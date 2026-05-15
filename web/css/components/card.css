@@ -1,0 +1,13 @@
+﻿.card-shell {
+    border-radius: var(--radius-lg);
+    background: linear-gradient(180deg, var(--color-cloud), #ffffff 70%);
+    padding: var(--space-5);
+    box-shadow: var(--color-shadow);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.card-shell--soft {
+    border-radius: var(--radius-lg);
+    border: 0;
+    box-shadow: var(--color-shadow);
+}
