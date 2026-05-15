@@ -1,0 +1,25 @@
+# Build output
+build/
+dist/
+
+# NetBeans
+nbproject/private/
+nbbuild/
+nbdist/
+nb-configuration.xml
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Compiled classes
+*.class
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
