@@ -1,5 +1,6 @@
 package controller;
 
+import constant.Views;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,13 +13,15 @@ import java.io.IOException;
  */
 public abstract class BaseController extends HttpServlet {
 
-    protected void showIndex(HttpServletRequest req, HttpServletResponse res)
+    protected void view(HttpServletRequest req, HttpServletResponse res, String view)
             throws ServletException, IOException {
-        req.getRequestDispatcher("/WEB-INF/index.jsp").forward(req, res);
+        req.getRequestDispatcher(
+                "/WEB-INF/" + view + ".jsp"
+        ).forward(req, res);
     }
 
-    protected void redirectIndex(HttpServletRequest req, HttpServletResponse res)
+    protected void redirect(HttpServletRequest req, HttpServletResponse res, String route)
             throws ServletException, IOException {
-        res.sendRedirect(req.getContextPath() + "/");
+        res.sendRedirect(req.getContextPath() + route);
     }
 }
