@@ -23,3 +23,6 @@ nb-configuration.xml
 # OS
 .DS_Store
 Thumbs.db
+
+web/WEB-INF/lib
+config.properties
