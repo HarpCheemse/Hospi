@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+<aside th:fragment="sidebar"
+       class="w-64 bg-surface border-r border-border p-5">
+
+    <!-- LOGO -->
+    <div class="flex items-center gap-3 mb-8">
+
+        <div class="w-9 h-9 bg-primary rounded-lg"></div>
+
+        <span class="font-semibold text-lg text-text">
+            Hospi
+        </span>
+
+    </div>
+
+    <!-- NAVIGATION -->
+    <nav class="space-y-1 text-sm">
+
+        <!-- DASHBOARD -->
+        <a th:href="@{/manager}"
+           class="flex items-center gap-3 p-2 rounded-lg"
+           th:classappend="${activeSidebar == 'DASHBOARD'}
+           ? ' bg-primary/10 text-primary font-medium'
+           : ' hover:bg-background text-text'">
+
+            <img th:src="@{/assets/icons/layout-grid.svg}" alt="Dashboard">
+
+            Dashboard
+
+        </a>
+
+        <!-- ROOM TYPES -->
+        <a th:href="@{/manager/room-types}"
+           class="flex items-center gap-3 p-2 rounded-lg"
+           th:classappend="${activeSidebar == 'ROOM_TYPES'}
+           ? ' bg-primary/10 text-primary font-medium'
+           : ' hover:bg-background text-text'">
+
+            <img th:src="@{/assets/icons/bed-double.svg}" alt="Room Types">
+
+            Room Types
+
+        </a>
+
+        <!-- RESERVATIONS -->
+        <a th:href="@{/manager/reservations}"
+           class="flex items-center gap-3 p-2 rounded-lg"
+           th:classappend="${activeSidebar == 'RESERVATIONS'}
+           ? ' bg-primary/10 text-primary font-medium'
+           : ' hover:bg-background text-text'">
+
+            <img th:src="@{/assets/icons/calendar-check.svg}" alt="Reservations">
+
+            Reservations
+
+        </a>
+
+        <!-- NOTIFICATIONS -->
+        <a th:href="@{/manager/notifications}"
+           class="flex items-center justify-between p-2 rounded-lg"
+           th:classappend="${activeSidebar == 'NOTIFICATIONS'}
+           ? ' bg-primary/10 text-primary font-medium'
+           : ' hover:bg-background text-text'">
+
+            <div class="flex items-center gap-3">
+
+                <img th:src="@{/assets/icons/bell.svg}" alt="Notifications">
+
+                Notifications
+
+            </div>
+
+            <span class="text-xs bg-accent text-white px-2 py-0.5 rounded-full">
+                7
+            </span>
+
+        </a>
+
+        <!-- TASKS -->
+        <a th:href="@{/manager/tasks}"
+           class="flex items-center gap-3 p-2 rounded-lg"
+           th:classappend="${activeSidebar == 'TASKS'}
+           ? ' bg-primary/10 text-primary font-medium'
+           : ' hover:bg-background text-text'">
+
+            <img th:src="@{/assets/icons/list-todo.svg}" alt="Tasks">
+
+            Tasks
+
+        </a>
+
+        <!-- REVENUES -->
+        <a th:href="@{/manager/revenues}"
+           class="flex items-center gap-3 p-2 rounded-lg"
+           th:classappend="${activeSidebar == 'REVENUES'}
+           ? ' bg-primary/10 text-primary font-medium'
+           : ' hover:bg-background text-text'">
+
+            <img th:src="@{/assets/icons/circle-dollar-sign.svg}" alt="Revenues">
+
+            Revenues
+
+        </a>
+
+        <!-- HOTEL DETAILS -->
+        <a th:href="@{/manager/hotel-details}"
+           class="flex items-center gap-3 p-2 rounded-lg"
+           th:classappend="${activeSidebar == 'HOTEL_DETAILS'}
+           ? ' bg-primary/10 text-primary font-medium'
+           : ' hover:bg-background text-text'">
+
+            <img th:src="@{/assets/icons/building-2.svg}" alt="Hotel Details">
+
+            Hotel Details
+
+        </a>
+
+    </nav>
+
+</aside>
+
+</body>
+</html>

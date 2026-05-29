@@ -1,6 +1,7 @@
 # Build output
 build/
 dist/
+target/
 
 # NetBeans
 nbproject/private/
@@ -24,5 +25,8 @@ nb-configuration.xml
 .DS_Store
 Thumbs.db
 
-web/WEB-INF/lib
-config.properties
+src/main/webapp/WEB-INF/lib
+src/main/webapp/assets/icons
+application.properties
+
+node_modules

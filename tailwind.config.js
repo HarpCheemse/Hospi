@@ -1,5 +1,10 @@
 module.exports = {
-  content: ["./src/main/webapp/**/*.jsp", "./src/main/webapp/**/*.html", "./src/**/*.{js,ts}"],
+  content: [
+    "./src/main/resources/templates/**/*.html",
+    "./src/main/webapp/**/*.jsp",
+    "./src/main/webapp/**/*.html",
+    "./src/**/*.{js,ts}",
+  ],
 
   theme: {
     extend: {

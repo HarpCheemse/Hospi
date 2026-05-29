@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title th:text="'Edit ' + ${roomType.name} + ' | Hospi'">
+        Edit Room Type | Hospi
+    </title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<body class="bg-background text-text">
+
+<div class="flex min-h-screen">
+
+    <!-- SIDEBAR -->
+    <div th:replace="~{fragments/manager-sidebar :: sidebar}"></div>
+
+    <!-- MAIN -->
+    <main class="flex-1 bg-background p-6">
+
+        <!-- HEADER -->
+        <div class="mb-6 flex items-start justify-between">
+
+            <div>
+                <h1 class="text-2xl font-bold text-text">
+                    Edit Room Type
+                </h1>
+
+                <p class="mt-1 text-sm text-muted"
+                   th:text="${roomType.name}">
+                    Room Name
+                </p>
+            </div>
+
+            <a th:href="@{'/manager/room-types/' + ${roomType.id}}"
+               class="rounded-xl border border-border bg-surface px-4 py-2 text-sm font-medium hover:bg-background">
+                Back to Details
+            </a>
+
+        </div>
+
+        <!-- FORM -->
+        <form th:action="@{'/manager/room-types/edit/' + ${roomType.id}}"
+              th:object="${roomType}"
+              method="post"
+              enctype="multipart/form-data"
+              class="flex flex-col gap-6">
+
+            <!-- BASIC INFO -->
+            <section class="rounded-2xl border border-border bg-surface shadow-card">
+
+                <div class="border-b border-border p-5">
+                    <h2 class="text-lg font-semibold">Basic Information</h2>
+                </div>
+
+                <div class="grid grid-cols-2 gap-5 p-5">
+
+                    <!-- NAME -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium">Name</label>
+                        <input type="text"
+                               th:field="*{name}"
+                               class="rounded-xl border border-border bg-background px-4 py-3">
+                    </div>
+
+                    <!-- BED TYPE -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium">Bed Type</label>
+                        <select th:field="*{bedType}"
+                                class="rounded-xl border border-border bg-background px-4 py-3">
+                            <option th:each="bedType : ${bedTypes}"
+                                    th:value="${bedType}"
+                                    th:text="${bedType}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- MAX OCCUPANCY -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium">Max Occupancy</label>
+                        <input type="number"
+                               th:field="*{maxOccupancy}"
+                               min="1"
+                               class="rounded-xl border border-border bg-background px-4 py-3">
+                    </div>
+
+                    <!-- AREA -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium">Area (m²)</label>
+                        <input type="number"
+                               th:field="*{area}"
+                               min="0"
+                               class="rounded-xl border border-border bg-background px-4 py-3">
+                    </div>
+
+                    <!-- BASE PRICE -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium">Base Price</label>
+                        <input type="number"
+                               step="0.01"
+                               th:field="*{basePrice}"
+                               class="rounded-xl border border-border bg-background px-4 py-3">
+                    </div>
+
+                    <!-- ACTIVE -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium">Status</label>
+
+                        <select th:field="*{active}"
+                                class="rounded-xl border border-border bg-background px-4 py-3">
+                            <option th:value="true">Active</option>
+                            <option th:value="false">Inactive</option>
+                        </select>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- DESCRIPTION -->
+            <section class="rounded-2xl border border-border bg-surface shadow-card">
+
+                <div class="border-b border-border p-5">
+                    <h2 class="text-lg font-semibold">Description & Features</h2>
+                </div>
+
+                <div class="p-5 flex flex-col gap-5">
+
+                    <textarea th:field="*{description}"
+                              rows="5"
+                              class="rounded-xl border border-border bg-background px-4 py-3"></textarea>
+
+                    <textarea th:field="*{features}"
+                              rows="4"
+                              class="rounded-xl border border-border bg-background px-4 py-3"></textarea>
+
+                    <p class="text-xs text-muted">
+                        Separate features with commas
+                    </p>
+
+                </div>
+
+            </section>
+
+            <!-- IMAGES -->
+            <section class="rounded-2xl border border-border bg-surface shadow-card">
+
+                <div class="border-b border-border p-5">
+                    <h2 class="text-lg font-semibold">Room Images</h2>
+                </div>
+
+                <div class="p-5 flex flex-col gap-6">
+
+                    <!-- CURRENT BANNER -->
+                    <div>
+                        <p class="text-sm font-medium mb-2">Current Banner</p>
+
+                        <div class="h-60 overflow-hidden rounded-xl border border-border bg-background">
+
+                            <img th:if="${!#lists.isEmpty(roomType.pictures)}"
+                                 th:src="@{/room-type-picture/{id}(id=${roomType.pictures[0].id})}"
+                                 class="h-full w-full object-cover">
+
+                            <div th:if="${#lists.isEmpty(roomType.pictures)}"
+                                 class="flex h-full items-center justify-center text-muted">
+                                No image
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- UPLOAD NEW -->
+                    <div id="uploadBox"
+                         class="flex h-40 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-background text-muted">
+
+                        <p class="text-sm font-medium">Replace images</p>
+                        <p class="text-xs">PNG, JPG, WEBP</p>
+
+                    </div>
+
+                    <input type="file"
+                           id="imageInput"
+                           name="images"
+                           multiple
+                           accept="image/*"
+                           class="hidden">
+
+                    <div id="previewContainer" class="grid grid-cols-3 gap-3"></div>
+
+                    <script th:src="@{/js/components/media-uploader.js}"></script>
+
+                    <script>
+                        document.addEventListener("DOMContentLoaded", () => {
+                            Hospi.MediaUploader({
+                                uploadBox: "#uploadBox",
+                                input: "#imageInput",
+                                previewContainer: "#previewContainer"
+                            });
+                        });
+                    </script>
+
+                </div>
+
+            </section>
+
+            <!-- ACTIONS -->
+            <div class="flex justify-end gap-3">
+
+                <a th:href="@{'/manager/room-types/' + ${roomType.id}}"
+                   class="rounded-xl border border-border bg-surface px-5 py-3 text-sm font-medium">
+                    Cancel
+                </a>
+
+                <button type="submit"
+                        class="rounded-xl bg-primary px-5 py-3 text-sm font-medium text-white">
+                    Save Changes
+                </button>
+
+            </div>
+
+        </form>
+
+    </main>
+
+</div>
+
+</body>
+</html>

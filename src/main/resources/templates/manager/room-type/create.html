@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Create Room Type | Hospi</title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<body class="bg-background text-text">
+
+<div class="flex min-h-screen">
+
+    <!-- SIDEBAR -->
+    <div th:replace="~{fragments/manager-sidebar :: sidebar}"></div>
+
+    <!-- MAIN -->
+    <main class="flex-1 bg-background p-6">
+
+        <!-- PAGE HEADER -->
+        <div class="mb-6 flex items-start justify-between">
+
+            <div>
+                <h1 class="text-2xl font-bold text-text">
+                    Create Room Type
+                </h1>
+
+                <p class="mt-1 text-sm text-muted">
+                    Add a new room category with pricing, occupancy,
+                    amenities, and operational settings.
+                </p>
+            </div>
+
+            <a th:href="@{/templates/manager/room-type}"
+               class="rounded-xl border border-border bg-surface px-4 py-2 text-sm font-medium hover:bg-background">
+                Back to Room Types
+            </a>
+
+        </div>
+
+        <!-- FORM -->
+        <form th:action="@{/manager/room-types/create}"
+              th:object="${roomTypeForm}"
+              method="post"
+              enctype="multipart/form-data"
+              class="flex flex-col gap-6">
+
+            <!-- BASIC INFORMATION -->
+            <section class="rounded-2xl border border-border bg-surface shadow-card">
+
+                <div class="border-b border-border p-5">
+                    <h2 class="text-lg font-semibold">
+                        Basic Information
+                    </h2>
+
+                    <p class="mt-1 text-sm text-muted">
+                        General room type information and visibility settings.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-5 p-5">
+
+                    <!-- NAME -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium">
+                            Room Type Name
+                        </label>
+
+                        <input type="text"
+                               th:field="*{name}"
+                               placeholder="Deluxe Ocean Suite"
+                               class="rounded-xl border border-border bg-background px-4 py-3 outline-none focus:border-primary">
+                    </div>
+
+                    <!-- BED TYPE -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium">
+                            Bed Type
+                        </label>
+
+                        <select th:field="*{bedType}"
+                                class="rounded-xl border border-border bg-background px-4 py-3 outline-none focus:border-primary">
+                            <option
+                                    th:each="bedType : ${bedTypes}"
+                                    th:value="${bedType}"
+                                    th:text="${bedType}">
+                            </option>
+
+                        </select>
+                    </div>
+
+                    <!-- MAX OCCUPANCY -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium">
+                            Max Occupancy
+                        </label>
+
+                        <input type="number"
+                               min="1"
+                               th:field="*{maxOccupancy}"
+                               placeholder="2"
+                               class="rounded-xl border border-border bg-background px-4 py-3 outline-none focus:border-primary">
+                    </div>
+
+                    <!-- AREA -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium">
+                            Area (m²)
+                        </label>
+
+                        <input type="number"
+                               min="0"
+                               th:field="*{area}"
+                               placeholder="48"
+                               class="rounded-xl border border-border bg-background px-4 py-3 outline-none focus:border-primary">
+                    </div>
+
+                    <!-- BASE PRICE -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium">
+                            Base Price
+                        </label>
+
+                        <input type="number"
+                               min="0"
+                               step="0.01"
+                               th:field="*{basePrice}"
+                               placeholder="320"
+                               class="rounded-xl border border-border bg-background px-4 py-3 outline-none focus:border-primary">
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- DESCRIPTION -->
+            <section class="rounded-2xl border border-border bg-surface shadow-card">
+
+                <div class="border-b border-border p-5">
+                    <h2 class="text-lg font-semibold">
+                        Description & Features
+                    </h2>
+
+                    <p class="mt-1 text-sm text-muted">
+                        Provide detailed room information and amenities.
+                    </p>
+                </div>
+
+                <div class="flex flex-col gap-5 p-5">
+
+                    <!-- DESCRIPTION -->
+                    <div class="flex flex-col gap-2">
+
+                        <label class="text-sm font-medium">
+                            Description
+                        </label>
+
+                        <textarea th:field="*{description}"
+                                  rows="5"
+                                  placeholder="Spacious luxury suite with private balcony and premium amenities..."
+                                  class="rounded-xl border border-border bg-background px-4 py-3 outline-none focus:border-primary"></textarea>
+
+                    </div>
+
+                    <!-- FEATURES -->
+                    <div class="flex flex-col gap-2">
+
+                        <label class="text-sm font-medium">
+                            Features
+                        </label>
+
+                        <textarea th:field="*{features}"
+                                  rows="4"
+                                  placeholder="WiFi, Smart TV, Balcony, Mini Bar, Bathtub..."
+                                  class="rounded-xl border border-border bg-background px-4 py-3 outline-none focus:border-primary"></textarea>
+
+                        <p class="text-xs text-muted">
+                            Separate features with commas.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- ROOM TYPE IMAGES -->
+            <section class="rounded-2xl border border-border bg-surface shadow-card">
+
+                <div class="border-b border-border p-5">
+                    <h2 class="text-lg font-semibold">
+                        Room Images
+                    </h2>
+
+                    <p class="mt-1 text-sm text-muted">
+                        Upload or attach room type images.
+                    </p>
+                </div>
+
+                <div class="p-5">
+
+                    <div id="uploadBox"
+                         class="flex h-48 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-background text-muted transition hover:border-primary">
+
+                        <div class="flex flex-col items-center gap-2">
+
+                            <p class="text-sm font-medium">
+                                Click, drag & drop, or paste image
+                            </p>
+
+                            <p class="text-xs text-muted">
+                                PNG, JPG, WEBP
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <input type="file"
+                           id="imageInput"
+                           name="image"
+                           accept="image/*"
+                           class="hidden">
+
+                    <!-- preview -->
+                    <div id="previewContainer" class="mt-4"></div>
+
+
+                    <script th:src="@{/js/components/media-uploader.js}"></script>
+
+                    <script>
+                        document.addEventListener("DOMContentLoaded", () => {
+
+                            Hospi.MediaUploader({
+                                uploadBox: "#uploadBox",
+                                input: "#imageInput",
+                                previewContainer: "#previewContainer"
+                            });
+
+                        });
+                    </script>
+
+                </div>
+
+            </section>
+
+            <!-- ACTIONS -->
+            <div class="flex items-center justify-end gap-3">
+
+                <a th:href="@{/manager/room-types}"
+                   class="rounded-xl border border-border bg-surface px-5 py-3 text-sm font-medium hover:bg-background">
+                    Cancel
+                </a>
+
+                <button type="submit"
+                        class="rounded-xl bg-primary px-5 py-3 text-sm font-medium text-white hover:opacity-90">
+                    Create Room Type
+                </button>
+
+            </div>
+
+        </form>
+
+    </main>
+
+</div>
+
+</body>
+</html>
