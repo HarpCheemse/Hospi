@@ -1,10 +1,10 @@
 package com.hospi.manage.features.manager.roomtype.service;
 
+import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.common.utils.ImageUtils;
 import com.hospi.manage.features.manager.roomtype.dto.RoomTypeForm;
 import com.hospi.manage.features.manager.roomtype.entity.RoomType;
 import com.hospi.manage.features.manager.roomtype.entity.RoomTypePicture;
-import com.hospi.manage.features.manager.roomtype.repository.RoomTypePictureRepository;
 import com.hospi.manage.features.manager.roomtype.repository.RoomTypeRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -50,7 +50,8 @@ public class RoomTypeService {
     }
 
     public RoomType findById(Long id) {
-        return roomTypeRepository.findById(id).orElseThrow();
+        return roomTypeRepository.findById(id).orElseThrow(() ->
+                new ResourceNotFoundException("Room type not found"));
     }
 
     @Transactional
@@ -77,5 +78,11 @@ public class RoomTypeService {
             roomType.getPictures().add(picture);
         }
         roomTypeRepository.save(roomType);
+    }
+
+    @Transactional
+    public void delete(Long id){
+        RoomType roomType = findById(id);
+        roomTypeRepository.delete(roomType);
     }
 }
