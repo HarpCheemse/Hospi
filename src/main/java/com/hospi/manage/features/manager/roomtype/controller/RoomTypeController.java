@@ -1,5 +1,6 @@
 package com.hospi.manage.features.manager.roomtype.controller;
 
+import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.common.utils.ImageUtils;
 import com.hospi.manage.features.manager.roomtype.dto.RoomTypeForm;
 import com.hospi.manage.features.manager.roomtype.entity.RoomType;
@@ -19,6 +20,11 @@ import java.util.List;
 public class RoomTypeController {
     private final RoomTypeService roomTypeService;
     private final RoomTypePictureService roomTypePictureService;
+
+    @ModelAttribute
+    public void addCommonAttributes(Model model) {
+        model.addAttribute(Attributes.ACTIVE_SIDEBAR, "ROOM_TYPES");
+    }
 
     public RoomTypeController(RoomTypeService roomTypeService, RoomTypePictureService roomTypePictureService) {
         this.roomTypeService = roomTypeService;
@@ -58,7 +64,7 @@ public class RoomTypeController {
     public String edit(@PathVariable Long id, Model model) {
         model.addAttribute("roomType", roomTypeService.findById(id));
         model.addAttribute("bedTypes", BedType.values());
-            
+
         return "manager/room-type/edit";
     }
 
@@ -67,6 +73,13 @@ public class RoomTypeController {
                                  @RequestParam(value = "images", required = false) MultipartFile images)
     throws IOException {
         roomTypeService.update(id, form, images);
+
+        return "redirect:/manager/room-types";
+    }
+
+    @PostMapping("/delete/{id}")
+    public String deleteRoomType(@PathVariable Long id) {
+        roomTypeService.delete(id);
 
         return "redirect:/manager/room-types";
     }
