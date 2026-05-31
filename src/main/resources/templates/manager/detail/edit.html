@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Edit Hotel | Hospi</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<body class="bg-background text-text">
+
+<div class="flex min-h-screen">
+
+    <!-- SIDEBAR -->
+    <div th:replace="~{fragments/manager-sidebar :: sidebar}"></div>
+
+    <!-- MAIN -->
+    <main class="flex-1 bg-background p-6">
+
+        <!-- PAGE HEADER -->
+        <div class="mb-6 flex items-start justify-between">
+
+            <div>
+                <h1 class="text-2xl font-bold text-text">
+                    Edit Hotel
+                </h1>
+
+                <p class="mt-1 text-sm text-muted">
+                    Update your hotel's profile, contact information,
+                    amenities, and operational settings.
+                </p>
+            </div>
+
+            <a th:href="@{/manager/hotel}"
+               class="rounded-xl border border-border bg-surface px-4 py-2 text-sm font-medium hover:bg-background">
+                Back to Hotel
+            </a>
+
+        </div>
+
+        <form th:action="@{/manager/details/edit}"
+              th:object="${hotelForm}"
+              method="post"
+              class="flex flex-col gap-6"
+              enctype="multipart/form-data">
+
+            <section
+                    x-data="{ preview: null }"
+                    class="rounded-2xl border border-border bg-surface shadow-card">
+
+                <div class="border-b border-border p-5">
+                    <h2 class="text-lg font-semibold">
+                        Room Image
+                    </h2>
+
+                    <p class="mt-1 text-sm text-muted">
+                        Upload an image representing this room type.
+                    </p>
+                </div>
+
+                <div class="p-5">
+
+                    <!-- IMAGE PREVIEW -->
+                    <template x-if="preview">
+                        <div class="mb-4">
+                            <img :src="preview"
+                                 class="h-64 w-full rounded-xl border border-border object-cover">
+                        </div>
+                    </template>
+
+                    <!-- UPLOAD BOX -->
+                    <label
+                            class="flex h-48 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-background text-muted transition hover:border-primary">
+
+                        <div class="flex flex-col items-center gap-2">
+
+                            <p class="text-sm font-medium">
+                                Click to upload image
+                            </p>
+
+                            <p class="text-xs text-muted">
+                                PNG, JPG, WEBP
+                            </p>
+
+                        </div>
+
+                        <input type="file"
+                               name="images"
+                               accept="image/*"
+                               class="hidden"
+                               @change="
+                        const file = $event.target.files[0];
+                        if (file) {
+                            preview = URL.createObjectURL(file);
+                        }
+                   ">
+                    </label>
+
+                    <!-- REMOVE -->
+                    <button
+                            x-show="preview"
+                            type="button"
+                            @click="
+                    preview = null;
+                    $event.target.closest('section')
+                        .querySelector('input[type=file]').value = '';
+                "
+                            class="mt-4 rounded-xl border border-border px-4 py-2 text-sm">
+                        Remove Image
+                    </button>
+
+                </div>
+
+            </section>
+
+            <!-- BASIC INFORMATION -->
+            <section class="rounded-2xl border border-border bg-surface shadow-card">
+
+                <div class="border-b border-border p-5">
+                    <h2 class="text-lg font-semibold">
+                        Basic Information
+                    </h2>
+
+                    <p class="mt-1 text-sm text-muted">
+                        General hotel profile and visibility settings.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-5 p-5">
+
+                    <!-- HOTEL NAME -->
+                    <div class="col-span-2">
+
+                        <label class="mb-2 block text-sm font-medium">
+                            Hotel Name
+                        </label>
+
+                        <input type="text"
+                               th:field="*{name}"
+                               class="input w-full"
+                               placeholder="Sunset Bay Resort">
+
+                    </div>
+
+                    <!-- STATUS -->
+                    <div>
+
+                        <label class="mb-2 block text-sm font-medium">
+                            Status
+                        </label>
+
+                        <select th:field="*{status}"
+                                class="input w-full">
+
+                            <option value="ACTIVE">
+                                Active
+                            </option>
+
+                            <option value="MAINTENANCE">
+                                Maintenance
+                            </option>
+
+                            <option value="CLOSED">
+                                Closed
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <!-- EMPTY SPACE -->
+                    <div></div>
+
+                    <!-- DESCRIPTION -->
+                    <div class="col-span-2">
+
+                        <label class="mb-2 block text-sm font-medium">
+                            Description
+                        </label>
+
+                        <textarea rows="5"
+                                  th:field="*{description}"
+                                  class="input w-full"
+                                  placeholder="Describe your hotel..."></textarea>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- CONTACT INFORMATION -->
+            <section class="rounded-2xl border border-border bg-surface shadow-card">
+
+                <div class="border-b border-border p-5">
+                    <h2 class="text-lg font-semibold">
+                        Contact Information
+                    </h2>
+
+                    <p class="mt-1 text-sm text-muted">
+                        Contact details visible throughout the system.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-5 p-5">
+
+                    <!-- ADDRESS -->
+                    <div class="col-span-2">
+
+                        <label class="mb-2 block text-sm font-medium">
+                            Address
+                        </label>
+
+                        <input type="text"
+                               th:field="*{address}"
+                               class="input w-full">
+
+                    </div>
+
+                    <!-- PHONE -->
+                    <div>
+
+                        <label class="mb-2 block text-sm font-medium">
+                            Phone
+                        </label>
+
+                        <input type="text"
+                               th:field="*{phone}"
+                               class="input w-full">
+
+                    </div>
+
+                    <!-- EMAIL -->
+                    <div>
+
+                        <label class="mb-2 block text-sm font-medium">
+                            Email
+                        </label>
+
+                        <input type="email"
+                               th:field="*{email}"
+                               class="input w-full">
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- OPERATIONS -->
+            <section class="rounded-2xl border border-border bg-surface shadow-card">
+
+                <div class="border-b border-border p-5">
+                    <h2 class="text-lg font-semibold">
+                        Operations
+                    </h2>
+
+                    <p class="mt-1 text-sm text-muted">
+                        Configure guest check-in and check-out times.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-5 p-5">
+
+                    <!-- CHECK IN -->
+                    <div>
+
+                        <label class="mb-2 block text-sm font-medium">
+                            Check-In Time
+                        </label>
+
+                        <input type="time"
+                               th:field="*{checkInTime}"
+                               class="input w-full">
+
+                    </div>
+
+                    <!-- CHECK OUT -->
+                    <div>
+
+                        <label class="mb-2 block text-sm font-medium">
+                            Check-Out Time
+                        </label>
+
+                        <input type="time"
+                               th:field="*{checkOutTime}"
+                               class="input w-full">
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- FEATURES -->
+            <section class="rounded-2xl border border-border bg-surface shadow-card">
+
+                <div class="border-b border-border p-5">
+                    <h2 class="text-lg font-semibold">
+                        Features & Amenities
+                    </h2>
+
+                    <p class="mt-1 text-sm text-muted">
+                        Enter amenities separated by commas.
+                    </p>
+                </div>
+
+                <div class="p-5">
+
+                    <label class="mb-2 block text-sm font-medium">
+                        Features
+                    </label>
+
+                    <textarea rows="4"
+                              th:field="*{features}"
+                              class="input w-full"
+                              placeholder="Free WiFi, Outdoor Pool, Spa, Fitness Center"></textarea>
+
+                </div>
+
+            </section>
+
+            <!-- TERMS -->
+            <section class="rounded-2xl border border-border bg-surface shadow-card">
+
+                <div class="border-b border-border p-5">
+                    <h2 class="text-lg font-semibold">
+                        Terms of Service
+                    </h2>
+
+                    <p class="mt-1 text-sm text-muted">
+                        Hotel policies and guest requirements.
+                    </p>
+                </div>
+
+                <div class="p-5">
+
+                    <textarea rows="8"
+                              th:field="*{termOfService}"
+                              class="input w-full"
+                              placeholder="Enter hotel policies..."></textarea>
+
+                </div>
+
+            </section>
+
+            <!-- ACTIONS -->
+            <div class="flex items-center justify-end gap-3">
+
+                <a th:href="@{/manager/hotel}"
+                   class="rounded-xl border border-border bg-surface px-5 py-3 text-sm font-medium">
+                    Cancel
+                </a>
+
+                <button type="submit"
+                        class="rounded-xl bg-primary px-5 py-3 text-sm font-medium text-white hover:opacity-90">
+                    Save Changes
+                </button>
+
+            </div>
+
+        </form>
+
+    </main>
+
+</div>
+
+</body>
+</html>
