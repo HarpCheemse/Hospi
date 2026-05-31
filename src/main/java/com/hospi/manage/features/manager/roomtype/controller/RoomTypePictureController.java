@@ -1,4 +1,4 @@
-package com.hospi.manage.core;
+package com.hospi.manage.features.manager.roomtype.controller;
 
 import com.hospi.manage.features.manager.roomtype.entity.RoomTypePicture;
 import com.hospi.manage.features.manager.roomtype.service.RoomTypePictureService;
@@ -28,8 +28,6 @@ public class RoomTypePictureController {
 
         RoomTypePicture image =
                 roomTypePictureService.findById(id);
-
-        System.out.println(image.getImageData().length);
 
         return ResponseEntity.ok()
                 .contentType(
