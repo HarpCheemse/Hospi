@@ -96,9 +96,12 @@
                             class="rounded-2xl border border-border bg-background p-4 text-left transition hover:border-primary hover:shadow-card">
 
                         <!-- ROOM NUMBER -->
-                        <div class="text-xl font-bold"
-                             th:text="${room.roomNumber}">
-                            101
+                        <div class="flex">
+                            <div class="text-xl font-bold"
+                                 th:text="${room.roomNumber}">
+                                101
+                            </div>
+                            <a th:href="@{|/manager/rooms/${room.id}/edit|}">Edit</a>
                         </div>
 
                         <!-- ROOM TYPE -->

@@ -3,6 +3,8 @@ package com.hospi.manage.features.manager.room.controller;
 import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.features.manager.detail.entity.Hotel;
 import com.hospi.manage.features.manager.detail.service.HotelService;
+import com.hospi.manage.features.manager.room.dto.RoomEditForm;
+import com.hospi.manage.features.manager.room.entity.Room;
 import com.hospi.manage.features.manager.room.service.RoomService;
 import com.hospi.manage.features.manager.roomtype.entity.RoomType;
 import com.hospi.manage.features.manager.roomtype.service.RoomTypeService;
@@ -50,6 +52,27 @@ public class RoomController {
                              @RequestParam Long roomTypeId) {
 
         roomService.createRoom(floor, numberOfRooms, roomTypeId);
+        return "redirect:/manager/rooms";
+    }
+
+    @GetMapping("/{id}/edit")
+    public String edit(@PathVariable Long id, Model model) {
+        Room room = roomService.findById(id);
+
+        model.addAttribute(Attributes.FORM,
+                new RoomEditForm(room.getRoomNumber(),
+                        room.getRoomType().getId()));
+
+        model.addAttribute("roomTypes", roomTypeService.findAll());
+
+        model.addAttribute("floor", room.getFloorNumber());
+        model.addAttribute("roomId", room.getId());
+        return "manager/room/edit";
+    }
+
+    @PostMapping("/{id}/edit")
+    public String editRoom(@PathVariable Long id, @ModelAttribute RoomEditForm form) {
+        roomService.updateRoom(id, form);
         return "redirect:/manager/rooms";
     }
 }

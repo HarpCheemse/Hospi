@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Edit Room | Hospi</title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<body class="bg-background text-text">
+
+<div class="flex min-h-screen">
+
+    <!-- SIDEBAR -->
+    <div th:replace="~{fragments/manager-sidebar :: sidebar}"></div>
+
+    <!-- MAIN -->
+    <main class="flex-1 p-6">
+
+        <!-- HEADER -->
+        <div class="mb-6 flex items-start justify-between">
+
+            <div>
+
+                <h1 class="text-2xl font-bold">
+                    Edit Room
+                </h1>
+
+                <p class="mt-1 text-sm text-muted">
+                    Update room information.
+                </p>
+
+            </div>
+
+            <a th:href="@{/manager/rooms}"
+               class="rounded-xl border border-border bg-surface px-4 py-2 text-sm font-medium hover:bg-background">
+                Back to Rooms
+            </a>
+
+        </div>
+
+        <form th:object="${form}"
+              th:action="@{|/manager/rooms/${roomId}/edit|}"
+              method="post">
+
+            <section class="rounded-2xl border border-border bg-surface shadow-card">
+
+                <div class="border-b border-border p-5">
+
+                    <h2 class="text-lg font-semibold">
+                        Room Details
+                    </h2>
+
+                    <p class="mt-1 text-sm text-muted">
+                        Modify room number and room type.
+                    </p>
+
+                </div>
+
+                <div class="grid grid-cols-2 gap-5 p-5">
+
+                    <!-- ROOM NUMBER -->
+                    <div>
+
+                        <label class="mb-2 block text-sm font-medium">
+                            Room Number
+                        </label>
+
+                        <input type="text"
+                               name="roomNumber"
+                               th:value="*{roomNumber}"
+                               maxlength="10"
+                               class="input w-full"
+                               required>
+
+                    </div>
+
+                    <!-- ROOM TYPE -->
+                    <div>
+
+                        <label class="mb-2 block text-sm font-medium">
+                            Room Type
+                        </label>
+
+                        <select th:field="*{roomTypeId}"
+                                class="input w-full">
+
+                            <option th:each="roomType : ${roomTypes}"
+                                    th:value="${roomType.id}"
+                                    th:text="${roomType.name}">
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- READ ONLY INFO -->
+            <section class="mt-6 rounded-2xl border border-border bg-surface shadow-card">
+
+                <div class="border-b border-border p-5">
+
+                    <h2 class="text-lg font-semibold">
+                        Room Information
+                    </h2>
+
+                </div>
+
+                <div class="grid grid-cols-3 gap-5 p-5">
+
+                    <div>
+                        <p class="text-sm text-muted">
+                            Floor
+                        </p>
+
+                        <p class="mt-1 font-medium"
+                           th:text="${floor}">
+                            1
+                        </p>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- ACTIONS -->
+            <div class="mt-6 flex justify-end gap-3">
+
+                <a th:href="@{/manager/rooms}"
+                   class="rounded-xl border border-border bg-surface px-5 py-3 text-sm font-medium">
+                    Cancel
+                </a>
+
+                <button type="submit"
+                        class="rounded-xl bg-primary px-5 py-3 text-sm font-medium text-white hover:opacity-90">
+                    Save Changes
+                </button>
+
+            </div>
+
+        </form>
+
+    </main>
+
+</div>
+
+</body>
+</html>

@@ -5,6 +5,7 @@ import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.manager.detail.entity.Hotel;
 import com.hospi.manage.features.manager.detail.repository.HotelRepository;
 import com.hospi.manage.features.manager.room.dto.FloorView;
+import com.hospi.manage.features.manager.room.dto.RoomEditForm;
 import com.hospi.manage.features.manager.room.dto.RoomView;
 import com.hospi.manage.features.manager.room.entity.Room;
 import com.hospi.manage.features.manager.room.enums.ConditionStatus;
@@ -98,5 +99,24 @@ public class RoomService {
         }
 
         return floors;
+    }
+
+    public Room findById(Long id) {
+        return roomRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Room not found")
+        );
+    }
+
+    public void updateRoom(Long id, RoomEditForm form) {
+        Room room = findById(id);
+        RoomType roomType =
+                roomTypeRepository.findById(form.roomTypeId()).orElseThrow(
+                        () -> new ResourceNotFoundException("Room type not found")
+                );
+
+        room.setRoomType(roomType);
+        room.setRoomNumber(form.roomNumber());
+
+        roomRepository.save(room);
     }
 }
