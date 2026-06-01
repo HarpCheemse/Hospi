@@ -1,0 +1,36 @@
+package com.hospi.manage.features.manager.detail.controller;
+
+import com.hospi.manage.features.manager.detail.entity.HotelPicture;
+import com.hospi.manage.features.manager.detail.service.HotelPictureService;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping("/hotel-picture")
+public class HotelPictureController {
+
+    private final HotelPictureService hotelPictureService;
+
+    public HotelPictureController(HotelPictureService hotelPictureService) {
+        this.hotelPictureService = hotelPictureService;
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<byte[]> getImage(
+            @PathVariable Long id
+    ) {
+
+        HotelPicture image =
+                hotelPictureService.findById(id);
+
+        return ResponseEntity.ok()
+                .contentType(
+                        MediaType.valueOf("image/webp")
+                )
+                .body(image.getImageData());
+    }
+}
