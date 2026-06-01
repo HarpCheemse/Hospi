@@ -1,5 +1,6 @@
 package com.hospi.manage.features.manager.roomtype.service;
 
+import com.hospi.manage.common.constant.HotelConstants;
 import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.common.utils.ImageUtils;
 import com.hospi.manage.features.manager.roomtype.dto.RoomTypeForm;
@@ -66,6 +67,7 @@ public class RoomTypeService {
         roomType.setDescription(form.getDescription());
         roomType.setFeatures(form.getFeatures());
         roomType.setActive(form.getActive());
+        roomType.setHotelId(HotelConstants.HOTEL_ID);
 
         //ONLY 1 images for now
         if (images != null && !images.isEmpty()) {
