@@ -46,6 +46,19 @@
 
         </a>
 
+        <a th:href="@{/manager/rooms}"
+           class="flex items-center gap-3 p-2 rounded-lg"
+           th:classappend="${activeSidebar == 'ROOMS'}
+           ? ' bg-primary/10 text-primary font-medium'
+           : ' hover:bg-background text-text'">
+
+            <img th:src="@{/assets/icons/bed-double.svg}" alt="Room">
+
+            Room
+
+        </a>
+
+
         <!-- RESERVATIONS -->
         <a th:href="@{/manager/reservations}"
            class="flex items-center gap-3 p-2 rounded-lg"
@@ -107,7 +120,7 @@
         </a>
 
         <!-- HOTEL DETAILS -->
-        <a th:href="@{/manager/hotel-details}"
+        <a th:href="@{/manager/details}"
            class="flex items-center gap-3 p-2 rounded-lg"
            th:classappend="${activeSidebar == 'HOTEL_DETAILS'}
            ? ' bg-primary/10 text-primary font-medium'
