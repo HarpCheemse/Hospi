@@ -1,0 +1,102 @@
+package com.hospi.manage.features.manager.room.service;
+
+import com.hospi.manage.common.constant.HotelConstants;
+import com.hospi.manage.common.exception.ResourceNotFoundException;
+import com.hospi.manage.features.manager.detail.entity.Hotel;
+import com.hospi.manage.features.manager.detail.repository.HotelRepository;
+import com.hospi.manage.features.manager.room.dto.FloorView;
+import com.hospi.manage.features.manager.room.dto.RoomView;
+import com.hospi.manage.features.manager.room.entity.Room;
+import com.hospi.manage.features.manager.room.enums.ConditionStatus;
+import com.hospi.manage.features.manager.room.enums.OccupancyStatus;
+import com.hospi.manage.features.manager.room.repository.RoomRepository;
+import com.hospi.manage.features.manager.roomtype.entity.RoomType;
+import com.hospi.manage.features.manager.roomtype.repository.RoomTypeRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+public class RoomService {
+    private final RoomRepository roomRepository;
+    private final RoomTypeRepository roomTypeRepository;
+    private final HotelRepository hotelRepository;
+
+    RoomService(RoomRepository roomRepository,
+                RoomTypeRepository roomTypeRepository,
+                HotelRepository hotelRepository) {
+        this.roomRepository = roomRepository;
+        this.roomTypeRepository = roomTypeRepository;
+        this.hotelRepository = hotelRepository;
+    }
+
+    public List<Room> findAll() {
+        return roomRepository.findAll();
+    }
+
+    @Transactional
+    public void createRoom(int floor, int numberOfRooms, Long roomTypeId) {
+        RoomType roomType = roomTypeRepository.findById(roomTypeId).orElseThrow(
+                () -> new ResourceNotFoundException("Room type not found")
+        );
+        List<Room> rooms = new ArrayList<>();
+        int start = floor * 100 + 1;
+        for (int i = 0; i < numberOfRooms; i++) {
+            Room room = new Room();
+
+            room.setRoomNumber(String.valueOf(start + i));
+            room.setRoomType(roomType);
+            room.setFloorNumber((short) floor);
+            room.setHotelId(HotelConstants.HOTEL_ID);
+            room.setConditionStatus(ConditionStatus.CLEAN);
+            room.setOccupancyStatus(OccupancyStatus.VACANT);
+            room.setActive(true);
+
+            rooms.add(room);
+        }
+
+        roomRepository.saveAll(rooms);
+    }
+
+
+    private FloorView buildFloorView(int floorNumber, List<Room> rooms) {
+
+        List<RoomView> roomViews = rooms.stream()
+                .map(room -> new RoomView(
+                        room.getId(),
+                        room.getRoomNumber(),
+                        room.getRoomType() != null
+                                ? room.getRoomType().getName()
+                                : null,
+                        room.getOccupancyStatus(),
+                        room.getConditionStatus()
+                ))
+                .toList();
+
+        return new FloorView(
+                floorNumber,
+                roomViews.size(),
+                roomViews
+        );
+    }
+
+    public List<FloorView> getFloorViews() {
+
+        Hotel hotel = hotelRepository.findById(HotelConstants.HOTEL_ID).orElseThrow(
+                () -> new ResourceNotFoundException("hotel not found")
+        );
+
+        List<FloorView> floors = new ArrayList<>();
+
+        for (int floor = 1; floor <= hotel.getFloorCount(); floor++) {
+
+            List<Room> rooms = roomRepository.findByFloorNumberOrderByRoomNumber(floor);
+
+            floors.add(buildFloorView(floor, rooms));
+        }
+
+        return floors;
+    }
+}
