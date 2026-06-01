@@ -1,5 +1,6 @@
 package com.hospi.manage.features.manager.roomtype.entity;
 
+import com.hospi.manage.features.manager.room.entity.Room;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -7,7 +8,6 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 @Entity
@@ -51,6 +51,9 @@ public class RoomType {
 
     @OneToMany(mappedBy = "roomType", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RoomTypePicture> pictures = new ArrayList<>();
+
+    @OneToMany(mappedBy = "roomType")
+    private List<Room> rooms = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {
