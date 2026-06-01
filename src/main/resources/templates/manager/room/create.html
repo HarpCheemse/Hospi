@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Add Rooms | Hospi</title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<body class="bg-background text-text">
+
+<div class="flex min-h-screen">
+
+    <!-- SIDEBAR -->
+    <div th:replace="~{fragments/manager-sidebar :: sidebar}"></div>
+
+    <!-- MAIN -->
+    <main class="flex-1 p-6">
+
+        <!-- HEADER -->
+        <div class="mb-6 flex items-start justify-between">
+
+            <div>
+
+                <h1 class="text-2xl font-bold">
+                    Add Rooms
+                </h1>
+
+                <p class="mt-1 text-sm text-muted">
+                    Generate multiple rooms at once for a selected floor.
+                </p>
+
+            </div>
+
+            <a th:href="@{/manager/rooms}"
+               class="rounded-xl border border-border bg-surface px-4 py-2 text-sm font-medium hover:bg-background">
+                Back to Rooms
+            </a>
+
+        </div>
+
+        <form th:action="@{/manager/rooms/create}"
+              method="post">
+
+            <section class="rounded-2xl border border-border bg-surface shadow-card">
+
+                <div class="border-b border-border p-5">
+
+                    <h2 class="text-lg font-semibold">
+                        Room Generation Settings
+                    </h2>
+
+                    <p class="mt-1 text-sm text-muted">
+                        Configure how room numbers should be generated.
+                    </p>
+
+                </div>
+
+                <div class="grid grid-cols-2 gap-5 p-5">
+
+                    <!-- FLOOR -->
+                    <div>
+
+                        <label class="mb-2 block text-sm font-medium">
+                            Floor
+                        </label>
+
+                        <select name="floor"
+                                class="input w-full">
+
+                            <option value="">
+                                Select Floor
+                            </option>
+
+                            <option th:each="floor : ${#numbers.sequence(1, hotel.floorCount)}"
+                                    th:value="${floor}"
+                                    th:text="|Floor ${floor}|">
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <!-- ROOM COUNT -->
+                    <div>
+
+                        <label class="mb-2 block text-sm font-medium">
+                            Number of Rooms
+                        </label>
+
+                        <input type="number"
+                               name="count"
+                               min="1"
+                               max="99"
+                               class="input w-full"
+                               placeholder="10">
+
+                    </div>
+
+                    <!-- ROOM TYPE -->
+                    <div>
+
+                        <label class="mb-2 block text-sm font-medium">
+                            Default Room Type
+                        </label>
+
+                        <select name="roomTypeId"
+                                class="input w-full">
+
+                            <option value="">
+                                No Room Type
+                            </option>
+
+                            <option th:each="roomType : ${roomTypes}"
+                                    th:value="${roomType.id}"
+                                    th:text="${roomType.name}">
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- PREVIEW -->
+            <section class="mt-6 rounded-2xl border border-border bg-surface shadow-card">
+
+                <div class="border-b border-border p-5">
+
+                    <h2 class="text-lg font-semibold">
+                        Example
+                    </h2>
+
+                    <p class="mt-1 text-sm text-muted">
+                        Generating 5 rooms starting from 101 creates:
+                    </p>
+
+                </div>
+
+                <div class="flex flex-wrap gap-3 p-5">
+
+                    <div class="rounded-xl border border-border bg-background px-4 py-3">
+                        101
+                    </div>
+
+                    <div class="rounded-xl border border-border bg-background px-4 py-3">
+                        102
+                    </div>
+
+                    <div class="rounded-xl border border-border bg-background px-4 py-3">
+                        103
+                    </div>
+
+                    <div class="rounded-xl border border-border bg-background px-4 py-3">
+                        104
+                    </div>
+
+                    <div class="rounded-xl border border-border bg-background px-4 py-3">
+                        105
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- ACTIONS -->
+            <div class="mt-6 flex justify-end gap-3">
+
+                <a th:href="@{/manager/rooms}"
+                   class="rounded-xl border border-border bg-surface px-5 py-3 text-sm font-medium">
+                    Cancel
+                </a>
+
+                <button type="submit"
+                        class="rounded-xl bg-primary px-5 py-3 text-sm font-medium text-white hover:opacity-90">
+                    Generate Rooms
+                </button>
+
+            </div>
+
+        </form>
+
+    </main>
+
+</div>
+
+</body>
+</html>
