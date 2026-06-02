@@ -1,16 +1,23 @@
 package com.hospi.manage.features.manager.room.controller;
 
 import com.hospi.manage.common.constant.Attributes;
-import com.hospi.manage.features.manager.detail.entity.Hotel;
 import com.hospi.manage.features.manager.detail.service.HotelService;
+import com.hospi.manage.features.manager.room.dto.RoomCreateForm;
 import com.hospi.manage.features.manager.room.dto.RoomEditForm;
 import com.hospi.manage.features.manager.room.entity.Room;
+import com.hospi.manage.features.manager.room.enums.ConditionStatus;
 import com.hospi.manage.features.manager.room.service.RoomService;
-import com.hospi.manage.features.manager.roomtype.entity.RoomType;
+import com.hospi.manage.features.manager.room.validation.RoomValidator;
 import com.hospi.manage.features.manager.roomtype.service.RoomTypeService;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/manager/rooms")
@@ -19,11 +26,16 @@ public class RoomController {
     final private RoomTypeService roomTypeService;
     final private RoomService roomService;
 
+    final private RoomValidator roomValidator;
+
     RoomController(HotelService hotelService,
-                   RoomTypeService roomTypeService, RoomService roomService) {
+                   RoomTypeService roomTypeService,
+                   RoomService roomService,
+                   RoomValidator roomValidator) {
         this.hotelService = hotelService;
         this.roomTypeService = roomTypeService;
         this.roomService = roomService;
+        this.roomValidator = roomValidator;
     }
 
 
@@ -35,24 +47,17 @@ public class RoomController {
     @GetMapping
     public String list(Model model) {
         model.addAttribute("hotel", hotelService.findById(null));
-        model.addAttribute("floors",roomService.getFloorViews());
+        model.addAttribute("floors", roomService.getFloorViews());
         return "manager/room/list";
     }
 
     @GetMapping("/create")
     public String create(Model model) {
+        model.addAttribute(Attributes.FORM, new RoomCreateForm(null, null, null));
+
         model.addAttribute("hotel", hotelService.findById(null));
         model.addAttribute("roomTypes", roomTypeService.findAll());
         return "manager/room/create";
-    }
-
-    @PostMapping("/create")
-    public String createRoom(@RequestParam int floor,
-                             @RequestParam("count") int numberOfRooms,
-                             @RequestParam Long roomTypeId) {
-
-        roomService.createRoom(floor, numberOfRooms, roomTypeId);
-        return "redirect:/manager/rooms";
     }
 
     @GetMapping("/{id}/edit")
@@ -61,7 +66,9 @@ public class RoomController {
 
         model.addAttribute(Attributes.FORM,
                 new RoomEditForm(room.getRoomNumber(),
-                        room.getRoomType().getId()));
+                        room.getRoomType().getId(), room.getConditionStatus()));
+
+        model.addAttribute("conditionStatuses", ConditionStatus.values());
 
         model.addAttribute("roomTypes", roomTypeService.findAll());
 
@@ -70,9 +77,54 @@ public class RoomController {
         return "manager/room/edit";
     }
 
+
+    @PostMapping("/create")
+    public String createRoom(@Valid @ModelAttribute(Attributes.FORM) RoomCreateForm form,
+                             BindingResult bindingResult,
+                             RedirectAttributes redirectAttributes,
+                             Model model) {
+        roomValidator.validateCreate(form, bindingResult);
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("hotel", hotelService.findById(null));
+            model.addAttribute("roomTypes", roomTypeService.findAll());
+
+            return "manager/room/create";
+        }
+
+        roomService.createRoom(form);
+        redirectAttributes.addFlashAttribute(
+                Attributes.SUCCESS,
+                "Create " + form.numberOfRooms() + " rooms on floor "
+                        + form.floor() + " successfully"
+        );
+        return "redirect:/manager/rooms";
+    }
+
     @PostMapping("/{id}/edit")
-    public String editRoom(@PathVariable Long id, @ModelAttribute RoomEditForm form) {
+    public String editRoom(@PathVariable Long id,
+                           @Valid @ModelAttribute(Attributes.FORM) RoomEditForm form,
+                           BindingResult bindingResult,
+                           RedirectAttributes redirectAttributes,
+                           Model model) {
+        Room room = roomService.findById(id);
+
+        roomValidator.validateUpdate(room, form, bindingResult);
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("roomTypes", roomTypeService.findAll());
+            model.addAttribute("floor", room.getFloorNumber());
+            model.addAttribute("roomId", room.getId());
+            model.addAttribute("conditionStatuses", ConditionStatus.values());
+            return "manager/room/edit";
+        }
+
         roomService.updateRoom(id, form);
+
+        redirectAttributes.addFlashAttribute(
+                Attributes.SUCCESS,
+                "Room updated successfully"
+        );
         return "redirect:/manager/rooms";
     }
 }
