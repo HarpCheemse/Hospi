@@ -8,6 +8,8 @@
     <title>Edit Room | Hospi</title>
 
     <link rel="stylesheet" th:href="@{/css/app.css}">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.9/cdn.min.js" defer></script>
 </head>
 
 <body class="bg-background text-text">
@@ -19,6 +21,8 @@
 
     <!-- MAIN -->
     <main class="flex-1 p-6">
+        <!-- TOASTS -->
+        <div th:replace="~{fragments/components/toast :: toast}"></div>
 
         <!-- HEADER -->
         <div class="mb-6 flex items-start justify-between">
@@ -44,7 +48,7 @@
 
         <form th:object="${form}"
               th:action="@{|/manager/rooms/${roomId}/edit|}"
-              method="post">
+              method="post" novalidate>
 
             <section class="rounded-2xl border border-border bg-surface shadow-card">
 
@@ -69,12 +73,21 @@
                             Room Number
                         </label>
 
-                        <input type="text"
-                               name="roomNumber"
-                               th:value="*{roomNumber}"
-                               maxlength="10"
-                               class="input w-full"
-                               required>
+                        <input
+                                th:field="*{roomNumber}"
+                                type="text"
+                                maxlength="3"
+                                inputmode="numeric"
+                                class="w-full rounded-xl border border-border
+                                bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"
+                                th:classappend="${#fields.hasErrors('roomNumber')} ? 'border-danger focus:ring-danger' : ''"
+                                required>
+
+                        <!-- INLINE ERROR -->
+                        <p th:if="${#fields.hasErrors('roomNumber')}"
+                           th:errors="*{roomNumber}"
+                           class="mt-1 text-sm text-danger">
+                        </p>
 
                     </div>
 
@@ -86,7 +99,9 @@
                         </label>
 
                         <select th:field="*{roomTypeId}"
-                                class="input w-full">
+                                class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary
+                   "
+                                th:classappend="${#fields.hasErrors('roomTypeId')} ? 'border-danger focus:ring-danger' : ''">
 
                             <option th:each="roomType : ${roomTypes}"
                                     th:value="${roomType.id}"
@@ -94,6 +109,11 @@
                             </option>
 
                         </select>
+
+                        <p th:if="${#fields.hasErrors('roomTypeId')}"
+                           th:errors="*{roomTypeId}"
+                           class="mt-1 text-sm text-danger">
+                        </p>
 
                     </div>
 
@@ -114,15 +134,28 @@
 
                 <div class="grid grid-cols-3 gap-5 p-5">
 
-                    <div>
-                        <p class="text-sm text-muted">
-                            Floor
-                        </p>
+                    <div class="flex justify-between">
+                        <div>
+                            <p class="text-sm text-muted">
+                                Floor
+                            </p>
 
-                        <p class="mt-1 font-medium"
-                           th:text="${floor}">
-                            1
-                        </p>
+                            <p class="mt-1 font-medium"
+                               th:text="${floor}">
+                                1
+                            </p>
+                        </div>
+                        <select th:field="*{conditionStatus}"
+                                class="w-48 rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary
+                   "
+                                th:classappend="${#fields.hasErrors('conditionStatus')} ? 'border-danger focus:ring-danger' : ''">
+
+                            <option th:each="conditionStatus : ${conditionStatuses}"
+                                    th:value="${conditionStatus}"
+                                    th:text="${conditionStatus}">
+                            </option>
+
+                        </select>
                     </div>
 
                 </div>
