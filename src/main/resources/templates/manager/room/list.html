@@ -8,6 +8,8 @@
     <title>Rooms | Hospi</title>
 
     <link rel="stylesheet" th:href="@{/css/app.css}">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.9/cdn.min.js" defer></script>
 </head>
 
 <body class="bg-background text-text">
@@ -19,6 +21,8 @@
 
     <!-- MAIN -->
     <main class="flex-1 p-6">
+        <!-- TOASTS -->
+        <div th:replace="~{fragments/components/toast :: toast}"></div>
 
         <!-- HEADER -->
         <div class="mb-6 flex items-start justify-between">
@@ -96,7 +100,7 @@
                             class="rounded-2xl border border-border bg-background p-4 text-left transition hover:border-primary hover:shadow-card">
 
                         <!-- ROOM NUMBER -->
-                        <div class="flex">
+                        <div class="flex justify-between">
                             <div class="text-xl font-bold"
                                  th:text="${room.roomNumber}">
                                 101
