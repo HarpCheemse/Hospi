@@ -2,9 +2,7 @@ package com.hospi.manage.features.manager.room.service;
 
 import com.hospi.manage.common.constant.HotelConstants;
 import com.hospi.manage.common.exception.ResourceNotFoundException;
-import com.hospi.manage.common.exception.room.DuplicateRoomNumberException;
-import com.hospi.manage.common.exception.room.FloorCapacityExceededException;
-import com.hospi.manage.common.exception.room.InvalidRoomNumberException;
+
 import com.hospi.manage.features.manager.detail.entity.Hotel;
 import com.hospi.manage.features.manager.detail.repository.HotelRepository;
 import com.hospi.manage.features.manager.room.dto.FloorView;
