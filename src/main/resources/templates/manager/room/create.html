@@ -8,6 +8,8 @@
     <title>Add Rooms | Hospi</title>
 
     <link rel="stylesheet" th:href="@{/css/app.css}">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.9/cdn.min.js" defer></script>
 </head>
 
 <body class="bg-background text-text">
@@ -19,6 +21,8 @@
 
     <!-- MAIN -->
     <main class="flex-1 p-6">
+        <!-- TOASTS -->
+        <div th:replace="~{fragments/components/toast :: toast}"></div>
 
         <!-- HEADER -->
         <div class="mb-6 flex items-start justify-between">
@@ -43,7 +47,9 @@
         </div>
 
         <form th:action="@{/manager/rooms/create}"
-              method="post">
+              th:object="${form}"
+              method="post"
+              novalidate>
 
             <section class="rounded-2xl border border-border bg-surface shadow-card">
 
@@ -68,8 +74,7 @@
                             Floor
                         </label>
 
-                        <select name="floor"
-                                class="input w-full">
+                        <select th:field="*{floor}" class="input w-full">
 
                             <option value="">
                                 Select Floor
@@ -81,6 +86,10 @@
                             </option>
 
                         </select>
+                        <p th:if="${#fields.hasErrors('floor')}"
+                           th:errors="*{floor}"
+                           class="mt-1 text-sm text-danger">
+                        </p>
 
                     </div>
 
@@ -92,12 +101,13 @@
                         </label>
 
                         <input type="number"
-                               name="count"
-                               min="1"
-                               max="99"
+                               th:field="*{numberOfRooms}"
                                class="input w-full"
                                placeholder="10">
-
+                        <p th:if="${#fields.hasErrors('numberOfRooms')}"
+                           th:errors="*{numberOfRooms}"
+                           class="mt-1 text-sm text-danger">
+                        </p>
                     </div>
 
                     <!-- ROOM TYPE -->
@@ -107,8 +117,7 @@
                             Default Room Type
                         </label>
 
-                        <select name="roomTypeId"
-                                class="input w-full">
+                        <select th:field="*{roomTypeId}" class="input w-full">
 
                             <option value="">
                                 No Room Type
@@ -120,48 +129,11 @@
                             </option>
 
                         </select>
+                        <p th:if="${#fields.hasErrors('roomTypeId')}"
+                           th:errors="*{roomTypeId}"
+                           class="mt-1 text-sm text-danger">
+                        </p>
 
-                    </div>
-
-                </div>
-
-            </section>
-
-            <!-- PREVIEW -->
-            <section class="mt-6 rounded-2xl border border-border bg-surface shadow-card">
-
-                <div class="border-b border-border p-5">
-
-                    <h2 class="text-lg font-semibold">
-                        Example
-                    </h2>
-
-                    <p class="mt-1 text-sm text-muted">
-                        Generating 5 rooms starting from 101 creates:
-                    </p>
-
-                </div>
-
-                <div class="flex flex-wrap gap-3 p-5">
-
-                    <div class="rounded-xl border border-border bg-background px-4 py-3">
-                        101
-                    </div>
-
-                    <div class="rounded-xl border border-border bg-background px-4 py-3">
-                        102
-                    </div>
-
-                    <div class="rounded-xl border border-border bg-background px-4 py-3">
-                        103
-                    </div>
-
-                    <div class="rounded-xl border border-border bg-background px-4 py-3">
-                        104
-                    </div>
-
-                    <div class="rounded-xl border border-border bg-background px-4 py-3">
-                        105
                     </div>
 
                 </div>
