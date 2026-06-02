@@ -2,9 +2,13 @@ package com.hospi.manage.features.manager.room.service;
 
 import com.hospi.manage.common.constant.HotelConstants;
 import com.hospi.manage.common.exception.ResourceNotFoundException;
+import com.hospi.manage.common.exception.room.DuplicateRoomNumberException;
+import com.hospi.manage.common.exception.room.FloorCapacityExceededException;
+import com.hospi.manage.common.exception.room.InvalidRoomNumberException;
 import com.hospi.manage.features.manager.detail.entity.Hotel;
 import com.hospi.manage.features.manager.detail.repository.HotelRepository;
 import com.hospi.manage.features.manager.room.dto.FloorView;
+import com.hospi.manage.features.manager.room.dto.RoomCreateForm;
 import com.hospi.manage.features.manager.room.dto.RoomEditForm;
 import com.hospi.manage.features.manager.room.dto.RoomView;
 import com.hospi.manage.features.manager.room.entity.Room;
@@ -14,10 +18,13 @@ import com.hospi.manage.features.manager.room.repository.RoomRepository;
 import com.hospi.manage.features.manager.roomtype.entity.RoomType;
 import com.hospi.manage.features.manager.roomtype.repository.RoomTypeRepository;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ValidationException;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.FieldError;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RoomService {
@@ -38,18 +45,27 @@ public class RoomService {
     }
 
     @Transactional
-    public void createRoom(int floor, int numberOfRooms, Long roomTypeId) {
-        RoomType roomType = roomTypeRepository.findById(roomTypeId).orElseThrow(
+    public void createRoom(RoomCreateForm form) {
+        Integer highest =
+                roomRepository.findHighestRoomNumberByFloor(form.floor());
+        if (highest == null) {
+            highest = form.floor() * 100;
+        }
+
+        int start = highest + 1;
+
+        RoomType roomType = roomTypeRepository.findById(form.roomTypeId()).orElseThrow(
                 () -> new ResourceNotFoundException("Room type not found")
         );
+
         List<Room> rooms = new ArrayList<>();
-        int start = floor * 100 + 1;
-        for (int i = 0; i < numberOfRooms; i++) {
+
+        for (int i = 0; i < form.numberOfRooms(); i++) {
             Room room = new Room();
 
             room.setRoomNumber(String.valueOf(start + i));
             room.setRoomType(roomType);
-            room.setFloorNumber((short) floor);
+            room.setFloorNumber((short) form.floor());
             room.setHotelId(HotelConstants.HOTEL_ID);
             room.setConditionStatus(ConditionStatus.CLEAN);
             room.setOccupancyStatus(OccupancyStatus.VACANT);
@@ -109,12 +125,14 @@ public class RoomService {
 
     public void updateRoom(Long id, RoomEditForm form) {
         Room room = findById(id);
+
         RoomType roomType =
                 roomTypeRepository.findById(form.roomTypeId()).orElseThrow(
                         () -> new ResourceNotFoundException("Room type not found")
                 );
 
         room.setRoomType(roomType);
+        room.setConditionStatus(form.conditionStatus());
         room.setRoomNumber(form.roomNumber());
 
         roomRepository.save(room);
