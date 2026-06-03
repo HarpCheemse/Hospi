@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Admin Dashboard | Hospi</title>
+
+    <link rel="stylesheet"
+          th:href="@{/css/app.css}"/>
+</head>
+
+<body class="bg-background text-text">
+
+<div class="flex min-h-screen">
+
+    <!-- SIDEBAR -->
+    <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+
+    <!-- MAIN -->
+    <main class="flex-1 p-6 bg-background">
+
+        <!-- HEADER -->
+        <div class="mb-6">
+
+            <h1 class="text-2xl font-bold">
+                Admin Dashboard
+            </h1>
+
+            <p class="text-sm text-muted mt-1">
+                Monitor platform activity, staff management, and system health
+            </p>
+
+        </div>
+
+        <!-- STATS -->
+        <div class="grid grid-cols-4 gap-4 mb-6">
+
+            <div class="bg-surface border border-border rounded-xl p-5 shadow-sm">
+
+                <div class="flex justify-between mb-4">
+
+                    <div>
+                        <p class="text-sm text-muted">
+                            Total Staff
+                        </p>
+
+                        <p class="text-2xl font-bold">
+                            86
+                        </p>
+                    </div>
+
+                    <img th:src="@{/assets/icons/users.svg}"
+                         alt="Users">
+
+                </div>
+
+                <p class="text-xs text-green-600">
+                    +12 this month
+                </p>
+
+            </div>
+
+            <div class="bg-surface border border-border rounded-xl p-5 shadow-sm">
+
+                <div class="flex justify-between mb-4">
+
+                    <div>
+                        <p class="text-sm text-muted">
+                            Active Roles
+                        </p>
+
+                        <p class="text-2xl font-bold">
+                            14
+                        </p>
+                    </div>
+
+                    <img th:src="@{/assets/icons/shield-check.svg}"
+                         alt="Roles">
+
+                </div>
+
+                <p class="text-xs text-muted">
+                    Permission groups
+                </p>
+
+            </div>
+
+            <div class="bg-surface border border-border rounded-xl p-5 shadow-sm">
+
+                <div class="flex justify-between mb-4">
+
+                    <div>
+                        <p class="text-sm text-muted">
+                            RAM Usage
+                        </p>
+
+                        <p class="text-2xl font-bold">
+                            145 MB
+                        </p>
+                    </div>
+
+                    <img th:src="@{/assets/icons/memory-stick.svg}"
+                         alt="RAM Usage">
+
+                </div>
+
+                <p class="text-xs text-muted">
+                    Stable operations
+                </p>
+
+            </div>
+
+            <div class="bg-surface border border-border rounded-xl p-5 shadow-sm">
+
+                <div class="flex justify-between mb-4">
+
+                    <div>
+                        <p class="text-sm text-muted">
+                            System Uptime
+                        </p>
+
+                        <p class="text-2xl font-bold">
+                            99.98%
+                        </p>
+                    </div>
+
+                    <img th:src="@{/assets/icons/server.svg}"
+                         alt="Server">
+
+                </div>
+
+                <p class="text-xs text-green-600">
+                    Healthy
+                </p>
+
+            </div>
+
+        </div>
+
+        <!-- CONTENT GRID -->
+        <div class="grid grid-cols-2 gap-4">
+
+            <!-- RECENT ACTIVITY -->
+            <div class="bg-surface border border-border rounded-xl p-5">
+
+                <div class="flex justify-between mb-4">
+
+                    <div>
+
+                        <h2 class="text-lg font-semibold">
+                            Recent Activity
+                        </h2>
+
+                        <p class="text-sm text-muted">
+                            Latest system events
+                        </p>
+
+                    </div>
+
+                    <button class="text-sm border border-border px-3 py-1 rounded-lg hover:bg-background">
+                        View All
+                    </button>
+
+                </div>
+
+                <div class="space-y-4">
+
+                    <div class="flex gap-3">
+                        <div class="w-2 h-2 mt-2 bg-primary rounded-full"></div>
+                        <div>
+                            <p class="text-sm font-medium">
+                                New receptionist account created
+                            </p>
+                            <p class="text-xs text-muted">
+                                5 minutes ago
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <div class="w-2 h-2 mt-2 bg-primary rounded-full"></div>
+                        <div>
+                            <p class="text-sm font-medium">
+                                Role permissions updated
+                            </p>
+                            <p class="text-xs text-muted">
+                                18 minutes ago
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <div class="w-2 h-2 mt-2 bg-primary rounded-full"></div>
+                        <div>
+                            <p class="text-sm font-medium">
+                                Backup completed successfully
+                            </p>
+                            <p class="text-xs text-muted">
+                                1 hour ago
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <div class="w-2 h-2 mt-2 bg-yellow-500 rounded-full"></div>
+                        <div>
+                            <p class="text-sm font-medium">
+                                Failed login attempts detected
+                            </p>
+                            <p class="text-xs text-muted">
+                                2 hours ago
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- SYSTEM HEALTH -->
+            <div class="bg-surface border border-border rounded-xl p-5">
+
+                <div class="flex justify-between mb-4">
+
+                    <h2 class="text-lg font-semibold">
+                        System Health
+                    </h2>
+
+                    <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                        Healthy
+                    </span>
+
+                </div>
+
+                <div class="space-y-5">
+
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>CPU Usage</span>
+                            <span>42%</span>
+                        </div>
+
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-primary h-2 rounded-full"
+                                 style="width: 42%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>Database Load</span>
+                            <span>63%</span>
+                        </div>
+
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-primary h-2 rounded-full"
+                                 style="width: 63%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>Storage Usage</span>
+                            <span>71%</span>
+                        </div>
+
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-primary h-2 rounded-full"
+                                 style="width: 71%"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+</body>
+</html>
