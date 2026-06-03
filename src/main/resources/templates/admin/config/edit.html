@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Edit System Configuration | Hospi</title>
+
+    <link rel="stylesheet"
+          th:href="@{/css/app.css}">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.9/cdn.min.js" defer></script>
+</head>
+
+<body class="bg-background text-text">
+
+<div class="flex min-h-screen">
+
+    <!-- SIDEBAR -->
+    <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+
+    <!-- MAIN -->
+    <main class="flex-1 p-6">
+
+        <div class="mb-6 flex items-start justify-between">
+
+            <div>
+
+                <h1 class="text-2xl font-bold">
+                    Edit System Configuration
+                </h1>
+
+                <p class="mt-1 text-sm text-muted">
+                    Configure hotel financial settings and booking rules.
+                </p>
+
+            </div>
+
+            <a th:href="@{/admin/configs}"
+               class="rounded-xl border border-border bg-surface px-4 py-2 text-sm font-medium hover:bg-background">
+                Back
+            </a>
+
+        </div>
+
+        <form th:object="${form}"
+              th:action="@{/admin/configs/edit}"
+              method="post"
+              novalidate>
+
+            <!-- FINANCIAL -->
+            <section class="rounded-2xl border border-border bg-surface shadow-card">
+
+                <div class="border-b border-border p-5">
+
+                    <h2 class="text-lg font-semibold">
+                        Financial Settings
+                    </h2>
+
+                </div>
+
+                <div class="grid grid-cols-2 gap-5 p-5">
+
+                    <!-- TAX RATE -->
+                    <div>
+
+                        <label class="mb-2 block text-sm font-medium">
+                            Tax Rate (%)
+                        </label>
+
+                        <p class="mb-2 text-sm text-muted">
+                            Percentage tax automatically added to every booking invoice.
+                        </p>
+
+                        <input th:field="*{taxRate}"
+                               type="number"
+                               step="0.01"
+                               min="0"
+                               class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+                        <p th:if="${#fields.hasErrors('taxRate')}"
+                           th:errors="*{taxRate}"
+                           class="mt-1 text-sm text-danger">
+                        </p>
+                    </div>
+
+                    <div>
+                        <label class="mb-2 block text-sm font-medium"> Default Deposit Percentage (%) </label>
+                        <p class="mb-2 text-sm text-muted">
+                            Percentage of the booking total required during reservation
+                            confirmation. </p>
+                        <input th:field="*{defaultDepositPercentage}" type="number" step="0.01"
+                               min="0"
+                               class="w-full rounded-xl border border-border
+                               bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+                        <p th:if="${#fields.hasErrors('defaultDepositPercentage')}"
+                           th:errors="*{defaultDepositPercentage}"
+                           class="mt-1 text-sm text-danger">
+                        </p>
+                    </div>
+
+
+                    <div>
+                        <label class="mb-2 block text-sm font-medium"> Late Checkout Fee </label>
+                        <p class="mb-2 text-sm text-muted"> Additional charge applied when guests check out after the
+                            standard checkout time. </p>
+                        <input th:field="*{lateCheckoutFee}" type="number" step="0.01"
+                               min="0"
+                               class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+                        <p th:if="${#fields.hasErrors('lateCheckoutFee')}"
+                           th:errors="*{lateCheckoutFee}"
+                           class="mt-1 text-sm text-danger">
+                        </p>
+                    </div>
+
+                    <div><label class="mb-2 block text-sm font-medium"> Extra Guest Fee </label>
+                        <p class="mb-2 text-sm text-muted"> Fee charged for each guest exceeding the room's standard
+                            occupancy. </p>
+                        <input th:field="*{extraGuestFee}" type="number" step="0.01" min="0"
+                               class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+                        <p th:if="${#fields.hasErrors('extraGuestFee')}"
+                           th:errors="*{extraGuestFee}"
+                           class="mt-1 text-sm text-danger">
+                        </p>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- BOOKING RULES -->
+            <section class="mt-6 rounded-2xl border border-border bg-surface shadow-card">
+                <div class="border-b border-border p-5"><h2 class="text-lg font-semibold"> Booking Rules </h2>
+                    <p class="mt-1 text-sm text-muted"> Configure reservation limits and cancellation policies. </p>
+                </div>
+                <div class="grid grid-cols-2 gap-5 p-5">
+                    <div><label class="mb-2 block text-sm font-medium"> Pending Booking Expiry (Minutes) </label>
+                        <p class="mb-2 text-sm text-muted"> Automatically cancel unpaid pending reservations after this
+                            duration. </p> <input th:field="*{pendingBookingExpiryMinutes}" type="number" min="1"
+                                                  class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+                        <p th:if="${#fields.hasErrors('pendingBookingExpiryMinutes')}"
+                           th:errors="*{pendingBookingExpiryMinutes}"
+                           class="mt-1 text-sm text-danger">
+                        </p>
+                    </div>
+                    <div><label class="mb-2 block text-sm font-medium"> Cancellation Hours Before Check-in </label>
+                        <p class="mb-2 text-sm text-muted"> Guests may cancel without penalty before this many hours
+                            from check-in. </p> <input th:field="*{cancellationHoursBeforeCheckin}" type="number"
+                                                       min="0"
+                                                       class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+                        <p th:if="${#fields.hasErrors('cancellationHoursBeforeCheckin')}"
+                           th:errors="*{cancellationHoursBeforeCheckin}"
+                           class="mt-1 text-sm text-danger">
+                        </p>
+                    </div>
+                    <div><label class="mb-2 block text-sm font-medium"> Maximum Booking Days </label>
+                        <p class="mb-2 text-sm text-muted"> Maximum number of nights allowed in a single
+                            reservation. </p> <input th:field="*{maximumBookingDays}" type="number" min="1"
+                                                     class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+                        <p th:if="${#fields.hasErrors('maximumBookingDays')}"
+                           th:errors="*{maximumBookingDays}"
+                           class="mt-1 text-sm text-danger">
+                        </p>
+                    </div>
+                    <div>
+                        <label class="mb-2 block text-sm font-medium"> Maximum Rooms Per Booking </label>
+                        <p class="mb-2 text-sm text-muted"> Maximum number of rooms a guest may reserve in one
+                            booking. </p>
+                        <input th:field="*{maximumRoomPerBook}" type="number" min="1"
+                               class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+                        <p th:if="${#fields.hasErrors('maximumRoomPerBook')}"
+                           th:errors="*{maximumRoomPerBook}"
+                           class="mt-1 text-sm text-danger">
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <div class="mt-6 flex justify-end gap-3">
+
+                <a th:href="@{/admin/configs}"
+                   class="rounded-xl border border-border bg-surface px-5 py-3 text-sm font-medium">
+                    Cancel
+                </a>
+
+                <button type="submit"
+                        class="rounded-xl bg-primary px-5 py-3 text-sm font-medium text-white hover:opacity-90">
+                    Save Configuration
+                </button>
+
+            </div>
+
+        </form>
+
+    </main>
+
+</div>
+
+</body>
+</html>
