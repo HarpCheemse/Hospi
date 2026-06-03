@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+<aside th:fragment="sidebar"
+       class="w-64 bg-surface border-r border-border p-5">
+
+    <!-- LOGO -->
+    <div class="flex items-center gap-3 mb-8">
+
+        <div class="w-9 h-9 bg-primary rounded-lg"></div>
+
+        <span class="font-semibold text-lg text-text">
+            Hospi
+        </span>
+
+    </div>
+
+    <!-- NAVIGATION -->
+    <nav class="space-y-1 text-sm">
+
+        <!-- DASHBOARD -->
+        <a th:href="@{/admin}"
+           class="flex items-center gap-3 p-2 rounded-lg"
+           th:classappend="${activeSidebar == 'DASHBOARD'}
+           ? ' bg-primary/10 text-primary font-medium'
+           : ' hover:bg-background text-text'">
+
+            <img th:src="@{/assets/icons/layout-grid.svg}" alt="Dashboard">
+
+            Dashboard
+
+        </a>
+
+        <!-- STAFF ACCOUNTS -->
+        <a th:href="@{/admin/staff}"
+           class="flex items-center gap-3 p-2 rounded-lg"
+           th:classappend="${activeSidebar == 'STAFF_ACCOUNTS'}
+           ? ' bg-primary/10 text-primary font-medium'
+           : ' hover:bg-background text-text'">
+
+            <img th:src="@{/assets/icons/user.svg}" alt="Staff Accounts">
+
+            Staff Accounts
+
+        </a>
+
+        <!-- SYSTEM CONFIGS -->
+        <a th:href="@{/admin/configs}"
+           class="flex items-center gap-3 p-2 rounded-lg"
+           th:classappend="${activeSidebar == 'SYSTEM_CONFIGS'}
+           ? ' bg-primary/10 text-primary font-medium'
+           : ' hover:bg-background text-text'">
+
+            <img th:src="@{/assets/icons/settings.svg}" alt="System Configs">
+
+            System Configs
+
+        </a>
+
+        <!-- NOTIFICATIONS -->
+        <a th:href="@{/admin/notifications}"
+           class="flex items-center justify-between p-2 rounded-lg"
+           th:classappend="${activeSidebar == 'NOTIFICATIONS'}
+           ? ' bg-primary/10 text-primary font-medium'
+           : ' hover:bg-background text-text'">
+
+            <div class="flex items-center gap-3">
+
+                <img th:src="@{/assets/icons/bell.svg}" alt="Notifications">
+
+                Notifications
+
+            </div>
+
+            <span class="text-xs bg-accent text-white px-2 py-0.5 rounded-full">
+                7
+            </span>
+
+        </a>
+
+    </nav>
+
+</aside>
+
+</body>
+</html>
