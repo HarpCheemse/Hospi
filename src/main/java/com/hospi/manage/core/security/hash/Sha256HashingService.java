@@ -1,4 +1,4 @@
-package com.hospi.manage.core.security;
+package com.hospi.manage.core.security.hash;
 
 import org.springframework.stereotype.Service;
 
