@@ -2,7 +2,6 @@ package com.hospi.manage.features.admin.account.service;
 
 import com.hospi.manage.common.constant.HotelConstants;
 import com.hospi.manage.common.exception.ResourceNotFoundException;
-import com.hospi.manage.core.security.Argon2HashingService;
 import com.hospi.manage.features.admin.account.dto.AccountCreateForm;
 import com.hospi.manage.features.admin.account.dto.AccountEditForm;
 import com.hospi.manage.features.admin.account.dto.AccountView;
@@ -10,6 +9,7 @@ import com.hospi.manage.features.admin.account.entity.Account;
 import com.hospi.manage.features.admin.account.enums.AccountStatus;
 import com.hospi.manage.features.admin.account.repository.AccountRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,11 +17,11 @@ import java.util.List;
 @Service
 public class AccountService {
     private final AccountRepository accountRepository;
-    private final Argon2HashingService argon2HashingService;
+    private final PasswordEncoder passwordEncoder;
 
     AccountService(AccountRepository accountRepository,
-                   Argon2HashingService argon2HashingService) {
-        this.argon2HashingService = argon2HashingService;
+                   PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
         this.accountRepository = accountRepository;
     }
 
@@ -55,7 +55,7 @@ public class AccountService {
         account.setEmail(form.email());
         account.setPhone(form.phone());
 
-        String passwordHash = argon2HashingService.hash(form.password());
+        String passwordHash = passwordEncoder.encode(form.password());
 
         account.setPasswordHash(passwordHash);
 
@@ -104,5 +104,20 @@ public class AccountService {
         account.setStatus(form.status());
 
         accountRepository.save(account);
+    }
+
+    @Transactional
+    public void rehashAllPasswords(String defaultRawPassword) {
+
+        List<Account> accounts = accountRepository.findAll();
+
+        for (Account account : accounts) {
+
+            String newHash = passwordEncoder.encode(defaultRawPassword);
+
+            account.setPasswordHash(newHash);
+        }
+
+        accountRepository.saveAll(accounts);
     }
 }
