@@ -1,6 +1,7 @@
 package com.hospi.manage.features.admin.account.validator;
 
 import com.hospi.manage.features.admin.account.dto.AccountCreateForm;
+import com.hospi.manage.features.admin.account.dto.AccountEditForm;
 import com.hospi.manage.features.admin.account.enums.Role;
 import com.hospi.manage.features.admin.account.repository.AccountRepository;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,25 @@ public class AccountValidator {
         validatePassword(form.password(), bindingResult);
 
         validateRole(form.role(), bindingResult);
+    }
+
+    public void validateUpdate(Long id, AccountEditForm form, BindingResult bindingResult) {
+        validateRole(form.role(), bindingResult);
+
+        validateEmailUpdate(id, form.email(), bindingResult);
+    }
+
+    private void validateEmailUpdate(Long id,
+                                     String email,
+                                     BindingResult bindingResult) {
+
+        if (accountRepository.existsByEmailAndIdNot(email, id)) {
+            bindingResult.rejectValue(
+                    "email",
+                    "email.duplicate",
+                    "Email is already in use"
+            );
+        }
     }
 
     private void validateRole(Role role,
