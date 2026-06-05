@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login | Hospi</title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<body class="bg-background text-text">
+
+<div class="min-h-screen flex items-center justify-center px-6">
+
+    <div class="w-full max-w-md">
+
+        <!-- BRAND -->
+        <div class="mb-8 text-center">
+
+            <div class="mx-auto mb-3 h-12 w-12 rounded-xl bg-primary"></div>
+
+            <h1 class="text-2xl font-bold">
+                Hospi
+            </h1>
+
+            <p class="mt-1 text-sm text-muted">
+                Sign in to your staff account
+            </p>
+
+        </div>
+
+        <!-- CARD -->
+        <div class="rounded-2xl border border-border bg-surface shadow-card p-6">
+
+            <!-- ERROR -->
+            <div th:if="${param.error}"
+                 class="mb-4 rounded-xl bg-danger/10 px-4 py-3 text-sm text-danger">
+
+                Invalid email or password
+
+            </div>
+
+            <!-- LOGOUT -->
+            <div th:if="${param.logout}"
+                 class="mb-4 rounded-xl bg-primary-soft px-4 py-3 text-sm text-primary-dark">
+
+                You have been logged out successfully
+
+            </div>
+
+            <!-- FORM -->
+            <form th:object="${form}" th:action="@{/login}" method="post" novalidate>
+
+                <!-- EMAIL -->
+                <div class="mb-4">
+
+                    <label class="mb-2 block text-sm font-medium">
+                        Email
+                    </label>
+
+                    <input type="email"
+                           name="email"
+                           class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"
+                           placeholder="you@hospi.com"
+                           required>
+
+                </div>
+
+                <!-- PASSWORD -->
+                <div class="mb-4">
+
+                    <label class="mb-2 block text-sm font-medium">
+                        Password
+                    </label>
+
+                    <input type="password"
+                           name="password"
+                           class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"
+                           placeholder="••••••••"
+                           required>
+
+                </div>
+
+                <!-- BUTTON -->
+                <button type="submit"
+                        class="w-full rounded-xl bg-primary px-4 py-3 text-sm font-medium text-white shadow-card hover:opacity-90">
+
+                    Sign In
+
+                </button>
+
+            </form>
+
+        </div>
+
+        <!-- FOOTER -->
+        <p class="mt-6 text-center text-xs text-muted">
+            © 2026 Hospi. Internal staff system.
+        </p>
+
+    </div>
+
+</div>
+
+</body>
+</html>
