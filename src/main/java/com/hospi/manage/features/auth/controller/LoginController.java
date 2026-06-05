@@ -1,0 +1,39 @@
+package com.hospi.manage.features.auth.controller;
+
+import com.hospi.manage.features.admin.account.service.AccountService;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+@Controller
+@RequestMapping("/login")
+public class LoginController {
+    private final AccountService accountService;
+
+    LoginController(AccountService accountService) {
+        this.accountService = accountService;
+    }
+
+    @GetMapping
+    public String login(
+            @RequestParam(value = "error", required = false) String error,
+            @RequestParam(value = "logout", required = false) String logout,
+            Model model
+    ) {
+//        accountService.rehashAllPasswords("123");
+
+        System.out.println(accountService.findAllViews());
+
+        if (error != null) {
+            model.addAttribute("error", "Invalid email or password");
+        }
+
+        if (logout != null) {
+            model.addAttribute("message", "You have been logged out");
+        }
+
+        return "auth/login";
+    }
+}
