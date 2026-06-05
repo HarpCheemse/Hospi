@@ -1,6 +1,7 @@
 package com.hospi.manage.features.admin.account.validator;
 
 import com.hospi.manage.features.admin.account.dto.AccountCreateForm;
+import com.hospi.manage.features.admin.account.dto.AccountEditForm;
 import com.hospi.manage.features.admin.account.enums.AccountStatus;
 import com.hospi.manage.features.admin.account.enums.Role;
 import com.hospi.manage.features.admin.account.repository.AccountRepository;
@@ -165,6 +166,29 @@ class AccountValidatorTest {
         accountValidator.validateCreate(form, bindingResult);
 
         assertFalse(bindingResult.hasErrors());
+    }
+
+    @Test
+    void shouldRejectWhenEmailBelongsToAnotherAccount() {
+
+        Long currentAccountId = 1L;
+
+        AccountEditForm form = new AccountEditForm(
+                "John Doe",
+                "john@hospi.com",
+                "0123456789",
+                Role.MANAGER,
+                AccountStatus.ACTIVE
+        );
+
+        when(accountRepository.existsByEmailAndIdNot("john@hospi.com", currentAccountId))
+                .thenReturn(true);
+
+        BindingResult bindingResult = new BeanPropertyBindingResult(form, "form");
+
+        accountValidator.validateUpdate(currentAccountId, form, bindingResult);
+
+        assertTrue(bindingResult.hasFieldErrors("email"));
     }
 
 }
