@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Account Details | Hospi</title>
+
+    <link rel="stylesheet"
+          th:href="@{/css/app.css}">
+</head>
+
+<body class="bg-background text-text">
+
+<div class="flex min-h-screen">
+
+    <!-- SIDEBAR -->
+    <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+
+    <!-- MAIN -->
+    <main class="flex-1 p-6">
+
+        <!-- TOAST -->
+        <div th:replace="~{fragments/components/toast :: toast}"></div>
+
+        <!-- HEADER -->
+        <div class="mb-6 flex items-start justify-between">
+
+            <div>
+
+                <h1 class="text-2xl font-bold"
+                    th:text="${account.fullName}">
+                    John Doe
+                </h1>
+
+                <p class="mt-1 text-sm text-muted">
+                    Review account information and permissions.
+                </p>
+
+            </div>
+
+            <a th:href="@{'/admin/accounts/' + ${account.id} + '/edit'}"
+               class="rounded-xl bg-primary px-5 py-3 text-sm font-medium text-white shadow-card hover:opacity-90">
+                Edit Account
+            </a>
+
+        </div>
+
+        <!-- ACCOUNT INFORMATION -->
+        <section class="rounded-2xl border border-border bg-surface shadow-card">
+
+            <div class="border-b border-border p-5">
+
+                <h2 class="text-lg font-semibold">
+                    Account Information
+                </h2>
+
+            </div>
+
+            <div class="grid grid-cols-2 gap-5 p-5">
+
+                <div>
+
+                    <p class="text-sm text-muted">
+                        Full Name
+                    </p>
+
+                    <p class="mt-1 font-medium"
+                       th:text="${account.fullName}">
+                        John Doe
+                    </p>
+
+                </div>
+
+                <div>
+
+                    <p class="text-sm text-muted">
+                        Email Address
+                    </p>
+
+                    <p class="mt-1 font-medium"
+                       th:text="${account.email}">
+                        john@hospi.com
+                    </p>
+
+                </div>
+
+                <div>
+
+                    <p class="text-sm text-muted">
+                        Phone Number
+                    </p>
+
+                    <p class="mt-1 font-medium"
+                       th:text="${account.phone}">
+                        0123456789
+                    </p>
+
+                </div>
+
+                <div>
+
+                    <p class="text-sm text-muted">
+                        Role
+                    </p>
+
+                    <div class="mt-1">
+
+                        <span class="rounded-full bg-primary-soft px-2 py-1 text-xs font-medium text-primary-dark"
+                              th:text="${account.role}">
+                            MANAGER
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ACCOUNT STATUS -->
+        <section class="mt-6 rounded-2xl border border-border bg-surface shadow-card">
+
+            <div class="border-b border-border p-5">
+
+                <h2 class="text-lg font-semibold">
+                    Account Status
+                </h2>
+
+            </div>
+
+            <div class="grid grid-cols-2 gap-5 p-5">
+
+                <div>
+
+                    <p class="text-sm text-muted">
+                        Status
+                    </p>
+
+                    <div class="mt-1">
+
+                        <span th:if="${account.status.name() == 'ACTIVE'}"
+                              class="rounded-full bg-success/10 px-2 py-1 text-xs font-medium text-success">
+                            Active
+                        </span>
+
+                        <span th:if="${account.status.name() == 'DISABLED'}"
+                              class="rounded-full bg-danger/10 px-2 py-1 text-xs font-medium text-danger">
+                            Disabled
+                        </span>
+
+                        <span th:if="${account.status.name() == 'LOCKED'}"
+                              class="rounded-full bg-warning/10 px-2 py-1 text-xs font-medium text-warning">
+                            Locked
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+</body>
+</html>
