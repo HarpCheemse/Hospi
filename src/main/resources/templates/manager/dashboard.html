@@ -1,43 +1,82 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>Manager Dashboard | Hospi</title>
 
-    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet"
+          th:href="@{/css/app.css}">
 </head>
 
-<body class="bg-background text-text">
+<body class="h-screen overflow-hidden bg-background text-text">
 
-<div class="flex min-h-screen">
+<div class="flex h-full">
 
     <div th:replace="~{fragments/manager-sidebar :: sidebar}"></div>
 
-    <main class="flex-1 bg-background p-6">
+    <main class="flex-1 overflow-y-auto bg-background p-6">
 
+        <!-- HEADER -->
         <div class="mb-6 flex items-center justify-between">
+
             <div>
-                <h1 class="text-2xl font-bold text-text">Manager Dashboard</h1>
+
+                <h1 class="text-2xl font-bold">
+                    Manager Dashboard
+                </h1>
+
                 <p class="text-sm text-muted">
                     Monitor reservations, room availability, and hotel operations
                 </p>
+
             </div>
 
             <div th:replace="~{fragments/components :: userPill('JD', 'John Doe', 'Manager')}"></div>
+
         </div>
 
+        <!-- STATS -->
         <div class="mb-6 grid grid-cols-4 gap-4">
-            <div th:replace="~{fragments/components :: statCard('New Bookings', '840', '+8.70% from last week', 'positive')}"></div>
-            <div th:replace="~{fragments/components :: statCard('Check-In', '231', '+3.56% from last week', 'positive')}"></div>
-            <div th:replace="~{fragments/components :: statCard('Check-Out', '124', '-1.06% from last week', 'neutral')}"></div>
-            <div th:replace="~{fragments/components :: statCard('Total Revenue', '$123,980', '+5.70% from last week', 'positive')}"></div>
+
+            <div th:replace="~{fragments/components :: statCard(
+                'New Bookings',
+                '840',
+                '+8.70% from last week',
+                'positive'
+            )}"></div>
+
+            <div th:replace="~{fragments/components :: statCard(
+                'Check-In',
+                '231',
+                '+3.56% from last week',
+                'positive'
+            )}"></div>
+
+            <div th:replace="~{fragments/components :: statCard(
+                'Check-Out',
+                '124',
+                '-1.06% from last week',
+                'neutral'
+            )}"></div>
+
+            <div th:replace="~{fragments/components :: statCard(
+                'Total Revenue',
+                '$123,980',
+                '+5.70% from last week',
+                'positive'
+            )}"></div>
+
         </div>
 
+        <!-- CONTENT -->
         <div class="grid grid-cols-12 gap-4">
 
+            <!-- LEFT -->
             <div class="col-span-8 flex flex-col gap-4">
 
                 <section th:replace="~{fragments/components :: panel(
@@ -46,15 +85,24 @@
                     ~{::#revenue-action},
                     ~{::#revenue-content}
                 )}">
+
                     <th:block id="revenue-action">
-                        <button th:replace="~{fragments/components :: button('Last 6 Months', 'secondary')}"></button>
+
+                        <button th:replace="~{fragments/components :: button(
+                            'Last 6 Months',
+                            'secondary'
+                        )}"></button>
+
                     </th:block>
 
                     <th:block id="revenue-content">
+
                         <div class="flex h-64 items-center justify-center rounded-lg border border-border bg-background text-muted">
                             Revenue Graph
                         </div>
+
                     </th:block>
+
                 </section>
 
                 <section th:replace="~{fragments/components :: panel(
@@ -63,19 +111,29 @@
                     ~{::#reservations-action},
                     ~{::#reservations-content}
                 )}">
+
                     <th:block id="reservations-action">
-                        <button th:replace="~{fragments/components :: button('Last 7 Days', 'secondary')}"></button>
+
+                        <button th:replace="~{fragments/components :: button(
+                            'Last 7 Days',
+                            'secondary'
+                        )}"></button>
+
                     </th:block>
 
                     <th:block id="reservations-content">
+
                         <div class="flex h-40 items-center justify-center rounded-lg border border-border bg-background text-muted">
                             Reservation Chart
                         </div>
+
                     </th:block>
+
                 </section>
 
             </div>
 
+            <!-- RIGHT -->
             <div class="col-span-4 flex flex-col gap-4">
 
                 <section th:replace="~{fragments/components :: panel(
@@ -84,22 +142,36 @@
                     ~{::#availability-action},
                     ~{::#availability-content}
                 )}">
+
                     <th:block id="availability-action">
-                        <button class="text-xl leading-none text-muted" type="button">...</button>
+
+                        <button class="text-xl leading-none text-muted"
+                                type="button">
+                            ...
+                        </button>
+
                     </th:block>
 
                     <th:block id="availability-content">
+
                         <div class="mb-4 flex h-40 items-center justify-center rounded-lg border border-border bg-background text-muted">
                             Availability Bar
                         </div>
 
                         <div class="grid grid-cols-2 gap-2">
+
                             <div th:replace="~{fragments/components :: metricTile('Occupied', '286')}"></div>
+
                             <div th:replace="~{fragments/components :: metricTile('Reserved', '87')}"></div>
+
                             <div th:replace="~{fragments/components :: metricTile('Available', '32')}"></div>
+
                             <div th:replace="~{fragments/components :: metricTile('Not Ready', '13')}"></div>
+
                         </div>
+
                     </th:block>
+
                 </section>
 
                 <section th:replace="~{fragments/components :: panel(
@@ -108,13 +180,33 @@
                     ~{},
                     ~{::#activity-content}
                 )}">
+
                     <th:block id="activity-content">
+
                         <div class="flex flex-col gap-4">
-                            <div th:replace="~{fragments/components :: activityItem('New reservation created', '2 minutes ago', 'primary')}"></div>
-                            <div th:replace="~{fragments/components :: activityItem('Room 203 checked in', '15 minutes ago', 'success')}"></div>
-                            <div th:replace="~{fragments/components :: activityItem('Cleaning task assigned', '34 minutes ago', 'warning')}"></div>
+
+                            <div th:replace="~{fragments/components :: activityItem(
+                                'New reservation created',
+                                '2 minutes ago',
+                                'primary'
+                            )}"></div>
+
+                            <div th:replace="~{fragments/components :: activityItem(
+                                'Room 203 checked in',
+                                '15 minutes ago',
+                                'success'
+                            )}"></div>
+
+                            <div th:replace="~{fragments/components :: activityItem(
+                                'Cleaning task assigned',
+                                '34 minutes ago',
+                                'warning'
+                            )}"></div>
+
                         </div>
+
                     </th:block>
+
                 </section>
 
             </div>

@@ -4,122 +4,144 @@
 <body>
 
 <aside th:fragment="sidebar"
-       class="w-64 bg-surface border-r border-border p-5">
+       class="flex h-full w-64 flex-col border-r border-border bg-surface p-5">
 
     <!-- LOGO -->
-    <div class="flex items-center gap-3 mb-8">
+    <div class="mb-8 flex items-center gap-3">
 
-        <div class="w-9 h-9 bg-primary rounded-lg"></div>
+        <div class="h-9 w-9 rounded-lg bg-primary"></div>
 
-        <span class="font-semibold text-lg text-text">
+        <span class="text-lg font-semibold text-text">
             Hospi
         </span>
 
     </div>
 
     <!-- NAVIGATION -->
-    <nav class="space-y-1 text-sm">
+    <nav class="flex-1 overflow-y-auto space-y-1 text-sm">
 
-        <!-- DASHBOARD -->
+
         <a th:href="@{/manager}"
-           class="flex items-center gap-3 p-2 rounded-lg"
+           class="flex items-center gap-3 rounded-lg p-2"
            th:classappend="${activeSidebar == 'DASHBOARD'}
            ? ' bg-primary/10 text-primary font-medium'
            : ' hover:bg-background text-text'">
 
-            <img th:src="@{/assets/icons/layout-grid.svg}" alt="Dashboard">
+            <img th:src="@{/assets/icons/layout-grid.svg}"
+                 alt="Dashboard">
 
             Dashboard
 
         </a>
 
-        <!-- ROOM TYPES -->
         <a th:href="@{/manager/room-types}"
-           class="flex items-center gap-3 p-2 rounded-lg"
+           class="flex items-center gap-3 rounded-lg p-2"
            th:classappend="${activeSidebar == 'ROOM_TYPES'}
            ? ' bg-primary/10 text-primary font-medium'
            : ' hover:bg-background text-text'">
 
-            <img th:src="@{/assets/icons/bed-double.svg}" alt="Room Types">
+            <img th:src="@{/assets/icons/bed-double.svg}"
+                 alt="Room Types">
 
             Room Types
 
         </a>
 
         <a th:href="@{/manager/rooms}"
-           class="flex items-center gap-3 p-2 rounded-lg"
+           class="flex items-center gap-3 rounded-lg p-2"
            th:classappend="${activeSidebar == 'ROOMS'}
            ? ' bg-primary/10 text-primary font-medium'
            : ' hover:bg-background text-text'">
 
-            <img th:src="@{/assets/icons/bed-double.svg}" alt="Room">
+            <img th:src="@{/assets/icons/bed-double.svg}"
+                 alt="Room">
 
             Room
 
         </a>
 
-
-        <!-- RESERVATIONS -->
         <a th:href="@{/manager/reservations}"
-           class="flex items-center gap-3 p-2 rounded-lg"
+           class="flex items-center gap-3 rounded-lg p-2"
            th:classappend="${activeSidebar == 'RESERVATIONS'}
            ? ' bg-primary/10 text-primary font-medium'
            : ' hover:bg-background text-text'">
 
-            <img th:src="@{/assets/icons/calendar-check.svg}" alt="Reservations">
+            <img th:src="@{/assets/icons/calendar-check.svg}"
+                 alt="Reservations">
 
             Reservations
 
         </a>
 
-        <!-- NOTIFICATIONS -->
         <a th:href="@{/manager/notifications}"
-           class="flex items-center justify-between p-2 rounded-lg"
+           class="flex items-center justify-between rounded-lg p-2"
            th:classappend="${activeSidebar == 'NOTIFICATIONS'}
            ? ' bg-primary/10 text-primary font-medium'
            : ' hover:bg-background text-text'">
 
             <div class="flex items-center gap-3">
 
-                <img th:src="@{/assets/icons/bell.svg}" alt="Notifications">
+                <img th:src="@{/assets/icons/bell.svg}"
+                     alt="Notifications">
 
                 Notifications
 
             </div>
 
-            <span class="text-xs bg-accent text-white px-2 py-0.5 rounded-full">
+            <span class="rounded-full bg-accent px-2 py-0.5 text-xs text-white">
                 7
             </span>
 
         </a>
 
-        <!-- REVENUES -->
         <a th:href="@{/manager/revenues}"
-           class="flex items-center gap-3 p-2 rounded-lg"
+           class="flex items-center gap-3 rounded-lg p-2"
            th:classappend="${activeSidebar == 'REVENUES'}
            ? ' bg-primary/10 text-primary font-medium'
            : ' hover:bg-background text-text'">
 
-            <img th:src="@{/assets/icons/circle-dollar-sign.svg}" alt="Revenues">
+            <img th:src="@{/assets/icons/circle-dollar-sign.svg}"
+                 alt="Revenues">
 
             Revenues
 
         </a>
 
-        <!-- HOTEL DETAILS -->
         <a th:href="@{/manager/details}"
-           class="flex items-center gap-3 p-2 rounded-lg"
+           class="flex items-center gap-3 rounded-lg p-2"
            th:classappend="${activeSidebar == 'HOTEL_DETAILS'}
            ? ' bg-primary/10 text-primary font-medium'
            : ' hover:bg-background text-text'">
 
-            <img th:src="@{/assets/icons/building-2.svg}" alt="Hotel Details">
+            <img th:src="@{/assets/icons/building-2.svg}"
+                 alt="Hotel Details">
 
             Hotel Details
 
         </a>
 
     </nav>
+
+    <!-- LOGOUT -->
+    <div class="mt-auto pt-4">
+
+        <form th:action="@{/logout}"
+              method="post">
+
+            <button type="submit"
+                    class="flex w-full items-center gap-3 rounded-xl bg-danger px-4 py-2 text-sm font-medium text-white hover:opacity-90">
+
+                <img th:src="@{/assets/icons/log-out.svg}"
+                     class="h-5 w-5 brightness-0 invert"
+                     alt="Logout">
+
+                Logout
+
+            </button>
+
+        </form>
+
+    </div>
 
 </aside>
 
