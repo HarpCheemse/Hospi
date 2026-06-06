@@ -24,9 +24,6 @@ public class RoleBasedAuthenticationSuccessHandler implements AuthenticationSucc
                 .orElseThrow()
                 .getAuthority();
 
-        System.out.println(authentication.isAuthenticated());
-        System.out.println(request.getSession(false).getId());
-
         switch (role) {
             case "ROLE_ADMIN" -> response.sendRedirect("/admin");
 
