@@ -1,6 +1,7 @@
 package com.hospi.manage.core.security.session;
 
 import com.hospi.manage.features.admin.account.entity.Account;
+import com.hospi.manage.features.admin.account.enums.Role;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,9 +23,19 @@ public class AccountPrincipal implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(
-                new SimpleGrantedAuthority("ROLE_" + account.getRole().name())
-        );
+        return List.of(new SimpleGrantedAuthority("ROLE_" + account.getRole().name()));
+    }
+
+    public Long getId() {
+        return account.getId();
+    }
+
+    public String getEmail() {
+        return account.getEmail();
+    }
+
+    public Role getRole() {
+        return account.getRole();
     }
 
     @Override
