@@ -2,19 +2,23 @@ package com.hospi.manage.features.admin.account.validator;
 
 import com.hospi.manage.features.admin.account.dto.AccountCreateForm;
 import com.hospi.manage.features.admin.account.dto.AccountEditForm;
+import com.hospi.manage.features.admin.account.entity.Account;
 import com.hospi.manage.features.admin.account.enums.AccountStatus;
 import com.hospi.manage.features.admin.account.enums.Role;
 import com.hospi.manage.features.admin.account.repository.AccountRepository;
+import com.hospi.manage.features.credential.dto.ChangePasswordForm;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -23,8 +27,24 @@ class AccountValidatorTest {
     @Mock
     private AccountRepository accountRepository;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @InjectMocks
     private AccountValidator accountValidator;
+
+    private BindingResult binding(Object target) {
+        return new BeanPropertyBindingResult(target,
+                "form");
+    }
+
+    private Account mockAccount(String encodedPassword) {
+        Account acc = mock(Account.class);
+        when(acc.getPasswordHash()).thenReturn(encodedPassword);
+        return acc;
+    }
+
+    // ---------------- CREATE VALIDATION ----------------
 
     @Test
     void shouldRejectWhenEmailAlreadyExists() {
@@ -37,15 +57,14 @@ class AccountValidatorTest {
                 Role.MANAGER
         );
 
-        when(accountRepository.existsByEmail("john@hospi.com"))
-                .thenReturn(true);
+        when(accountRepository.existsByEmail("john@hospi.com")).thenReturn(true);
 
-        BindingResult bindingResult =
-                new BeanPropertyBindingResult(form, "form");
+        BindingResult br = binding(form);
 
-        accountValidator.validateCreate(form, bindingResult);
+        accountValidator.validateCreate(form,
+                br);
 
-        assertTrue(bindingResult.hasFieldErrors("email"));
+        assertTrue(br.hasFieldErrors("email"));
     }
 
     @Test
@@ -59,19 +78,18 @@ class AccountValidatorTest {
                 Role.MANAGER
         );
 
-        when(accountRepository.existsByEmail("john@hospi.com"))
-                .thenReturn(false);
+        when(accountRepository.existsByEmail("john@hospi.com")).thenReturn(false);
 
-        BindingResult bindingResult =
-                new BeanPropertyBindingResult(form, "form");
+        BindingResult br = binding(form);
 
-        accountValidator.validateCreate(form, bindingResult);
+        accountValidator.validateCreate(form,
+                br);
 
-        assertFalse(bindingResult.hasErrors());
+        assertFalse(br.hasErrors());
     }
 
     @Test
-    void shouldRejectWhenPasswordIsTooShort() {
+    void shouldRejectWhenPasswordIsTooWeak() {
 
         AccountCreateForm form = new AccountCreateForm(
                 "John Doe",
@@ -81,16 +99,16 @@ class AccountValidatorTest {
                 Role.MANAGER
         );
 
-        BindingResult bindingResult =
-                new BeanPropertyBindingResult(form, "form");
+        BindingResult br = binding(form);
 
-        accountValidator.validateCreate(form, bindingResult);
+        accountValidator.validateCreate(form,
+                br);
 
-        assertTrue(bindingResult.hasFieldErrors("password"));
+        assertTrue(br.hasFieldErrors("password"));
     }
 
     @Test
-    void shouldRejectWhenPasswordContainsNoDigit() {
+    void shouldRejectWhenPasswordHasNoDigit() {
 
         AccountCreateForm form = new AccountCreateForm(
                 "John Doe",
@@ -100,16 +118,16 @@ class AccountValidatorTest {
                 Role.MANAGER
         );
 
-        BindingResult bindingResult =
-                new BeanPropertyBindingResult(form, "form");
+        BindingResult br = binding(form);
 
-        accountValidator.validateCreate(form, bindingResult);
+        accountValidator.validateCreate(form,
+                br);
 
-        assertTrue(bindingResult.hasFieldErrors("password"));
+        assertTrue(br.hasFieldErrors("password"));
     }
 
     @Test
-    void shouldRejectWhenPasswordContainsNoLetter() {
+    void shouldRejectWhenPasswordHasNoLetter() {
 
         AccountCreateForm form = new AccountCreateForm(
                 "John Doe",
@@ -119,12 +137,12 @@ class AccountValidatorTest {
                 Role.MANAGER
         );
 
-        BindingResult bindingResult =
-                new BeanPropertyBindingResult(form, "form");
+        BindingResult br = binding(form);
 
-        accountValidator.validateCreate(form, bindingResult);
+        accountValidator.validateCreate(form,
+                br);
 
-        assertTrue(bindingResult.hasFieldErrors("password"));
+        assertTrue(br.hasFieldErrors("password"));
     }
 
     @Test
@@ -138,12 +156,12 @@ class AccountValidatorTest {
                 Role.ADMIN
         );
 
-        BindingResult bindingResult =
-                new BeanPropertyBindingResult(form, "form");
+        BindingResult br = binding(form);
 
-        accountValidator.validateCreate(form, bindingResult);
+        accountValidator.validateCreate(form,
+                br);
 
-        assertTrue(bindingResult.hasFieldErrors("role"));
+        assertTrue(br.hasFieldErrors("role"));
     }
 
     @Test
@@ -157,21 +175,22 @@ class AccountValidatorTest {
                 Role.MANAGER
         );
 
-        when(accountRepository.existsByEmail("john@hospi.com"))
-                .thenReturn(false);
+        when(accountRepository.existsByEmail("john@hospi.com")).thenReturn(false);
 
-        BindingResult bindingResult =
-                new BeanPropertyBindingResult(form, "form");
+        BindingResult br = binding(form);
 
-        accountValidator.validateCreate(form, bindingResult);
+        accountValidator.validateCreate(form,
+                br);
 
-        assertFalse(bindingResult.hasErrors());
+        assertFalse(br.hasErrors());
     }
+
+    // ---------------- UPDATE VALIDATION ----------------
 
     @Test
     void shouldRejectWhenEmailBelongsToAnotherAccount() {
 
-        Long currentAccountId = 1L;
+        Long id = 1L;
 
         AccountEditForm form = new AccountEditForm(
                 "John Doe",
@@ -181,14 +200,44 @@ class AccountValidatorTest {
                 AccountStatus.ACTIVE
         );
 
-        when(accountRepository.existsByEmailAndIdNot("john@hospi.com", currentAccountId))
+        when(accountRepository.existsByEmailAndIdNot("john@hospi.com",
+                id))
                 .thenReturn(true);
 
-        BindingResult bindingResult = new BeanPropertyBindingResult(form, "form");
+        BindingResult br = binding(form);
 
-        accountValidator.validateUpdate(currentAccountId, form, bindingResult);
+        accountValidator.validateUpdate(id,
+                form,
+                br);
 
-        assertTrue(bindingResult.hasFieldErrors("email"));
+        assertTrue(br.hasFieldErrors("email"));
     }
 
+    // ---------------- CHANGE PASSWORD ----------------
+
+    @Test
+    void shouldAcceptValidChangePassword() {
+
+        Account account = mockAccount("encodedOldPass");
+
+        ChangePasswordForm form = new ChangePasswordForm(
+                "oldPass",
+                "Newpass123",
+                "Newpass123"
+        );
+
+        BindingResult br = binding(form);
+
+        when(passwordEncoder.matches("oldPass",
+                "encodedOldPass")).thenReturn(true);
+        when(passwordEncoder.matches("Newpass123",
+                "encodedOldPass")).thenReturn(false);
+
+        accountValidator.validateChangePassword(account,
+                form,
+                br,
+                passwordEncoder);
+
+        assertFalse(br.hasErrors());
+    }
 }
