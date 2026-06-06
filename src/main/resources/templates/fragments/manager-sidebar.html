@@ -120,6 +120,19 @@
 
         </a>
 
+        <a th:href="@{/credentials}"
+           class="flex items-center gap-3 rounded-lg p-2"
+           th:classappend="${activeSidebar == 'CREDENTIALS'}
+           ? ' bg-primary/10 text-primary font-medium'
+           : ' hover:bg-background text-text'">
+
+            <img th:src="@{/assets/icons/key-square.svg}"
+                 alt="Key">
+
+            Credentials
+
+        </a>
+
     </nav>
 
     <!-- LOGOUT -->
