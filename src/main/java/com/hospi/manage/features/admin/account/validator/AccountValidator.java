@@ -2,11 +2,13 @@ package com.hospi.manage.features.admin.account.validator;
 
 import com.hospi.manage.features.admin.account.dto.AccountCreateForm;
 import com.hospi.manage.features.admin.account.dto.AccountEditForm;
+import com.hospi.manage.features.admin.account.entity.Account;
 import com.hospi.manage.features.admin.account.enums.Role;
 import com.hospi.manage.features.admin.account.repository.AccountRepository;
+import com.hospi.manage.features.credential.dto.ChangePasswordForm;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.Errors;
 
 @Component
 public class AccountValidator {
@@ -16,69 +18,125 @@ public class AccountValidator {
         this.accountRepository = accountRepository;
     }
 
-    public void validateCreate(AccountCreateForm form, BindingResult bindingResult) {
-        validateEmail(form.email(), bindingResult);
+    public void validateChangePassword(Account account, ChangePasswordForm form, BindingResult br,
+                                       PasswordEncoder encoder) {
 
-        validatePassword(form.password(), bindingResult);
+        if (br.hasErrors()) return;
 
-        validateRole(form.role(), bindingResult);
+        validateCurrentPassword(account,
+                form.currentPassword(),
+                encoder,
+                br);
+        if (br.hasErrors()) return;
+
+        validateNewPassword(form.newPassword(),
+                br);
+        if (br.hasErrors()) return;
+
+        validatePasswordMatch(form.newPassword(),
+                form.confirmPassword(),
+                br);
+        if (br.hasErrors()) return;
+
+        validateNotSameAsOld(account,
+                form.newPassword(),
+                encoder,
+                br);
     }
 
-    public void validateUpdate(Long id, AccountEditForm form, BindingResult bindingResult) {
-        validateRole(form.role(), bindingResult);
-
-        validateEmailUpdate(id, form.email(), bindingResult);
-    }
-
-    private void validateEmailUpdate(Long id,
-                                     String email,
-                                     BindingResult bindingResult) {
-
-        if (accountRepository.existsByEmailAndIdNot(email, id)) {
-            bindingResult.rejectValue(
-                    "email",
-                    "email.duplicate",
-                    "Email is already in use"
-            );
+    private void validatePasswordMatch(String newPassword, String confirmPassword, BindingResult br) {
+        if (newPassword != null && !newPassword.equals(confirmPassword)) {
+            br.rejectValue("confirmPassword",
+                    "mismatch.password",
+                    "Passwords do not match");
         }
     }
 
-    private void validateRole(Role role,
-                              BindingResult bindingResult) {
+    private void validateNotSameAsOld(Account account, String newPassword, PasswordEncoder encoder, BindingResult br) {
+        if (encoder.matches(newPassword,
+                account.getPasswordHash())) {
+            br.rejectValue("newPassword",
+                    "same.password",
+                    "New password must be different from old password");
+        }
+    }
+
+    private void validateNewPassword(String newPassword, BindingResult br) {
+
+        validatePassword(newPassword,
+                "newPassword",
+                br);
+    }
+
+    private void validateCurrentPassword(Account account, String currentPassword, PasswordEncoder encoder,
+                                         BindingResult br) {
+        if (!encoder.matches(currentPassword,
+                account.getPasswordHash())) {
+            br.rejectValue("currentPassword",
+                    "invalid.currentPassword",
+                    "Current password is incorrect");
+        }
+    }
+
+    public void validateCreate(AccountCreateForm form, BindingResult bindingResult) {
+        validateEmail(form.email(),
+                bindingResult);
+
+        validatePassword(form.password(),
+                "password",
+                bindingResult);
+
+        validateRole(form.role(),
+                bindingResult);
+    }
+
+    public void validateUpdate(Long id, AccountEditForm form, BindingResult bindingResult) {
+        validateRole(form.role(),
+                bindingResult);
+
+        validateEmailUpdate(id,
+                form.email(),
+                bindingResult);
+    }
+
+    private void validateEmailUpdate(Long id, String email, BindingResult bindingResult) {
+
+        if (accountRepository.existsByEmailAndIdNot(email,
+                id)) {
+            bindingResult.rejectValue("email",
+                    "email.duplicate",
+                    "Email is already in use");
+        }
+    }
+
+    private void validateRole(Role role, BindingResult bindingResult) {
 
         if (role == null) {
             return;
         }
 
         if (role == Role.ADMIN) {
-            bindingResult.rejectValue(
-                    "role",
+            bindingResult.rejectValue("role",
                     "role.not.allowed",
-                    "Admin accounts cannot be created"
-            );
+                    "Admin accounts cannot be created");
         }
     }
 
     private void validateEmail(String email, BindingResult bindingResult) {
         if (accountRepository.existsByEmail(email)) {
-            bindingResult.rejectValue(
-                    "email",
+            bindingResult.rejectValue("email",
                     "duplicate",
-                    "Email already exists"
-            );
+                    "Email already exists");
         }
     }
 
 
-    private void validatePassword(String password,
-                                  BindingResult bindingResult) {
+    private void validatePassword(String password, String fieldName, BindingResult bindingResult) {
 
         if (!isValidPassword(password)) {
-            bindingResult.rejectValue(
-                    "password",
+            bindingResult.rejectValue(fieldName,
                     "invalid.password",
-                    "Password must be at least 8 characters and contain both letters and numbers"
-            );
+                    "Password must be at least 8 characters and contain both letters and numbers");
         }
     }
 
