@@ -70,7 +70,7 @@
                 </div>
 
                 <!-- PASSWORD -->
-                <div class="mb-4">
+                <div class="mb-2">
 
                     <label class="mb-2 block text-sm font-medium">
                         Password
@@ -84,6 +84,15 @@
 
                 </div>
 
+                <!-- FORGOT PASSWORD -->
+                <div class="mb-4 flex justify-end">
+
+                    <a th:href="@{/auth/password/forgot}"
+                       class="text-sm text-primary hover:underline">
+                        Forgot password?
+                    </a>
+
+                </div>
                 <!-- BUTTON -->
                 <button type="submit"
                         class="w-full rounded-xl bg-primary px-4 py-3 text-sm font-medium text-white shadow-card hover:opacity-90">
