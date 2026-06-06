@@ -19,30 +19,26 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
 
-    AccountService(AccountRepository accountRepository,
-                   PasswordEncoder passwordEncoder) {
+    AccountService(AccountRepository accountRepository, PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
         this.accountRepository = accountRepository;
     }
 
     public Account findById(Long id) {
-        return accountRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("Account")
-        );
+        return accountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Account"));
+    }
+
+    public Account findByEmail(String email) {
+        return accountRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("Email"));
     }
 
     public List<AccountView> findAllViews() {
-        return accountRepository.findAll()
-                .stream()
-                .map(account -> new AccountView(
-                        account.getId(),
-                        account.getFullName(),
-                        account.getEmail(),
-                        account.getPhone(),
-                        account.getRole(),
-                        account.getStatus()
-                ))
-                .toList();
+        return accountRepository.findAll().stream().map(account -> new AccountView(account.getId(),
+                account.getFullName(),
+                account.getEmail(),
+                account.getPhone(),
+                account.getRole(),
+                account.getStatus())).toList();
     }
 
     @Transactional
@@ -67,35 +63,28 @@ public class AccountService {
 
     public AccountView getAccountView(Long id) {
         Account account = findById(id);
-        return new AccountView(
-                account.getId(),
+        return new AccountView(account.getId(),
                 account.getFullName(),
                 account.getEmail(),
                 account.getPhone(),
                 account.getRole(),
-                account.getStatus()
-        );
+                account.getStatus());
     }
 
     public AccountEditForm getEditForm(Long id) {
         Account account = findById(id);
 
-        return new AccountEditForm(
-                account.getFullName(),
+        return new AccountEditForm(account.getFullName(),
                 account.getEmail(),
                 account.getPhone(),
                 account.getRole(),
-                account.getStatus()
-        );
+                account.getStatus());
     }
 
     @Transactional
     public void updateAccount(Long id, AccountEditForm form) {
 
-        Account account = accountRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Account not found with id: " + id)
-                );
+        Account account = accountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Account not found with id: " + id));
 
         account.setFullName(form.fullName());
         account.setEmail(form.email());
