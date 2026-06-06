@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class ExceptionController {
     @GetMapping("/401")
     public String unAuthorized() {
-        System.out.println("HELLO");
         return "error/401";
     }
 }
