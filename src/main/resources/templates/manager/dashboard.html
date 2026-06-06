@@ -4,28 +4,27 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Manager Dashboard | Hospi</title>
 
-    <link rel="stylesheet"
-          th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 
 <body class="h-screen overflow-hidden bg-background text-text">
 
 <div class="flex h-full">
 
-    <div th:replace="~{fragments/manager-sidebar :: sidebar}"></div>
+    <!-- SIDEBAR -->
+    <aside th:replace="~{fragments/manager-sidebar :: sidebar}"></aside>
 
+    <!-- MAIN CONTENT -->
     <main class="flex-1 overflow-y-auto bg-background p-6">
 
-        <!-- HEADER -->
-        <div class="mb-6 flex items-center justify-between">
+        <!-- PAGE HEADER -->
+        <header class="mb-6 flex items-center justify-between">
 
-            <div>
-
+            <section aria-label="Page title">
                 <h1 class="text-2xl font-bold">
                     Manager Dashboard
                 </h1>
@@ -33,53 +32,56 @@
                 <p class="text-sm text-muted">
                     Monitor reservations, room availability, and hotel operations
                 </p>
+            </section>
 
-            </div>
+            <section aria-label="User profile">
+                <div th:replace="~{fragments/components :: userPill('JD', 'John Doe', 'Manager')}"></div>
+            </section>
 
-            <div th:replace="~{fragments/components :: userPill('JD', 'John Doe', 'Manager')}"></div>
+        </header>
 
-        </div>
+        <!-- KPI SECTION -->
+        <section aria-label="Key performance indicators"
+                 class="mb-6 grid grid-cols-4 gap-4">
 
-        <!-- STATS -->
-        <div class="mb-6 grid grid-cols-4 gap-4">
-
-            <div th:replace="~{fragments/components :: statCard(
+            <article th:replace="~{fragments/components :: statCard(
                 'New Bookings',
                 '840',
                 '+8.70% from last week',
                 'positive'
-            )}"></div>
+            )}"></article>
 
-            <div th:replace="~{fragments/components :: statCard(
+            <article th:replace="~{fragments/components :: statCard(
                 'Check-In',
                 '231',
                 '+3.56% from last week',
                 'positive'
-            )}"></div>
+            )}"></article>
 
-            <div th:replace="~{fragments/components :: statCard(
+            <article th:replace="~{fragments/components :: statCard(
                 'Check-Out',
                 '124',
                 '-1.06% from last week',
                 'neutral'
-            )}"></div>
+            )}"></article>
 
-            <div th:replace="~{fragments/components :: statCard(
+            <article th:replace="~{fragments/components :: statCard(
                 'Total Revenue',
                 '$123,980',
                 '+5.70% from last week',
                 'positive'
-            )}"></div>
+            )}"></article>
 
-        </div>
+        </section>
 
-        <!-- CONTENT -->
-        <div class="grid grid-cols-12 gap-4">
+        <!-- MAIN GRID CONTENT -->
+        <section aria-label="Dashboard analytics"
+                 class="grid grid-cols-12 gap-4">
 
-            <!-- LEFT -->
-            <div class="col-span-8 flex flex-col gap-4">
+            <!-- LEFT COLUMN -->
+            <section class="col-span-8 flex flex-col gap-4">
 
-                <section th:replace="~{fragments/components :: panel(
+                <article th:replace="~{fragments/components :: panel(
                     'Revenue',
                     'Revenue performance overview',
                     ~{::#revenue-action},
@@ -103,9 +105,9 @@
 
                     </th:block>
 
-                </section>
+                </article>
 
-                <section th:replace="~{fragments/components :: panel(
+                <article th:replace="~{fragments/components :: panel(
                     'Reservations',
                     'Booking analytics from the last 7 days',
                     ~{::#reservations-action},
@@ -129,14 +131,14 @@
 
                     </th:block>
 
-                </section>
+                </article>
 
-            </div>
+            </section>
 
-            <!-- RIGHT -->
-            <div class="col-span-4 flex flex-col gap-4">
+            <!-- RIGHT COLUMN -->
+            <section class="col-span-4 flex flex-col gap-4">
 
-                <section th:replace="~{fragments/components :: panel(
+                <article th:replace="~{fragments/components :: panel(
                     'Room Availability',
                     'Current occupancy overview',
                     ~{::#availability-action},
@@ -146,7 +148,8 @@
                     <th:block id="availability-action">
 
                         <button class="text-xl leading-none text-muted"
-                                type="button">
+                                type="button"
+                                aria-label="More options">
                             ...
                         </button>
 
@@ -172,9 +175,9 @@
 
                     </th:block>
 
-                </section>
+                </article>
 
-                <section th:replace="~{fragments/components :: panel(
+                <article th:replace="~{fragments/components :: panel(
                     'Recent Activity',
                     'Latest hotel operations',
                     ~{},
@@ -185,33 +188,33 @@
 
                         <div class="flex flex-col gap-4">
 
-                            <div th:replace="~{fragments/components :: activityItem(
+                            <article th:replace="~{fragments/components :: activityItem(
                                 'New reservation created',
                                 '2 minutes ago',
                                 'primary'
-                            )}"></div>
+                            )}"></article>
 
-                            <div th:replace="~{fragments/components :: activityItem(
+                            <article th:replace="~{fragments/components :: activityItem(
                                 'Room 203 checked in',
                                 '15 minutes ago',
                                 'success'
-                            )}"></div>
+                            )}"></article>
 
-                            <div th:replace="~{fragments/components :: activityItem(
+                            <article th:replace="~{fragments/components :: activityItem(
                                 'Cleaning task assigned',
                                 '34 minutes ago',
                                 'warning'
-                            )}"></div>
+                            )}"></article>
 
                         </div>
 
                     </th:block>
 
-                </section>
+                </article>
 
-            </div>
+            </section>
 
-        </div>
+        </section>
 
     </main>
 
