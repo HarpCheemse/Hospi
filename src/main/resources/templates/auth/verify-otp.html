@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Verify Otp</title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<body class="min-h-screen flex items-center justify-center bg-background">
+
+<div class="w-full max-w-md bg-surface p-8 rounded-2xl shadow-lg">
+
+    <!-- OTP Form -->
+    <form th:action="@{/auth/password/verify-otp}"
+          th:object="${form}"
+          method="post" class="space-y-4" novalidate>
+        <h1 class="text-2xl font-semibold mb-2">Verify OTP</h1>
+        <p class="text-sm text-muted mb-6">
+            We sent a 6-digit code to:
+            <span class="font-medium" th:text="*{email}"></span>
+        </p>
+        <div>
+            <input type="text"
+                   th:field="*{otp}"
+                   maxlength="6"
+                   inputmode="numeric"
+                   class="w-full rounded-xl border border-border px-4 py-3 text-center tracking-widest text-lg"
+                   placeholder="123456"
+                   required>
+            <input type="hidden" th:field="*{email}">
+            <div th:replace="fragments/form-error :: error('otp')"></div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex gap-3 mt-6">
+
+            <!-- Verify -->
+            <button type="submit"
+                    class="flex-1 bg-primary text-white py-3 rounded-xl hover:opacity-90">
+                Verify
+            </button>
+
+            <!-- Back -->
+            <a href="/auth/password/forgot"
+               class="flex-1 text-center border border-border py-3 rounded-xl hover:bg-surface">
+                Back
+            </a>
+
+        </div>
+    </form>
+
+</div>
+
+</body>
+</html>
