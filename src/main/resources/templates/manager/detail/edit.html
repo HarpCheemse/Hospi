@@ -10,32 +10,30 @@
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 
-<body class="bg-background text-text">
-
-<div class="flex min-h-screen">
+<body class="staff-layout">
 
     <!-- SIDEBAR -->
     <div th:replace="~{fragments/manager-sidebar :: sidebar}"></div>
 
     <!-- MAIN -->
-    <main class="flex-1 bg-background p-6">
+    <main class="staff-page">
 
         <!-- PAGE HEADER -->
-        <div class="mb-6 flex items-start justify-between">
+        <div class="staff-page-header">
 
             <div>
-                <h1 class="text-2xl font-bold text-text">
+                <h1 class="staff-page-title">
                     Edit Hotel
                 </h1>
 
-                <p class="mt-1 text-sm text-muted">
+                <p class="page-description">
                     Update your hotel's profile, contact information,
                     amenities, and operational settings.
                 </p>
             </div>
 
             <a th:href="@{/manager/hotel}"
-               class="rounded-xl border border-border bg-surface px-4 py-2 text-sm font-medium hover:bg-background">
+               class="btn btn-secondary">
                 Back to Hotel
             </a>
 
@@ -49,14 +47,14 @@
 
             <section
                     x-data="{ preview: null }"
-                    class="rounded-2xl border border-border bg-surface shadow-card">
+                    class="card">
 
                 <div class="border-b border-border p-5">
                     <h2 class="text-lg font-semibold">
                         Room Image
                     </h2>
 
-                    <p class="mt-1 text-sm text-muted">
+                    <p class="page-description">
                         Upload an image representing this room type.
                     </p>
                 </div>
@@ -73,7 +71,7 @@
 
                     <!-- UPLOAD BOX -->
                     <label
-                            class="flex h-48 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-background text-muted transition hover:border-primary">
+                            class="flex h-48 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-background text-muted-foreground transition hover:border-primary">
 
                         <div class="flex flex-col items-center gap-2">
 
@@ -81,7 +79,7 @@
                                 Click to upload image
                             </p>
 
-                            <p class="text-xs text-muted">
+                            <p class="text-xs text-muted-foreground">
                                 PNG, JPG, WEBP
                             </p>
 
@@ -117,14 +115,14 @@
             </section>
 
             <!-- BASIC INFORMATION -->
-            <section class="rounded-2xl border border-border bg-surface shadow-card">
+            <section class="card">
 
                 <div class="border-b border-border p-5">
                     <h2 class="text-lg font-semibold">
                         Basic Information
                     </h2>
 
-                    <p class="mt-1 text-sm text-muted">
+                    <p class="page-description">
                         General hotel profile and visibility settings.
                     </p>
                 </div>
@@ -193,14 +191,14 @@
             </section>
 
             <!-- CONTACT INFORMATION -->
-            <section class="rounded-2xl border border-border bg-surface shadow-card">
+            <section class="card">
 
                 <div class="border-b border-border p-5">
                     <h2 class="text-lg font-semibold">
                         Contact Information
                     </h2>
 
-                    <p class="mt-1 text-sm text-muted">
+                    <p class="page-description">
                         Contact details visible throughout the system.
                     </p>
                 </div>
@@ -251,14 +249,14 @@
             </section>
 
             <!-- OPERATIONS -->
-            <section class="rounded-2xl border border-border bg-surface shadow-card">
+            <section class="card">
 
                 <div class="border-b border-border p-5">
                     <h2 class="text-lg font-semibold">
                         Operations
                     </h2>
 
-                    <p class="mt-1 text-sm text-muted">
+                    <p class="page-description">
                         Configure guest check-in and check-out times.
                     </p>
                 </div>
@@ -296,14 +294,14 @@
             </section>
 
             <!-- FEATURES -->
-            <section class="rounded-2xl border border-border bg-surface shadow-card">
+            <section class="card">
 
                 <div class="border-b border-border p-5">
                     <h2 class="text-lg font-semibold">
                         Features & Amenities
                     </h2>
 
-                    <p class="mt-1 text-sm text-muted">
+                    <p class="page-description">
                         Enter amenities separated by commas.
                     </p>
                 </div>
@@ -324,14 +322,14 @@
             </section>
 
             <!-- TERMS -->
-            <section class="rounded-2xl border border-border bg-surface shadow-card">
+            <section class="card">
 
                 <div class="border-b border-border p-5">
                     <h2 class="text-lg font-semibold">
                         Terms of Service
                     </h2>
 
-                    <p class="mt-1 text-sm text-muted">
+                    <p class="page-description">
                         Hotel policies and guest requirements.
                     </p>
                 </div>
@@ -351,12 +349,12 @@
             <div class="flex items-center justify-end gap-3">
 
                 <a th:href="@{/manager/hotel}"
-                   class="rounded-xl border border-border bg-surface px-5 py-3 text-sm font-medium">
+                   class="btn btn-secondary btn-lg">
                     Cancel
                 </a>
 
                 <button type="submit"
-                        class="rounded-xl bg-primary px-5 py-3 text-sm font-medium text-white hover:opacity-90">
+                        class="btn btn-primary btn-lg">
                     Save Changes
                 </button>
 
@@ -365,8 +363,6 @@
         </form>
 
     </main>
-
-</div>
 
 </body>
 </html>

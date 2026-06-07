@@ -49,16 +49,20 @@ public class AdminAccountController {
                 null,
                 null
         );
-        model.addAttribute("statuses", AccountStatus.values());
-        model.addAttribute("roles", Role.values());
-        model.addAttribute(Attributes.FORM, form);
+        model.addAttribute("statuses",
+                AccountStatus.values());
+        model.addAttribute("roles",
+                Role.values());
+        model.addAttribute(Attributes.FORM,
+                form);
         return "admin/account/create";
     }
 
     @GetMapping("/{id}")
     String detail(@PathVariable Long id, Model model) {
         AccountView account = accountService.getAccountView(id);
-        model.addAttribute("account", account);
+        model.addAttribute("account",
+                account);
 
         return "admin/account/detail";
     }
@@ -80,7 +84,8 @@ public class AdminAccountController {
         model.addAttribute("statuses",
                 AccountStatus.values());
 
-        model.addAttribute("accountId", id);
+        model.addAttribute("accountId",
+                id);
 
         return "admin/account/edit";
     }
@@ -92,14 +97,15 @@ public class AdminAccountController {
             RedirectAttributes redirectAttributes,
             Model model) {
 
-        accountValidator.validateCreate(form, bindingResult);
-
-        System.out.println(bindingResult.getAllErrors());
+        accountValidator.validateCreate(form,
+                bindingResult);
 
         if (bindingResult.hasErrors()) {
 
-            model.addAttribute("roles", Role.values());
-            model.addAttribute("statuses", AccountStatus.values());
+            model.addAttribute("roles",
+                    Role.values());
+            model.addAttribute("statuses",
+                    AccountStatus.values());
 
             return "admin/account/create";
         }
@@ -121,7 +127,9 @@ public class AdminAccountController {
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
 
-        accountValidator.validateUpdate(id, form, bindingResult);
+        accountValidator.validateUpdate(id,
+                form,
+                bindingResult);
 
         if (bindingResult.hasErrors()) {
 
@@ -130,13 +138,16 @@ public class AdminAccountController {
                             .filter(role -> role != Role.ADMIN)
                             .toList());
 
-            model.addAttribute("statuses", AccountStatus.values());
-            model.addAttribute("accountId", id);
+            model.addAttribute("statuses",
+                    AccountStatus.values());
+            model.addAttribute("accountId",
+                    id);
 
             return "admin/account/edit";
         }
 
-        accountService.updateAccount(id, form);
+        accountService.updateAccount(id,
+                form);
 
         redirectAttributes.addFlashAttribute(
                 Attributes.SUCCESS,

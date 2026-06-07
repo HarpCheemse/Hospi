@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class AdminDashboardController {
     @GetMapping
     public String dashboard(Model model) {
-        model.addAttribute(Attributes.FORM, "DASHBOARD");
+        model.addAttribute(Attributes.ACTIVE_SIDEBAR,
+                "DASHBOARD");
         return "admin/dashboard";
     }
 }

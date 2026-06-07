@@ -10,31 +10,31 @@
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 
-<body class="bg-background text-text">
-
-<div class="flex min-h-screen">
+<body class="staff-layout">
 
     <!-- SIDEBAR -->
     <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
 
     <!-- MAIN -->
-    <main class="flex-1 p-6">
+    <main class="staff-page">
 
         <!-- HEADER -->
-        <div class="mb-6">
+        <header class="staff-page-header">
 
-            <h1 class="text-2xl font-bold">
-                Create Account
-            </h1>
+            <section>
+                <h1 class="staff-page-title">
+                    Create Account
+                </h1>
 
-            <p class="mt-1 text-sm text-muted">
-                Add a new staff account to the system.
-            </p>
+                <p class="page-description">
+                    Add a new staff account to the system.
+                </p>
+            </section>
 
-        </div>
+        </header>
 
         <!-- FORM -->
-        <section class="max-w-3xl rounded-2xl border border-border bg-surface shadow-card">
+        <section class="max-w-3xl card">
 
             <div class="border-b border-border p-5">
 
@@ -47,11 +47,11 @@
             <form th:action="@{/admin/accounts/create}"
                   th:object="${form}"
                   method="post"
-                  class="p-5 space-y-5">
+                  class="flex flex-col gap-5 p-5">
 
                 <!-- FULL NAME -->
                 <div>
-                    <label class="mb-2 block text-sm text-muted">
+                    <label class="mb-2 block text-sm font-medium">
                         Full Name
                     </label>
 
@@ -68,7 +68,7 @@
 
                 <!-- EMAIL -->
                 <div>
-                    <label class="mb-2 block text-sm text-muted">
+                    <label class="mb-2 block text-sm font-medium">
                         Email
                     </label>
 
@@ -85,7 +85,7 @@
 
                 <!-- PHONE -->
                 <div>
-                    <label class="mb-2 block text-sm text-muted">
+                    <label class="mb-2 block text-sm font-medium">
                         Phone
                     </label>
 
@@ -102,7 +102,7 @@
 
                 <!-- ROLE -->
                 <div>
-                    <label class="mb-2 block text-sm text-muted">
+                    <label class="mb-2 block text-sm font-medium">
                         Role
                     </label>
 
@@ -127,7 +127,7 @@
 
                 <!-- PASSWORD -->
                 <div>
-                    <label class="mb-2 block text-sm text-muted">
+                    <label class="mb-2 block text-sm font-medium">
                         Password
                     </label>
 
@@ -146,12 +146,12 @@
                 <div class="flex items-center justify-end gap-3 pt-2">
 
                     <a th:href="@{/admin/accounts}"
-                       class="rounded-xl border border-border px-5 py-3 text-sm font-medium text-text hover:bg-background">
+                       class="btn btn-secondary btn-lg">
                         Cancel
                     </a>
 
                     <button type="submit"
-                            class="rounded-xl bg-primary px-5 py-3 text-sm font-medium text-white hover:opacity-90">
+                            class="btn btn-primary btn-lg">
                         Create Account
                     </button>
 
@@ -162,8 +162,6 @@
         </section>
 
     </main>
-
-</div>
 
 </body>
 </html>

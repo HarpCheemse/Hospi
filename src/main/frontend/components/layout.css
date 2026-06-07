@@ -1,0 +1,21 @@
+@layer components {
+    .staff-layout {
+        @apply flex h-screen overflow-hidden bg-background text-foreground;
+    }
+
+    .staff-page {
+        @apply flex-1 overflow-y-auto bg-background p-6;
+    }
+
+    .staff-page-header {
+        @apply mb-6 flex items-center justify-between;
+    }
+
+    .staff-page-title {
+        @apply text-2xl font-bold;
+    }
+
+    .page-description {
+        @apply text-sm text-muted-foreground;
+    }
+}

@@ -7,7 +7,6 @@ import com.hospi.manage.features.manager.detail.dto.HotelForm;
 import com.hospi.manage.features.manager.detail.entity.Hotel;
 import com.hospi.manage.features.manager.detail.entity.HotelPicture;
 import com.hospi.manage.features.manager.detail.repository.HotelRepository;
-import com.hospi.manage.features.manager.roomtype.entity.RoomTypePicture;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -64,7 +63,9 @@ public class HotelService {
         hotel.setTermOfService(form.getTermOfService());
 
         if (images != null && !images.isEmpty()) {
-            byte[] compressed = ImageUtils.compressWebP(images, 720, 0.75f);
+            byte[] compressed = ImageUtils.compressWebP(images,
+                    720,
+                    0.75f);
             HotelPicture picture = new HotelPicture();
             picture.setHotel(hotel);
             picture.setImageData(compressed);
@@ -72,7 +73,6 @@ public class HotelService {
             //This is temporary solution due to only have 1 picture per hotel
             hotel.getPictures().clear();
             hotel.getPictures().add(picture);
-            System.out.println(hotel.getPictures().size());
         }
         hotelRepository.save(hotel);
     }

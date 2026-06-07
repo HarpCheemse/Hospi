@@ -5,220 +5,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Manager Dashboard | Hospi</title>
-
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 
-<body class="h-screen overflow-hidden bg-background text-text">
+<body class="staff-layout">
 
-<div class="flex h-full">
+<!-- SIDEBAR -->
+<aside th:replace="~{fragments/manager-sidebar :: sidebar}"></aside>
 
-    <!-- SIDEBAR -->
-    <aside th:replace="~{fragments/manager-sidebar :: sidebar}"></aside>
+<!-- MAIN -->
+<main class="staff-page">
 
-    <!-- MAIN CONTENT -->
-    <main class="flex-1 overflow-y-auto bg-background p-6">
+    <!-- HEADER -->
+    <header class="staff-page-header">
 
-        <!-- PAGE HEADER -->
-        <header class="mb-6 flex items-center justify-between">
-
-            <section aria-label="Page title">
-                <h1 class="text-2xl font-bold">
-                    Manager Dashboard
-                </h1>
-
-                <p class="text-sm text-muted">
-                    Monitor reservations, room availability, and hotel operations
-                </p>
-            </section>
-
-            <section aria-label="User profile">
-                <div th:replace="~{fragments/components :: userPill('JD', 'John Doe', 'Manager')}"></div>
-            </section>
-
-        </header>
-
-        <!-- KPI SECTION -->
-        <section aria-label="Key performance indicators"
-                 class="mb-6 grid grid-cols-4 gap-4">
-
-            <article th:replace="~{fragments/components :: statCard(
-                'New Bookings',
-                '840',
-                '+8.70% from last week',
-                'positive'
-            )}"></article>
-
-            <article th:replace="~{fragments/components :: statCard(
-                'Check-In',
-                '231',
-                '+3.56% from last week',
-                'positive'
-            )}"></article>
-
-            <article th:replace="~{fragments/components :: statCard(
-                'Check-Out',
-                '124',
-                '-1.06% from last week',
-                'neutral'
-            )}"></article>
-
-            <article th:replace="~{fragments/components :: statCard(
-                'Total Revenue',
-                '$123,980',
-                '+5.70% from last week',
-                'positive'
-            )}"></article>
-
+        <section>
+            <h1 class="staff-page-title">Manager Dashboard</h1>
+            <p class="page-description">
+                Monitor reservations, room availability, and hotel operations over the week
+            </p>
         </section>
 
-        <!-- MAIN GRID CONTENT -->
-        <section aria-label="Dashboard analytics"
-                 class="grid grid-cols-12 gap-4">
+        <section>
+            <div class="user-pill">
 
-            <!-- LEFT COLUMN -->
-            <section class="col-span-8 flex flex-col gap-4">
+                <div class="avatar">
+                    JD
+                </div>
 
-                <article th:replace="~{fragments/components :: panel(
-                    'Revenue',
-                    'Revenue performance overview',
-                    ~{::#revenue-action},
-                    ~{::#revenue-content}
-                )}">
+                <div>
+                    <p class="text-sm font-medium text-foreground">John Doe</p>
+                    <p class="text-xs text-muted-foreground">Manager</p>
+                </div>
 
-                    <th:block id="revenue-action">
+            </div>
+        </section>
 
-                        <button th:replace="~{fragments/components :: button(
-                            'Last 6 Months',
-                            'secondary'
-                        )}"></button>
+    </header>
 
-                    </th:block>
+    <!-- KPI -->
+    <section class="mb-6 grid grid-cols-4 gap-4">
 
-                    <th:block id="revenue-content">
+        <div class="card-compact">
+            <p class="text-sm text-muted-foreground">New Bookings</p>
+            <p class="mt-1 text-2xl font-bold text-foreground">840</p>
+            <p class="mt-1 pill-success">
+                +8.70% from last week
+            </p>
+        </div>
 
-                        <div class="flex h-64 items-center justify-center rounded-lg border border-border bg-background text-muted">
-                            Revenue Graph
-                        </div>
+        <div class="card-compact">
+            <p class="text-sm text-muted-foreground">Check-In</p>
+            <p class="mt-1 text-2xl font-bold text-foreground">231</p>
+            <p class="mt-1 pill-success">
+                +3.56% from last week
+            </p>
+        </div>
 
-                    </th:block>
+        <div class="card-compact">
+            <p class="text-sm text-muted-foreground">Check-Out</p>
+            <p class="mt-1 text-2xl font-bold text-foreground">124</p>
+            <p class="mt-1 pill-muted">
+                -1.06% from last week
+            </p>
+        </div>
 
-                </article>
+        <div class="card-compact">
+            <p class="text-sm text-muted-foreground">Total Revenue</p>
+            <p class="mt-1 text-2xl font-bold text-foreground">$123,980</p>
+            <p class="mt-1 pill-success">
+                +5.70% from last week
+            </p>
+        </div>
 
-                <article th:replace="~{fragments/components :: panel(
-                    'Reservations',
-                    'Booking analytics from the last 7 days',
-                    ~{::#reservations-action},
-                    ~{::#reservations-content}
-                )}">
+    </section>
 
-                    <th:block id="reservations-action">
+    <!-- GRID -->
+    <section class="grid grid-cols-12 gap-4">
 
-                        <button th:replace="~{fragments/components :: button(
-                            'Last 7 Days',
-                            'secondary'
-                        )}"></button>
+        <!-- LEFT -->
+        <section class="col-span-8 flex flex-col gap-4">
 
-                    </th:block>
+            <section class="card-panel">
 
-                    <th:block id="reservations-content">
+                <div class="mb-4 flex items-center justify-between">
+                    <div>
+                        <h2 class="text-lg font-semibold text-foreground">Revenue</h2>
+                        <p class="text-sm text-muted-foreground">Revenue performance overview over the week</p>
+                    </div>
 
-                        <div class="flex h-40 items-center justify-center rounded-lg border border-border bg-background text-muted">
-                            Reservation Chart
-                        </div>
+                    <a href="#" class="btn btn-primary">View</a>
+                </div>
 
-                    </th:block>
-
-                </article>
+                <div class="flex h-64 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground">
+                    Revenue Graph
+                </div>
 
             </section>
 
-            <!-- RIGHT COLUMN -->
-            <section class="col-span-4 flex flex-col gap-4">
+            <section class="card-panel">
 
-                <article th:replace="~{fragments/components :: panel(
-                    'Room Availability',
-                    'Current occupancy overview',
-                    ~{::#availability-action},
-                    ~{::#availability-content}
-                )}">
+                <div class="mb-4 flex items-center justify-between">
+                    <div>
+                        <h2 class="text-lg font-semibold text-foreground">Reservations</h2>
+                        <p class="text-sm text-muted-foreground">Booking analytics from the last 7 days</p>
+                    </div>
 
-                    <th:block id="availability-action">
+                    <a class="btn btn-primary">View</a>
+                </div>
 
-                        <button class="text-xl leading-none text-muted"
-                                type="button"
-                                aria-label="More options">
-                            ...
-                        </button>
-
-                    </th:block>
-
-                    <th:block id="availability-content">
-
-                        <div class="mb-4 flex h-40 items-center justify-center rounded-lg border border-border bg-background text-muted">
-                            Availability Bar
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-2">
-
-                            <div th:replace="~{fragments/components :: metricTile('Occupied', '286')}"></div>
-
-                            <div th:replace="~{fragments/components :: metricTile('Reserved', '87')}"></div>
-
-                            <div th:replace="~{fragments/components :: metricTile('Available', '32')}"></div>
-
-                            <div th:replace="~{fragments/components :: metricTile('Not Ready', '13')}"></div>
-
-                        </div>
-
-                    </th:block>
-
-                </article>
-
-                <article th:replace="~{fragments/components :: panel(
-                    'Recent Activity',
-                    'Latest hotel operations',
-                    ~{},
-                    ~{::#activity-content}
-                )}">
-
-                    <th:block id="activity-content">
-
-                        <div class="flex flex-col gap-4">
-
-                            <article th:replace="~{fragments/components :: activityItem(
-                                'New reservation created',
-                                '2 minutes ago',
-                                'primary'
-                            )}"></article>
-
-                            <article th:replace="~{fragments/components :: activityItem(
-                                'Room 203 checked in',
-                                '15 minutes ago',
-                                'success'
-                            )}"></article>
-
-                            <article th:replace="~{fragments/components :: activityItem(
-                                'Cleaning task assigned',
-                                '34 minutes ago',
-                                'warning'
-                            )}"></article>
-
-                        </div>
-
-                    </th:block>
-
-                </article>
+                <div class="flex h-40 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground">
+                    Reservation Chart
+                </div>
 
             </section>
 
         </section>
 
-    </main>
+        <!-- RIGHT -->
+        <section class="col-span-4 flex flex-col gap-4">
 
-</div>
+            <section class="card-panel">
+
+                <div class="mb-4 flex items-center justify-between">
+                    <div>
+                        <h2 class="text-lg font-semibold text-foreground">Room Availability</h2>
+                        <p class="text-sm text-muted-foreground">Current occupancy overview</p>
+                    </div>
+
+                    <button class="text-xl text-muted-foreground">...</button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+
+                    <div class="rounded-lg border border-border bg-background p-3">
+                        <p class="text-sm text-muted-foreground">Occupied</p>
+                        <p class="text-lg font-semibold text-foreground">286</p>
+                    </div>
+
+                    <div class="rounded-lg border border-border bg-background p-3">
+                        <p class="text-sm text-muted-foreground">Reserved</p>
+                        <p class="text-lg font-semibold text-foreground">87</p>
+                    </div>
+
+                    <div class="rounded-lg border border-border bg-background p-3">
+                        <p class="text-sm text-muted-foreground">Available</p>
+                        <p class="text-lg font-semibold text-foreground">32</p>
+                    </div>
+
+                    <div class="rounded-lg border border-border bg-background p-3">
+                        <p class="text-sm text-muted-foreground">Out Of Order</p>
+                        <p class="text-lg font-semibold text-foreground">13</p>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <section class="card-panel">
+
+                <div class="mb-4">
+                    <h2 class="text-lg font-semibold text-foreground">Recent Activity</h2>
+                    <p class="text-sm text-muted-foreground">Latest hotel operations</p>
+                </div>
+
+                <div class="flex flex-col gap-4">
+
+                    <div class="flex items-start gap-3">
+                        <div class="mt-2 h-2 w-2 rounded-full bg-primary"></div>
+                        <div>
+                            <p class="text-sm font-medium text-foreground">New reservation created</p>
+                            <p class="text-xs text-muted-foreground">2 minutes ago</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <div class="mt-2 h-2 w-2 rounded-full bg-success"></div>
+                        <div>
+                            <p class="text-sm font-medium text-foreground">Room 203 checked in</p>
+                            <p class="text-xs text-muted-foreground">15 minutes ago</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <div class="mt-2 h-2 w-2 rounded-full bg-warning"></div>
+                        <div>
+                            <p class="text-sm font-medium text-foreground">Cleaning task assigned</p>
+                            <p class="text-xs text-muted-foreground">34 minutes ago</p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </section>
+
+    </section>
+
+</main>
 
 </body>
 </html>

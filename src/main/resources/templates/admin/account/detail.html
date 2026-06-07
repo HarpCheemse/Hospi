@@ -13,44 +13,42 @@
           th:href="@{/css/app.css}">
 </head>
 
-<body class="bg-background text-text">
-
-<div class="flex min-h-screen">
+<body class="staff-layout">
 
     <!-- SIDEBAR -->
     <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
 
     <!-- MAIN -->
-    <main class="flex-1 p-6">
+    <main class="staff-page">
 
         <!-- TOAST -->
         <div th:replace="~{fragments/components/toast :: toast}"></div>
 
         <!-- HEADER -->
-        <div class="mb-6 flex items-start justify-between">
+        <header class="staff-page-header">
 
-            <div>
+            <section>
 
-                <h1 class="text-2xl font-bold"
+                <h1 class="staff-page-title"
                     th:text="${account.fullName}">
                     John Doe
                 </h1>
 
-                <p class="mt-1 text-sm text-muted">
+                <p class="page-description">
                     Review account information and permissions.
                 </p>
 
-            </div>
+            </section>
 
             <a th:href="@{'/admin/accounts/' + ${account.id} + '/edit'}"
-               class="rounded-xl bg-primary px-5 py-3 text-sm font-medium text-white shadow-card hover:opacity-90">
+               class="btn btn-primary btn-lg">
                 Edit Account
             </a>
 
-        </div>
+        </header>
 
         <!-- ACCOUNT INFORMATION -->
-        <section class="rounded-2xl border border-border bg-surface shadow-card">
+        <section class="card">
 
             <div class="border-b border-border p-5">
 
@@ -64,7 +62,7 @@
 
                 <div>
 
-                    <p class="text-sm text-muted">
+                    <p class="text-sm text-muted-foreground">
                         Full Name
                     </p>
 
@@ -77,7 +75,7 @@
 
                 <div>
 
-                    <p class="text-sm text-muted">
+                    <p class="text-sm text-muted-foreground">
                         Email Address
                     </p>
 
@@ -90,7 +88,7 @@
 
                 <div>
 
-                    <p class="text-sm text-muted">
+                    <p class="text-sm text-muted-foreground">
                         Phone Number
                     </p>
 
@@ -103,13 +101,13 @@
 
                 <div>
 
-                    <p class="text-sm text-muted">
+                    <p class="text-sm text-muted-foreground">
                         Role
                     </p>
 
                     <div class="mt-1">
 
-                        <span class="rounded-full bg-primary-soft px-2 py-1 text-xs font-medium text-primary-dark"
+                        <span class="pill-muted"
                               th:text="${account.role}">
                             MANAGER
                         </span>
@@ -123,7 +121,7 @@
         </section>
 
         <!-- ACCOUNT STATUS -->
-        <section class="mt-6 rounded-2xl border border-border bg-surface shadow-card">
+        <section class="card mt-6">
 
             <div class="border-b border-border p-5">
 
@@ -137,24 +135,24 @@
 
                 <div>
 
-                    <p class="text-sm text-muted">
+                    <p class="text-sm text-muted-foreground">
                         Status
                     </p>
 
                     <div class="mt-1">
 
                         <span th:if="${account.status.name() == 'ACTIVE'}"
-                              class="rounded-full bg-success/10 px-2 py-1 text-xs font-medium text-success">
+                              class="pill-success">
                             Active
                         </span>
 
                         <span th:if="${account.status.name() == 'DISABLED'}"
-                              class="rounded-full bg-danger/10 px-2 py-1 text-xs font-medium text-danger">
+                              class="pill-danger">
                             Disabled
                         </span>
 
                         <span th:if="${account.status.name() == 'LOCKED'}"
-                              class="rounded-full bg-warning/10 px-2 py-1 text-xs font-medium text-warning">
+                              class="pill-warning">
                             Locked
                         </span>
 
@@ -167,8 +165,6 @@
         </section>
 
     </main>
-
-</div>
 
 </body>
 </html>

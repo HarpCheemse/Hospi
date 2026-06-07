@@ -12,43 +12,41 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.9/cdn.min.js" defer></script>
 </head>
 
-<body class="bg-background text-text">
-
-<div class="flex min-h-screen">
+<body class="staff-layout">
 
     <!-- SIDEBAR -->
     <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
 
     <!-- MAIN -->
-    <main class="flex-1 p-6">
+    <main class="staff-page">
 
         <!-- TOAST -->
         <div th:replace="~{fragments/components/toast :: toast}"></div>
 
         <!-- HEADER -->
-        <div class="mb-6 flex items-start justify-between">
+        <header class="staff-page-header">
 
-            <div>
+            <section>
 
-                <h1 class="text-2xl font-bold">
+                <h1 class="staff-page-title">
                     System Configuration
                 </h1>
 
-                <p class="mt-1 text-sm text-muted">
+                <p class="page-description">
                     Review hotel financial settings and booking rules.
                 </p>
 
-            </div>
+            </section>
 
             <a th:href="@{/admin/configs/edit}"
-               class="rounded-xl bg-primary px-5 py-3 text-sm font-medium text-white hover:opacity-90">
+               class="btn btn-primary btn-lg">
                 Edit Configuration
             </a>
 
-        </div>
+        </header>
 
         <!-- FINANCIAL SETTINGS -->
-        <section class="rounded-2xl border border-border bg-surface shadow-card">
+        <section class="card">
 
             <div class="border-b border-border p-5">
 
@@ -61,7 +59,7 @@
             <div class="grid grid-cols-2 gap-5 p-5">
 
                 <div>
-                    <p class="text-sm text-muted">
+                    <p class="text-sm text-muted-foreground">
                         Tax Rate
                     </p>
 
@@ -72,7 +70,7 @@
                 </div>
 
                 <div>
-                    <p class="text-sm text-muted">
+                    <p class="text-sm text-muted-foreground">
                         Default Deposit Percentage
                     </p>
 
@@ -83,7 +81,7 @@
                 </div>
 
                 <div>
-                    <p class="text-sm text-muted">
+                    <p class="text-sm text-muted-foreground">
                         Late Checkout Fee
                     </p>
 
@@ -94,7 +92,7 @@
                 </div>
 
                 <div>
-                    <p class="text-sm text-muted">
+                    <p class="text-sm text-muted-foreground">
                         Extra Guest Fee
                     </p>
 
@@ -109,7 +107,7 @@
         </section>
 
         <!-- BOOKING RULES -->
-        <section class="mt-6 rounded-2xl border border-border bg-surface shadow-card">
+        <section class="card mt-6">
 
             <div class="border-b border-border p-5">
 
@@ -122,7 +120,7 @@
             <div class="grid grid-cols-2 gap-5 p-5">
 
                 <div>
-                    <p class="text-sm text-muted">
+                    <p class="text-sm text-muted-foreground">
                         Pending Booking Expiry
                     </p>
 
@@ -133,7 +131,7 @@
                 </div>
 
                 <div>
-                    <p class="text-sm text-muted">
+                    <p class="text-sm text-muted-foreground">
                         Cancellation Before Check-in
                     </p>
 
@@ -144,7 +142,7 @@
                 </div>
 
                 <div>
-                    <p class="text-sm text-muted">
+                    <p class="text-sm text-muted-foreground">
                         Maximum Booking Days
                     </p>
 
@@ -155,7 +153,7 @@
                 </div>
 
                 <div>
-                    <p class="text-sm text-muted">
+                    <p class="text-sm text-muted-foreground">
                         Maximum Rooms Per Booking
                     </p>
 
@@ -170,8 +168,6 @@
         </section>
 
     </main>
-
-</div>
 
 </body>
 </html>

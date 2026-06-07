@@ -12,26 +12,24 @@
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 
-<body class="bg-background text-text">
-
-<div class="flex min-h-screen">
+<body class="staff-layout">
 
     <!-- SIDEBAR -->
     <div th:replace="~{fragments/manager-sidebar :: sidebar}"></div>
 
     <!-- MAIN -->
-    <main class="flex-1 bg-background p-6">
+    <main class="staff-page">
 
         <!-- HEADER -->
-        <div class="mb-6 flex items-start justify-between">
+        <div class="staff-page-header">
 
             <div>
-                <h1 class="text-2xl font-bold text-text"
+                <h1 class="staff-page-title"
                     th:text="${hotel.name}">
                     Hotel Name
                 </h1>
 
-                <p class="mt-1 text-sm text-muted">
+                <p class="page-description">
                     View hotel profile, contact information, operations, and settings.
                 </p>
             </div>
@@ -39,12 +37,12 @@
             <div class="flex items-center gap-3">
 
                 <a th:href="@{/manager/details/edit}"
-                   class="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white">
+                   class="btn btn-primary">
                     Edit Hotel
                 </a>
 
                 <a th:href="@{/manager/dashboard}"
-                   class="rounded-xl border border-border bg-surface px-4 py-2 text-sm font-medium">
+                   class="btn btn-secondary">
                     Back
                 </a>
 
@@ -53,7 +51,7 @@
         </div>
 
         <!-- HERO -->
-        <section class="overflow-hidden rounded-2xl border border-border bg-surface shadow-card">
+        <section class="overflow-hidden card">
             <div class="relative h-[300px] overflow-hidden">
 
                 <img th:if="${!#lists.isEmpty(hotel.pictures)}"
@@ -103,13 +101,13 @@
             <div class="col-span-8 flex flex-col gap-6">
 
                 <!-- OVERVIEW -->
-                <section class="rounded-2xl border border-border bg-surface shadow-card">
+                <section class="card">
                     <div class="border-b border-border p-5">
                         <h2 class="text-lg font-semibold">Overview</h2>
                     </div>
 
                     <div class="p-5">
-                        <p class="whitespace-pre-line text-muted"
+                        <p class="whitespace-pre-line text-muted-foreground"
                            th:text="${hotel.description}">
                             Hotel description...
                         </p>
@@ -117,7 +115,7 @@
                 </section>
 
                 <!-- FEATURES -->
-                <section class="rounded-2xl border border-border bg-surface shadow-card">
+                <section class="card">
                     <div class="border-b border-border p-5">
                         <h2 class="text-lg font-semibold">Features & Amenities</h2>
                     </div>
@@ -131,13 +129,13 @@
                 </section>
 
                 <!-- TERMS -->
-                <section class="rounded-2xl border border-border bg-surface shadow-card">
+                <section class="card">
                     <div class="border-b border-border p-5">
                         <h2 class="text-lg font-semibold">Terms of Service</h2>
                     </div>
 
                     <div class="p-5">
-                        <p class="whitespace-pre-line text-muted"
+                        <p class="whitespace-pre-line text-muted-foreground"
                            th:text="${hotel.termOfService}">
                             Terms...
                         </p>
@@ -150,7 +148,7 @@
             <div class="col-span-4 flex flex-col gap-6">
 
                 <!-- CONTACT -->
-                <section class="rounded-2xl border border-border bg-surface shadow-card">
+                <section class="card">
                     <div class="border-b border-border p-5">
                         <h2 class="text-lg font-semibold">Contact</h2>
                     </div>
@@ -158,17 +156,17 @@
                     <div class="flex flex-col gap-4 p-5 text-sm">
 
                         <div>
-                            <p class="text-muted">Address</p>
+                            <p class="text-muted-foreground">Address</p>
                             <p class="font-medium" th:text="${hotel.address}">Address</p>
                         </div>
 
                         <div>
-                            <p class="text-muted">Phone</p>
+                            <p class="text-muted-foreground">Phone</p>
                             <p class="font-medium" th:text="${hotel.phone}">Phone</p>
                         </div>
 
                         <div>
-                            <p class="text-muted">Email</p>
+                            <p class="text-muted-foreground">Email</p>
                             <p class="font-medium" th:text="${hotel.email}">Email</p>
                         </div>
 
@@ -176,7 +174,7 @@
                 </section>
 
                 <!-- OPERATIONS -->
-                <section class="rounded-2xl border border-border bg-surface shadow-card">
+                <section class="card">
                     <div class="border-b border-border p-5">
                         <h2 class="text-lg font-semibold">Operations</h2>
                     </div>
@@ -184,7 +182,7 @@
                     <div class="flex flex-col gap-4 p-5 text-sm">
 
                         <div class="flex justify-between">
-                            <span class="text-muted">Check-In</span>
+                            <span class="text-muted-foreground">Check-In</span>
                             <span class="font-medium"
                                   th:text="${#temporals.format(hotel.checkInTime,'HH:mm')}">
                                 14:00
@@ -192,7 +190,7 @@
                         </div>
 
                         <div class="flex justify-between">
-                            <span class="text-muted">Check-Out</span>
+                            <span class="text-muted-foreground">Check-Out</span>
                             <span class="font-medium"
                                   th:text="${#temporals.format(hotel.checkOutTime,'HH:mm')}">
                                 12:00
@@ -200,7 +198,7 @@
                         </div>
 
                         <div class="flex justify-between">
-                            <span class="text-muted">Floors</span>
+                            <span class="text-muted-foreground">Floors</span>
                             <span class="font-medium"
                                   th:text="${hotel.floorCount}">
                                 10
@@ -211,7 +209,7 @@
                 </section>
 
                 <!-- RATINGS -->
-                <section class="rounded-2xl border border-border bg-surface shadow-card">
+                <section class="card">
                     <div class="border-b border-border p-5">
                         <h2 class="text-lg font-semibold">Ratings</h2>
                     </div>
@@ -222,7 +220,7 @@
                             4.8
                         </div>
 
-                        <div class="mt-2 text-sm text-muted">
+                        <div class="mt-2 text-sm text-muted-foreground">
                             Average Rating
                         </div>
 
@@ -233,7 +231,7 @@
                 </section>
 
                 <!-- SYSTEM -->
-                <section class="rounded-2xl border border-border bg-surface shadow-card">
+                <section class="card">
                     <div class="border-b border-border p-5">
                         <h2 class="text-lg font-semibold">System Info</h2>
                     </div>
@@ -241,19 +239,19 @@
                     <div class="flex flex-col gap-4 p-5 text-sm">
 
                         <div class="flex justify-between">
-                            <span class="text-muted">ID</span>
+                            <span class="text-muted-foreground">ID</span>
                             <span class="font-medium" th:text="${hotel.id}">1</span>
                         </div>
 
                         <div class="flex justify-between">
-                            <span class="text-muted">Created</span>
+                            <span class="text-muted-foreground">Created</span>
                             <span class="font-medium"
                                   th:text="${#temporals.format(hotel.createdAt,'dd MMM yyyy HH:mm')}">
                             </span>
                         </div>
 
                         <div class="flex justify-between">
-                            <span class="text-muted">Updated</span>
+                            <span class="text-muted-foreground">Updated</span>
                             <span class="font-medium"
                                   th:text="${#temporals.format(hotel.updatedAt,'dd MMM yyyy HH:mm')}">
                             </span>
@@ -267,8 +265,6 @@
         </div>
 
     </main>
-
-</div>
 
 </body>
 </html>

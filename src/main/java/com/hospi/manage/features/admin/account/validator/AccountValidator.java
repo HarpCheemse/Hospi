@@ -5,6 +5,7 @@ import com.hospi.manage.features.admin.account.dto.AccountEditForm;
 import com.hospi.manage.features.admin.account.entity.Account;
 import com.hospi.manage.features.admin.account.enums.Role;
 import com.hospi.manage.features.admin.account.repository.AccountRepository;
+import com.hospi.manage.features.auth.dto.ResetPasswordForm;
 import com.hospi.manage.features.credential.dto.ChangePasswordForm;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -42,6 +43,19 @@ public class AccountValidator {
                 form.newPassword(),
                 encoder,
                 br);
+    }
+
+    public void validateResetPassword(ResetPasswordForm form, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) return;
+
+        validateNewPassword(form.newPassword(),
+                bindingResult);
+
+        if (bindingResult.hasErrors()) return;
+
+        validatePasswordMatch(form.newPassword(),
+                form.confirmPassword(),
+                bindingResult);
     }
 
     private void validatePasswordMatch(String newPassword, String confirmPassword, BindingResult br) {
