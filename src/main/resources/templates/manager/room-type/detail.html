@@ -12,26 +12,24 @@
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 
-<body class="bg-background text-text">
-
-<div class="flex min-h-screen">
+<body class="staff-layout">
 
     <!-- SIDEBAR -->
     <div th:replace="~{fragments/manager-sidebar :: sidebar}"></div>
 
     <!-- MAIN -->
-    <main class="flex-1 bg-background p-6">
+    <main class="staff-page">
 
         <!-- PAGE HEADER -->
-        <div class="mb-6 flex items-start justify-between">
+        <div class="staff-page-header">
 
             <div>
-                <h1 class="text-2xl font-bold text-text"
+                <h1 class="staff-page-title"
                     th:text="${roomType.name}">
                     Deluxe Ocean Suite
                 </h1>
 
-                <p class="mt-1 text-sm text-muted">
+                <p class="page-description">
                     View room type details, pricing, amenities,
                     images, and operational information.
                 </p>
@@ -40,12 +38,12 @@
             <div class="flex items-center gap-3">
 
                 <a th:href="@{'/manager/room-types/edit/' + ${roomType.id}}"
-                   class="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white hover:opacity-90">
+                   class="btn btn-primary">
                     Edit Room Type
                 </a>
 
                 <a th:href="@{/manager/room-types}"
-                   class="rounded-xl border border-border bg-surface px-4 py-2 text-sm font-medium hover:bg-background">
+                   class="btn btn-secondary">
                     Back to Room Types
                 </a>
 
@@ -54,12 +52,12 @@
         </div>
 
         <!-- BANNER IMAGE -->
-        <section class="overflow-hidden rounded-2xl border border-border bg-surface shadow-card">
+        <section class="overflow-hidden card">
 
             <div class="relative h-[380px] w-full bg-background">
 
                 <div th:if="${roomType.pictures == null or roomType.pictures.isEmpty()}"
-                     class="flex h-full items-center justify-center text-muted">
+                     class="flex h-full items-center justify-center text-muted-foreground">
                     No banner image available
                 </div>
 
@@ -67,12 +65,12 @@
                 <div class="absolute right-5 top-5">
 
                     <span th:if="${roomType.active}"
-                          class="rounded-full bg-success/10 px-3 py-1 text-xs font-semibold text-success">
+                          class="pill-success">
                         Active
                     </span>
 
                     <span th:unless="${roomType.active}"
-                          class="rounded-full bg-danger/10 px-3 py-1 text-xs font-semibold text-danger">
+                          class="pill-danger">
                         Inactive
                     </span>
 
@@ -89,7 +87,7 @@
             <div class="col-span-8 flex flex-col gap-6">
 
                 <!-- OVERVIEW -->
-                <section class="rounded-2xl border border-border bg-surface shadow-card">
+                <section class="card">
 
                     <div class="border-b border-border p-5">
                         <h2 class="text-lg font-semibold">
@@ -102,7 +100,7 @@
                         <!-- BED TYPE -->
                         <div class="rounded-xl border border-border bg-background p-4">
 
-                            <p class="text-xs uppercase tracking-wide text-muted">
+                            <p class="text-xs uppercase tracking-brand text-muted-foreground">
                                 Bed Type
                             </p>
 
@@ -116,7 +114,7 @@
                         <!-- OCCUPANCY -->
                         <div class="rounded-xl border border-border bg-background p-4">
 
-                            <p class="text-xs uppercase tracking-wide text-muted">
+                            <p class="text-xs uppercase tracking-brand text-muted-foreground">
                                 Max Occupancy
                             </p>
 
@@ -130,7 +128,7 @@
                         <!-- AREA -->
                         <div class="rounded-xl border border-border bg-background p-4">
 
-                            <p class="text-xs uppercase tracking-wide text-muted">
+                            <p class="text-xs uppercase tracking-brand text-muted-foreground">
                                 Area
                             </p>
 
@@ -143,7 +141,7 @@
                         <!-- BASE PRICE -->
                         <div class="rounded-xl border border-border bg-background p-4">
 
-                            <p class="text-xs uppercase tracking-wide text-muted">
+                            <p class="text-xs uppercase tracking-brand text-muted-foreground">
                                 Base Price
                             </p>
 
@@ -159,7 +157,7 @@
                 </section>
 
                 <!-- DESCRIPTION -->
-                <section class="rounded-2xl border border-border bg-surface shadow-card">
+                <section class="card">
 
                     <div class="border-b border-border p-5">
                         <h2 class="text-lg font-semibold">
@@ -169,7 +167,7 @@
 
                     <div class="p-5">
 
-                        <p class="whitespace-pre-line leading-relaxed text-muted"
+                        <p class="whitespace-pre-line leading-relaxed text-muted-foreground"
                            th:text="${roomType.description}">
                             Spacious luxury suite with private balcony
                             and premium amenities.
@@ -180,7 +178,7 @@
                 </section>
 
                 <!-- FEATURES -->
-                <section class="rounded-2xl border border-border bg-surface shadow-card">
+                <section class="card">
 
                     <div class="border-b border-border p-5">
                         <h2 class="text-lg font-semibold">
@@ -213,7 +211,7 @@
             <div class="col-span-4 flex flex-col gap-6">
 
                 <!-- DETAIL IMAGES -->
-                <section class="rounded-2xl border border-border bg-surface shadow-card">
+                <section class="card">
 
                     <div class="border-b border-border p-5">
                         <h2 class="text-lg font-semibold">
@@ -236,7 +234,7 @@
                 </section>
 
                 <!-- SYSTEM INFO -->
-                <section class="rounded-2xl border border-border bg-surface shadow-card">
+                <section class="card">
 
                     <div class="border-b border-border p-5">
                         <h2 class="text-lg font-semibold">
@@ -248,7 +246,7 @@
 
                         <div class="flex items-center justify-between">
 
-                            <span class="text-muted">
+                            <span class="text-muted-foreground">
                                 Room Type ID
                             </span>
 
@@ -261,7 +259,7 @@
 
                         <div class="flex items-center justify-between">
 
-                            <span class="text-muted">
+                            <span class="text-muted-foreground">
                                 Created At
                             </span>
 
@@ -274,7 +272,7 @@
 
                         <div class="flex items-center justify-between">
 
-                            <span class="text-muted">
+                            <span class="text-muted-foreground">
                                 Updated At
                             </span>
 
@@ -294,8 +292,6 @@
         </div>
 
     </main>
-
-</div>
 
 </body>
 </html>
