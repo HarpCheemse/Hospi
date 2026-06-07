@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Our Rooms | Hospi Hotel</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-background text-text flex flex-col min-h-screen pt-24">
+
+  <!-- HEADER -->
+  <div th:replace="~{guest/layout :: header('rooms')}"></div>
+
+  <main class="flex-grow">
+    
+    <!-- PAGE TITLE / HERO -->
+    <section class="bg-surface-muted py-16 border-b border-border/30">
+      <div class="mx-auto max-w-7xl px-6 text-center">
+        <p class="text-xs font-semibold uppercase tracking-widest text-accent mb-2 font-sans">EXPLORE ACCOMMODATIONS</p>
+        <h1 class="text-4xl md:text-5xl font-bold font-display text-text">Choose Your Perfect Room</h1>
+        <p class="mt-4 max-w-xl mx-auto text-sm text-muted">Select from our premium rooms and suites. Designed with elegance and ultimate guest comfort in mind.</p>
+      </div>
+    </section>
+
+    <!-- ROOM TYPES GRID -->
+    <section class="mx-auto max-w-7xl px-6 py-20">
+      <div th:if="${#lists.isEmpty(roomTypes)}" class="text-center py-20 bg-surface rounded-2xl border border-border shadow-card">
+        <p class="text-lg text-muted">No room types configured yet. Please check back later!</p>
+      </div>
+
+      <div th:if="${not #lists.isEmpty(roomTypes)}" class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <article th:each="roomType : ${roomTypes}" class="overflow-hidden rounded-2xl bg-surface border border-border/80 shadow-card hover:shadow-soft transition-shadow flex flex-col h-full">
+          <!-- Room Type Image -->
+          <div class="relative h-64 w-full bg-surface-muted overflow-hidden">
+            <img th:if="${#lists.isEmpty(roomType.pictures)}" class="h-full w-full object-cover hover:scale-105 transition-transform duration-slow"
+                 th:src="@{/images/hotel2.jpg}" alt="Room template picture"/>
+            <img th:if="${not #lists.isEmpty(roomType.pictures)}" class="h-full w-full object-cover hover:scale-105 transition-transform duration-slow"
+                 th:src="@{'/room-type-picture/' + ${roomType.pictures[0].id}}" alt="Room Type Image"/>
+            <span class="absolute top-4 right-4 bg-primary text-white font-sans text-xs font-semibold px-3 py-1.5 rounded-full shadow-md"
+                  th:text="'$' + ${roomType.basePrice} + ' / night'">$89 / night</span>
+          </div>
+
+          <!-- Room Type Content -->
+          <div class="p-6 flex flex-col flex-grow">
+            <h3 class="text-2xl font-bold font-display text-text mb-2" th:text="${roomType.name}">Deluxe Room</h3>
+            <p class="text-sm text-muted line-clamp-3 mb-4 leading-relaxed" th:text="${roomType.description}">
+              Spacious and elegant room with amenities.
+            </p>
+
+            <!-- Room Specs -->
+            <div class="grid grid-cols-2 gap-y-3 gap-x-2 border-t border-b border-border/50 py-4 mb-6 text-xs text-muted font-sans mt-auto">
+              <div class="flex items-center gap-2">
+                <span>📐</span>
+                <span th:text="${roomType.area} + ' m²'">32 m²</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span>👥</span>
+                <span th:text="'Max: ' + ${roomType.maxOccupancy} + ' guests'">Max: 2 guests</span>
+              </div>
+              <div class="flex items-center gap-2 col-span-2">
+                <span>🛌</span>
+                <span th:text="'Bed Type: ' + ${roomType.bedType}">Bed Type: King Size</span>
+              </div>
+            </div>
+
+            <!-- Features / Amenities Tags -->
+            <div class="mb-6 flex flex-wrap gap-1.5" th:if="${roomType.features != null}">
+              <!-- Split comma-separated features if possible, otherwise display text -->
+              <span th:each="feature : ${#strings.arraySplit(roomType.features, ',')}"
+                    class="rounded-md bg-primary-soft/40 px-2 py-1 text-[10px] font-semibold tracking-wider text-primary uppercase"
+                    th:text="${#strings.trim(feature)}">
+                Free WiFi
+              </span>
+            </div>
+
+            <a th:href="@{/#booking}" class="mt-auto block text-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-card hover:opacity-90 transition-opacity">
+              Reserve Room
+            </a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <div th:replace="~{guest/layout :: footer}"></div>
+
+</body>
+</html>
