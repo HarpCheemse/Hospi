@@ -1,0 +1,37 @@
+@theme {
+    /* palette */
+    --color-ink: #17211F;
+    --color-forest: #123C35;
+    --color-emerald: #1F6F5B;
+    --color-gold: #C7A45D;
+    --color-ivory: #FBF8F1;
+    --color-porcelain: #FFFFFF;
+    --color-stone: #6B6258;
+
+    /* semantic */
+    --color-primary: var(--color-emerald);
+    --color-primary-foreground: var(--color-ivory);
+
+    --color-accent: var(--color-gold);
+    --color-accent-foreground: var(--color-ink);
+
+    --color-background: var(--color-ivory);
+    --color-foreground: var(--color-ink);
+
+    --color-surface: var(--color-porcelain);
+    --color-surface-foreground: var(--color-ink);
+
+    --color-muted: #EEE7DA;
+    --color-muted-foreground: #aeaeae;
+
+    --color-border: #DED5C7;
+
+    --color-success: #2F7D4F;
+    --color-success-foreground: #FFFFFF;
+
+    --color-warning: #B7791F;
+    --color-warning-foreground: #FFFFFF;
+
+    --color-danger: #B84A3A;
+    --color-danger-foreground: #FFFFFF;
+}

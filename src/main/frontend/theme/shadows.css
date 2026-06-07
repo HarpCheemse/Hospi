@@ -1,0 +1,9 @@
+@theme {
+    --shadow-none: none;
+
+    --shadow-card: 0 12px 32px rgba(23, 33, 31, 0.08);
+    --shadow-soft: 0 18px 48px rgba(23, 33, 31, 0.10);
+    --shadow-float: 0 24px 64px rgba(23, 33, 31, 0.14);
+
+    --shadow-inset: inset 0 2px 6px rgba(23, 33, 31, 0.08);
+}
