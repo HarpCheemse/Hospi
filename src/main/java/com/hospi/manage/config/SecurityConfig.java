@@ -55,6 +55,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 
                         .requestMatchers("/",
+                                "/rooms",
+                                "/policies",
+                                "/contact",
+                                "/my-booking",
+                                "/error/**",
+                                "/hotel-picture/**",
+                                "/room-type-picture/**",
                                 "/login",
                                 "/auth/password/**",
                                 "/css/**",
