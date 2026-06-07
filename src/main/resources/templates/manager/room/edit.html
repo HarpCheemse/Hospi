@@ -12,35 +12,33 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.9/cdn.min.js" defer></script>
 </head>
 
-<body class="bg-background text-text">
-
-<div class="flex min-h-screen">
+<body class="staff-layout">
 
     <!-- SIDEBAR -->
     <div th:replace="~{fragments/manager-sidebar :: sidebar}"></div>
 
     <!-- MAIN -->
-    <main class="flex-1 p-6">
+    <main class="staff-page">
         <!-- TOASTS -->
         <div th:replace="~{fragments/components/toast :: toast}"></div>
 
         <!-- HEADER -->
-        <div class="mb-6 flex items-start justify-between">
+        <div class="staff-page-header">
 
             <div>
 
-                <h1 class="text-2xl font-bold">
+                <h1 class="staff-page-title">
                     Edit Room
                 </h1>
 
-                <p class="mt-1 text-sm text-muted">
+                <p class="page-description">
                     Update room information.
                 </p>
 
             </div>
 
             <a th:href="@{/manager/rooms}"
-               class="rounded-xl border border-border bg-surface px-4 py-2 text-sm font-medium hover:bg-background">
+               class="btn btn-secondary">
                 Back to Rooms
             </a>
 
@@ -50,7 +48,7 @@
               th:action="@{|/manager/rooms/${roomId}/edit|}"
               method="post" novalidate>
 
-            <section class="rounded-2xl border border-border bg-surface shadow-card">
+            <section class="card">
 
                 <div class="border-b border-border p-5">
 
@@ -58,7 +56,7 @@
                         Room Details
                     </h2>
 
-                    <p class="mt-1 text-sm text-muted">
+                    <p class="mt-1 text-sm text-muted-foreground">
                         Modify room number and room type.
                     </p>
 
@@ -122,7 +120,7 @@
             </section>
 
             <!-- READ ONLY INFO -->
-            <section class="mt-6 rounded-2xl border border-border bg-surface shadow-card">
+            <section class="mt-6 card">
 
                 <div class="border-b border-border p-5">
 
@@ -136,7 +134,7 @@
 
                     <div class="flex justify-between">
                         <div>
-                            <p class="text-sm text-muted">
+                            <p class="text-sm text-muted-foreground">
                                 Floor
                             </p>
 
@@ -166,12 +164,12 @@
             <div class="mt-6 flex justify-end gap-3">
 
                 <a th:href="@{/manager/rooms}"
-                   class="rounded-xl border border-border bg-surface px-5 py-3 text-sm font-medium">
+                   class="btn btn-secondary btn-lg">
                     Cancel
                 </a>
 
                 <button type="submit"
-                        class="rounded-xl bg-primary px-5 py-3 text-sm font-medium text-white hover:opacity-90">
+                        class="btn btn-primary btn-lg">
                     Save Changes
                 </button>
 
@@ -180,8 +178,6 @@
         </form>
 
     </main>
-
-</div>
 
 </body>
 </html>

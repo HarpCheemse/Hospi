@@ -10,38 +10,32 @@
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 
-<body class="bg-background text-text">
+<body class="staff-layout">
 
-<div class="flex min-h-screen">
-
-    <!-- SIDEBAR -->
     <div th:replace="~{fragments/manager-sidebar :: sidebar}"></div>
 
-    <!-- MAIN -->
-    <main class="flex-1 bg-background p-6">
+    <main class="staff-page">
 
-        <!-- HEADER -->
-        <div class="mb-6 flex items-start justify-between">
+        <div class="staff-page-header">
 
             <div>
-                <h1 class="text-2xl font-bold text-text">Room Types</h1>
+                <h1 class="staff-page-title">Room Types</h1>
 
-                <p class="mt-1 text-sm text-muted">
+                <p class="page-description">
                     Manage room categories, pricing, occupancy, and operational availability.
                 </p>
             </div>
 
             <a th:href="@{/manager/room-types/create}"
-               class="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white hover:opacity-90">
+               class="btn btn-primary">
                 + Create Room Type
             </a>
 
         </div>
 
         <!-- EMPTY STATE -->
-        <div th:if="${#lists.isEmpty(roomTypes)}"
-             class="rounded-2xl border border-border bg-surface p-10 text-center text-muted">
-            No room types found. Create your first one.
+        <div th:if="${#lists.isEmpty(roomTypes)}" class="card-empty">
+            <p class="text-muted-foreground">No room types found. Create your first one.</p>
         </div>
 
         <!-- GRID -->
@@ -49,11 +43,11 @@
              class="grid grid-cols-3 gap-5">
 
             <!-- CARD -->
-            <section th:each="rt : ${roomTypes}"
-                     class="overflow-hidden rounded-2xl border border-border bg-surface shadow-card">
+             <section th:each="rt : ${roomTypes}"
+                      class="overflow-hidden card">
 
                 <!-- IMAGE -->
-                <div class="flex h-48 items-center justify-center border-b border-border bg-background text-muted">
+                <div class="flex h-48 items-center justify-center border-b border-border bg-background text-muted-foreground">
 
                     <img th:if="${!#lists.isEmpty(rt.pictures)}"
                          th:src="@{/room-type-picture/{id}(id=${rt.pictures[0].id})}"
@@ -75,14 +69,13 @@
                                 Room Name
                             </h2>
 
-                            <p class="text-sm text-muted"
+                            <p class="text-sm text-muted-foreground"
                                th:text="${rt.bedType + ' · ' + rt.area + 'm²'}">
                                 Bed · Area
                             </p>
                         </div>
 
-                        <span class="rounded-full px-2 py-1 text-xs font-medium"
-                              th:classappend="${rt.active} ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+                        <span th:classappend="${rt.active} ? 'pill-success' : 'pill-danger'"
                               th:text="${rt.active} ? 'ACTIVE' : 'DISABLED'">
                             Status
                         </span>
@@ -93,17 +86,17 @@
                     <div class="mb-4 grid grid-cols-2 gap-3">
 
                         <div class="rounded-lg border border-border bg-background p-3">
-                            <p class="text-xs text-muted">Rooms</p>
+                            <p class="text-xs text-muted-foreground">Rooms</p>
                             <p class="text-lg font-semibold"
-                               th:text="0">
+                                th:text="0">
                                 0
                             </p>
                         </div>
 
                         <div class="rounded-lg border border-border bg-background p-3">
-                            <p class="text-xs text-muted">Base Price</p>
+                            <p class="text-xs text-muted-foreground">Base Price</p>
                             <p class="text-lg font-semibold"
-                               th:text="|$${rt.basePrice}|">
+                                th:text="|$${rt.basePrice}|">
                                 $0
                             </p>
                         </div>
@@ -111,7 +104,7 @@
                     </div>
 
                     <!-- DESCRIPTION -->
-                    <p class="mb-4 line-clamp-2 text-sm text-muted"
+                    <p class="mb-4 line-clamp-2 text-sm text-muted-foreground"
                        th:text="${rt.description}">
                         Description
                     </p>
@@ -120,12 +113,12 @@
                     <div class="flex items-center gap-2">
 
                         <a th:href="@{'/manager/room-types/' + ${rt.id}}"
-                           class="rounded-xl bg-gray-100 px-3 py-2 text-sm hover:bg-gray-200">
+                           class="btn btn-secondary btn-sm">
                             View
                         </a>
 
                         <a th:href="@{'/manager/room-types/edit/' + ${rt.id}}"
-                           class="rounded-xl bg-primary px-3 py-2 text-sm text-white hover:opacity-90">
+                           class="btn btn-primary btn-sm">
                             Edit
                         </a>
 
@@ -138,8 +131,6 @@
         </div>
 
     </main>
-
-</div>
 
 </body>
 </html>

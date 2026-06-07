@@ -19,32 +19,30 @@
     </style>
 </head>
 
-<body class="bg-background text-text">
-
-<div class="flex min-h-screen">
+<body class="staff-layout">
 
     <!-- SIDEBAR -->
     <div th:replace="~{fragments/manager-sidebar :: sidebar}"></div>
 
     <!-- MAIN -->
-    <main class="flex-1 bg-background p-6">
+    <main class="staff-page">
 
         <!-- HEADER -->
-        <div class="mb-6 flex items-start justify-between">
+        <div class="staff-page-header">
 
             <div>
-                <h1 class="text-2xl font-bold text-text">
+                <h1 class="staff-page-title">
                     Edit Room Type
                 </h1>
 
-                <p class="mt-1 text-sm text-muted"
+                <p class="page-description"
                    th:text="${roomType.name}">
                     Room Name
                 </p>
             </div>
 
             <a th:href="@{'/manager/room-types/' + ${roomType.id}}"
-               class="rounded-xl border border-border bg-surface px-4 py-2 text-sm font-medium hover:bg-background">
+               class="btn btn-secondary">
                 Back to Details
             </a>
 
@@ -58,7 +56,7 @@
               class="flex flex-col gap-6">
 
             <!-- BASIC INFO -->
-            <section class="rounded-2xl border border-border bg-surface shadow-card">
+            <section class="card">
 
                 <div class="border-b border-border p-5">
                     <h2 class="text-lg font-semibold">Basic Information</h2>
@@ -129,7 +127,7 @@
             </section>
 
             <!-- DESCRIPTION -->
-            <section class="rounded-2xl border border-border bg-surface shadow-card">
+            <section class="card">
 
                 <div class="border-b border-border p-5">
                     <h2 class="text-lg font-semibold">Description & Features</h2>
@@ -145,7 +143,7 @@
                               rows="4"
                               class="rounded-xl border border-border bg-background px-4 py-3"></textarea>
 
-                    <p class="text-xs text-muted">
+                    <p class="text-xs text-muted-foreground">
                         Separate features with commas
                     </p>
 
@@ -154,7 +152,7 @@
             </section>
 
             <!-- IMAGES -->
-            <section class="rounded-2xl border border-border bg-surface shadow-card">
+            <section class="card">
 
                 <div class="border-b border-border p-5">
                     <h2 class="text-lg font-semibold">Room Images</h2>
@@ -173,7 +171,7 @@
                                  class="h-full w-full object-cover">
 
                             <div th:if="${#lists.isEmpty(roomType.pictures)}"
-                                 class="flex h-full items-center justify-center text-muted">
+                                 class="flex h-full items-center justify-center text-muted-foreground">
                                 No image
                             </div>
 
@@ -182,7 +180,7 @@
 
                     <!-- UPLOAD NEW -->
                     <div id="uploadBox"
-                         class="flex h-40 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-background text-muted">
+                         class="flex h-40 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-background text-muted-foreground">
 
                         <p class="text-sm font-medium">Replace images</p>
                         <p class="text-xs">PNG, JPG, WEBP</p>
@@ -221,18 +219,18 @@
                 <div class="flex justify-end gap-3">
 
                     <a th:href="@{'/manager/room-types/' + ${roomType.id}}"
-                       class="rounded-xl border border-border bg-surface px-5 py-3 text-sm font-medium">
+                       class="btn btn-secondary btn-lg">
                         Cancel
                     </a>
 
                     <button type="button"
                             @click="deleteModalOpen = true"
-                            class="rounded-xl bg-danger px-5 py-3 text-sm font-medium text-white">
+                            class="btn btn-danger btn-lg">
                         Delete
                     </button>
 
                     <button type="submit"
-                            class="rounded-xl bg-primary px-5 py-3 text-sm font-medium text-white">
+                            class="btn btn-primary btn-lg">
                         Save Changes
                     </button>
 
@@ -259,11 +257,11 @@
                          @click.stop
                          class="relative mx-4 w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl">
 
-                        <h2 class="text-lg font-semibold text-text">
+                        <h2 class="text-lg font-semibold text-foreground">
                             Delete Room Type
                         </h2>
 
-                        <p class="mt-2 text-sm text-muted">
+                        <p class="mt-2 text-sm text-muted-foreground">
                             Are you sure you want to delete this room type? This action cannot be undone.
                         </p>
 
@@ -271,13 +269,13 @@
 
                             <button type="button"
                                     @click="deleteModalOpen = false"
-                                    class="rounded-xl border border-border bg-background px-4 py-2 text-sm font-medium">
+                                    class="btn btn-secondary">
                                 Cancel
                             </button>
 
                             <button type="submit"
                                     form="deleteForm"
-                                    class="rounded-xl bg-danger px-4 py-2 text-sm font-medium text-white">
+                                    class="btn btn-danger">
                                 Delete
                             </button>
 
@@ -298,8 +296,6 @@
               method="post">
         </form>
     </main>
-
-</div>
 
 </body>
 </html>

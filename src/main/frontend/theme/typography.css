@@ -1,0 +1,20 @@
+@theme {
+    --font-display: "Cormorant Garamond", Georgia, serif;
+    --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+    --text-2xs: 0.6875rem;
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+    --text-3xl: 1.875rem;
+    --text-4xl: 2.5rem;
+    --text-5xl: 3.25rem;
+    --text-6xl: 4rem;
+    
+    --tracking-brand: 0.08em;
+    --tracking-brand-wide: 0.16em;
+}

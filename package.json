@@ -7,8 +7,8 @@
     "test": "src/test"
   },
   "scripts": {
-    "css:build": "tailwindcss -i ./src/main/frontend/tailwind.css -o ./src/main/resources/static/css/app.css --minify",
-    "css:watch": "tailwindcss -i ./src/main/frontend/tailwind.css -o ./src/main/resources/static/css/app.css --watch",
+    "css:build": "tailwindcss -i ./src/main/frontend/app.css -o ./src/main/resources/static/css/app.css --minify",
+    "css:watch": "tailwindcss -i ./src/main/frontend/app.css -o ./src/main/resources/static/css/app.css --watch",
     "test": "echo \"No JavaScript tests configured\""
   },
   "repository": {
