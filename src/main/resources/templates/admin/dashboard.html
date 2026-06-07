@@ -9,42 +9,39 @@
           th:href="@{/css/app.css}"/>
 </head>
 
-<body class="bg-background text-text">
-
-<div class="flex min-h-screen">
+<body class="staff-layout">
 
     <!-- SIDEBAR -->
     <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
 
     <!-- MAIN -->
-    <main class="flex-1 p-6 bg-background">
+    <main class="staff-page">
 
         <!-- HEADER -->
-        <div class="mb-6">
+        <header class="staff-page-header">
 
-            <h1 class="text-2xl font-bold">
-                Admin Dashboard
-            </h1>
+            <section>
+                <h1 class="staff-page-title">Admin Dashboard</h1>
+                <p class="page-description">
+                    Monitor platform activity, staff management, and system health
+                </p>
+            </section>
 
-            <p class="text-sm text-muted mt-1">
-                Monitor platform activity, staff management, and system health
-            </p>
-
-        </div>
+        </header>
 
         <!-- STATS -->
-        <div class="grid grid-cols-4 gap-4 mb-6">
+        <section class="mb-6 grid grid-cols-4 gap-4">
 
-            <div class="bg-surface border border-border rounded-xl p-5 shadow-sm">
+            <div class="card-compact">
 
-                <div class="flex justify-between mb-4">
+                <div class="mb-4 flex items-start justify-between">
 
                     <div>
-                        <p class="text-sm text-muted">
+                        <p class="text-sm text-muted-foreground">
                             Total Staff
                         </p>
 
-                        <p class="text-2xl font-bold">
+                        <p class="mt-1 text-2xl font-bold text-foreground">
                             86
                         </p>
                     </div>
@@ -54,22 +51,22 @@
 
                 </div>
 
-                <p class="text-xs text-green-600">
+                <p class="pill-success">
                     +12 this month
                 </p>
 
             </div>
 
-            <div class="bg-surface border border-border rounded-xl p-5 shadow-sm">
+            <div class="card-compact">
 
-                <div class="flex justify-between mb-4">
+                <div class="mb-4 flex items-start justify-between">
 
                     <div>
-                        <p class="text-sm text-muted">
+                        <p class="text-sm text-muted-foreground">
                             Active Roles
                         </p>
 
-                        <p class="text-2xl font-bold">
+                        <p class="mt-1 text-2xl font-bold text-foreground">
                             14
                         </p>
                     </div>
@@ -79,22 +76,22 @@
 
                 </div>
 
-                <p class="text-xs text-muted">
+                <p class="pill-muted">
                     Permission groups
                 </p>
 
             </div>
 
-            <div class="bg-surface border border-border rounded-xl p-5 shadow-sm">
+            <div class="card-compact">
 
-                <div class="flex justify-between mb-4">
+                <div class="mb-4 flex items-start justify-between">
 
                     <div>
-                        <p class="text-sm text-muted">
+                        <p class="text-sm text-muted-foreground">
                             RAM Usage
                         </p>
 
-                        <p class="text-2xl font-bold">
+                        <p class="mt-1 text-2xl font-bold text-foreground">
                             145 MB
                         </p>
                     </div>
@@ -104,22 +101,22 @@
 
                 </div>
 
-                <p class="text-xs text-muted">
+                <p class="pill-muted">
                     Stable operations
                 </p>
 
             </div>
 
-            <div class="bg-surface border border-border rounded-xl p-5 shadow-sm">
+            <div class="card-compact">
 
-                <div class="flex justify-between mb-4">
+                <div class="mb-4 flex items-start justify-between">
 
                     <div>
-                        <p class="text-sm text-muted">
+                        <p class="text-sm text-muted-foreground">
                             System Uptime
                         </p>
 
-                        <p class="text-2xl font-bold">
+                        <p class="mt-1 text-2xl font-bold text-foreground">
                             99.98%
                         </p>
                     </div>
@@ -129,85 +126,85 @@
 
                 </div>
 
-                <p class="text-xs text-green-600">
+                <p class="pill-success">
                     Healthy
                 </p>
 
             </div>
 
-        </div>
+        </section>
 
-        <!-- CONTENT GRID -->
-        <div class="grid grid-cols-2 gap-4">
+        <!-- GRID -->
+        <section class="grid grid-cols-12 gap-4">
 
             <!-- RECENT ACTIVITY -->
-            <div class="bg-surface border border-border rounded-xl p-5">
+            <section class="card-panel col-span-7">
 
-                <div class="flex justify-between mb-4">
+                <div class="mb-4 flex items-center justify-between">
 
                     <div>
 
-                        <h2 class="text-lg font-semibold">
+                        <h2 class="text-lg font-semibold text-foreground">
                             Recent Activity
                         </h2>
 
-                        <p class="text-sm text-muted">
+                        <p class="text-sm text-muted-foreground">
                             Latest system events
                         </p>
 
                     </div>
 
-                    <button class="text-sm border border-border px-3 py-1 rounded-lg hover:bg-background">
+                    <button class="btn btn-secondary btn-sm">
                         View All
                     </button>
 
                 </div>
 
-                <div class="space-y-4">
+                <div class="flex flex-col gap-4">
 
-                    <div class="flex gap-3">
-                        <div class="w-2 h-2 mt-2 bg-primary rounded-full"></div>
+                    <div class="flex items-start gap-3">
+                        <div class="mt-2 h-2 w-2 rounded-full bg-primary"></div>
                         <div>
-                            <p class="text-sm font-medium">
+                            <p class="text-sm font-medium text-foreground">
                                 New receptionist account created
                             </p>
-                            <p class="text-xs text-muted">
+                            <p class="text-xs text-muted-foreground">
                                 5 minutes ago
                             </p>
                         </div>
                     </div>
 
-                    <div class="flex gap-3">
-                        <div class="w-2 h-2 mt-2 bg-primary rounded-full"></div>
+                    <div class="flex items-start gap-3">
+                        <div class="mt-2 h-2 w-2 rounded-full bg-primary"></div>
                         <div>
-                            <p class="text-sm font-medium">
+                            <p class="text-sm font-medium text-foreground">
                                 Role permissions updated
                             </p>
-                            <p class="text-xs text-muted">
+                            <p class="text-xs text-muted-foreground">
                                 18 minutes ago
                             </p>
                         </div>
                     </div>
 
-                    <div class="flex gap-3">
-                        <div class="w-2 h-2 mt-2 bg-primary rounded-full"></div>
+                    <div class="flex items-start gap-3">
+                        <div class="mt-2 h-2 w-2 rounded-full bg-primary"></div>
                         <div>
-                            <p class="text-sm font-medium">
+                            <p class="text-sm font-medium text-foreground">
                                 Backup completed successfully
                             </p>
-                            <p class="text-xs text-muted">
+                            <p class="text-xs text-muted-foreground">
                                 1 hour ago
                             </p>
                         </div>
                     </div>
 
-                    <div class="flex gap-3">
-                        <div class="w-2 h-2 mt-2 bg-yellow-500 rounded-full"></div>
+                    <div class="flex items-start gap-3">
+                        <div class="mt-2 h-2 w-2 rounded-full bg-warning"></div>
                         <div>
-                            <p class="text-sm font-medium">
+                            <p class="text-sm font-medium text-foreground">
                                 Failed login attempts detected
                             </p>
-                            <p class="text-xs text-muted">
+                            <p class="text-xs text-muted-foreground">
                                 2 hours ago
                             </p>
                         </div>
@@ -215,70 +212,71 @@
 
                 </div>
 
-            </div>
+            </section>
 
             <!-- SYSTEM HEALTH -->
-            <div class="bg-surface border border-border rounded-xl p-5">
+            <section class="card-panel col-span-5">
 
-                <div class="flex justify-between mb-4">
+                <div class="mb-4 flex items-center justify-between">
 
-                    <h2 class="text-lg font-semibold">
-                        System Health
-                    </h2>
+                    <div>
+                        <h2 class="text-lg font-semibold text-foreground">
+                            System Health
+                        </h2>
+                        <p class="text-sm text-muted-foreground">Current system status</p>
+                    </div>
 
-                    <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                    <span class="pill-success">
                         Healthy
                     </span>
 
                 </div>
 
-                <div class="space-y-5">
+                <div class="flex flex-col gap-5">
 
                     <div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <span>CPU Usage</span>
-                            <span>42%</span>
+                        <div class="mb-1 flex justify-between text-sm">
+                            <span class="text-foreground">CPU Usage</span>
+                            <span class="text-muted-foreground">42%</span>
                         </div>
 
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-primary h-2 rounded-full"
+                        <div class="h-2 w-full rounded-full bg-muted">
+                            <div class="h-2 rounded-full bg-primary"
                                  style="width: 42%"></div>
                         </div>
                     </div>
 
                     <div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <span>Database Load</span>
-                            <span>63%</span>
+                        <div class="mb-1 flex justify-between text-sm">
+                            <span class="text-foreground">Database Load</span>
+                            <span class="text-muted-foreground">63%</span>
                         </div>
 
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-primary h-2 rounded-full"
+                        <div class="h-2 w-full rounded-full bg-muted">
+                            <div class="h-2 rounded-full bg-primary"
                                  style="width: 63%"></div>
                         </div>
                     </div>
 
                     <div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <span>Storage Usage</span>
-                            <span>71%</span>
+                        <div class="mb-1 flex justify-between text-sm">
+                            <span class="text-foreground">Storage Usage</span>
+                            <span class="text-muted-foreground">71%</span>
                         </div>
 
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-primary h-2 rounded-full"
+                        <div class="h-2 w-full rounded-full bg-muted">
+                            <div class="h-2 rounded-full bg-primary"
                                  style="width: 71%"></div>
                         </div>
                     </div>
 
                 </div>
 
-            </div>
+            </section>
 
-        </div>
+        </section>
 
     </main>
-
-</div>
 
 </body>
 </html>

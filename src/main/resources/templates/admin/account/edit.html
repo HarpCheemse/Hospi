@@ -13,46 +13,45 @@
           th:href="@{/css/app.css}">
 </head>
 
-<body class="bg-background text-text">
-
-<div class="flex min-h-screen">
+<body class="staff-layout">
 
     <!-- SIDEBAR -->
     <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
 
     <!-- MAIN -->
-    <main class="flex-1 p-6">
+    <main class="staff-page">
 
         <div th:replace="~{fragments/components/toast :: toast}"></div>
 
         <!-- HEADER -->
-        <div class="mb-6 flex items-start justify-between">
+        <header class="staff-page-header">
 
-            <div>
+            <section>
 
-                <h1 class="text-2xl font-bold">
+                <h1 class="staff-page-title">
                     Edit Account
                 </h1>
 
-                <p class="mt-1 text-sm text-muted">
+                <p class="page-description">
                     Update account information and permissions.
                 </p>
 
-            </div>
+            </section>
 
             <a th:href="@{'/admin/accounts/' + ${accountId}}"
-               class="rounded-xl border border-border px-5 py-3 text-sm font-medium text-text hover:bg-background">
+               class="btn btn-secondary btn-lg">
                 Cancel
             </a>
 
-        </div>
+        </header>
 
         <!-- FORM -->
         <form th:action="@{'/admin/accounts/' + ${accountId} + '/edit'}"
               th:object="${form}"
-              method="post">
+              method="post"
+              class="flex flex-col gap-6">
 
-            <div class="rounded-2xl border border-border bg-surface shadow-card">
+            <section class="card">
 
                 <div class="border-b border-border p-5">
 
@@ -172,18 +171,18 @@
 
                 </div>
 
-            </div>
+            </section>
 
             <!-- ACTIONS -->
-            <div class="mt-6 flex justify-end gap-3">
+            <div class="flex justify-end gap-3">
 
                 <a th:href="@{'/admin/accounts/' + ${accountId}}"
-                   class="rounded-xl border border-border px-5 py-3 text-sm font-medium text-text hover:bg-background">
+                   class="btn btn-secondary btn-lg">
                     Cancel
                 </a>
 
                 <button type="submit"
-                        class="rounded-xl bg-primary px-5 py-3 text-sm font-medium text-white shadow-card hover:opacity-90">
+                        class="btn btn-primary btn-lg">
                     Save Changes
                 </button>
 
@@ -192,8 +191,6 @@
         </form>
 
     </main>
-
-</div>
 
 </body>
 </html>

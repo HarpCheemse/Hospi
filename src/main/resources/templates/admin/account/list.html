@@ -11,43 +11,41 @@
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 
-<body class="bg-background text-text">
-
-<div class="flex min-h-screen">
+<body class="staff-layout">
 
     <!-- SIDEBAR -->
     <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
 
     <!-- MAIN -->
-    <main class="flex-1 p-6">
+    <main class="staff-page">
 
         <!-- TOAST -->
         <div th:replace="~{fragments/components/toast :: toast}"></div>
 
         <!-- HEADER -->
-        <div class="mb-6 flex items-start justify-between">
+        <header class="staff-page-header">
 
-            <div>
+            <section>
 
-                <h1 class="text-2xl font-bold">
+                <h1 class="staff-page-title">
                     Account Management
                 </h1>
 
-                <p class="mt-1 text-sm text-muted">
+                <p class="page-description">
                     Review and manage user accounts across the system.
                 </p>
 
-            </div>
+            </section>
 
             <a th:href="@{/admin/accounts/create}"
-               class="rounded-xl bg-primary px-5 py-3 text-sm font-medium text-white hover:opacity-90">
+               class="btn btn-primary btn-lg">
                 Create Account
             </a>
 
-        </div>
+        </header>
 
         <!-- FILTERS -->
-        <section class="mb-6 rounded-2xl border border-border bg-surface shadow-card">
+        <section class="card">
 
             <div class="border-b border-border p-5">
 
@@ -61,7 +59,7 @@
 
                 <div>
 
-                    <label class="mb-2 block text-sm text-muted">
+                    <label class="mb-2 block text-sm font-medium">
                         Search
                     </label>
 
@@ -73,7 +71,7 @@
 
                 <div>
 
-                    <label class="mb-2 block text-sm text-muted">
+                    <label class="mb-2 block text-sm font-medium">
                         Role
                     </label>
 
@@ -94,7 +92,7 @@
 
                 <div>
 
-                    <label class="mb-2 block text-sm text-muted">
+                    <label class="mb-2 block text-sm font-medium">
                         Status
                     </label>
 
@@ -115,7 +113,7 @@
         </section>
 
         <!-- ACCOUNTS -->
-        <section class="rounded-2xl border border-border bg-surface shadow-card">
+        <section class="overflow-hidden card">
 
             <div class="border-b border-border p-5">
 
@@ -129,23 +127,23 @@
 
                 <table class="w-full">
 
-                    <thead class="bg-surface-muted">
+                    <thead class="bg-muted">
 
                     <tr>
 
-                        <th class="px-5 py-4 text-left text-sm font-medium text-muted">
+                        <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">
                             Account
                         </th>
 
-                        <th class="px-5 py-4 text-left text-sm font-medium text-muted">
+                        <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">
                             Role
                         </th>
 
-                        <th class="px-5 py-4 text-left text-sm font-medium text-muted">
+                        <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">
                             Status
                         </th>
 
-                        <th class="px-5 py-4 text-right text-sm font-medium text-muted">
+                        <th class="px-5 py-4 text-right text-sm font-medium text-muted-foreground">
                             Actions
                         </th>
 
@@ -153,7 +151,6 @@
 
                     </thead>
 
-                    <tbody>
                     <tbody>
 
                     <tr th:each="account : ${accounts}"
@@ -166,7 +163,7 @@
                                 John Smith
                             </p>
 
-                            <p class="text-sm text-muted"
+                            <p class="text-sm text-muted-foreground"
                                th:text="${account.email()}">
                                 john@hospi.com
                             </p>
@@ -180,30 +177,30 @@
 
                         <td class="px-5 py-4">
 
-        <span th:if="${account.status().name() == 'ACTIVE'}"
-              class="rounded-full bg-primary-soft px-2 py-1 text-xs font-medium text-primary-dark"
-              th:text="${account.status()}">
-            ACTIVE
-        </span>
+                            <span th:if="${account.status().name() == 'ACTIVE'}"
+                                  class="pill-success"
+                                  th:text="${account.status()}">
+                                ACTIVE
+                            </span>
 
                             <span th:if="${account.status().name() == 'DISABLED'}"
-                                  class="rounded-full bg-danger/10 px-2 py-1 text-xs font-medium text-danger"
+                                  class="pill-danger"
                                   th:text="${account.status()}">
-            DISABLED
-        </span>
+                                DISABLED
+                            </span>
 
                             <span th:if="${account.status().name() == 'LOCKED'}"
-                                  class="rounded-full bg-warning/10 px-2 py-1 text-xs font-medium text-warning"
+                                  class="pill-warning"
                                   th:text="${account.status()}">
-            LOCKED
-        </span>
+                                LOCKED
+                            </span>
 
                         </td>
 
                         <td class="px-5 py-4 text-right">
 
                             <a th:href="@{/admin/accounts/{id}(id=${account.id()})}"
-                               class="rounded-xl border border-border px-4 py-2 text-sm font-medium hover:bg-background">
+                               class="btn btn-secondary btn-sm">
                                 View
                             </a>
 
@@ -214,13 +211,11 @@
                     <tr th:if="${#lists.isEmpty(accounts)}">
 
                         <td colspan="4"
-                            class="px-5 py-10 text-center text-muted">
+                            class="px-5 py-10 text-center text-muted-foreground">
                             No accounts found.
                         </td>
 
                     </tr>
-
-                    </tbody>
 
                     </tbody>
 
@@ -231,8 +226,6 @@
         </section>
 
     </main>
-
-</div>
 
 </body>
 </html>

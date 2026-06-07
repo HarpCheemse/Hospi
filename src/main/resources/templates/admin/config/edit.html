@@ -15,44 +15,44 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.9/cdn.min.js" defer></script>
 </head>
 
-<body class="bg-background text-text">
-
-<div class="flex min-h-screen">
+<body class="staff-layout">
 
     <!-- SIDEBAR -->
     <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
 
     <!-- MAIN -->
-    <main class="flex-1 p-6">
+    <main class="staff-page">
 
-        <div class="mb-6 flex items-start justify-between">
+        <!-- HEADER -->
+        <header class="staff-page-header">
 
-            <div>
+            <section>
 
-                <h1 class="text-2xl font-bold">
+                <h1 class="staff-page-title">
                     Edit System Configuration
                 </h1>
 
-                <p class="mt-1 text-sm text-muted">
+                <p class="page-description">
                     Configure hotel financial settings and booking rules.
                 </p>
 
-            </div>
+            </section>
 
             <a th:href="@{/admin/configs}"
-               class="rounded-xl border border-border bg-surface px-4 py-2 text-sm font-medium hover:bg-background">
+               class="btn btn-secondary">
                 Back
             </a>
 
-        </div>
+        </header>
 
         <form th:object="${form}"
               th:action="@{/admin/configs/edit}"
               method="post"
-              novalidate>
+              novalidate
+              class="flex flex-col gap-6">
 
             <!-- FINANCIAL -->
-            <section class="rounded-2xl border border-border bg-surface shadow-card">
+            <section class="card">
 
                 <div class="border-b border-border p-5">
 
@@ -71,7 +71,7 @@
                             Tax Rate (%)
                         </label>
 
-                        <p class="mb-2 text-sm text-muted">
+                        <p class="mb-2 text-sm text-muted-foreground">
                             Percentage tax automatically added to every booking invoice.
                         </p>
 
@@ -88,7 +88,7 @@
 
                     <div>
                         <label class="mb-2 block text-sm font-medium"> Default Deposit Percentage (%) </label>
-                        <p class="mb-2 text-sm text-muted">
+                        <p class="mb-2 text-sm text-muted-foreground">
                             Percentage of the booking total required during reservation
                             confirmation. </p>
                         <input th:field="*{defaultDepositPercentage}" type="number" step="0.01"
@@ -104,7 +104,7 @@
 
                     <div>
                         <label class="mb-2 block text-sm font-medium"> Late Checkout Fee </label>
-                        <p class="mb-2 text-sm text-muted"> Additional charge applied when guests check out after the
+                        <p class="mb-2 text-sm text-muted-foreground"> Additional charge applied when guests check out after the
                             standard checkout time. </p>
                         <input th:field="*{lateCheckoutFee}" type="number" step="0.01"
                                min="0"
@@ -116,7 +116,7 @@
                     </div>
 
                     <div><label class="mb-2 block text-sm font-medium"> Extra Guest Fee </label>
-                        <p class="mb-2 text-sm text-muted"> Fee charged for each guest exceeding the room's standard
+                        <p class="mb-2 text-sm text-muted-foreground"> Fee charged for each guest exceeding the room's standard
                             occupancy. </p>
                         <input th:field="*{extraGuestFee}" type="number" step="0.01" min="0"
                                class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
@@ -130,13 +130,13 @@
             </section>
 
             <!-- BOOKING RULES -->
-            <section class="mt-6 rounded-2xl border border-border bg-surface shadow-card">
+            <section class="card">
                 <div class="border-b border-border p-5"><h2 class="text-lg font-semibold"> Booking Rules </h2>
-                    <p class="mt-1 text-sm text-muted"> Configure reservation limits and cancellation policies. </p>
+                    <p class="page-description"> Configure reservation limits and cancellation policies. </p>
                 </div>
                 <div class="grid grid-cols-2 gap-5 p-5">
                     <div><label class="mb-2 block text-sm font-medium"> Pending Booking Expiry (Minutes) </label>
-                        <p class="mb-2 text-sm text-muted"> Automatically cancel unpaid pending reservations after this
+                        <p class="mb-2 text-sm text-muted-foreground"> Automatically cancel unpaid pending reservations after this
                             duration. </p> <input th:field="*{pendingBookingExpiryMinutes}" type="number" min="1"
                                                   class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
                         <p th:if="${#fields.hasErrors('pendingBookingExpiryMinutes')}"
@@ -145,7 +145,7 @@
                         </p>
                     </div>
                     <div><label class="mb-2 block text-sm font-medium"> Cancellation Hours Before Check-in </label>
-                        <p class="mb-2 text-sm text-muted"> Guests may cancel without penalty before this many hours
+                        <p class="mb-2 text-sm text-muted-foreground"> Guests may cancel without penalty before this many hours
                             from check-in. </p> <input th:field="*{cancellationHoursBeforeCheckin}" type="number"
                                                        min="0"
                                                        class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
@@ -155,7 +155,7 @@
                         </p>
                     </div>
                     <div><label class="mb-2 block text-sm font-medium"> Maximum Booking Days </label>
-                        <p class="mb-2 text-sm text-muted"> Maximum number of nights allowed in a single
+                        <p class="mb-2 text-sm text-muted-foreground"> Maximum number of nights allowed in a single
                             reservation. </p> <input th:field="*{maximumBookingDays}" type="number" min="1"
                                                      class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
                         <p th:if="${#fields.hasErrors('maximumBookingDays')}"
@@ -165,7 +165,7 @@
                     </div>
                     <div>
                         <label class="mb-2 block text-sm font-medium"> Maximum Rooms Per Booking </label>
-                        <p class="mb-2 text-sm text-muted"> Maximum number of rooms a guest may reserve in one
+                        <p class="mb-2 text-sm text-muted-foreground"> Maximum number of rooms a guest may reserve in one
                             booking. </p>
                         <input th:field="*{maximumRoomPerBook}" type="number" min="1"
                                class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
@@ -177,15 +177,15 @@
                 </div>
             </section>
 
-            <div class="mt-6 flex justify-end gap-3">
+            <div class="flex justify-end gap-3">
 
                 <a th:href="@{/admin/configs}"
-                   class="rounded-xl border border-border bg-surface px-5 py-3 text-sm font-medium">
+                   class="btn btn-secondary btn-lg">
                     Cancel
                 </a>
 
                 <button type="submit"
-                        class="rounded-xl bg-primary px-5 py-3 text-sm font-medium text-white hover:opacity-90">
+                        class="btn btn-primary btn-lg">
                     Save Configuration
                 </button>
 
@@ -194,8 +194,6 @@
         </form>
 
     </main>
-
-</div>
 
 </body>
 </html>
