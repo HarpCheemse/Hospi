@@ -11,6 +11,7 @@ nb-configuration.xml
 
 # IDE
 .idea/
+.vscode/
 *.iml
 *.iws
 *.ipr
