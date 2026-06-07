@@ -1,0 +1,9 @@
+@layer components {
+    .avatar {
+        @apply flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold;
+    }
+
+    .user-pill {
+        @apply flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-2 shadow-card;
+    }
+}
