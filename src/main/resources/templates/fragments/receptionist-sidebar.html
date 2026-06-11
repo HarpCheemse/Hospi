@@ -4,23 +4,23 @@
 <body>
 
 <aside th:fragment="sidebar"
-       class="w-64 bg-surface border-r border-border p-5">
+       class="flex h-full w-64 flex-col border-r border-border bg-surface p-5">
 
     <!-- BRAND -->
-    <div class="flex items-center gap-3 mb-8">
-        <div class="w-9 h-9 bg-primary rounded-lg"></div>
-        <span class="font-semibold text-lg text-text">Hospi</span>
+    <div class="mb-8 flex items-center gap-3">
+        <div class="h-9 w-9 rounded-lg bg-primary"></div>
+        <span class="text-lg font-semibold text-foreground">Hospi</span>
     </div>
 
     <!-- NAV -->
-    <nav class="space-y-1 text-sm">
+    <nav class="flex-1 overflow-y-auto space-y-1 text-sm">
 
         <!-- DASHBOARD -->
         <a th:href="@{/receptionist}"
-           class="flex items-center gap-3 p-2 rounded-lg"
+           class="flex items-center gap-3 rounded-lg p-2"
            th:classappend="${activeSidebar == 'DASHBOARD'}
-                ? ' bg-primary/10 text-primary font-medium'
-                : ' hover:bg-background text-text'">
+                 ? ' bg-primary/10 text-primary font-medium'
+                 : ' hover:bg-muted text-foreground'">
 
             <img th:src="@{/assets/icons/layout-grid.svg}" alt="Dashboard"/>
             Dashboard
@@ -29,10 +29,10 @@
 
         <!-- RESERVATIONS -->
         <a th:href="@{/receptionist/reservations}"
-           class="flex items-center gap-3 p-2 rounded-lg"
+           class="flex items-center gap-3 rounded-lg p-2"
            th:classappend="${activeSidebar == 'RESERVATIONS'}
-                ? ' bg-primary/10 text-primary font-medium'
-                : ' hover:bg-background text-text'">
+                 ? ' bg-primary/10 text-primary font-medium'
+                 : ' hover:bg-muted text-foreground'">
 
             <img th:src="@{/assets/icons/calendar-check.svg}" alt="Reservations"/>
             Reservations
@@ -41,10 +41,10 @@
 
         <!-- ROOM STATUS -->
         <a th:href="@{/receptionist/room-status}"
-           class="flex items-center gap-3 p-2 rounded-lg"
+           class="flex items-center gap-3 rounded-lg p-2"
            th:classappend="${activeSidebar == 'ROOM_STATUS'}
-                ? ' bg-primary/10 text-primary font-medium'
-                : ' hover:bg-background text-text'">
+                 ? ' bg-primary/10 text-primary font-medium'
+                 : ' hover:bg-muted text-foreground'">
 
             <img th:src="@{/assets/icons/bed-double.svg}" alt="Room Status"/>
             Room Status
@@ -53,23 +53,34 @@
 
         <!-- NOTIFICATIONS -->
         <a th:href="@{/receptionist/notifications}"
-           class="flex items-center justify-between p-2 rounded-lg"
+           class="flex items-center justify-between rounded-lg p-2"
            th:classappend="${activeSidebar == 'NOTIFICATIONS'}
-                ? ' bg-primary/10 text-primary font-medium'
-                : ' hover:bg-background text-text'">
+                 ? ' bg-primary/10 text-primary font-medium'
+                 : ' hover:bg-muted text-foreground'">
 
             <div class="flex items-center gap-3">
                 <img th:src="@{/assets/icons/bell.svg}" alt="Notifications"/>
                 Notifications
             </div>
 
-            <span class="text-xs bg-accent text-white px-2 py-0.5 rounded-full">
+            <span class="pill-warning">
                 7
             </span>
 
         </a>
 
     </nav>
+
+    <!-- LOGOUT -->
+    <div class="mt-auto pt-4">
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="btn btn-danger w-full justify-start">
+                <img th:src="@{/assets/icons/log-out.svg}"
+                     class="h-5 w-5 brightness-0 invert" alt="Logout">
+                Logout
+            </button>
+        </form>
+    </div>
 
 </aside>
 
