@@ -19,13 +19,15 @@ public class OtpService {
         this.hashingService = hashingService;
     }
 
+    private static int OTP_EXPIRED_MINUTES = 10;
+
     public String createOtp(String email, OtpType type) {
         String rawOtp = OtpGenerator.generate6DigitOtp();
 
         OtpChallenge challenge = new OtpChallenge();
         challenge.setEmail(email);
         challenge.setOtpHash(hashingService.hash(rawOtp));
-        challenge.setExpiresAt(LocalDateTime.now().plusMinutes(10));
+        challenge.setExpiresAt(LocalDateTime.now().plusMinutes(OTP_EXPIRED_MINUTES));
         challenge.setType(type);
 
         otpChallengeRepository.save(challenge);
