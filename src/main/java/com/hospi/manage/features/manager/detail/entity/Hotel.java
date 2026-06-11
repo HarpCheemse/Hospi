@@ -1,7 +1,6 @@
 package com.hospi.manage.features.manager.detail.entity;
 
 import com.hospi.manage.features.manager.detail.enums.HotelStatus;
-import com.hospi.manage.features.manager.roomtype.entity.RoomTypePicture;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

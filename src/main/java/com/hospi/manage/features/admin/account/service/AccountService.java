@@ -1,6 +1,5 @@
 package com.hospi.manage.features.admin.account.service;
 
-import com.hospi.manage.common.constant.HotelConstants;
 import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.admin.account.dto.AccountCreateForm;
 import com.hospi.manage.features.admin.account.dto.AccountEditForm;
@@ -44,8 +43,6 @@ public class AccountService {
     @Transactional
     public void createAccount(AccountCreateForm form) {
         Account account = new Account();
-
-        account.setHotelId(HotelConstants.HOTEL_ID);
 
         account.setFullName(form.fullName());
         account.setEmail(form.email());

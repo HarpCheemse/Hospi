@@ -1,4 +1,4 @@
-package com.hospi.manage.features.manager.detail.entity;
+package com.hospi.manage.features.room.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -7,10 +7,11 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "hotel_pictures")
+@Table(name = "room_type_pictures")
 @Getter
 @Setter
-public class HotelPicture {
+public class RoomTypePicture {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,8 +27,8 @@ public class HotelPicture {
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "hotel_id")
-    private Hotel hotel;
+    @JoinColumn(name = "room_type_id")
+    private RoomType roomType;
 
     @PrePersist
     public void prePersist() {

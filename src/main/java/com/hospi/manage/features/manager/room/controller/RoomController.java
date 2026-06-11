@@ -2,22 +2,19 @@ package com.hospi.manage.features.manager.room.controller;
 
 import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.features.manager.detail.service.HotelService;
-import com.hospi.manage.features.manager.room.dto.RoomCreateForm;
-import com.hospi.manage.features.manager.room.dto.RoomEditForm;
-import com.hospi.manage.features.manager.room.entity.Room;
-import com.hospi.manage.features.manager.room.enums.ConditionStatus;
-import com.hospi.manage.features.manager.room.service.RoomService;
-import com.hospi.manage.features.manager.room.validation.RoomValidator;
-import com.hospi.manage.features.manager.roomtype.service.RoomTypeService;
+import com.hospi.manage.features.room.dto.RoomCreateForm;
+import com.hospi.manage.features.room.dto.RoomEditForm;
+import com.hospi.manage.features.room.entity.Room;
+import com.hospi.manage.features.room.enums.ConditionStatus;
+import com.hospi.manage.features.room.service.RoomService;
+import com.hospi.manage.features.room.service.RoomTypeService;
+import com.hospi.manage.features.room.validation.RoomValidator;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.util.List;
 
 @Controller
 @RequestMapping("/manager/rooms")
@@ -41,22 +38,30 @@ public class RoomController {
 
     @ModelAttribute
     public void addCommonAttributes(Model model) {
-        model.addAttribute(Attributes.ACTIVE_SIDEBAR, "ROOMS");
+        model.addAttribute(Attributes.ACTIVE_SIDEBAR,
+                "ROOMS");
     }
 
     @GetMapping
     public String list(Model model) {
-        model.addAttribute("hotel", hotelService.findById(null));
-        model.addAttribute("floors", roomService.getFloorViews());
+        model.addAttribute("hotel",
+                hotelService.find());
+        model.addAttribute("floors",
+                roomService.getFloorViews());
         return "manager/room/list";
     }
 
     @GetMapping("/create")
     public String create(Model model) {
-        model.addAttribute(Attributes.FORM, new RoomCreateForm(null, null, null));
+        model.addAttribute(Attributes.FORM,
+                new RoomCreateForm(null,
+                        null,
+                        null));
 
-        model.addAttribute("hotel", hotelService.findById(null));
-        model.addAttribute("roomTypes", roomTypeService.findAll());
+        model.addAttribute("hotel",
+                hotelService.find());
+        model.addAttribute("roomTypes",
+                roomTypeService.findAll());
         return "manager/room/create";
     }
 
@@ -66,14 +71,19 @@ public class RoomController {
 
         model.addAttribute(Attributes.FORM,
                 new RoomEditForm(room.getRoomNumber(),
-                        room.getRoomType().getId(), room.getConditionStatus()));
+                        room.getRoomType().getId(),
+                        room.getConditionStatus()));
 
-        model.addAttribute("conditionStatuses", ConditionStatus.values());
+        model.addAttribute("conditionStatuses",
+                ConditionStatus.values());
 
-        model.addAttribute("roomTypes", roomTypeService.findAll());
+        model.addAttribute("roomTypes",
+                roomTypeService.findAll());
 
-        model.addAttribute("floor", room.getFloorNumber());
-        model.addAttribute("roomId", room.getId());
+        model.addAttribute("floor",
+                room.getFloorNumber());
+        model.addAttribute("roomId",
+                room.getId());
         return "manager/room/edit";
     }
 
@@ -83,11 +93,14 @@ public class RoomController {
                              BindingResult bindingResult,
                              RedirectAttributes redirectAttributes,
                              Model model) {
-        roomValidator.validateCreate(form, bindingResult);
+        roomValidator.validateCreate(form,
+                bindingResult);
 
         if (bindingResult.hasErrors()) {
-            model.addAttribute("hotel", hotelService.findById(null));
-            model.addAttribute("roomTypes", roomTypeService.findAll());
+            model.addAttribute("hotel",
+                    hotelService.find());
+            model.addAttribute("roomTypes",
+                    roomTypeService.findAll());
 
             return "manager/room/create";
         }
@@ -109,17 +122,24 @@ public class RoomController {
                            Model model) {
         Room room = roomService.findById(id);
 
-        roomValidator.validateUpdate(room, form, bindingResult);
+        roomValidator.validateUpdate(room,
+                form,
+                bindingResult);
 
         if (bindingResult.hasErrors()) {
-            model.addAttribute("roomTypes", roomTypeService.findAll());
-            model.addAttribute("floor", room.getFloorNumber());
-            model.addAttribute("roomId", room.getId());
-            model.addAttribute("conditionStatuses", ConditionStatus.values());
+            model.addAttribute("roomTypes",
+                    roomTypeService.findAll());
+            model.addAttribute("floor",
+                    room.getFloorNumber());
+            model.addAttribute("roomId",
+                    room.getId());
+            model.addAttribute("conditionStatuses",
+                    ConditionStatus.values());
             return "manager/room/edit";
         }
 
-        roomService.updateRoom(id, form);
+        roomService.updateRoom(id,
+                form);
 
         redirectAttributes.addFlashAttribute(
                 Attributes.SUCCESS,
