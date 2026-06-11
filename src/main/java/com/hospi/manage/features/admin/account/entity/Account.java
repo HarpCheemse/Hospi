@@ -18,9 +18,6 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "hotel_id")
-    private Long hotelId;
-
     @Column(name = "full_name", length = 100)
     private String fullName;
 

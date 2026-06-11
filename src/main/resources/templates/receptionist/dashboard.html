@@ -8,196 +8,196 @@
           th:href="@{/css/app.css}" />
 </head>
 
-<body class="bg-background text-text">
-
-<div class="flex min-h-screen">
+<body class="staff-layout">
 
     <!-- SIDEBAR -->
     <div th:replace="~{/fragments/receptionist-sidebar :: sidebar}"></div>
 
     <!-- MAIN -->
-    <main class="flex-1 bg-background p-6">
+    <main class="staff-page">
 
         <!-- HEADER -->
-        <div class="flex items-center justify-between mb-6">
+        <header class="staff-page-header">
 
-            <div>
-                <h1 class="text-2xl font-bold text-text">
+            <section>
+                <h1 class="staff-page-title">
                     Receptionist Dashboard
                 </h1>
-                <p class="text-muted text-sm">
+                <p class="page-description">
                     Handle arrivals, departures, guest requests, and daily front-desk work
                 </p>
-            </div>
+            </section>
 
-            <div class="bg-surface border border-border rounded-xl px-4 py-2 flex items-center gap-3 shadow-card">
+            <section>
+                <div class="user-pill">
 
-                <div class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-semibold">
-                    RC
+                    <div class="avatar">
+                        RC
+                    </div>
+
+                    <div>
+                        <p class="text-sm font-medium text-foreground">Reception Desk</p>
+                        <p class="text-xs text-muted-foreground">Morning Shift</p>
+                    </div>
+
                 </div>
+            </section>
 
-                <div>
-                    <p class="text-sm font-medium text-text">Reception Desk</p>
-                    <p class="text-xs text-muted">Morning Shift</p>
-                </div>
-
-            </div>
-
-        </div>
+        </header>
 
         <!-- QUICK ACTIONS -->
-        <div class="grid grid-cols-4 gap-4 mb-6">
+        <section class="mb-6 grid grid-cols-4 gap-4">
 
-            <button class="bg-primary text-white rounded-xl p-4 shadow-card flex items-center gap-3">
-                <img class="w-8 h-8" th:src="@{/assets/icons/door-open.svg}" alt=""/>
+            <button class="btn btn-primary flex items-center gap-3 p-4">
+                <img class="h-8 w-8" th:src="@{/assets/icons/door-open.svg}" alt=""/>
                 <span class="font-semibold">New Check-In</span>
             </button>
 
-            <button class="bg-surface border border-border rounded-xl p-4 shadow-card flex items-center gap-3 hover:bg-background">
-                <img class="w-8 h-8" th:src="@{/assets/icons/key-round.svg}" alt=""/>
+            <button class="btn btn-secondary flex items-center gap-3 p-4">
+                <img class="h-8 w-8" th:src="@{/assets/icons/key-round.svg}" alt=""/>
                 <span class="font-semibold">Check-Out</span>
             </button>
 
-            <button class="bg-surface border border-border rounded-xl p-4 shadow-card flex items-center gap-3 hover:bg-background">
-                <img class="w-8 h-8" th:src="@{/assets/icons/user-plus.svg}" alt=""/>
+            <button class="btn btn-secondary flex items-center gap-3 p-4">
+                <img class="h-8 w-8" th:src="@{/assets/icons/user-plus.svg}" alt=""/>
                 <span class="font-semibold">Walk-In Guest</span>
             </button>
 
-            <button class="bg-surface border border-border rounded-xl p-4 shadow-card flex items-center gap-3 hover:bg-background">
-                <img class="w-8 h-8" th:src="@{/assets/icons/search.svg}" alt=""/>
+            <button class="btn btn-secondary flex items-center gap-3 p-4">
+                <img class="h-8 w-8" th:src="@{/assets/icons/search.svg}" alt=""/>
                 <span class="font-semibold">Find Booking</span>
             </button>
 
-        </div>
+        </section>
 
         <!-- STATS -->
-        <div class="grid grid-cols-4 gap-4 mb-6">
+        <section class="mb-6 grid grid-cols-4 gap-4">
 
-            <div class="bg-surface border border-border rounded-xl p-4 shadow-card">
-                <p class="text-sm text-muted">Arrivals Today</p>
-                <p class="text-2xl font-bold">48</p>
-                <p class="text-xs text-green-600 mt-1">31 already checked in</p>
+            <div class="card-compact">
+                <p class="text-sm text-muted-foreground">Arrivals Today</p>
+                <p class="mt-1 text-2xl font-bold text-foreground">48</p>
+                <p class="mt-1 pill-success">31 already checked in</p>
             </div>
 
-            <div class="bg-surface border border-border rounded-xl p-4 shadow-card">
-                <p class="text-sm text-muted">Departures Today</p>
-                <p class="text-2xl font-bold">26</p>
-                <p class="text-xs text-muted mt-1">9 waiting for checkout</p>
+            <div class="card-compact">
+                <p class="text-sm text-muted-foreground">Departures Today</p>
+                <p class="mt-1 text-2xl font-bold text-foreground">26</p>
+                <p class="mt-1 pill-muted">9 waiting for checkout</p>
             </div>
 
-            <div class="bg-surface border border-border rounded-xl p-4 shadow-card">
-                <p class="text-sm text-muted">Available Rooms</p>
-                <p class="text-2xl font-bold">32</p>
-                <p class="text-xs text-green-600 mt-1">12 cleaned and ready</p>
+            <div class="card-compact">
+                <p class="text-sm text-muted-foreground">Available Rooms</p>
+                <p class="mt-1 text-2xl font-bold text-foreground">32</p>
+                <p class="mt-1 pill-success">12 cleaned and ready</p>
             </div>
 
-            <div class="bg-surface border border-border rounded-xl p-4 shadow-card">
-                <p class="text-sm text-muted">Pending Payments</p>
-                <p class="text-2xl font-bold">$4,820</p>
-                <p class="text-xs text-danger mt-1">6 invoices need follow-up</p>
+            <div class="card-compact">
+                <p class="text-sm text-muted-foreground">Pending Payments</p>
+                <p class="mt-1 text-2xl font-bold text-foreground">$4,820</p>
+                <p class="mt-1 pill-danger">6 invoices need follow-up</p>
             </div>
 
-        </div>
+        </section>
 
         <!-- CONTENT GRID -->
-        <div class="grid grid-cols-12 gap-4">
+        <section class="grid grid-cols-12 gap-4">
 
             <!-- LEFT -->
-            <div class="col-span-8 flex flex-col gap-4">
+            <section class="col-span-8 flex flex-col gap-4">
 
                 <!-- TODAY QUEUE -->
-                <div class="bg-surface border border-border rounded-xl p-5 shadow-card">
+                <section class="card-panel">
 
-                    <div class="flex items-center justify-between mb-4">
+                    <div class="mb-4 flex items-center justify-between">
 
                         <div>
-                            <h2 class="text-lg font-semibold">Today Queue</h2>
-                            <p class="text-sm text-muted">
+                            <h2 class="text-lg font-semibold text-foreground">Today Queue</h2>
+                            <p class="text-sm text-muted-foreground">
                                 Guests that need front-desk action
                             </p>
                         </div>
 
-                        <button class="px-3 py-1 text-sm border border-border rounded-lg hover:bg-background">
+                        <button class="btn btn-secondary btn-sm">
                             View All
                         </button>
 
                     </div>
 
-                    <div class="space-y-2">
+                    <div class="flex flex-col gap-2">
 
                         <!-- ROW -->
-                        <div class="grid grid-cols-12 items-center gap-3 bg-background border border-border rounded-lg p-3 text-sm">
+                        <div class="grid grid-cols-12 items-center gap-3 rounded-lg border border-border bg-background p-3 text-sm">
 
                             <div class="col-span-4">
-                                <p class="font-semibold">Nguyen Minh Anh</p>
-                                <p class="text-xs text-muted">Booking #BK-1048</p>
+                                <p class="font-semibold text-foreground">Nguyen Minh Anh</p>
+                                <p class="text-xs text-muted-foreground">Booking #BK-1048</p>
                             </div>
 
-                            <p class="col-span-2 text-muted">Room 204</p>
-                            <p class="col-span-2 text-muted">14:00</p>
+                            <p class="col-span-2 text-muted-foreground">Room 204</p>
+                            <p class="col-span-2 text-muted-foreground">14:00</p>
 
-                            <span class="col-span-2 text-green-600 font-medium">Check-In</span>
+                            <span class="col-span-2 font-medium text-success">Check-In</span>
 
-                            <button class="col-span-2 px-3 py-1 bg-primary text-white rounded-lg">
+                            <button class="col-span-2 rounded-lg bg-primary px-3 py-1 text-white">
                                 Open
                             </button>
 
                         </div>
 
                         <!-- ROW -->
-                        <div class="grid grid-cols-12 items-center gap-3 bg-background border border-border rounded-lg p-3 text-sm">
+                        <div class="grid grid-cols-12 items-center gap-3 rounded-lg border border-border bg-background p-3 text-sm">
 
                             <div class="col-span-4">
-                                <p class="font-semibold">Tran Bao Long</p>
-                                <p class="text-xs text-muted">Booking #BK-1052</p>
+                                <p class="font-semibold text-foreground">Tran Bao Long</p>
+                                <p class="text-xs text-muted-foreground">Booking #BK-1052</p>
                             </div>
 
-                            <p class="col-span-2 text-muted">Room 418</p>
-                            <p class="col-span-2 text-muted">11:30</p>
+                            <p class="col-span-2 text-muted-foreground">Room 418</p>
+                            <p class="col-span-2 text-muted-foreground">11:30</p>
 
-                            <span class="col-span-2 text-danger font-medium">Payment</span>
+                            <span class="col-span-2 font-medium text-danger">Payment</span>
 
-                            <button class="col-span-2 px-3 py-1 bg-primary text-white rounded-lg">
+                            <button class="col-span-2 rounded-lg bg-primary px-3 py-1 text-white">
                                 Open
                             </button>
 
                         </div>
 
                         <!-- ROW -->
-                        <div class="grid grid-cols-12 items-center gap-3 bg-background border border-border rounded-lg p-3 text-sm">
+                        <div class="grid grid-cols-12 items-center gap-3 rounded-lg border border-border bg-background p-3 text-sm">
 
                             <div class="col-span-4">
-                                <p class="font-semibold">Lena Parker</p>
-                                <p class="text-xs text-muted">Booking #BK-1057</p>
+                                <p class="font-semibold text-foreground">Lena Parker</p>
+                                <p class="text-xs text-muted-foreground">Booking #BK-1057</p>
                             </div>
 
-                            <p class="col-span-2 text-muted">Room 305</p>
-                            <p class="col-span-2 text-muted">12:00</p>
+                            <p class="col-span-2 text-muted-foreground">Room 305</p>
+                            <p class="col-span-2 text-muted-foreground">12:00</p>
 
-                            <span class="col-span-2 text-muted font-medium">Check-Out</span>
+                            <span class="col-span-2 font-medium text-muted-foreground">Check-Out</span>
 
-                            <button class="col-span-2 px-3 py-1 bg-primary text-white rounded-lg">
+                            <button class="col-span-2 rounded-lg bg-primary px-3 py-1 text-white">
                                 Open
                             </button>
 
                         </div>
 
                     </div>
-                </div>
+                </section>
 
                 <!-- GUEST REQUESTS -->
-                <div class="bg-surface border border-border rounded-xl p-5 shadow-card">
+                <section class="card-panel">
 
-                    <div class="flex items-center justify-between mb-4">
+                    <div class="mb-4 flex items-center justify-between">
 
                         <div>
-                            <h2 class="text-lg font-semibold">Guest Requests</h2>
-                            <p class="text-sm text-muted">
+                            <h2 class="text-lg font-semibold text-foreground">Guest Requests</h2>
+                            <p class="text-sm text-muted-foreground">
                                 Active service calls from occupied rooms
                             </p>
                         </div>
 
-                        <button class="px-3 py-1 text-sm border border-border rounded-lg hover:bg-background">
+                        <button class="btn btn-secondary btn-sm">
                             Assign Staff
                         </button>
 
@@ -205,115 +205,113 @@
 
                     <div class="grid grid-cols-3 gap-3 text-sm">
 
-                        <div class="bg-background border border-border rounded-lg p-3">
-                            <p class="font-semibold">Extra towels</p>
-                            <p class="text-muted mt-1">Room 512</p>
-                            <p class="text-xs text-danger mt-4">Waiting 18 min</p>
+                        <div class="rounded-lg border border-border bg-background p-3">
+                            <p class="font-semibold text-foreground">Extra towels</p>
+                            <p class="mt-1 text-muted-foreground">Room 512</p>
+                            <p class="mt-4 text-xs text-danger">Waiting 18 min</p>
                         </div>
 
-                        <div class="bg-background border border-border rounded-lg p-3">
-                            <p class="font-semibold">Airport pickup</p>
-                            <p class="text-muted mt-1">Lobby desk</p>
-                            <p class="text-xs text-muted mt-4">Scheduled 16:30</p>
+                        <div class="rounded-lg border border-border bg-background p-3">
+                            <p class="font-semibold text-foreground">Airport pickup</p>
+                            <p class="mt-1 text-muted-foreground">Lobby desk</p>
+                            <p class="mt-4 text-xs text-muted-foreground">Scheduled 16:30</p>
                         </div>
 
-                        <div class="bg-background border border-border rounded-lg p-3">
-                            <p class="font-semibold">Late checkout</p>
-                            <p class="text-muted mt-1">Room 208</p>
-                            <p class="text-xs text-green-600 mt-4">Approved</p>
+                        <div class="rounded-lg border border-border bg-background p-3">
+                            <p class="font-semibold text-foreground">Late checkout</p>
+                            <p class="mt-1 text-muted-foreground">Room 208</p>
+                            <p class="mt-4 text-xs text-success">Approved</p>
                         </div>
 
                     </div>
 
-                </div>
+                </section>
 
-            </div>
+            </section>
 
             <!-- RIGHT -->
-            <div class="col-span-4 flex flex-col gap-4">
+            <section class="col-span-4 flex flex-col gap-4">
 
                 <!-- ROOM READINESS -->
-                <div class="bg-surface border border-border rounded-xl p-5 shadow-card">
+                <section class="card-panel">
 
-                    <div class="flex items-center justify-between mb-4">
+                    <div class="mb-4 flex items-center justify-between">
 
                         <div>
-                            <h2 class="text-lg font-semibold">Room Readiness</h2>
-                            <p class="text-sm text-muted">Housekeeping handoff</p>
+                            <h2 class="text-lg font-semibold text-foreground">Room Readiness</h2>
+                            <p class="text-sm text-muted-foreground">Housekeeping handoff</p>
                         </div>
 
-                        <img class="w-8 h-8" th:src="@{/assets/icons/clipboard-check.svg}" alt=""/>
+                        <img class="h-8 w-8" th:src="@{/assets/icons/clipboard-check.svg}" alt=""/>
 
                     </div>
 
-                    <div class="space-y-2 text-sm">
+                    <div class="flex flex-col gap-2 text-sm">
 
-                        <div class="flex items-center justify-between bg-background rounded-lg p-3">
-                            <span>Cleaned</span>
-                            <span class="font-semibold text-green-600">12</span>
+                        <div class="flex items-center justify-between rounded-lg bg-background p-3">
+                            <span class="text-foreground">Cleaned</span>
+                            <span class="font-semibold text-success">12</span>
                         </div>
 
-                        <div class="flex items-center justify-between bg-background rounded-lg p-3">
-                            <span>Inspection</span>
-                            <span class="font-semibold">8</span>
+                        <div class="flex items-center justify-between rounded-lg bg-background p-3">
+                            <span class="text-foreground">Inspection</span>
+                            <span class="font-semibold text-foreground">8</span>
                         </div>
 
-                        <div class="flex items-center justify-between bg-background rounded-lg p-3">
-                            <span>Dirty</span>
+                        <div class="flex items-center justify-between rounded-lg bg-background p-3">
+                            <span class="text-foreground">Dirty</span>
                             <span class="font-semibold text-danger">14</span>
                         </div>
 
-                        <div class="flex items-center justify-between bg-background rounded-lg p-3">
-                            <span>Out of Service</span>
-                            <span class="font-semibold">3</span>
+                        <div class="flex items-center justify-between rounded-lg bg-background p-3">
+                            <span class="text-foreground">Out of Service</span>
+                            <span class="font-semibold text-foreground">3</span>
                         </div>
 
                     </div>
 
-                </div>
+                </section>
 
                 <!-- CONTACTS -->
-                <div class="bg-surface border border-border rounded-xl p-5 shadow-card">
+                <section class="card-panel">
 
-                    <div class="flex items-center gap-3 mb-4">
+                    <div class="mb-4 flex items-center gap-3">
 
-                        <img class="w-8 h-8" th:src="@{/assets/icons/phone.svg}" alt=""/>
+                        <img class="h-8 w-8" th:src="@{/assets/icons/phone.svg}" alt=""/>
 
                         <div>
-                            <h2 class="text-lg font-semibold">Quick Contacts</h2>
-                            <p class="text-sm text-muted">Internal hotel lines</p>
+                            <h2 class="text-lg font-semibold text-foreground">Quick Contacts</h2>
+                            <p class="text-sm text-muted-foreground">Internal hotel lines</p>
                         </div>
 
                     </div>
 
-                    <div class="space-y-2 text-sm">
+                    <div class="flex flex-col gap-2 text-sm">
 
-                        <button class="w-full flex items-center justify-between bg-background border border-border rounded-lg p-3">
-                            <span>Housekeeping</span>
-                            <span class="text-muted">102</span>
+                        <button class="flex w-full items-center justify-between rounded-lg border border-border bg-background p-3">
+                            <span class="text-foreground">Housekeeping</span>
+                            <span class="text-muted-foreground">102</span>
                         </button>
 
-                        <button class="w-full flex items-center justify-between bg-background border border-border rounded-lg p-3">
-                            <span>Security</span>
-                            <span class="text-muted">113</span>
+                        <button class="flex w-full items-center justify-between rounded-lg border border-border bg-background p-3">
+                            <span class="text-foreground">Security</span>
+                            <span class="text-muted-foreground">113</span>
                         </button>
 
-                        <button class="w-full flex items-center justify-between bg-background border border-border rounded-lg p-3">
-                            <span>Manager</span>
-                            <span class="text-muted">201</span>
+                        <button class="flex w-full items-center justify-between rounded-lg border border-border bg-background p-3">
+                            <span class="text-foreground">Manager</span>
+                            <span class="text-muted-foreground">201</span>
                         </button>
 
                     </div>
 
-                </div>
+                </section>
 
-            </div>
+            </section>
 
-        </div>
+        </section>
 
     </main>
-
-</div>
 
 </body>
 </html>

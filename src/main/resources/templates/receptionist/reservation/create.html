@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Walk-In Booking | Hospi</title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<body class="staff-layout">
+
+<div th:replace="~{/fragments/receptionist-sidebar :: sidebar}"></div>
+
+<main class="staff-page">
+
+    <header class="staff-page-header">
+
+        <section>
+            <h1 class="staff-page-title">Walk-In Booking</h1>
+            <p class="page-description">
+                Choose check-in and check-out dates to see available room types.
+            </p>
+        </section>
+
+        <a th:href="@{/receptionist/reservations}"
+           class="btn btn-secondary btn-lg">
+            Back to Reservations
+        </a>
+
+    </header>
+
+    <form th:action="@{/receptionist/reservations/create}"
+          th:object="${form}"
+          method="post"
+          class="flex flex-col gap-6">
+
+        <section class="card">
+
+            <div class="border-b border-border p-5">
+                <h2 class="text-lg font-semibold text-foreground">Select Stay Dates</h2>
+                <p class="page-description">Choose the check-in and check-out dates to see available room types.</p>
+            </div>
+
+            <div class="flex items-end gap-5 p-5">
+
+                <div class="flex-1">
+                    <label class="mb-2 block text-sm font-medium text-foreground">
+                        Check-In Date
+                    </label>
+
+                    <input type="date"
+                           th:field="*{checkInAt}"
+                           class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+
+                    <div th:replace="~{fragments/form-error :: error('checkInAt')}"></div>
+                </div>
+
+                <div class="flex-1">
+                    <label class="mb-2 block text-sm font-medium text-foreground">
+                        Check-Out Date
+                    </label>
+
+                    <input type="date"
+                           th:field="*{checkOutAt}"
+                           class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+
+                    <div th:replace="~{fragments/form-error :: error('checkOutAt')}"></div>
+                </div>
+
+                <button type="submit"
+                        class="btn btn-primary btn-lg">
+                    Search
+                </button>
+
+            </div>
+
+        </section>
+
+    </form>
+
+</main>
+
+</body>
+</html>

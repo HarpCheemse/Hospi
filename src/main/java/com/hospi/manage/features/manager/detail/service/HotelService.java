@@ -21,15 +21,15 @@ public class HotelService {
         this.hotelRepository = hotelRepository;
     }
 
-    /// There is only 1 hotel so find by id should pass in null
-    public Hotel findById(Long id) {
+    /// There is only 1 hotel
+    public Hotel find() {
         return hotelRepository.findById(HotelConstants.HOTEL_ID).orElseThrow(
                 () -> new ResourceNotFoundException("Hotel not found")
         );
     }
 
-    public HotelForm getForm(Long id) {
-        Hotel hotel = findById(null);
+    public HotelForm getForm() {
+        Hotel hotel = find();
         HotelForm form = new HotelForm();
 
         form.setName(hotel.getName());
@@ -49,7 +49,7 @@ public class HotelService {
     @Transactional
     public void update(HotelForm form, MultipartFile images)
             throws IOException {
-        Hotel hotel = findById(null);
+        Hotel hotel = find();
 
         hotel.setName(form.getName());
         hotel.setDescription(form.getDescription());

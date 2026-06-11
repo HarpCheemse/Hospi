@@ -1,11 +1,11 @@
 package com.hospi.manage.features.manager.room.validator;
 
-import com.hospi.manage.features.manager.room.dto.RoomCreateForm;
-import com.hospi.manage.features.manager.room.dto.RoomEditForm;
-import com.hospi.manage.features.manager.room.entity.Room;
-import com.hospi.manage.features.manager.room.enums.ConditionStatus;
-import com.hospi.manage.features.manager.room.repository.RoomRepository;
-import com.hospi.manage.features.manager.room.validation.RoomValidator;
+import com.hospi.manage.features.room.dto.RoomCreateForm;
+import com.hospi.manage.features.room.dto.RoomEditForm;
+import com.hospi.manage.features.room.entity.Room;
+import com.hospi.manage.features.room.enums.ConditionStatus;
+import com.hospi.manage.features.room.repository.RoomRepository;
+import com.hospi.manage.features.room.validation.RoomValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,12 +34,17 @@ public class RoomValidatorTest {
         room.setRoomNumber("201");
 
         RoomEditForm form =
-                new RoomEditForm("101", 1L, ConditionStatus.CLEAN);
+                new RoomEditForm("101",
+                        1L,
+                        ConditionStatus.CLEAN);
 
         BindingResult errors =
-                new BeanPropertyBindingResult(form, "form");
+                new BeanPropertyBindingResult(form,
+                        "form");
 
-        roomValidator.validateUpdate(room, form, errors);
+        roomValidator.validateUpdate(room,
+                form,
+                errors);
 
         assertTrue(errors.hasFieldErrors("roomNumber"));
     }
@@ -52,15 +57,20 @@ public class RoomValidatorTest {
         room.setFloorNumber((short) 1);
 
         RoomEditForm form =
-                new RoomEditForm("101", 1L, ConditionStatus.CLEAN);
+                new RoomEditForm("101",
+                        1L,
+                        ConditionStatus.CLEAN);
 
         when(roomRepository.existsByRoomNumber("101"))
                 .thenReturn(true);
 
         BindingResult errors =
-                new BeanPropertyBindingResult(form, "form");
+                new BeanPropertyBindingResult(form,
+                        "form");
 
-        roomValidator.validateUpdate(room, form, errors);
+        roomValidator.validateUpdate(room,
+                form,
+                errors);
 
         assertTrue(errors.hasFieldErrors("roomNumber"));
     }
@@ -72,12 +82,16 @@ public class RoomValidatorTest {
                 .thenReturn(198);
 
         RoomCreateForm form =
-                new RoomCreateForm((short) 1, 3, 1L);
+                new RoomCreateForm((short) 1,
+                        3,
+                        1L);
 
         BindingResult errors =
-                new BeanPropertyBindingResult(form, "form");
+                new BeanPropertyBindingResult(form,
+                        "form");
 
-        roomValidator.validateCreate(form, errors);
+        roomValidator.validateCreate(form,
+                errors);
 
         assertTrue(errors.hasFieldErrors("numberOfRooms"));
     }

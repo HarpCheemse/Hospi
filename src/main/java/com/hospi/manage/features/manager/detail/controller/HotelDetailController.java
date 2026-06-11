@@ -21,26 +21,32 @@ public class HotelDetailController {
 
     @ModelAttribute
     public void addCommonAttributes(Model model) {
-        model.addAttribute(Attributes.ACTIVE_SIDEBAR, "HOTEL_DETAILS");
+        model.addAttribute(Attributes.ACTIVE_SIDEBAR,
+                "HOTEL_DETAILS");
     }
 
     @GetMapping
     public String detail(Model model) {
-        model.addAttribute("hotel", hotelService.findById(null));
+        model.addAttribute("hotel",
+                hotelService.find());
         return "manager/detail/detail";
     }
 
     @GetMapping("/edit")
     public String edit(Model model) {
-        model.addAttribute("hotelForm", hotelService.getForm(null));
-        model.addAttribute("hotel", hotelService.findById(null));
+        model.addAttribute("hotelForm",
+                hotelService.getForm());
+        model.addAttribute("hotel",
+                hotelService.find());
         return "manager/detail/edit";
     }
 
     @PostMapping("/edit")
     public String updateDetail(@ModelAttribute HotelForm form,
-            @RequestParam(value = "images", required = false) MultipartFile images) throws IOException {
-        hotelService.update(form, images);
+                               @RequestParam(value = "images", required = false) MultipartFile images)
+            throws IOException {
+        hotelService.update(form,
+                images);
         return "redirect:/manager/details";
     }
 }
