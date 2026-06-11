@@ -10,71 +10,83 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-background text-text flex flex-col min-h-screen pt-24">
+<body class="bg-background text-foreground flex flex-col min-h-screen pt-24 font-sans">
 
   <!-- HEADER -->
   <div th:replace="~{guest/layout :: header('policies')}"></div>
 
   <main class="flex-grow py-16">
-    <div class="mx-auto max-w-4xl px-6">
+    <div class="mx-auto max-w-[42rem] px-6">
       
       <!-- HEADER -->
       <div class="text-center mb-12">
-        <p class="text-xs font-semibold uppercase tracking-widest text-accent mb-2">HOTEL RULEBOOK</p>
-        <h1 class="text-4xl md:text-5xl font-bold font-display">Hotel Policies & Terms</h1>
-        <p class="mt-3 text-sm text-muted">Please read our check-in, check-out, deposit, and stay policies carefully.</p>
+        <p class="text-xs font-semibold uppercase tracking-brand text-accent mb-2">HOTEL RULEBOOK</p>
+        <h1 class="text-4xl md:text-5xl font-bold font-display text-foreground">Hotel Policies & Terms</h1>
+        <p class="mt-3 text-sm text-muted-foreground">Please read our check-in, check-out, deposit, and stay policies carefully.</p>
       </div>
 
       <!-- POLICY CARDS -->
       <div class="space-y-6">
 
         <!-- Timings Policy Card -->
-        <div class="rounded-xl border border-border bg-surface p-6 shadow-card">
-          <h3 class="text-xl font-bold font-display text-primary flex items-center gap-2 mb-4">
-            <span>🕒</span> Check-In & Check-Out Times
-          </h3> 
-          <div class="grid gap-6 sm:grid-cols-2 text-sm">
-            <div class="p-4 rounded-lg bg-background border border-border/40">
-              <span class="text-xs font-semibold text-muted uppercase">Standard Check-In</span>
-              <p class="text-lg font-bold text-text mt-1" th:text="${hotel != null and hotel.checkInTime != null ? hotel.checkInTime : '14:00'}">14:00</p>
-              <p class="text-xs text-subtle mt-1">Early check-in subject to availability.</p>
-            </div>
-            <div class="p-4 rounded-lg bg-background border border-border/40">
-              <span class="text-xs font-semibold text-muted uppercase">Standard Check-Out</span>
-              <p class="text-lg font-bold text-text mt-1" th:text="${hotel != null and hotel.checkOutTime != null ? hotel.checkOutTime : '12:00'}">12:00</p>
-              <p class="text-xs text-subtle mt-1">Late check-out may incur additional fees.</p>
+        <div class="card">
+          <div class="card-header border-b border-border/40 pb-4 mb-4">
+            <h3 class="text-xl font-bold font-display text-primary flex items-center gap-2">
+              <img th:src="@{/assets/icons/clock.svg}" class="w-5 h-5 shrink-0" alt="Clock"> Check-In & Check-Out Times
+            </h3>
+          </div>
+          <div class="card-body">
+            <div class="grid gap-6 sm:grid-cols-2 text-sm">
+              <div class="p-4 rounded-xl bg-background border border-border/40">
+                <span class="text-2xs font-semibold text-muted-foreground uppercase tracking-brand">Standard Check-In</span>
+                <p class="text-lg font-bold text-foreground mt-1" th:text="${hotel != null and hotel.checkInTime != null ? hotel.checkInTime : '14:00'}">14:00</p>
+                <p class="text-xs text-muted-foreground mt-1">Early check-in subject to availability.</p>
+              </div>
+              <div class="p-4 rounded-xl bg-background border border-border/40">
+                <span class="text-2xs font-semibold text-muted-foreground uppercase tracking-brand">Standard Check-Out</span>
+                <p class="text-lg font-bold text-foreground mt-1" th:text="${hotel != null and hotel.checkOutTime != null ? hotel.checkOutTime : '12:00'}">12:00</p>
+                <p class="text-xs text-muted-foreground mt-1">Late check-out may incur additional fees.</p>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Term of Service Policy Card -->
-        <div class="rounded-xl border border-border bg-surface p-6 shadow-card">
-          <h3 class="text-xl font-bold font-display text-primary flex items-center gap-2 mb-4">
-            <span>📝</span> Terms of Service
-          </h3>
-          <div class="prose max-w-none text-sm text-muted leading-relaxed space-y-4">
-            <!-- Render dynamic terms if present -->
-            <p th:if="${hotel != null and hotel.termOfService != null and !#strings.isEmpty(hotel.termOfService)}"
-               th:text="${hotel.termOfService}"></p>
-               
-            <!-- Fallback terms of service -->
-            <div th:if="${hotel == null or hotel.termOfService == null or #strings.isEmpty(hotel.termOfService)}" class="space-y-3">
-              <p>Guests must present a valid government-issued ID and verification details at the time of check-in.</p>
-              <p>All reservations are subject to verification. System reserves the right to cancel bookings if details cannot be verified.</p>
-              <p>Guests are responsible for any damage caused to hotel property during their stay.</p>
+        <div class="card">
+          <div class="card-header border-b border-border/40 pb-4 mb-4">
+            <h3 class="text-xl font-bold font-display text-primary flex items-center gap-2">
+              <img th:src="@{/assets/icons/file-text.svg}" class="w-5 h-5 shrink-0" alt="Terms"> Terms of Service
+            </h3>
+          </div>
+          <div class="card-body">
+            <div class="prose max-w-none text-sm text-muted-foreground leading-relaxed space-y-4">
+              <!-- Render dynamic terms if present -->
+              <p th:if="${hotel != null and hotel.termOfService != null and !#strings.isEmpty(hotel.termOfService)}"
+                 th:text="${hotel.termOfService}"></p>
+                 
+              <!-- Fallback terms of service -->
+              <div th:if="${hotel == null or hotel.termOfService == null or #strings.isEmpty(hotel.termOfService)}" class="space-y-3">
+                <p>Guests must present a valid government-issued ID and verification details at the time of check-in.</p>
+                <p>All reservations are subject to verification. System reserves the right to cancel bookings if details cannot be verified.</p>
+                <p>Guests are responsible for any damage caused to hotel property during their stay.</p>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Cancellation & Refund Policy Card -->
-        <div class="rounded-xl border border-border bg-surface p-6 shadow-card">
-          <h3 class="text-xl font-bold font-display text-primary flex items-center gap-2 mb-4">
-            <span>💳</span> Cancellation & Refunds
-          </h3>
-          <div class="text-sm text-muted leading-relaxed space-y-3">
-            <p><strong>Standard Cancellation:</strong> Free cancellations are allowed up to 24 hours prior to the scheduled check-in date. Cancellations made inside the 24-hour window will forfeit the booking deposit.</p>
-            <p><strong>Refund Policy:</strong> Eligible refunds will be processed back to the original payment method within 7-10 business days.</p>
-            <p><strong>No-Show Policy:</strong> In case of a no-show, the reservation will be held until 23:59 on the check-in date, after which it will be cancelled and the entire deposit will be forfeited.</p>
+        <div class="card">
+          <div class="card-header border-b border-border/40 pb-4 mb-4">
+            <h3 class="text-xl font-bold font-display text-primary flex items-center gap-2">
+              <img th:src="@{/assets/icons/credit-card.svg}" class="w-5 h-5 shrink-0" alt="Payment"> Cancellation & Refunds
+            </h3>
+          </div>
+          <div class="card-body">
+            <div class="text-sm text-muted-foreground leading-relaxed space-y-3">
+              <p><strong>Standard Cancellation:</strong> Free cancellations are allowed up to 24 hours prior to the scheduled check-in date. Cancellations made inside the 24-hour window will forfeit the booking deposit.</p>
+              <p><strong>Refund Policy:</strong> Eligible refunds will be processed back to the original payment method within 7-10 business days.</p>
+              <p><strong>No-Show Policy:</strong> In case of a no-show, the reservation will be held until 23:59 on the check-in date, after which it will be cancelled and the entire deposit will be forfeited.</p>
+            </div>
           </div>
         </div>
 

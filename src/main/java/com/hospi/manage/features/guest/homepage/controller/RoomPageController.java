@@ -1,4 +1,4 @@
-package com.hospi.manage.features.guest.controller;
+package com.hospi.manage.features.guest.homepage.controller;
 
 import com.hospi.manage.features.manager.roomtype.service.RoomTypeService;
 import org.springframework.stereotype.Controller;

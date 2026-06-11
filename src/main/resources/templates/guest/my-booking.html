@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-background text-text flex flex-col min-h-screen pt-24">
+<body class="bg-background text-foreground flex flex-col min-h-screen pt-24 font-sans">
 
   <!-- HEADER -->
   <div th:replace="~{guest/layout :: header('my-booking')}"></div>
@@ -19,28 +19,30 @@
     <div class="mx-auto max-w-md w-full px-6">
       
       <!-- TRACKING CARD -->
-      <div class="rounded-xl border border-border bg-surface p-8 shadow-soft">
+      <div class="card p-8 shadow-soft">
         
         <div class="text-center mb-8">
-          <span class="text-3xl mb-2 block">🔍</span>
-          <h2 class="text-3xl font-bold font-display text-text">Track Your Booking</h2>
-          <p class="text-xs text-muted mt-2">Enter reservation details to monitor your booking status.</p>
+          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 mb-4 mx-auto shadow-sm">
+            <img th:src="@{/assets/icons/search.svg}" class="w-6 h-6 text-primary" alt="Search">
+          </div>
+          <h2 class="text-3xl font-bold font-display text-foreground">Track Your Booking</h2>
+          <p class="text-xs text-muted-foreground mt-2">Enter reservation details to monitor your booking status.</p>
         </div>
 
         <form class="space-y-5">
           <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-muted mb-2">Email Address</label>
+            <label class="mb-2 block text-sm font-medium text-foreground">Email Address</label>
             <input type="email" placeholder="example@email.com" required
-                   class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-primary outline-none transition"/>
+                   class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"/>
           </div>
 
           <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-muted mb-2">Booking Code</label>
+            <label class="mb-2 block text-sm font-medium text-foreground">Booking Code</label>
             <input type="text" placeholder="e.g. BKM-102938" required
-                   class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-primary outline-none transition"/>
+                   class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"/>
           </div>
 
-          <button type="button" class="w-full mt-4 rounded-xl bg-primary px-5 py-3 font-semibold text-white shadow-card hover:opacity-90 transition-opacity">
+          <button type="button" class="btn btn-primary w-full mt-4">
             Track Reservation
           </button>
         </form>

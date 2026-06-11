@@ -1,4 +1,4 @@
-package com.hospi.manage.features.guest.controller;
+package com.hospi.manage.features.guest.homepage.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
