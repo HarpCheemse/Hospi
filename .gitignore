@@ -34,3 +34,5 @@ node_modules
 
 .vscode
 src/main/resources/static/css/app.css
+
+docs
