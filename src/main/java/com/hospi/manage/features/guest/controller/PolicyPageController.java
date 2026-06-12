@@ -18,9 +18,11 @@ public class PolicyPageController {
     @GetMapping
     public String policies(Model model) {
         try {
-            model.addAttribute("hotel", hotelService.findById(null));
+            model.addAttribute("hotel",
+                    hotelService.find());
         } catch (Exception e) {
-            model.addAttribute("hotel", null);
+            model.addAttribute("hotel",
+                    null);
         }
         return "guest/policies";
     }

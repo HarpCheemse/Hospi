@@ -19,12 +19,16 @@ public class HomeController {
     @GetMapping
     public String home(Model model) {
         try {
-            Hotel hotel = hotelService.findById(null);
-            model.addAttribute("hotel", hotel);
-            model.addAttribute("banners", hotel.getPictures());
+            Hotel hotel = hotelService.find();
+            model.addAttribute("hotel",
+                    hotel);
+            model.addAttribute("banners",
+                    hotel.getPictures());
         } catch (Exception e) {
-            model.addAttribute("hotel", null);
-            model.addAttribute("banners", null);
+            model.addAttribute("hotel",
+                    null);
+            model.addAttribute("banners",
+                    null);
         }
         return "guest/home";
     }

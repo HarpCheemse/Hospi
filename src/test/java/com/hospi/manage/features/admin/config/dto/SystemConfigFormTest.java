@@ -32,7 +32,9 @@ public class SystemConfigFormTest {
                 30,
                 24,
                 30,
-                5
+                5,
+                new BigDecimal("50.00"),
+                24
         );
 
         Set<ConstraintViolation<SystemConfigForm>> violations =
@@ -52,7 +54,9 @@ public class SystemConfigFormTest {
                 0,
                 -1,
                 0,
-                0
+                0,
+                new BigDecimal("200"),   // >100 invalid
+                -1
         );
 
         Set<ConstraintViolation<SystemConfigForm>> violations =
@@ -76,12 +80,14 @@ public class SystemConfigFormTest {
                 null,
                 null,
                 null,
+                null,
+                null,
                 null
         );
 
         Set<ConstraintViolation<SystemConfigForm>> violations =
                 validator.validate(form);
 
-        assertEquals(8, violations.size());
+        assertEquals(10, violations.size());
     }
 }

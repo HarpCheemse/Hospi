@@ -19,10 +19,12 @@ public class ContactPageController {
     @GetMapping
     public String contact(Model model) {
         try {
-            Hotel hotel = hotelService.findById(null);
-            model.addAttribute("hotel", hotel);
+            Hotel hotel = hotelService.find();
+            model.addAttribute("hotel",
+                    hotel);
         } catch (Exception e) {
-            model.addAttribute("hotel", null);
+            model.addAttribute("hotel",
+                    null);
         }
         return "guest/contact";
     }

@@ -10,7 +10,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "hotel_settings")
+@Table(name = "system_configs")
 @Getter
 @Setter
 public class SystemConfig {
@@ -46,4 +46,12 @@ public class SystemConfig {
 
     @Column(name = "maximum_room_per_book", nullable = false)
     private Integer maximumRoomPerBook;
+
+    // Refund Settings
+
+    @Column(name = "refund_percentage", nullable = false)
+    private BigDecimal refundPercentage;
+
+    @Column(name = "full_refund_window_hours", nullable = false)
+    private Integer fullRefundWindowHours;
 }
