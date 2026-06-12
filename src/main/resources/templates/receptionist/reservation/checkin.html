@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check-In Guest | Hospi</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<body class="staff-layout">
+
+<div th:replace="~{/fragments/receptionist-sidebar :: sidebar}"></div>
+
+<main class="staff-page">
+
+    <div th:replace="~{fragments/components/toast :: toast}"></div>
+
+    <header class="staff-page-header">
+
+        <section>
+            <h1 class="staff-page-title">Check-In Guest</h1>
+            <p class="page-description">
+                Review booking details and confirm the guest's arrival.
+            </p>
+        </section>
+
+        <a th:href="@{/receptionist/reservations}"
+           class="btn btn-secondary btn-lg">
+            &larr; Back to Reservations
+        </a>
+
+    </header>
+
+    <form th:action="@{/receptionist/reservations/{id}/checkin(id=${view.id})}"
+          method="post"
+          class="flex flex-col gap-6">
+
+        <!-- BOOKING SUMMARY -->
+        <section class="card">
+
+            <div class="border-b border-border p-5">
+                <h2 class="text-lg font-semibold text-foreground">Booking Summary</h2>
+            </div>
+
+            <div class="p-5">
+
+                <div class="grid grid-cols-2 gap-5">
+
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-muted-foreground">Guest Name</label>
+                        <p class="text-foreground font-medium" th:text="${view.guestName}">John Smith</p>
+                    </div>
+
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-muted-foreground">Email</label>
+                        <p class="text-foreground" th:text="${view.guestEmail}">john@hospi.com</p>
+                    </div>
+
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-muted-foreground">Phone</label>
+                        <p class="text-foreground" th:text="${view.guestPhone}">+84 912 345 678</p>
+                    </div>
+
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-muted-foreground">Check-In</label>
+                        <p class="text-foreground"
+                           th:text="${#temporals.format(view.checkInAt, 'dd MMM yyyy')}">15 Jun 2026</p>
+                    </div>
+
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-muted-foreground">Check-Out</label>
+                        <p class="text-foreground"
+                           th:text="${#temporals.format(view.checkOutAt, 'dd MMM yyyy')}">18 Jun 2026</p>
+                    </div>
+
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-muted-foreground">Duration</label>
+                        <p class="text-foreground"
+                           th:text="${view.checkOutAt.toEpochDay() - view.checkInAt.toEpochDay() + ' nights'}">3
+                            nights</p>
+                    </div>
+
+                </div>
+
+                <div class="mt-5">
+                    <label class="mb-2 block text-sm font-medium text-muted-foreground">Rooms</label>
+                    <div class="flex flex-wrap gap-2">
+                        <th:block th:each="room : ${view.rooms}">
+                            <span class="pill-muted"
+                                  th:text="${room.roomTypeName} + ' x' + ${room.roomCount}">
+                                Deluxe x2
+                            </span>
+                        </th:block>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- BOOKING CODE VERIFICATION (ONLINE BOOKINGS ONLY) -->
+        <section class="card" th:if="${view.source.name() == 'ONLINE'}">
+
+            <div class="border-b border-border p-5">
+                <h2 class="text-lg font-semibold text-foreground">Booking Verification</h2>
+                <p class="page-description">Ask the guest for their booking confirmation code.</p>
+            </div>
+
+            <div class="p-5">
+                <label class="mb-2 block text-sm font-medium text-foreground" for="bookingCode">
+                    Booking Code
+                </label>
+                <input type="text"
+                       id="bookingCode"
+                       name="bookingCode"
+                       placeholder="Enter the guest's confirmation code"
+                       class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"
+                       required>
+            </div>
+
+        </section>
+
+        <!-- ACTIONS -->
+        <div class="flex items-center justify-end gap-3">
+
+            <a th:href="@{/receptionist/reservations}"
+               class="btn btn-secondary btn-lg">
+                Cancel
+            </a>
+
+            <button type="submit"
+                    class="btn btn-primary btn-lg">
+                Confirm Check-In
+            </button>
+
+        </div>
+
+    </form>
+
+</main>
+
+</body>
+</html>
