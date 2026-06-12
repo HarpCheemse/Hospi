@@ -13,6 +13,7 @@ import com.hospi.manage.features.reservation.repository.ReservationRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
@@ -24,19 +25,34 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final ReservationRepository reservationRepository;
     private final SystemConfigService systemConfigService;
+    private final PayPalService payPalService;
 
-    public PaymentService(PaymentRepository paymentRepository,
-                          ReservationRepository reservationRepository,
-                          SystemConfigService systemConfigService) {
+    public PaymentService(PaymentRepository paymentRepository, ReservationRepository reservationRepository,
+                          SystemConfigService systemConfigService, PayPalService payPalService) {
+
         this.paymentRepository = paymentRepository;
         this.reservationRepository = reservationRepository;
         this.systemConfigService = systemConfigService;
+        this.payPalService = payPalService;
+    }
+
+    public String createOnlineBookingPayment(BigDecimal amount, String returnUrl, String cancelUrl) throws IOException {
+
+        return payPalService.createOrder(amount.setScale(2,
+                        RoundingMode.HALF_UP).toString(),
+                returnUrl,
+                cancelUrl);
+    }
+
+    public boolean captureOnlineBookingPayment(String orderId)
+            throws IOException {
+
+        return payPalService.captureOrder(orderId);
     }
 
     @Transactional
     public Payment confirmPayment(Long reservationId, PaymentMethod method, String confirmedBy) {
-        Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
+        Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
 
         if (reservation.getStatus() != ReservationStatus.PENDING) {
             throw new IllegalStateException("Booking is not in PENDING status");
@@ -65,14 +81,14 @@ public class PaymentService {
 
     public BigDecimal calculateRefund(Reservation reservation) {
         SystemConfig config = systemConfigService.getConfig();
-        long hoursSinceCreation = ChronoUnit.HOURS.between(reservation.getCreatedAt(), LocalDateTime.now());
+        long hoursSinceCreation = ChronoUnit.HOURS.between(reservation.getCreatedAt(),
+                LocalDateTime.now());
 
         if (hoursSinceCreation <= config.getFullRefundWindowHours()) {
             return reservation.getTotalPrice();
         }
 
-        return reservation.getTotalPrice()
-                .multiply(config.getRefundPercentage())
-                .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP);
+        return reservation.getTotalPrice().multiply(config.getRefundPercentage()).divide(BigDecimal.valueOf(100),
+                RoundingMode.HALF_UP);
     }
 }
