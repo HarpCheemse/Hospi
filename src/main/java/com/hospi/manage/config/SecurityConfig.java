@@ -19,8 +19,7 @@ public class SecurityConfig {
     private final CustomAuthEntryPoint customAuthEntryPoint;
     private final RoleBasedAuthenticationSuccessHandler successHandler;
 
-    public SecurityConfig(AccountUserDetailsService userDetailsService,
-                          CustomAuthEntryPoint customAuthEntryPoint,
+    public SecurityConfig(AccountUserDetailsService userDetailsService, CustomAuthEntryPoint customAuthEntryPoint,
                           RoleBasedAuthenticationSuccessHandler successHandler) {
         this.userDetailsService = userDetailsService;
         this.customAuthEntryPoint = customAuthEntryPoint;
@@ -51,14 +50,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http
-                .authorizeHttpRequests(auth -> auth
+        http.authorizeHttpRequests(auth -> auth
 
                         .requestMatchers("/",
                                 "/rooms",
                                 "/policies",
                                 "/contact",
                                 "/my-booking",
+                                "/book",
+                                "/book/**",
                                 "/error/**",
                                 "/hotel-picture/**",
                                 "/room-type-picture/**",
@@ -69,35 +69,18 @@ public class SecurityConfig {
                                 "/assets/**",
                                 "/error/**").permitAll()
 
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/manager/**").hasRole("MANAGER")
-                        .requestMatchers("/receptionist/**").hasAnyRole("RECEPTIONIST",
+                        .requestMatchers("/admin/**").hasRole("ADMIN").requestMatchers("/manager/**").hasRole("MANAGER").requestMatchers("/receptionist/**").hasAnyRole("RECEPTIONIST",
                                 "ADMIN")
 
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
 
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .usernameParameter("email")
-                        .passwordParameter("password")
-                        .successHandler(successHandler)
-                        .failureUrl("/login?error")
-                        .permitAll()
-                )
+                .formLogin(form -> form.loginPage("/login").usernameParameter("email").passwordParameter("password").successHandler(successHandler).failureUrl("/login?error").permitAll())
 
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout=true")
-                )
+                .logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/login?logout=true"))
 
-                .sessionManagement(session -> session
-                        .sessionFixation().migrateSession()
-                )
+                .sessionManagement(session -> session.sessionFixation().migrateSession())
 
-                .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(customAuthEntryPoint)
-                );
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(customAuthEntryPoint));
 
         return http.build();
     }
