@@ -25,12 +25,12 @@
         <section>
             <h1 class="staff-page-title">Reservations</h1>
             <p class="page-description">
-                Manage checked-in guests and view all reservations across the hotel.
+                Manage active bookings and guest stays.
             </p>
         </section>
 
         <a th:href="@{/receptionist/reservations/create}" class="btn btn-primary btn-lg">
-            + Add Walk-In Booking
+            + Add Offline Booking
         </a>
 
     </header>
@@ -60,6 +60,10 @@
 
                     <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">
                         Check-In
+                    </th>
+
+                    <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">
+                        Phone
                     </th>
 
                     <th class="px-5 py-4 text-right text-sm font-medium text-muted-foreground">
@@ -105,9 +109,16 @@
                         15 Jun 2026
                     </td>
 
+                    <td class="px-5 py-4 text-sm text-foreground"
+                        th:text="${b.guestPhone}">
+                        +84 912 345 678
+                    </td>
+
                     <td class="px-5 py-4 text-right">
-                        <a class="btn btn-primary btn-sm">Manage</a>
-                        <a class="btn btn-secondary btn-sm">Check-Out</a>
+                        <a th:href="@{/receptionist/reservations/{id}(id=${b.id})}"
+                           class="btn btn-primary btn-sm">Manage</a>
+                        <a th:href="@{/receptionist/reservations/{id}/checkout(id=${b.id})}"
+                           class="btn btn-secondary btn-sm">Check-Out</a>
                     </td>
 
                 </tr>
@@ -120,12 +131,12 @@
 
     </section>
 
-    <!-- ALL RESERVATIONS -->
+    <!-- ACTIVE BOOKINGS -->
     <section class="overflow-hidden card" th:classappend="${!#lists.isEmpty(checkedInBookings)} ? 'mt-6' : ''">
 
         <div class="border-b border-border p-5">
-            <h2 class="text-lg font-semibold text-foreground">All Reservations</h2>
-            <p class="page-description">View and filter all bookings across the hotel</p>
+            <h2 class="text-lg font-semibold text-foreground">Active Bookings</h2>
+            <p class="page-description">Pending and confirmed bookings awaiting action</p>
         </div>
 
         <!-- FILTERS -->
@@ -141,9 +152,6 @@
                     <option value="">All Statuses</option>
                     <option value="PENDING">Pending</option>
                     <option value="CONFIRMED">Confirmed</option>
-                    <option value="CHECKED_IN">Checked In</option>
-                    <option value="CHECKED_OUT">Checked Out</option>
-                    <option value="CANCELLED">Cancelled</option>
                 </select>
             </div>
 
@@ -204,6 +212,10 @@
                         Check-Out
                     </th>
 
+                    <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">
+                        Total
+                    </th>
+
                     <th class="px-5 py-4 text-right text-sm font-medium text-muted-foreground">
                         Actions
                     </th>
@@ -213,7 +225,7 @@
 
                 <tbody>
 
-                <tr th:each="b : ${allBookings}"
+                <tr th:each="b : ${activeBookings}"
                     class="border-t border-border">
 
                     <td class="px-5 py-4">
@@ -230,16 +242,10 @@
                     <td class="px-5 py-4">
                         <span th:switch="${b.status}"
                               class="text-xs font-medium">
-                            <span th:case="'CHECKED_IN'"
-                                  class="pill-success">Checked In</span>
                             <span th:case="'PENDING'"
                                   class="pill-warning">Pending</span>
                             <span th:case="'CONFIRMED'"
                                   class="pill-muted">Confirmed</span>
-                            <span th:case="'CHECKED_OUT'"
-                                  class="pill-success">Checked Out</span>
-                            <span th:case="'CANCELLED'"
-                                  class="pill-danger">Cancelled</span>
                             <span th:case="*"
                                   class="pill-muted"
                                   th:text="${b.status}">Unknown</span>
@@ -256,17 +262,29 @@
                         18 Jun 2026
                     </td>
 
+                    <td class="px-5 py-4 text-sm font-medium text-foreground"
+                        th:text="|$ ${#numbers.formatDecimal(b.totalPrice, 0, 2)}|">
+                        $960.00
+                    </td>
+
                     <td class="px-5 py-4 text-right">
-                        <a class="btn btn-secondary btn-sm">View</a>
+                        <a th:if="${b.status.name() == 'PENDING' and b.source.name() == 'OFFLINE'}"
+                           th:href="@{/receptionist/reservations/{id}/payment(id=${b.id})}"
+                           class="btn btn-accent btn-sm">Pay</a>
+                        <a th:if="${b.status.name() == 'CONFIRMED'}"
+                           th:href="@{/receptionist/reservations/{id}/checkin(id=${b.id})}"
+                           class="btn btn-primary btn-sm">Check-In</a>
+                        <a th:if="${b.status.name() == 'PENDING' and b.source.name() == 'ONLINE'}"
+                           class="btn btn-ghost btn-sm">View</a>
                     </td>
 
                 </tr>
 
-                <tr th:if="${#lists.isEmpty(allBookings)}">
+                <tr th:if="${#lists.isEmpty(activeBookings)}">
 
-                    <td colspan="5"
+                    <td colspan="6"
                         class="px-5 py-10 text-center text-muted-foreground">
-                        No reservations found.
+                        No active bookings.
                     </td>
 
                 </tr>
