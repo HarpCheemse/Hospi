@@ -12,7 +12,13 @@ import com.hospi.manage.features.room.repository.RoomTypeRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import com.hospi.manage.features.guest.dto.BookingDraft;
+import com.hospi.manage.features.payment.entity.Payment;
+import com.hospi.manage.features.payment.enums.PaymentMethod;
+import com.hospi.manage.features.payment.repository.PaymentRepository;
+
 import java.math.BigDecimal;
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -24,11 +30,14 @@ import java.util.stream.Collectors;
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final RoomTypeRepository roomTypeRepository;
+    private final PaymentRepository paymentRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
-                              RoomTypeRepository roomTypeRepository) {
+                              RoomTypeRepository roomTypeRepository,
+                              PaymentRepository paymentRepository) {
         this.reservationRepository = reservationRepository;
         this.roomTypeRepository = roomTypeRepository;
+        this.paymentRepository = paymentRepository;
 
     }
 
@@ -127,5 +136,72 @@ public class ReservationService {
         reservation.setCheckedInBy(principal);
 
         return reservationRepository.save(reservation);
+    }
+
+    private static final SecureRandom RANDOM = new SecureRandom();
+
+    private String generateConfirmationCode() {
+        String chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        StringBuilder code = new StringBuilder("HSP-");
+        for (int i = 0; i < 6; i++) {
+            code.append(chars.charAt(RANDOM.nextInt(chars.length())));
+        }
+        return code.toString();
+    }
+
+    @Transactional
+    public Reservation createOnlineBooking(BookingDraft draft) {
+        Reservation reservation = new Reservation();
+        reservation.setGuestName(draft.getGuestName());
+        reservation.setGuestEmail(draft.getGuestEmail());
+        reservation.setGuestPhone(draft.getGuestPhone());
+        reservation.setGuestDateOfBirth(draft.getGuestDateOfBirth());
+        reservation.setGuestNationality(draft.getGuestNationality());
+        reservation.setCheckInAt(draft.getCheckInAt());
+        reservation.setCheckOutAt(draft.getCheckOutAt());
+        reservation.setStatus(ReservationStatus.CONFIRMED);
+        reservation.setSource(BookingSource.ONLINE);
+        reservation.setConfirmationCode(generateConfirmationCode());
+
+        BigDecimal totalPrice = BigDecimal.ZERO;
+        List<ReservationDetail> details = new ArrayList<>();
+
+        for (BookingDraft.RoomSelection room : draft.getRoomSelections()) {
+            Long roomTypeId = room.roomTypeId();
+            Integer count = room.count();
+
+            if (count == null || count <= 0) continue;
+
+            RoomType roomType = roomTypeRepository.findById(roomTypeId).orElse(null);
+            if (roomType == null) continue;
+
+            ReservationDetail detail = new ReservationDetail();
+            detail.setReservation(reservation);
+            detail.setRoomType(roomType);
+            detail.setRoomCount(count);
+            detail.setBasePrice(roomType.getBasePrice());
+
+            BigDecimal lineTotal = roomType.getBasePrice().multiply(BigDecimal.valueOf(count));
+            detail.setTotalPrice(lineTotal);
+            totalPrice = totalPrice.add(lineTotal);
+
+            details.add(detail);
+        }
+
+        reservation.setDetails(details);
+        reservation.setTotalPrice(totalPrice);
+
+        reservation = reservationRepository.save(reservation);
+
+        Payment payment = new Payment();
+        payment.setReservation(reservation);
+        payment.setAmount(draft.getDepositAmount());
+        payment.setPaymentMethod(PaymentMethod.PAYPAL);
+        payment.setConfirmedAt(LocalDateTime.now());
+        payment.setConfirmedBy(draft.getGuestEmail());
+
+        paymentRepository.save(payment);
+
+        return reservation;
     }
 }
