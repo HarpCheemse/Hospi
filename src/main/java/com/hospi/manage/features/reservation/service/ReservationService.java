@@ -1,8 +1,9 @@
 package com.hospi.manage.features.reservation.service;
 
-import com.hospi.manage.features.reservation.dto.CreateWalkInReservationForm;
+import com.hospi.manage.features.reservation.dto.OfflineBookingForm;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.ReservationDetail;
+import com.hospi.manage.features.reservation.enums.BookingSource;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
 import com.hospi.manage.features.room.dto.RoomSelection;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,8 +37,8 @@ public class ReservationService {
         return reservationRepository.findByStatusOrderByCheckInAtDesc(status);
     }
 
-    public List<Reservation> findAll() {
-        return reservationRepository.findAll();
+    public List<Reservation> findByStatuses(List<ReservationStatus> statuses) {
+        return reservationRepository.findByStatusInOrderByCheckInAtDesc(statuses);
     }
 
     /// This function return RoomTypeId and amount of reservations for a given day range
@@ -59,7 +61,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation createReservation(CreateWalkInReservationForm form) {
+    public Reservation createReservation(OfflineBookingForm form) {
         Reservation reservation = new Reservation();
         reservation.setGuestName(form.guestName());
         reservation.setGuestEmail(form.guestEmail());
@@ -69,6 +71,7 @@ public class ReservationService {
         reservation.setCheckInAt(form.checkInAt());
         reservation.setCheckOutAt(form.checkOutAt());
         reservation.setStatus(ReservationStatus.PENDING);
+        reservation.setSource(BookingSource.OFFLINE);
 
         BigDecimal totalPrice = BigDecimal.ZERO;
         List<ReservationDetail> details = new ArrayList<>();
@@ -97,6 +100,31 @@ public class ReservationService {
 
         reservation.setDetails(details);
         reservation.setTotalPrice(totalPrice);
+
+        return reservationRepository.save(reservation);
+    }
+
+    @Transactional
+    public Reservation checkIn(Long reservationId, String bookingCode, String principal) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+
+        if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
+            throw new IllegalStateException("Only confirmed bookings can be checked in");
+        }
+
+        if (reservation.getSource() == BookingSource.ONLINE) {
+            if (bookingCode == null || bookingCode.isBlank()) {
+                throw new IllegalStateException("Booking code is required for online bookings");
+            }
+            if (!bookingCode.equals(reservation.getConfirmationCode())) {
+                throw new IllegalStateException("Invalid booking code");
+            }
+        }
+
+        reservation.setStatus(ReservationStatus.CHECKED_IN);
+        reservation.setCheckedInAt(LocalDateTime.now());
+        reservation.setCheckedInBy(principal);
 
         return reservationRepository.save(reservation);
     }

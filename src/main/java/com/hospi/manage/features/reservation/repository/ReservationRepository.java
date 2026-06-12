@@ -12,6 +12,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByStatusOrderByCheckInAtDesc(ReservationStatus status);
 
+    List<Reservation> findByStatusInOrderByCheckInAtDesc(List<ReservationStatus> statuses);
+
     @Query("""
                 select r from Reservation r
                 where r.status <> 'CANCELLED'
