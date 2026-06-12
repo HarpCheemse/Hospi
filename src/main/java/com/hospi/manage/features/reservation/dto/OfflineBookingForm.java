@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 
-public record CreateWalkInReservationForm(
+public record OfflineBookingForm(
 
         @NotNull(message = "Check-in date is required") LocalDate checkInAt,
 
