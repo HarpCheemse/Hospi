@@ -30,7 +30,9 @@ public class SystemConfigService {
                 configs.getPendingBookingExpiryMinutes(),
                 configs.getCancellationHoursBeforeCheckin(),
                 configs.getMaximumBookingDays(),
-                configs.getMaximumRoomPerBook()
+                configs.getMaximumRoomPerBook(),
+                configs.getRefundPercentage(),
+                configs.getFullRefundWindowHours()
         );
         return form;
     }
@@ -46,6 +48,8 @@ public class SystemConfigService {
         configs.setMaximumRoomPerBook(form.maximumRoomPerBook());
         configs.setMaximumBookingDays(form.maximumBookingDays());
         configs.setPendingBookingExpiryMinutes(form.pendingBookingExpiryMinutes());
+        configs.setRefundPercentage(form.refundPercentage());
+        configs.setFullRefundWindowHours(form.fullRefundWindowHours());
 
         systemConfigRepository.save(configs);
     }

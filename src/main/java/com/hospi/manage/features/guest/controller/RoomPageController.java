@@ -1,6 +1,6 @@
 package com.hospi.manage.features.guest.controller;
 
-import com.hospi.manage.features.manager.roomtype.service.RoomTypeService;
+import com.hospi.manage.features.room.service.RoomTypeService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +17,8 @@ public class RoomPageController {
 
     @GetMapping
     public String rooms(Model model) {
-        model.addAttribute("roomTypes", roomTypeService.findAll());
+        model.addAttribute("roomTypes",
+                roomTypeService.findAll());
         return "guest/rooms";
     }
 }

@@ -1,5 +1,6 @@
 package com.hospi.manage.features.reservation.entity;
 
+import com.hospi.manage.features.reservation.enums.BookingSource;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -46,6 +47,13 @@ public class Reservation {
     @Column(name = "status", nullable = false)
     private ReservationStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "source", nullable = false, length = 20)
+    private BookingSource source;
+
+    @Column(name = "confirmation_code", length = 50)
+    private String confirmationCode;
+
     @Column(name = "total_price")
     private BigDecimal totalPrice;
 
@@ -54,6 +62,12 @@ public class Reservation {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "checked_in_at")
+    private LocalDateTime checkedInAt;
+
+    @Column(name = "checked_in_by")
+    private String checkedInBy;
 
     @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReservationDetail> details = new ArrayList<>();

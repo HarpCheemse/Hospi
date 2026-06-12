@@ -47,7 +47,19 @@ public record SystemConfigForm(
 
         @NotNull(message = "Maximum rooms per booking is required")
         @Min(value = 1, message = "Maximum rooms per booking must be at least 1")
-        Integer maximumRoomPerBook
+        Integer maximumRoomPerBook,
+
+        // Refund Settings
+        @NotNull(message = "Refund percentage is required")
+        @DecimalMin(value = "0.00", message = "Refund percentage cannot be negative")
+        @DecimalMax(value = "100.00", message = "Refund percentage cannot be larger than 100%")
+        @Digits(integer = 3, fraction = 2,
+                message = "Refund percentage must have up to 3 digits and 2 decimal places")
+        BigDecimal refundPercentage,
+
+        @NotNull(message = "Full refund window is required")
+        @Min(value = 0, message = "Full refund window cannot be negative")
+        Integer fullRefundWindowHours
 
 ) {
 }

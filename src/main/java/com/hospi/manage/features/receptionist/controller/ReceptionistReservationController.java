@@ -1,13 +1,13 @@
 package com.hospi.manage.features.receptionist.controller;
 
 import com.hospi.manage.common.constant.Attributes;
-import com.hospi.manage.features.reservation.dto.CreateWalkInReservationForm;
 import com.hospi.manage.features.reservation.dto.DateSearchForm;
+import com.hospi.manage.features.reservation.dto.OfflineBookingForm;
 import com.hospi.manage.features.reservation.dto.RoomTypeAvailabilityView;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.reservation.service.RoomAvailabilityService;
-import com.hospi.manage.features.reservation.validator.WalkInReservationValidator;
+import com.hospi.manage.features.reservation.validator.OfflineBookingValidator;
 import com.hospi.manage.features.room.dto.RoomSelection;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
@@ -24,14 +24,14 @@ import java.util.List;
 public class ReceptionistReservationController {
 
     private final ReservationService reservationService;
-    private final WalkInReservationValidator walkInReservationValidator;
+    private final OfflineBookingValidator offlineBookingValidator;
     private final RoomAvailabilityService roomAvailabilityService;
 
     public ReceptionistReservationController(ReservationService reservationService,
-                                             WalkInReservationValidator walkInReservationValidator,
+                                             OfflineBookingValidator offlineBookingValidator,
                                              RoomAvailabilityService roomAvailabilityService) {
         this.reservationService = reservationService;
-        this.walkInReservationValidator = walkInReservationValidator;
+        this.offlineBookingValidator = offlineBookingValidator;
         this.roomAvailabilityService = roomAvailabilityService;
     }
 
@@ -45,8 +45,11 @@ public class ReceptionistReservationController {
     String list(Model model) {
         model.addAttribute("checkedInBookings",
                 reservationService.findByStatus(ReservationStatus.CHECKED_IN));
-        model.addAttribute("allBookings",
-                reservationService.findAll());
+        model.addAttribute("activeBookings",
+                reservationService.findByStatuses(List.of(
+                        ReservationStatus.PENDING,
+                        ReservationStatus.CONFIRMED
+                )));
         return "receptionist/reservation/list";
     }
 
@@ -89,7 +92,7 @@ public class ReceptionistReservationController {
                 rt.roomTypeId(),
                 0)).toList();
 
-        CreateWalkInReservationForm form = new CreateWalkInReservationForm(checkInAt,
+        OfflineBookingForm form = new OfflineBookingForm(checkInAt,
                 checkOutAt,
                 null,
                 null,
@@ -110,13 +113,13 @@ public class ReceptionistReservationController {
     @PostMapping("/create/details")
     String createBooking(
             @Valid @ModelAttribute(Attributes.FORM)
-            CreateWalkInReservationForm form,
+            OfflineBookingForm form,
             BindingResult bindingResult,
             RedirectAttributes redirect,
             Model model
     ) {
 
-        walkInReservationValidator.validateCreate(
+        offlineBookingValidator.validateCreate(
                 form,
                 bindingResult
         );
@@ -138,7 +141,7 @@ public class ReceptionistReservationController {
 
         redirect.addFlashAttribute(
                 Attributes.SUCCESS,
-                "Walk-in booking created successfully."
+                "Offline booking created successfully."
         );
 
         return "redirect:/receptionist/reservations";

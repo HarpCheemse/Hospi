@@ -177,6 +177,37 @@
                 </div>
             </section>
 
+            <!-- CANCELLATION & REFUND -->
+            <section class="card">
+                <div class="border-b border-border p-5"><h2 class="text-lg font-semibold"> Cancellation &amp; Refund </h2>
+                    <p class="page-description"> Configure refund policy for confirmed offline bookings. </p>
+                </div>
+                <div class="grid grid-cols-2 gap-5 p-5">
+                    <div>
+                        <label class="mb-2 block text-sm font-medium"> Refund Percentage (%) </label>
+                        <p class="mb-2 text-sm text-muted-foreground">
+                            Percentage of the booking total refunded upon cancellation outside the full refund window. </p>
+                        <input th:field="*{refundPercentage}" type="number" step="0.01" min="0" max="100"
+                               class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+                        <p th:if="${#fields.hasErrors('refundPercentage')}"
+                           th:errors="*{refundPercentage}"
+                           class="mt-1 text-sm text-danger">
+                        </p>
+                    </div>
+                    <div>
+                        <label class="mb-2 block text-sm font-medium"> Full Refund Window (Hours) </label>
+                        <p class="mb-2 text-sm text-muted-foreground">
+                            Number of hours after booking creation during which a full (100%) refund is given. </p>
+                        <input th:field="*{fullRefundWindowHours}" type="number" min="0"
+                               class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+                        <p th:if="${#fields.hasErrors('fullRefundWindowHours')}"
+                           th:errors="*{fullRefundWindowHours}"
+                           class="mt-1 text-sm text-danger">
+                        </p>
+                    </div>
+                </div>
+            </section>
+
             <div class="flex justify-end gap-3">
 
                 <a th:href="@{/admin/configs}"
