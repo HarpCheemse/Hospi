@@ -6,12 +6,11 @@
         text-[13.5px] font-medium tracking-[0.01em]
         border-none
         focus-visible:outline-none
-        active:scale-[0.975]
         disabled:opacity-45 disabled:cursor-not-allowed disabled:pointer-events-none;
-        
-        transition-property: transform, box-shadow, opacity;
-        transition-duration: 120ms;
-        transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+
+        transition-property: background, opacity;
+        transition-duration: var(--duration-fast);
+        transition-timing-function: var(--ease-standard);
     }
 
     .btn:focus-visible {
@@ -19,75 +18,46 @@
     }
 
     .btn-primary {
-        background: linear-gradient(180deg, #24856C 0%, #1a6452 100%);
+        background: #1a6452;
         color: #F0F9F5;
-        text-shadow: 0 1px 1px rgba(0, 0, 0, 0.18);
-        box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.12) inset, /* top highlight */ 0 -1px 0 0 rgba(0, 0, 0, 0.20) inset, /* bottom edge depth */ 0 4px 10px -2px rgba(18, 60, 53, 0.45), /* ambient shadow */ 0 1px 3px 0 rgba(18, 60, 53, 0.30); /* close shadow */
+        box-shadow: 0 1px 3px rgba(18, 60, 53, 0.25);
     }
 
     .btn-primary:hover {
-        background: linear-gradient(180deg, #27937A 0%, #1e7060 100%);
-        transform: translateY(-1px);
-        box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.14) inset,
-        0 -1px 0 0 rgba(0, 0, 0, 0.20) inset,
-        0 6px 16px -3px rgba(18, 60, 53, 0.50),
-        0 2px 4px 0 rgba(18, 60, 53, 0.25);
+        background: #155444;
     }
 
     .btn-primary:active {
-        background: linear-gradient(180deg, #1a6452 0%, #1a6452 100%);
-        transform: scale(0.975) translateY(0);
-        box-shadow: 0 1px 3px -1px rgba(18, 60, 53, 0.30) inset,
-        0 1px 2px 0 rgba(18, 60, 53, 0.20);
+        background: #114639;
     }
 
     .btn-accent {
-        background: linear-gradient(180deg, #D4AF6A 0%, #b8923e 100%);
+        background: #b8923e;
         color: #2A1F0A;
-        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.15);
-        box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.22) inset,
-        0 -1px 0 0 rgba(0, 0, 0, 0.16) inset,
-        0 4px 10px -2px rgba(120, 80, 15, 0.40),
-        0 1px 3px 0 rgba(120, 80, 15, 0.25);
+        box-shadow: 0 1px 3px rgba(120, 80, 15, 0.25);
     }
 
     .btn-accent:hover {
-        background: linear-gradient(180deg, #DBBA77 0%, #c49c4a 100%);
-        transform: translateY(-1px);
-        box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.25) inset,
-        0 -1px 0 0 rgba(0, 0, 0, 0.16) inset,
-        0 6px 16px -3px rgba(120, 80, 15, 0.45),
-        0 2px 4px 0 rgba(120, 80, 15, 0.20);
+        background: #a17e2e;
     }
 
     .btn-accent:active {
-        background: linear-gradient(180deg, #b8923e 0%, #b8923e 100%);
-        transform: scale(0.975) translateY(0);
-        box-shadow: 0 1px 3px -1px rgba(120, 80, 15, 0.30) inset;
+        background: #8a6b25;
     }
 
     .btn-secondary {
-        background: linear-gradient(180deg, #FFFFFF 0%, #F5F1EA 100%);
+        background: #f5f1ea;
         color: var(--color-foreground);
         border: 1px solid rgba(23, 33, 31, 0.18);
-        box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.90) inset,
-        0 2px 5px -1px rgba(23, 33, 31, 0.10),
-        0 1px 2px 0 rgba(23, 33, 31, 0.07);
+        box-shadow: 0 1px 2px rgba(23, 33, 31, 0.08);
     }
 
     .btn-secondary:hover {
-        background: linear-gradient(180deg, #FFFFFF 0%, #EEE9DF 100%);
-        border-color: rgba(23, 33, 31, 0.28);
-        transform: translateY(-1px);
-        box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.90) inset,
-        0 4px 10px -2px rgba(23, 33, 31, 0.12),
-        0 1px 3px 0 rgba(23, 33, 31, 0.08);
+        background: #ede6db;
     }
 
     .btn-secondary:active {
-        background: linear-gradient(180deg, #EDE8DF 0%, #EDE8DF 100%);
-        transform: scale(0.975) translateY(0);
-        box-shadow: 0 1px 2px -1px rgba(23, 33, 31, 0.12) inset;
+        background: #e5dccc;
     }
 
     .btn-ghost {
@@ -106,28 +76,17 @@
     }
 
     .btn-danger {
-        background: linear-gradient(180deg, #C45548 0%, #9e3a2e 100%);
+        background: #9e3a2e;
         color: #FFF5F4;
-        text-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
-        box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.12) inset,
-        0 -1px 0 0 rgba(0, 0, 0, 0.18) inset,
-        0 4px 10px -2px rgba(120, 40, 30, 0.40),
-        0 1px 3px 0 rgba(120, 40, 30, 0.25);
+        box-shadow: 0 1px 3px rgba(120, 40, 30, 0.30);
     }
 
     .btn-danger:hover {
-        background: linear-gradient(180deg, #CC5D50 0%, #ad4035 100%);
-        transform: translateY(-1px);
-        box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.14) inset,
-        0 -1px 0 0 rgba(0, 0, 0, 0.18) inset,
-        0 6px 16px -3px rgba(120, 40, 30, 0.45),
-        0 2px 4px 0 rgba(120, 40, 30, 0.20);
+        background: #832e21;
     }
 
     .btn-danger:active {
-        background: linear-gradient(180deg, #9e3a2e 0%, #9e3a2e 100%);
-        transform: scale(0.975) translateY(0);
-        box-shadow: 0 1px 3px -1px rgba(120, 40, 30, 0.30) inset;
+        background: #6b2319;
     }
 
     .btn-sm {
