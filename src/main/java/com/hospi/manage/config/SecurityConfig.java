@@ -56,7 +56,7 @@ public class SecurityConfig {
                                 "/rooms",
                                 "/policies",
                                 "/contact",
-                                "/my-booking",
+                                "/my-booking/**",
                                 "/book",
                                 "/book/**",
                                 "/error/**",
