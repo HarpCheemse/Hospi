@@ -14,143 +14,152 @@
 
 <body class="staff-layout">
 
-    <!-- SIDEBAR -->
-    <div th:replace="~{fragments/manager-sidebar :: sidebar}"></div>
+<!-- SIDEBAR -->
+<div th:replace="~{fragments/manager-sidebar :: sidebar}"></div>
 
-    <!-- MAIN -->
-    <main class="staff-page">
-        <!-- TOASTS -->
-        <div th:replace="~{fragments/components/toast :: toast}"></div>
+<!-- MAIN -->
+<main class="staff-page">
+    <!-- TOASTS -->
+    <div th:replace="~{fragments/components/toast :: toast}"></div>
 
-        <!-- HEADER -->
-        <div class="staff-page-header">
+    <!-- HEADER -->
+    <div class="staff-page-header">
 
-            <div>
+        <div>
 
-                <h1 class="staff-page-title">
-                    Rooms
-                </h1>
+            <h1 class="staff-page-title">
+                Rooms
+            </h1>
 
-                <p class="page-description">
-                    Monitor room availability, housekeeping status, and assignments.
-                </p>
-
-            </div>
-
-            <div class="flex gap-3">
-
-                <a th:href="@{/manager/rooms/create}"
-                   class="btn btn-primary btn-lg">
-                    Add Room
-                </a>
-
-            </div>
-
-        </div>
-
-        <!-- EMPTY STATE -->
-        <div th:if="${hotel.floorCount == null or hotel.floorCount == 0}"
-             class="card-empty">
-
-            <h2 class="text-lg font-semibold">
-                No Floors Configured
-            </h2>
-
-            <p class="mt-2 text-sm text-muted-foreground">
-                Configure your hotel's floor count before creating rooms.
+            <p class="page-description">
+                Monitor room availability, housekeeping status, and assignments.
             </p>
 
         </div>
 
-        <!-- FLOORS -->
-        <div th:if="${hotel.floorCount != null and hotel.floorCount > 0}"
-             class="flex flex-col gap-6">
+        <div class="flex gap-3">
 
-            <!-- FLOOR -->
-            <section th:each="floor : ${floors}"
-                     class="card">
+            <a th:href="@{/manager/rooms/create}"
+               class="btn btn-primary btn-lg">
+                Add Room
+            </a>
 
-                <!-- FLOOR HEADER -->
-                <div class="flex items-center justify-between border-b border-border p-5">
+            <form th:action="@{/manager/rooms/generate-layout}"
+                  method="post">
 
-                    <div>
+                <button type="submit"
+                        class="btn btn-secondary btn-lg">
+                    Generate Sample Layout
+                </button>
 
-                        <h2 class="text-lg font-semibold"
-                            th:text="|Floor ${floor.number}|">
-                            Floor 1
-                        </h2>
+            </form>
+        </div>
 
-                        <p class="text-sm text-muted-foreground"
-                           th:text="|${floor.roomCount} rooms|">
-                            10 rooms
-                        </p>
+    </div>
 
-                    </div>
+    <!-- EMPTY STATE -->
+    <div th:if="${hotel.floorCount == null or hotel.floorCount == 0}"
+         class="card-empty">
 
+        <h2 class="text-lg font-semibold">
+            No Floors Configured
+        </h2>
+
+        <p class="mt-2 text-sm text-muted-foreground">
+            Configure your hotel's floor count before creating rooms.
+        </p>
+
+    </div>
+
+    <!-- FLOORS -->
+    <div th:if="${hotel.floorCount != null and hotel.floorCount > 0}"
+         class="flex flex-col gap-6">
+
+        <!-- FLOOR -->
+        <section th:each="floor : ${floors}"
+                 class="card">
+
+            <!-- FLOOR HEADER -->
+            <div class="flex items-center justify-between border-b border-border p-5">
+
+                <div>
+
+                    <h2 class="text-lg font-semibold"
+                        th:text="|Floor ${floor.number}|">
+                        Floor 1
+                    </h2>
+
+                    <p class="text-sm text-muted-foreground"
+                       th:text="|${floor.roomCount} rooms|">
+                        10 rooms
+                    </p>
 
                 </div>
 
-                <!-- ROOM GRID -->
-                <div class="grid grid-cols-2 gap-4 p-5 md:grid-cols-4 xl:grid-cols-6">
 
-                    <!-- ROOM CARD -->
-                    <button th:each="room : ${floor.rooms}"
-                            class="rounded-2xl border border-border bg-background p-4 text-left transition hover:border-primary hover:shadow-card">
+            </div>
 
-                        <!-- ROOM NUMBER -->
-                        <div class="flex justify-between">
-                            <div class="text-xl font-bold"
-                                 th:text="${room.roomNumber}">
-                                101
-                            </div>
-                            <a th:href="@{|/manager/rooms/${room.id}/edit|}">Edit</a>
+            <!-- ROOM GRID -->
+            <div class="grid grid-cols-2 gap-4 p-5 md:grid-cols-4 xl:grid-cols-6">
+
+                <!-- ROOM CARD -->
+                <button th:each="room : ${floor.rooms}"
+                        class="rounded-2xl border border-border bg-background p-4 text-left transition hover:border-primary hover:shadow-card">
+
+                    <!-- ROOM NUMBER -->
+                    <div class="flex justify-between">
+                        <div class="text-xl font-bold"
+                             th:text="${room.roomNumber}">
+                            101
                         </div>
+                        <a th:href="@{|/manager/rooms/${room.id}/edit|}">Edit</a>
+                    </div>
 
-                        <!-- ROOM TYPE -->
-                        <div class="mt-1 text-xs text-muted-foreground"
-                             th:text="${room.roomTypeName}">
-                            Deluxe King
-                        </div>
+                    <!-- ROOM TYPE -->
+                    <div class="mt-1 text-xs text-muted-foreground"
+                         th:text="${room.roomTypeName}">
+                        Deluxe King
+                    </div>
 
-                        <!-- STATUS -->
-                        <div class="mt-4 flex flex-col gap-2">
+                    <!-- STATUS -->
+                    <div class="mt-4 flex flex-col gap-2">
 
-                            <!-- OCCUPANCY -->
-                            <span class="rounded-lg px-2 py-1 text-center text-xs font-medium"
+                        <!-- OCCUPANCY -->
+                        <span class="rounded-lg px-2 py-1 text-center text-xs font-medium"
 
-                                  th:classappend="
+                              th:classappend="
                                   ${room.occupancyStatus?.name() == 'VACANT'} ? ' bg-success/10 text-success' :
                                   (${room.occupancyStatus?.name() == 'OCCUPIED'} ? ' bg-primary/10 text-primary' :
                                   ' bg-muted/10 text-muted-foreground')"
 
-                                  th:text="${room.occupancyStatus}">
+                              th:text="${room.occupancyStatus}">
                                 VACANT
                             </span>
 
-                            <!-- CONDITION -->
-                            <span class="rounded-lg px-2 py-1 text-center text-xs font-medium"
+                        <!-- CONDITION -->
+                        <span class="rounded-lg px-2 py-1 text-center text-xs font-medium"
 
-                                  th:classappend="
+                              th:classappend="
                                   ${room.conditionStatus?.name() == 'CLEAN'} ? ' bg-success/10 text-success' :
                                   (${room.conditionStatus?.name() == 'DIRTY'} ? ' bg-warning/10 text-warning' :
                                   (${room.conditionStatus?.name() == 'MAINTENANCE'} ? ' bg-danger/10 text-danger' :
                                    ' bg-muted/10 text-muted-foreground'))"
 
-                                  th:text="${room.conditionStatus}">
+                              th:text="${room.conditionStatus}">
                                 CLEAN
                             </span>
 
-                        </div>
+                    </div>
 
-                    </button>
+                </button>
 
-                </div>
+            </div>
 
-            </section>
+        </section>
 
-        </div>
+    </div>
 
-    </main>
+</main>
 
 </body>
 </html>

@@ -131,4 +131,36 @@ public class RoomService {
 
         roomRepository.save(room);
     }
+
+    //TODO optimize this
+    public boolean generateDefaultRoomLayout() {
+        if (!roomRepository.findAll().isEmpty()) {
+            return false;
+        }
+        Hotel hotel = hotelRepository.findById(HotelConstants.HOTEL_ID).orElseThrow(
+                () -> new ResourceNotFoundException("Hotel")
+        );
+        List<RoomType> roomTypes = roomTypeRepository.findAll();
+        List<Room> rooms = new ArrayList<>();
+        for (short floor = 1; floor <= hotel.getFloorCount(); floor++) {
+            int number = floor * 100;
+            for (RoomType roomType : roomTypes) {
+                for (int i = 1; i <= 5; i++) {
+                    number++;
+                    Room room = new Room();
+
+                    room.setRoomType(roomType);
+                    room.setFloorNumber(floor);
+                    room.setOccupancyStatus(OccupancyStatus.VACANT);
+                    room.setConditionStatus(ConditionStatus.CLEAN);
+                    room.setActive(true);
+                    room.setRoomNumber(String.valueOf(number));
+
+                    rooms.add(room);
+                }
+            }
+        }
+        roomRepository.saveAll(rooms);
+        return true;
+    }
 }

@@ -147,4 +147,19 @@ public class RoomController {
         );
         return "redirect:/manager/rooms";
     }
+
+    @PostMapping("/generate-layout")
+    public String generateDefaultRoomLayout(
+            RedirectAttributes redirectAttributes,
+            Model model
+    ) {
+        boolean result = roomService.generateDefaultRoomLayout();
+
+        if (result) {
+            return "redirect:/manager/rooms";
+        }
+        redirectAttributes.addAttribute(Attributes.ERROR,
+                "Rooms List must be empty to use this function");
+        return "redirect:/manager/rooms";
+    }
 }
