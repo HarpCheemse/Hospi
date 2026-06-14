@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -21,4 +22,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 and r.checkOutAt > :checkIn
             """)
     List<Reservation> findOverlapping(LocalDate checkIn, LocalDate checkOut);
+
+    Optional<Reservation> findByConfirmationCode(String confirmationCode);
+
+    Optional<Reservation> findByGuestEmailAndConfirmationCode(String guestEmail, String confirmationCode);
 }
