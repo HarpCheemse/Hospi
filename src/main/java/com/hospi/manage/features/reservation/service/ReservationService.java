@@ -50,6 +50,11 @@ public class ReservationService {
         return reservationRepository.findByStatusInOrderByCheckInAtDesc(statuses);
     }
 
+    public Reservation findById(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+    }
+
     /// This function return RoomTypeId and amount of reservations for a given day range
     public Map<Long, Integer> getBookedCounts(
             LocalDate checkInAt,
