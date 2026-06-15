@@ -80,6 +80,10 @@
                           th:text="${reservation.source.name()}">ONLINE</span>
                 </div>
 
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-muted-foreground">Total Price</label>
+                    <p class="text-foreground" th:text="${reservation.totalPrice}">400$</p>
+                </div>
             </div>
 
             <div class="mt-5">
@@ -305,6 +309,45 @@
 
     </section>
 
+    <!-- EXTEND STAY -->
+    <section class="card mt">
+
+        <div class="border-b border-border p-5">
+            <h2 class="text-lg font-semibold text-foreground">Extend Stay</h2>
+            <p class="page-description">
+                This will extend checkout date and recalculate price. (Subject to availability)
+            </p>
+        </div>
+
+        <div class="p-5">
+
+            <form th:action="@{/receptionist/reservations/{id}/manage/extend(id=${reservation.id})}"
+                  method="post"
+                  class="flex items-end gap-4">
+
+                <div class="flex-1">
+                    <label class="mb-2 block text-sm font-medium text-foreground" for="extraDays">
+                        Extra Nights
+                    </label>
+
+                    <input type="number"
+                           id="extraDays"
+                           name="extraDays"
+                           min="1"
+                           placeholder="days"
+                           class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+                </div>
+
+                <button type="submit"
+                        class="btn btn-primary btn-lg whitespace-nowrap">
+                    Extend
+                </button>
+
+            </form>
+
+        </div>
+
+    </section>
 </main>
 
 </body>

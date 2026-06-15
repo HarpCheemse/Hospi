@@ -23,6 +23,18 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             """)
     List<Reservation> findOverlapping(LocalDate checkIn, LocalDate checkOut);
 
+    //This exlude the reservation for room iventory. this is used for extends check out time
+    @Query("""
+                SELECT r FROM Reservation r
+                WHERE r.status IN ('CONFIRMED', 'CHECKED_IN')
+                AND r.id <> :excludedId
+                AND r.checkInAt < :end
+                AND r.checkOutAt > :start
+            """)
+    List<Reservation> findOverlappingExcluding(Long excludedId,
+                                               LocalDate start,
+                                               LocalDate end);
+
     Optional<Reservation> findByConfirmationCode(String confirmationCode);
 
     Optional<Reservation> findByGuestEmailAndConfirmationCode(String guestEmail, String confirmationCode);

@@ -165,19 +165,24 @@ public class ReceptionistReservationController {
         if (reservation.getStatus() != ReservationStatus.CHECKED_IN) {
             return "redirect:/receptionist/reservations";
         }
-        model.addAttribute("reservation", reservation);
-        model.addAttribute("guests", stayingGuestService.getGuests(id));
+        model.addAttribute("reservation",
+                reservation);
+        model.addAttribute("guests",
+                stayingGuestService.getGuests(id));
 
         var assignedRooms = roomAssignmentService.getAssignedRooms(id);
-        model.addAttribute("assignedRooms", assignedRooms);
-        model.addAttribute("availableRooms", roomAssignmentService.getAvailableRooms(id));
+        model.addAttribute("assignedRooms",
+                assignedRooms);
+        model.addAttribute("availableRooms",
+                roomAssignmentService.getAvailableRooms(id));
 
         var assignedCounts = assignedRooms.stream()
                 .collect(Collectors.groupingBy(
                         a -> a.getRoom().getRoomType().getId(),
                         Collectors.summingInt(a -> 1)
                 ));
-        model.addAttribute("assignedCounts", assignedCounts);
+        model.addAttribute("assignedCounts",
+                assignedCounts);
 
         if (edit != null) {
             var guest = stayingGuestService.getGuest(edit);
@@ -185,10 +190,13 @@ public class ReceptionistReservationController {
             form.setGuestName(guest.getGuestName());
             form.setDateOfBirth(guest.getDateOfBirth());
             form.setNationality(guest.getNationality());
-            model.addAttribute(Attributes.FORM, form);
-            model.addAttribute("editGuestId", edit);
+            model.addAttribute(Attributes.FORM,
+                    form);
+            model.addAttribute("editGuestId",
+                    edit);
         } else {
-            model.addAttribute(Attributes.FORM, new StayingGuestForm());
+            model.addAttribute(Attributes.FORM,
+                    new StayingGuestForm());
         }
 
         return "receptionist/reservation/manage";
@@ -200,13 +208,18 @@ public class ReceptionistReservationController {
                     BindingResult binding, Model model) {
         var reservation = reservationService.findById(id);
         if (binding.hasErrors()) {
-            model.addAttribute("reservation", reservation);
-            model.addAttribute("guests", stayingGuestService.getGuests(id));
-            model.addAttribute("assignedRooms", roomAssignmentService.getAssignedRooms(id));
-            model.addAttribute("availableRooms", roomAssignmentService.getAvailableRooms(id));
+            model.addAttribute("reservation",
+                    reservation);
+            model.addAttribute("guests",
+                    stayingGuestService.getGuests(id));
+            model.addAttribute("assignedRooms",
+                    roomAssignmentService.getAssignedRooms(id));
+            model.addAttribute("availableRooms",
+                    roomAssignmentService.getAvailableRooms(id));
             return "receptionist/reservation/manage";
         }
-        stayingGuestService.addGuest(id, form);
+        stayingGuestService.addGuest(id,
+                form);
         return "redirect:/receptionist/reservations/" + id + "/manage";
     }
 
@@ -215,14 +228,20 @@ public class ReceptionistReservationController {
                      @Valid @ModelAttribute(Attributes.FORM) StayingGuestForm form,
                      BindingResult binding, Model model) {
         if (binding.hasErrors()) {
-            model.addAttribute("reservation", reservationService.findById(id));
-            model.addAttribute("guests", stayingGuestService.getGuests(id));
-            model.addAttribute("assignedRooms", roomAssignmentService.getAssignedRooms(id));
-            model.addAttribute("availableRooms", roomAssignmentService.getAvailableRooms(id));
-            model.addAttribute("editGuestId", guestId);
+            model.addAttribute("reservation",
+                    reservationService.findById(id));
+            model.addAttribute("guests",
+                    stayingGuestService.getGuests(id));
+            model.addAttribute("assignedRooms",
+                    roomAssignmentService.getAssignedRooms(id));
+            model.addAttribute("availableRooms",
+                    roomAssignmentService.getAvailableRooms(id));
+            model.addAttribute("editGuestId",
+                    guestId);
             return "receptionist/reservation/manage";
         }
-        stayingGuestService.updateGuest(guestId, form);
+        stayingGuestService.updateGuest(guestId,
+                form);
         return "redirect:/receptionist/reservations/" + id + "/manage";
     }
 
@@ -237,7 +256,8 @@ public class ReceptionistReservationController {
                       @RequestParam Long roomId,
                       Model model) {
         try {
-            roomAssignmentService.assignRoom(id, roomId);
+            roomAssignmentService.assignRoom(id,
+                    roomId);
         } catch (IllegalStateException e) {
             // ignore duplicate or already-occupied
         }
@@ -261,5 +281,25 @@ public class ReceptionistReservationController {
                 .stream()
                 .map(RoomTypeAvailabilityView::new)
                 .toList();
+    }
+
+    @PostMapping("/{id}/manage/extend")
+    public String extendStay(@PathVariable Long id,
+                             @RequestParam int extraDays,
+                             RedirectAttributes redirect) {
+
+        try {
+            reservationService.extendStay(id,
+                    extraDays);
+
+            redirect.addFlashAttribute("success",
+                    "Stay extended successfully.");
+
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            redirect.addFlashAttribute("error",
+                    e.getMessage());
+        }
+
+        return "redirect:/receptionist/reservations/" + id + "/manage";
     }
 }

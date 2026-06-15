@@ -1,5 +1,9 @@
 package com.hospi.manage.features.reservation.service;
 
+import com.hospi.manage.features.guest.dto.BookingDraft;
+import com.hospi.manage.features.payment.entity.Payment;
+import com.hospi.manage.features.payment.enums.PaymentMethod;
+import com.hospi.manage.features.payment.repository.PaymentRepository;
 import com.hospi.manage.features.reservation.dto.OfflineBookingForm;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.ReservationDetail;
@@ -11,11 +15,6 @@ import com.hospi.manage.features.room.entity.RoomType;
 import com.hospi.manage.features.room.repository.RoomTypeRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-
-import com.hospi.manage.features.guest.dto.BookingDraft;
-import com.hospi.manage.features.payment.entity.Payment;
-import com.hospi.manage.features.payment.enums.PaymentMethod;
-import com.hospi.manage.features.payment.repository.PaymentRepository;
 
 import java.math.BigDecimal;
 import java.security.SecureRandom;
@@ -31,16 +30,18 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final RoomTypeRepository roomTypeRepository;
     private final PaymentRepository paymentRepository;
+    private final RoomAvailabilityService roomAvailabilityService;
+    private final AvailabilityEngine availabilityEngine;
 
-    public ReservationService(ReservationRepository reservationRepository,
-                              RoomTypeRepository roomTypeRepository,
-                              PaymentRepository paymentRepository) {
+    public ReservationService(ReservationRepository reservationRepository, RoomTypeRepository roomTypeRepository,
+                              PaymentRepository paymentRepository, RoomAvailabilityService roomAvailabilityService,
+                              AvailabilityEngine engine) {
         this.reservationRepository = reservationRepository;
         this.roomTypeRepository = roomTypeRepository;
         this.paymentRepository = paymentRepository;
-
+        this.roomAvailabilityService = roomAvailabilityService;
+        this.availabilityEngine = engine;
     }
-
 
     public List<Reservation> findByStatus(ReservationStatus status) {
         return reservationRepository.findByStatusOrderByCheckInAtDesc(status);
@@ -51,27 +52,14 @@ public class ReservationService {
     }
 
     public Reservation findById(Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+        return reservationRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
     }
 
     /// This function return RoomTypeId and amount of reservations for a given day range
-    public Map<Long, Integer> getBookedCounts(
-            LocalDate checkInAt,
-            LocalDate checkOutAt
-    ) {
-        return reservationRepository.findOverlapping(
-                        checkInAt,
-                        checkOutAt
-                )
-                .stream()
-                .flatMap(reservation -> reservation.getDetails().stream())
-                .collect(Collectors.groupingBy(
-                        detail -> detail.getRoomType().getId(),
-                        Collectors.summingInt(
-                                ReservationDetail::getRoomCount
-                        )
-                ));
+    public Map<Long, Integer> getBookedCounts(LocalDate checkInAt, LocalDate checkOutAt) {
+        return availabilityEngine.computeBookedCounts(checkInAt,
+                checkOutAt,
+                null);
     }
 
     @Transactional
@@ -120,8 +108,7 @@ public class ReservationService {
 
     @Transactional
     public Reservation checkIn(Long reservationId, String bookingCode, String principal) {
-        Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+        Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
 
         if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
             throw new IllegalStateException("Only confirmed bookings can be checked in");
@@ -208,5 +195,45 @@ public class ReservationService {
         paymentRepository.save(payment);
 
         return reservation;
+    }
+
+    @Transactional
+    public Reservation extendStay(Long reservationId, int extraDays) {
+        if (extraDays <= 0) {
+            throw new IllegalArgumentException("Extra days must be at least 1");
+        }
+
+        Reservation reservation = findById(reservationId);
+
+        if (reservation.getStatus() != ReservationStatus.CHECKED_IN) {
+            throw new IllegalStateException("Only checked-in reservations can be extended");
+        }
+
+        LocalDate newCheckout = reservation.getCheckOutAt().plusDays(extraDays);
+
+        Map<Long, Integer> required = reservation.getDetails().stream().collect(Collectors.groupingBy(d -> d.getRoomType().getId(),
+                Collectors.summingInt(ReservationDetail::getRoomCount)));
+
+        // canFulfil returns true when rooms ARE available — no inversion needed
+        if (!availabilityEngine.canFulfil(required,
+                reservation.getCheckOutAt(),
+                newCheckout,
+                reservationId)) {
+            throw new IllegalStateException("Cannot extend stay: room not available for extended period");
+        }
+
+        reservation.setCheckOutAt(newCheckout);
+        reservation.setTotalPrice(reservation.getTotalPrice().add(calculateExtensionCost(reservation,
+                extraDays)));
+
+        return reservationRepository.save(reservation);
+    }
+
+    private BigDecimal calculateExtensionCost(Reservation reservation, int extraDays) {
+
+        BigDecimal totalPerNight = reservation.getDetails().stream().map(detail -> detail.getBasePrice().multiply(BigDecimal.valueOf(detail.getRoomCount()))).reduce(BigDecimal.ZERO,
+                BigDecimal::add);
+
+        return totalPerNight.multiply(BigDecimal.valueOf(extraDays));
     }
 }

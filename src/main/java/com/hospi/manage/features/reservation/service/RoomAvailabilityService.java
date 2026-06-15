@@ -1,35 +1,37 @@
 package com.hospi.manage.features.reservation.service;
 
-import com.hospi.manage.features.room.dto.RoomInventory;
 import com.hospi.manage.features.room.dto.RoomTypeAvailability;
-import com.hospi.manage.features.room.repository.RoomRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class RoomAvailabilityService {
-    private final ReservationService reservationService;
-    private final RoomRepository roomRepository;
 
-    public RoomAvailabilityService(ReservationService reservationService, RoomRepository roomRepository) {
-        this.reservationService = reservationService;
-        this.roomRepository = roomRepository;
+    private final AvailabilityEngine engine;
+
+    public RoomAvailabilityService(AvailabilityEngine engine) {
+        this.engine = engine;
     }
 
-    public List<RoomTypeAvailability> getAvailability(LocalDate checkInAt, LocalDate checkOutAt) {
-        Map<Long, Integer> bookedCounts = reservationService.getBookedCounts(checkInAt,
-                checkOutAt);
-        List<RoomInventory> inventory = roomRepository.getRoomInventory();
+    /**
+     * For search and new bookings — includes all reservations.
+     */
+    public List<RoomTypeAvailability> getAvailability(LocalDate checkIn, LocalDate checkOut) {
+        return engine.getAvailability(checkIn,
+                checkOut,
+                null);
+    }
 
-        return inventory.stream().map(i -> {
-            int booked = bookedCounts.getOrDefault(i.roomType().getId(),
-                    0);
-            return new RoomTypeAvailability(i.roomType(),
-                    i.totalRooms(),
-                    i.totalRooms() - booked);
-        }).toList();
+    /**
+     * For extensions and edits — excludes one reservation.
+     */
+    public List<RoomTypeAvailability> getAvailabilityExcluding(Long excludedId,
+                                                               LocalDate checkIn,
+                                                               LocalDate checkOut) {
+        return engine.getAvailability(checkIn,
+                checkOut,
+                excludedId);
     }
 }
