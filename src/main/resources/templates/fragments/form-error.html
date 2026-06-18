@@ -2,11 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 
-<p th:fragment="error(field)"
-   th:if="${#fields.hasErrors(field)}"
-   th:errors="*{__${field}__}"
-   class="mt-1 text-sm text-danger">
-</p>
+<div th:fragment="error(field)" class="min-h-[1.25rem]">
+    <p th:if="${#fields.hasErrors(field)}"
+       th:errors="*{__${field}__}"
+       class="mt-1 text-sm text-danger">
+    </p>
+</div>
 
 </body>
 </html>

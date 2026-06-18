@@ -1,6 +1,6 @@
 package com.hospi.manage.features.reservation.dto;
 
-import com.hospi.manage.features.room.dto.RoomSelection;
+import com.hospi.manage.features.room.dto.room.RoomSelection;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 

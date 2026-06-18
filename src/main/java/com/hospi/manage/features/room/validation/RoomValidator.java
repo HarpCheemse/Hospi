@@ -1,7 +1,7 @@
 package com.hospi.manage.features.room.validation;
 
-import com.hospi.manage.features.room.dto.RoomCreateForm;
-import com.hospi.manage.features.room.dto.RoomEditForm;
+import com.hospi.manage.features.room.dto.room.RoomCreateForm;
+import com.hospi.manage.features.room.dto.room.RoomEditForm;
 import com.hospi.manage.features.room.entity.Room;
 import com.hospi.manage.features.room.repository.RoomRepository;
 import org.springframework.stereotype.Component;

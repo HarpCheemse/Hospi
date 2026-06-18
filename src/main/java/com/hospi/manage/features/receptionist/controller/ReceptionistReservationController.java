@@ -11,7 +11,7 @@ import com.hospi.manage.features.reservation.service.RoomAssignmentService;
 import com.hospi.manage.features.reservation.service.RoomAvailabilityService;
 import com.hospi.manage.features.reservation.service.StayingGuestService;
 import com.hospi.manage.features.reservation.validator.OfflineBookingValidator;
-import com.hospi.manage.features.room.dto.RoomSelection;
+import com.hospi.manage.features.room.dto.room.RoomSelection;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

@@ -34,4 +34,12 @@ public class RoomTypePicture {
     public void prePersist() {
         createdAt = LocalDateTime.now();
     }
+
+    public boolean isCover() {
+        return Integer.valueOf(1).equals(this.sortOrder);
+    }
+
+    public boolean isAdditional() {
+        return !isCover();
+    }
 }

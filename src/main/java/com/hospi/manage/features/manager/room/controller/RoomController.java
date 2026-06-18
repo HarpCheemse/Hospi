@@ -2,8 +2,8 @@ package com.hospi.manage.features.manager.room.controller;
 
 import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.features.manager.detail.service.HotelService;
-import com.hospi.manage.features.room.dto.RoomCreateForm;
-import com.hospi.manage.features.room.dto.RoomEditForm;
+import com.hospi.manage.features.room.dto.room.RoomCreateForm;
+import com.hospi.manage.features.room.dto.room.RoomEditForm;
 import com.hospi.manage.features.room.entity.Room;
 import com.hospi.manage.features.room.enums.ConditionStatus;
 import com.hospi.manage.features.room.service.RoomService;

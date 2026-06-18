@@ -1,6 +1,6 @@
 package com.hospi.manage.features.room.repository;
 
-import com.hospi.manage.features.room.dto.RoomInventory;
+import com.hospi.manage.features.room.dto.room.RoomInventory;
 import com.hospi.manage.features.room.entity.Room;
 import com.hospi.manage.features.room.entity.RoomType;
 import com.hospi.manage.features.room.enums.OccupancyStatus;
@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RoomRepository extends JpaRepository<Room, Long> {
-
     List<Room> findByFloorNumberOrderByRoomNumber(int floor);
 
     Optional<Room> findByRoomNumber(String roomNumber);

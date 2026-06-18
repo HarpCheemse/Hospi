@@ -1,4 +1,4 @@
-package com.hospi.manage.features.room.dto;
+package com.hospi.manage.features.room.dto.room_type;
 
 import com.hospi.manage.features.room.entity.RoomType;
 
