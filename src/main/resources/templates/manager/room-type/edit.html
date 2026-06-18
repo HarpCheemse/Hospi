@@ -5,12 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title th:text="'Edit ' + ${roomType.name} + ' | Hospi'">
+    <title th:text="'Edit Room Type' + ' | Hospi'">
         Edit Room Type | Hospi
     </title>
 
     <link rel="stylesheet" th:href="@{/css/app.css}">
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js" defer></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
 
     <style>
         [x-cloak] {
@@ -21,232 +21,297 @@
 
 <body class="staff-layout">
 
-    <!-- SIDEBAR -->
-    <div th:replace="~{fragments/manager-sidebar :: sidebar}"></div>
+<div th:replace="~{fragments/manager-sidebar :: sidebar}"></div>
 
-    <!-- MAIN -->
-    <main class="staff-page">
+<main class="staff-page">
 
-        <!-- HEADER -->
-        <div class="staff-page-header">
+    <!-- PAGE HEADER -->
+    <div class="staff-page-header">
 
-            <div>
-                <h1 class="staff-page-title">
-                    Edit Room Type
-                </h1>
+        <div class="flex items-center gap-4">
 
-                <p class="page-description"
-                   th:text="${roomType.name}">
-                    Room Name
-                </p>
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/bed-double.svg}" alt="">
             </div>
 
-            <a th:href="@{'/manager/room-types/' + ${roomType.id}}"
-               class="btn btn-secondary">
-                Back to Details
-            </a>
+            <div>
+                <h1 class="staff-page-title">Edit Room Type</h1>
+                <p class="page-description" th:text="${view.name}">Room Name</p>
+            </div>
 
         </div>
 
-        <!-- FORM -->
-        <form th:action="@{'/manager/room-types/edit/' + ${roomType.id}}"
-              th:object="${roomType}"
-              method="post"
-              enctype="multipart/form-data"
-              class="flex flex-col gap-6">
+        <a th:href="@{'/manager/room-types/' + ${view.id}}"
+           class="btn btn-secondary">
+            Back
+        </a>
 
-            <!-- BASIC INFO -->
-            <section class="card">
+    </div>
 
-                <div class="border-b border-border p-5">
-                    <h2 class="text-lg font-semibold">Basic Information</h2>
+    <!-- FORM -->
+    <form th:action="@{/manager/room-types/{id}/edit(id=${view.id})}"
+          th:object="${form}"
+          method="post"
+          enctype="multipart/form-data"
+          class="grid grid-cols-2 gap-6"
+          novalidate>
+
+        <!-- BASIC INFORMATION -->
+        <section class="card">
+            <div class="border-b border-border px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <img th:src="@{/assets/icons/bed-double.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div><h2 class="text-xl font-semibold">Basic Information</h2>
+                        <p class="mt-1 text-sm text-muted-foreground">Room category, tier, and bed configuration.</p>
+                    </div>
                 </div>
-
-                <div class="grid grid-cols-2 gap-5 p-5">
-
-                    <!-- NAME -->
-                    <div class="flex flex-col gap-2">
-                        <label class="text-sm font-medium">Name</label>
-                        <input type="text"
-                               th:field="*{name}"
-                               class="rounded-xl border border-border bg-background px-4 py-3">
-                    </div>
-
-                    <!-- BED TYPE -->
-                    <div class="flex flex-col gap-2">
-                        <label class="text-sm font-medium">Bed Type</label>
-                        <select th:field="*{bedType}"
-                                class="rounded-xl border border-border bg-background px-4 py-3">
-                            <option th:each="bedType : ${bedTypes}"
-                                    th:value="${bedType}"
-                                    th:text="${bedType}">
-                            </option>
-                        </select>
-                    </div>
-
-                    <!-- MAX OCCUPANCY -->
-                    <div class="flex flex-col gap-2">
-                        <label class="text-sm font-medium">Max Occupancy</label>
-                        <input type="number"
-                               th:field="*{maxOccupancy}"
-                               min="1"
-                               class="rounded-xl border border-border bg-background px-4 py-3">
-                    </div>
-
-                    <!-- AREA -->
-                    <div class="flex flex-col gap-2">
-                        <label class="text-sm font-medium">Area (m²)</label>
-                        <input type="number"
-                               th:field="*{area}"
-                               min="0"
-                               class="rounded-xl border border-border bg-background px-4 py-3">
-                    </div>
-
-                    <!-- BASE PRICE -->
-                    <div class="flex flex-col gap-2">
-                        <label class="text-sm font-medium">Base Price</label>
-                        <input type="number"
-                               step="0.01"
-                               th:field="*{basePrice}"
-                               class="rounded-xl border border-border bg-background px-4 py-3">
-                    </div>
-
-                    <!-- ACTIVE -->
-                    <div class="flex flex-col gap-2">
-                        <label class="text-sm font-medium">Status</label>
-
-                        <select th:field="*{active}"
-                                class="rounded-xl border border-border bg-background px-4 py-3">
-                            <option th:value="true">Active</option>
-                            <option th:value="false">Inactive</option>
-                        </select>
-                    </div>
-
+            </div>
+            <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-2 xl:grid-cols-3">
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Category</label>
+                    <div th:replace="fragments/form-error :: error('category')"></div>
+                    <select th:field="*{category}" class="input">
+                        <option th:each="cat : ${view.categories}"
+                                th:value="${cat}" th:text="${cat}">
+                        </option>
+                    </select>
                 </div>
-
-            </section>
-
-            <!-- DESCRIPTION -->
-            <section class="card">
-
-                <div class="border-b border-border p-5">
-                    <h2 class="text-lg font-semibold">Description & Features</h2>
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Tier</label>
+                    <div th:replace="fragments/form-error :: error('tier')"></div>
+                    <select th:field="*{tier}" class="input">
+                        <option th:each="tier : ${view.tiers}"
+                                th:value="${tier}" th:text="${tier}">
+                        </option>
+                    </select>
                 </div>
-
-                <div class="p-5 flex flex-col gap-5">
-
-                    <textarea th:field="*{description}"
-                              rows="5"
-                              class="rounded-xl border border-border bg-background px-4 py-3"></textarea>
-
-                    <textarea th:field="*{features}"
-                              rows="4"
-                              class="rounded-xl border border-border bg-background px-4 py-3"></textarea>
-
-                    <p class="text-xs text-muted-foreground">
-                        Separate features with commas
-                    </p>
-
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Bed Type</label>
+                    <div th:replace="fragments/form-error :: error('bedType')"></div>
+                    <select th:field="*{bedType}" class="input">
+                        <option th:each="bedType : ${view.bedTypes}"
+                                th:value="${bedType}" th:text="${bedType}">
+                        </option>
+                    </select>
                 </div>
+            </div>
+        </section>
 
-            </section>
-
-            <!-- IMAGES -->
-            <section class="card">
-
-                <div class="border-b border-border p-5">
-                    <h2 class="text-lg font-semibold">Room Images</h2>
+        <!-- PRICING & CAPACITY -->
+        <section class="card">
+            <div class="border-b border-border px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <img th:src="@{/assets/icons/users.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div><h2 class="text-xl font-semibold">Pricing &amp; Capacity</h2>
+                        <p class="mt-1 text-sm text-muted-foreground">Configure occupancy limits and room pricing.</p>
+                    </div>
                 </div>
+            </div>
+            <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-3">
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Base Price</label>
+                    <div th:replace="fragments/form-error :: error('basePrice')"></div>
+                    <input type="number" min="0" step="0.01"
+                           th:field="*{basePrice}" placeholder="320" class="input">
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Area (m²)</label>
+                    <div th:replace="fragments/form-error :: error('area')"></div>
+                    <input type="number" min="0"
+                           th:field="*{area}" placeholder="48" class="input">
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Max Occupancy</label>
+                    <div th:replace="fragments/form-error :: error('maxOccupancy')"></div>
+                    <input type="number" min="1"
+                           th:field="*{maxOccupancy}" placeholder="2" class="input">
+                </div>
+            </div>
+        </section>
 
-                <div class="p-5 flex flex-col gap-6">
+        <!-- DESCRIPTION & FEATURES -->
+        <section class="card col-span-1">
+            <div class="border-b border-border px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <img th:src="@{/assets/icons/file-text.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div><h2 class="text-xl font-semibold">Description &amp; Features</h2>
+                        <p class="mt-1 text-sm text-muted-foreground">Describe the room and available amenities.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col gap-6 p-6">
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Description</label>
+                    <div th:replace="fragments/form-error :: error('description')"></div>
+                    <textarea th:field="*{description}" rows="4"
+                              placeholder="Spacious luxury suite with private balcony and premium amenities..."
+                              class="input"></textarea>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Features</label>
+                    <div th:replace="fragments/form-error :: error('features')"></div>
+                    <textarea th:field="*{features}" rows="4"
+                              placeholder="WiFi, Smart TV, Balcony, Mini Bar, Bathtub..."
+                              class="input"></textarea>
+                    <p class="text-xs text-muted-foreground">Separate features with commas.</p>
+                </div>
+            </div>
+        </section>
 
-                    <!-- CURRENT BANNER -->
-                    <div>
-                        <p class="text-sm font-medium mb-2">Current Banner</p>
+        <!-- COVER IMAGE -->
+        <section class="card col-span-1">
+            <div class="border-b border-border px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <img th:src="@{/assets/icons/image-plus.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div><h2 class="text-xl font-semibold">Cover Image</h2>
+                        <p class="mt-1 text-sm text-muted-foreground">Upload a cover image for this room type.</p>
+                        <div th:replace="fragments/form-error :: error('coverImage')"></div>
+                    </div>
+                </div>
+            </div>
 
-                        <div class="h-60 overflow-hidden rounded-xl border border-border bg-background">
+            <div x-data="coverUploader()" class="p-5">
 
-                            <img th:if="${!#lists.isEmpty(roomType.pictures)}"
-                                 th:src="@{/room-type-picture/{id}(id=${roomType.pictures[0].id})}"
-                                 class="h-full w-full object-cover">
+                <div class="relative overflow-hidden rounded-xl border border-border bg-background">
+                    <!-- Current cover from DB -->
+                    <div th:if="${view.coverPictureId != null}" x-show="!preview" class="h-60">
+                        <img th:src="@{/room-type-picture/{id}(id=${view.coverPictureId()})}"
+                             alt="" class="h-full w-full object-cover">
+                    </div>
 
-                            <div th:if="${#lists.isEmpty(roomType.pictures)}"
-                                 class="flex h-full items-center justify-center text-muted-foreground">
-                                No image
-                            </div>
-
+                    <!-- Uploaded preview -->
+                    <template x-if="preview">
+                        <div class="h-60">
+                            <img :src="preview" alt="" class="h-full w-full object-cover">
                         </div>
+                    </template>
+
+                    <!-- Empty state / drop zone -->
+                    <div x-show="!preview"
+                         th:if="${view.coverPictureId == null}"
+                         @click="$refs.coverInput.click()"
+                         @dragover.prevent="$event.dataTransfer.dropEffect = 'copy'"
+                         @drop.prevent="handleDrop($event)"
+                         class="flex h-60 cursor-pointer flex-col items-center justify-center gap-2 text-muted-foreground">
+                        <img th:src="@{/assets/icons/image-plus.svg}" class="h-10 w-10 opacity-60" alt="">
+                        <p class="text-sm font-medium">Click or drag cover image here</p>
+                        <p class="text-xs">PNG, JPG, WebP</p>
                     </div>
-
-                    <!-- UPLOAD NEW -->
-                    <div id="uploadBox"
-                         class="flex h-40 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-background text-muted-foreground">
-
-                        <p class="text-sm font-medium">Replace images</p>
-                        <p class="text-xs">PNG, JPG, WEBP</p>
-
-                    </div>
-
-                    <input type="file"
-                           id="imageInput"
-                           name="images"
-                           multiple
-                           accept="image/*"
-                           class="hidden">
-
-                    <div id="previewContainer" class="grid grid-cols-3 gap-3"></div>
-
-                    <script th:src="@{/js/components/media-uploader.js}"></script>
-
-                    <script>
-                        document.addEventListener("DOMContentLoaded", () => {
-                            Hospi.MediaUploader({
-                                uploadBox: "#uploadBox",
-                                input: "#imageInput",
-                                previewContainer: "#previewContainer"
-                            });
-                        });
-                    </script>
 
                 </div>
 
-            </section>
-
-            <!-- ACTIONS -->
-            <div x-data="{ deleteModalOpen: false }">
-
-                <!-- ACTIONS -->
-                <div class="flex justify-end gap-3">
-
-                    <a th:href="@{'/manager/room-types/' + ${roomType.id}}"
-                       class="btn btn-secondary btn-lg">
-                        Cancel
-                    </a>
-
-                    <button type="button"
-                            @click="deleteModalOpen = true"
-                            class="btn btn-danger btn-lg">
-                        Delete
+                <div class="mt-3 flex justify-end gap-2">
+                    <button type="button" @click="$refs.coverInput.click()"
+                            class="rounded-lg bg-primary/90 px-3 py-1.5 text-xs text-white">
+                        <span th:text="${view.coverPictureId != null} ? 'Replace' : 'Upload'">Upload</span>
                     </button>
+                    <button type="button" @click="remove()" x-show="preview"
+                            class="rounded-lg bg-danger/90 px-3 py-1.5 text-xs text-white">
+                        Remove
+                    </button>
+                </div>
 
-                    <button type="submit"
-                            class="btn btn-primary btn-lg">
-                        Save Changes
+                <input type="file" x-ref="coverInput" name="coverImage"
+                       accept="image/*" @change="handleFile($event)" class="hidden">
+
+            </div>
+        </section>
+
+        <!-- ADDITIONAL IMAGES -->
+        <section class="card col-span-2">
+            <div class="border-b border-border px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <img th:src="@{/assets/icons/layout-grid.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div><h2 class="text-xl font-semibold">Additional Images</h2>
+                        <p class="mt-1 text-sm text-muted-foreground">Add up to 5 room photos. Optional.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div x-data="imageStack()"
+                 x-init="existingCount = parseInt($el.dataset.existingCount)"
+                 th:data-existing-count="${#lists.size(view.additionalPictureId())}"
+                 class="p-5">
+
+                <div class="flex flex-wrap gap-3">
+
+                    <!-- Existing additional images -->
+                    <div th:each="pic : ${view.additionalPictureId()}"
+                         class="relative w-32">
+                        <div class="overflow-hidden rounded-xl border border-border bg-background">
+                            <img th:src="@{/room-type-picture/{id}(id=${pic})}"
+                                 alt="" class="aspect-square w-full object-cover">
+                        </div>
+                        <input type="hidden" name="removeImageIds" th:value="${pic}">
+                        <button type="button"
+                                @click="$el.closest('.relative').remove(); existingCount--"
+                                class="mt-1.5 w-full rounded-lg bg-danger/10 py-1 text-xs font-medium text-danger">
+                            Delete
+                        </button>
+                    </div>
+
+                    <!-- New image previews (Alpine) -->
+                    <template x-for="(file, index) in newFiles" :key="index">
+                        <div class="relative w-32">
+                            <div class="overflow-hidden rounded-xl border border-border bg-background">
+                                <img :src="file.preview" alt="" class="aspect-square w-full object-cover">
+                            </div>
+                            <button type="button" @click="removeNew(index)"
+                                    class="mt-1.5 w-full rounded-lg bg-danger/10 py-1 text-xs font-medium text-danger">
+                                Delete
+                            </button>
+                        </div>
+                    </template>
+
+                    <!-- Add button -->
+                    <button type="button" @click="$refs.stackInput.click()"
+                            x-show="activeCount < 5"
+                            class="flex w-32 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border bg-background text-muted-foreground transition hover:border-primary hover:bg-primary/5"
+                            style="aspect-ratio: 1">
+                        <span class="text-xl leading-none">+</span>
+                        <span class="text-xs">Add Image</span>
                     </button>
 
                 </div>
 
-                <!-- MODAL -->
+                <input type="file" x-ref="stackInput"
+                       multiple accept="image/*" @change="addFiles($event)" class="hidden">
+
+                <p class="mt-3 text-xs text-muted-foreground" x-show="activeCount > 0">
+                    <span x-text="activeCount"></span>/5 images
+                </p>
+            </div>
+        </section>
+
+        <!-- ACTIONS -->
+        <section class="card col-span-2">
+            <div x-data="{ deleteModalOpen: false }" class="flex items-center justify-end gap-3 p-5">
+
+                <a th:href="@{'/manager/room-types/' + ${view.id}}"
+                   class="btn btn-secondary btn-lg">
+                    Cancel
+                </a>
+
+                <button type="button"
+                        @click="deleteModalOpen = true"
+                        class="btn btn-danger btn-lg">
+                    Delete
+                </button>
+
+                <button type="submit"
+                        class="btn btn-primary btn-lg">
+                    Save Changes
+                </button>
+
+                <!-- DELETE MODAL -->
                 <div x-show="deleteModalOpen"
                      x-cloak
                      class="fixed inset-0 z-50 flex items-center justify-center">
 
-                    <!-- BACKDROP -->
                     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"
                          @click="deleteModalOpen = false">
                     </div>
 
-                    <!-- PANEL -->
                     <div x-show="deleteModalOpen"
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 scale-95"
@@ -257,45 +322,102 @@
                          @click.stop
                          class="relative mx-4 w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl">
 
-                        <h2 class="text-lg font-semibold text-foreground">
-                            Delete Room Type
-                        </h2>
-
+                        <h2 class="text-lg font-semibold text-foreground">Delete Room Type</h2>
                         <p class="mt-2 text-sm text-muted-foreground">
                             Are you sure you want to delete this room type? This action cannot be undone.
                         </p>
 
                         <div class="mt-6 flex justify-end gap-3">
-
                             <button type="button"
                                     @click="deleteModalOpen = false"
                                     class="btn btn-secondary">
                                 Cancel
                             </button>
-
                             <button type="submit"
                                     form="deleteForm"
                                     class="btn btn-danger">
                                 Delete
                             </button>
-
                         </div>
 
                     </div>
-
                 </div>
 
             </div>
+        </section>
 
+    </form>
 
-        </form>
+    <!-- DELETE FORM -->
+    <form id="deleteForm"
+          th:action="@{/manager/room-types/delete/{id}(id=${view.id})}"
+          method="post">
+    </form>
 
-        <!-- DELETE FORM -->
-        <form id="deleteForm"
-              th:action="@{/manager/room-types/delete/{id}(id=${roomType.id})}"
-              method="post">
-        </form>
-    </main>
+</main>
+
+<!-- ALPINE COMPONENTS -->
+<script>
+    document.addEventListener("alpine:init", () => {
+
+        Alpine.data("coverUploader", () => ({
+            preview: null,
+            handleFile(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                if (!file.type.startsWith("image/")) return;
+                if (this.preview) URL.revokeObjectURL(this.preview);
+                this.preview = URL.createObjectURL(file);
+            },
+            handleDrop(event) {
+                const file = event.dataTransfer.files[0];
+                if (!file) return;
+                if (!file.type.startsWith("image/")) return;
+                this.$refs.coverInput.files = event.dataTransfer.files;
+                this.handleFile({target: {files: [file]}});
+            },
+            remove() {
+                if (this.preview) URL.revokeObjectURL(this.preview);
+                this.preview = null;
+                this.$refs.coverInput.value = "";
+            }
+        }));
+
+        Alpine.data("imageStack", () => ({
+            newFiles: [],
+            existingCount: 0,
+
+            get activeCount() {
+                return this.existingCount + this.newFiles.length;
+            },
+
+            addFiles(event) {
+                const files = [...event.target.files];
+                const available = 5 - this.activeCount;
+                files.slice(0, available).forEach(file => {
+                    if (!file.type.startsWith("image/")) return;
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    const input = document.createElement("input");
+                    input.type = "file";
+                    input.name = "newImages";
+                    input.style.display = "none";
+                    input.files = dt.files;
+                    document.querySelector("form[enctype]").appendChild(input);
+                    this.newFiles.push({preview: URL.createObjectURL(file), input});
+                });
+                event.target.value = "";
+            },
+
+            removeNew(index) {
+                const entry = this.newFiles[index];
+                URL.revokeObjectURL(entry.preview);
+                entry.input.remove();
+                this.newFiles.splice(index, 1);
+            }
+        }));
+    });
+</script>
 
 </body>
 </html>
