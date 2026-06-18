@@ -78,7 +78,19 @@ public class SecurityConfig {
 
                 .logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/login?logout=true"))
 
-                .sessionManagement(session -> session.sessionFixation().migrateSession())
+                .sessionManagement(session -> session.sessionFixation().migrateSession()).formLogin(form -> form
+                        .loginPage("/login")
+                        .usernameParameter("email")
+                        .passwordParameter("password")
+                        .successHandler(successHandler)
+                        .failureUrl("/login?error")
+                        .permitAll()
+                )
+                .rememberMe(remember -> remember
+                        .key("hospi-remember-key")
+                        //30 days
+                        .tokenValiditySeconds(60 * 60 * 24 * 30)
+                )
 
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(customAuthEntryPoint));
 
