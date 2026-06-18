@@ -1,6 +1,6 @@
 package com.hospi.manage.features.reservation.dto;
 
-import com.hospi.manage.features.room.dto.RoomTypeAvailability;
+import com.hospi.manage.features.room.dto.room_type.RoomTypeAvailability;
 import com.hospi.manage.features.room.entity.RoomTypePicture;
 
 import java.math.BigDecimal;

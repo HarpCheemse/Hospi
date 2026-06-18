@@ -1,15 +1,19 @@
 package com.hospi.manage.features.manager.room.controller;
 
 import com.hospi.manage.common.constant.Attributes;
-import com.hospi.manage.features.room.dto.RoomTypeForm;
+import com.hospi.manage.features.room.dto.room_type.RoomTypeCreateForm;
+import com.hospi.manage.features.room.dto.room_type.RoomTypeCreateView;
+import com.hospi.manage.features.room.dto.room_type.RoomTypeEditForm;
+import com.hospi.manage.features.room.dto.room_type.RoomTypeView;
 import com.hospi.manage.features.room.entity.RoomType;
-import com.hospi.manage.features.room.enums.BedType;
-import com.hospi.manage.features.room.service.RoomTypePictureService;
 import com.hospi.manage.features.room.service.RoomTypeService;
+import com.hospi.manage.features.room.validation.CreateRoomTypeValidator;
+import com.hospi.manage.features.room.validation.EditRoomTypeValidator;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
@@ -17,7 +21,15 @@ import java.io.IOException;
 @RequestMapping("/manager/room-types")
 public class RoomTypeController {
     private final RoomTypeService roomTypeService;
-    private final RoomTypePictureService roomTypePictureService;
+    private final CreateRoomTypeValidator createRoomTypeValidator;
+    private final EditRoomTypeValidator editRoomTypeValidator;
+
+    public RoomTypeController(RoomTypeService roomTypeService, CreateRoomTypeValidator createRoomTypeValidator,
+                              EditRoomTypeValidator editRoomTypeValidator) {
+        this.roomTypeService = roomTypeService;
+        this.createRoomTypeValidator = createRoomTypeValidator;
+        this.editRoomTypeValidator = editRoomTypeValidator;
+    }
 
     @ModelAttribute
     public void addCommonAttributes(Model model) {
@@ -25,64 +37,91 @@ public class RoomTypeController {
                 "ROOM_TYPES");
     }
 
-    public RoomTypeController(RoomTypeService roomTypeService, RoomTypePictureService roomTypePictureService) {
-        this.roomTypeService = roomTypeService;
-        this.roomTypePictureService = roomTypePictureService;
-    }
 
     @GetMapping
     public String list(Model model) {
-        model.addAttribute("roomTypes",
-                roomTypeService.findAll());
+        model.addAttribute(Attributes.VIEW,
+                roomTypeService.findAllViews());
         return "manager/room-type/list";
     }
 
     @GetMapping("/create")
     public String createForm(Model model) {
-        model.addAttribute("roomTypeForm",
-                new RoomTypeForm());
-        model.addAttribute("bedTypes",
-                BedType.values());
+        model.addAttribute(Attributes.FORM,
+                RoomTypeCreateForm.empty());
+
+        model.addAttribute(Attributes.VIEW,
+                RoomTypeCreateView.defaultView());
+
         return "manager/room-type/create";
     }
 
     @PostMapping("/create")
-    public String create(@ModelAttribute RoomTypeForm form, @RequestParam("image") MultipartFile image)
-            throws IOException {
-        roomTypeService.create(form,
-                image);
+    public String create(@Valid @ModelAttribute(Attributes.FORM) RoomTypeCreateForm form, BindingResult errors,
+                         Model model) throws IOException {
+
+        createRoomTypeValidator.validate(form,
+                errors);
+
+        if (errors.hasErrors()) {
+            model.addAttribute(Attributes.FORM,
+                    form);
+            model.addAttribute(Attributes.VIEW,
+                    RoomTypeCreateView.defaultView());
+
+            return "manager/room-type/create";
+        }
+
+        roomTypeService.createRoomType(form);
 
         return "redirect:/manager/room-types";
-
     }
 
     @GetMapping("/{id}")
     public String detail(@PathVariable Long id, Model model) {
-        model.addAttribute("roomType",
-                roomTypeService.findById(id));
+        model.addAttribute(Attributes.VIEW,
+                roomTypeService.findViewById(id));
 
         return "manager/room-type/detail";
     }
 
-    @GetMapping("/edit/{id}")
+    @GetMapping("/{id}/edit")
     public String edit(@PathVariable Long id, Model model) {
-        model.addAttribute("roomType",
-                roomTypeService.findById(id));
-        model.addAttribute("bedTypes",
-                BedType.values());
+        var roomType = roomTypeService.findById(id);
+
+        model.addAttribute(Attributes.FORM,
+                RoomTypeEditForm.from(roomType));
+
+        model.addAttribute(Attributes.VIEW,
+                RoomTypeView.from(roomType));
 
         return "manager/room-type/edit";
     }
 
-    @PostMapping("/edit/{id}")
-    public String updateRoomType(@PathVariable Long id, @ModelAttribute RoomType form,
-                                 @RequestParam(value = "images", required = false) MultipartFile images)
-            throws IOException {
-        roomTypeService.update(id,
-                form,
-                images);
+    @PostMapping("/{id}/edit")
+    public String updateRoomType(@PathVariable Long id, @Valid @ModelAttribute(Attributes.FORM) RoomTypeEditForm form,
+                                 BindingResult errors, Model model) throws IOException {
+        RoomType roomType = roomTypeService.findById(id);
+        int existingImageCount = (int) roomType.getPictures().stream().filter(p -> !Integer.valueOf(1).equals(p.getSortOrder())).count();
 
-        return "redirect:/manager/room-types";
+        editRoomTypeValidator.validate(id,
+                form,
+                existingImageCount,
+                errors);
+
+        if (errors.hasErrors()) {
+            model.addAttribute(Attributes.FORM,
+                    form);
+            model.addAttribute(Attributes.VIEW,
+                    RoomTypeView.from(roomType));
+
+            return "manager/room-type/edit";
+        }
+
+        roomTypeService.update(id,
+                form);
+
+        return "redirect:/manager/room-types/" + id;
     }
 
     @PostMapping("/delete/{id}")
@@ -91,5 +130,4 @@ public class RoomTypeController {
 
         return "redirect:/manager/room-types";
     }
-
 }

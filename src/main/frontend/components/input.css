@@ -1,0 +1,30 @@
+@layer components {
+    .input {
+        @apply w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none;
+        transition-property: border-color, box-shadow;
+        transition-duration: var(--duration-fast);
+        transition-timing-function: var(--ease-standard);
+    }
+
+    .input:focus {
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgba(31, 111, 91, 0.20);
+    }
+
+    .input-error {
+        border-color: var(--color-danger);
+    }
+
+    .input-error:focus {
+        border-color: var(--color-danger);
+        box-shadow: 0 0 0 3px rgba(184, 74, 58, 0.20);
+    }
+
+    .input-label {
+        @apply block mb-2 text-sm font-medium text-foreground;
+    }
+
+    .input-helper {
+        @apply mt-1 text-xs text-muted-foreground;
+    }
+}

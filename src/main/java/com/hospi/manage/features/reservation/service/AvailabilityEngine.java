@@ -2,8 +2,8 @@ package com.hospi.manage.features.reservation.service;
 
 import com.hospi.manage.features.reservation.entity.ReservationDetail;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
-import com.hospi.manage.features.room.dto.RoomInventory;
-import com.hospi.manage.features.room.dto.RoomTypeAvailability;
+import com.hospi.manage.features.room.dto.room.RoomInventory;
+import com.hospi.manage.features.room.dto.room_type.RoomTypeAvailability;
 import com.hospi.manage.features.room.repository.RoomRepository;
 import org.springframework.stereotype.Component;
 

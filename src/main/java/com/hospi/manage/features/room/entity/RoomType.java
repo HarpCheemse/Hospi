@@ -1,5 +1,7 @@
 package com.hospi.manage.features.room.entity;
 
+import com.hospi.manage.features.room.enums.RoomCategory;
+import com.hospi.manage.features.room.enums.RoomTier;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,6 +10,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Represents a category of room (e.g. Deluxe, Suite).
@@ -37,7 +40,7 @@ public class RoomType {
     private String name;
 
     @Column(name = "max_occupancy")
-    private Short maxOccupancy;
+    private Integer maxOccupancy;
 
     private String description;
 
@@ -55,6 +58,12 @@ public class RoomType {
 
     @Column(name = "base_price")
     private BigDecimal basePrice;
+
+    @Enumerated(EnumType.STRING)
+    private RoomCategory category;
+
+    @Enumerated(EnumType.STRING)
+    private RoomTier tier;
 
     @Column(name = "is_active")
     private Boolean active;
@@ -77,8 +86,21 @@ public class RoomType {
         updatedAt = LocalDateTime.now();
     }
 
+
     @PreUpdate
     public void preUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    public RoomTypePicture getCoverPicture() {
+        return pictures.stream().filter(p -> Integer.valueOf(1).equals(p.getSortOrder())).findFirst().orElse(null);
+    }
+
+    public Long getCoverPictureId() {
+        return Optional.ofNullable(getCoverPicture()).map(RoomTypePicture::getId).orElse(null);
+    }
+
+    public List<Long> getPicturesExcludeCover() {
+        return pictures.stream().filter(p -> !Integer.valueOf(1).equals(p.getSortOrder())).map(RoomTypePicture::getId).toList();
     }
 }

@@ -1,14 +1,15 @@
 package com.hospi.manage.features.room.service;
 
 import com.hospi.manage.common.exception.ResourceNotFoundException;
-import com.hospi.manage.common.utils.ImageUtils;
-import com.hospi.manage.features.room.dto.RoomTypeForm;
+import com.hospi.manage.features.room.dto.room_type.RoomTypeCreateForm;
+import com.hospi.manage.features.room.dto.room_type.RoomTypeEditForm;
+import com.hospi.manage.features.room.dto.room_type.RoomTypeView;
 import com.hospi.manage.features.room.entity.RoomType;
-import com.hospi.manage.features.room.entity.RoomTypePicture;
+import com.hospi.manage.features.room.enums.RoomCategory;
+import com.hospi.manage.features.room.enums.RoomTier;
 import com.hospi.manage.features.room.repository.RoomTypeRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -16,35 +17,41 @@ import java.util.List;
 @Service
 public class RoomTypeService {
     private final RoomTypeRepository roomTypeRepository;
+    private final RoomTypePictureService roomTypePictureService;
 
-    public RoomTypeService(RoomTypeRepository roomTypeRepository) {
+    private static final int CoverWidth = 1080;
+    private static final int GALLERY_WIDTH = 720;
+    private static final float IMAGE_QUALITY = 0.75f;
+
+    public RoomTypeService(RoomTypeRepository roomTypeRepository,
+                           RoomTypePictureService roomTypePictureService) {
         this.roomTypeRepository = roomTypeRepository;
+        this.roomTypePictureService = roomTypePictureService;
     }
 
     @Transactional
-    public void create(RoomTypeForm form, MultipartFile image) throws IOException {
+    public RoomType createRoomType(RoomTypeCreateForm form) throws IOException {
+
         RoomType roomType = new RoomType();
 
-        roomType.setName(form.getName());
-        roomType.setMaxOccupancy(form.getMaxOccupancy());
-        roomType.setDescription(form.getDescription());
-        roomType.setFeatures(form.getFeatures());
-        roomType.setBedType(form.getBedType().toString());
-        roomType.setArea(form.getArea());
-        roomType.setBasePrice(form.getBasePrice());
+        roomType.setName(generateRoomTypeName(form.category(),
+                form.tier()));
+        roomType.setMaxOccupancy(form.maxOccupancy());
+        roomType.setDescription(form.description());
+        roomType.setFeatures(form.features());
+        roomType.setBedType(form.bedType() != null ? form.bedType().toString() : null);
+        roomType.setArea(form.area());
+        roomType.setBasePrice(form.basePrice());
         roomType.setActive(true);
 
-        byte[] compressed = ImageUtils.compressWebP(image,
-                360,
-                0.75f);
+        roomTypePictureService.replaceCover(roomType,
+                form.coverImage());
 
-        RoomTypePicture picture = new RoomTypePicture();
-        picture.setRoomType(roomType);
-        picture.setImageData(compressed);
+        return roomTypeRepository.save(roomType);
+    }
 
-        roomType.getPictures().add(picture);
-
-        roomTypeRepository.save(roomType);
+    private String generateRoomTypeName(RoomCategory category, RoomTier tier) {
+        return tier.name() + " " + category.name();
     }
 
     public List<RoomType> findAll() {
@@ -52,41 +59,48 @@ public class RoomTypeService {
     }
 
     public RoomType findById(Long id) {
-        return roomTypeRepository.findById(id).orElseThrow(() ->
-                new ResourceNotFoundException("Room type not found"));
+        return roomTypeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Room type not found"));
     }
 
     @Transactional
-    public void update(Long id, RoomType form, MultipartFile images) throws IOException {
+    public void update(Long id, RoomTypeEditForm form) throws IOException {
+
         RoomType roomType = findById(id);
 
-        roomType.setName(form.getName());
-        roomType.setBedType(form.getBedType());
-        roomType.setMaxOccupancy(form.getMaxOccupancy());
-        roomType.setArea(form.getArea());
-        roomType.setBasePrice(form.getBasePrice());
-        roomType.setDescription(form.getDescription());
-        roomType.setFeatures(form.getFeatures());
-        roomType.setActive(form.getActive());
+        roomType.setName(generateRoomTypeName(form.category(),
+                form.tier()));
+        roomType.setCategory(form.category());
+        roomType.setTier(form.tier());
+        roomType.setBedType(form.bedType() != null ? form.bedType().toString() : null);
+        roomType.setMaxOccupancy(form.maxOccupancy());
+        roomType.setArea(form.area());
+        roomType.setBasePrice(form.basePrice());
+        roomType.setDescription(form.description());
+        roomType.setFeatures(form.features());
 
-        //ONLY 1 images for now
-        if (images != null && !images.isEmpty()) {
-            byte[] compressed = ImageUtils.compressWebP(images,
-                    360,
-                    0.75f);
-            RoomTypePicture picture = new RoomTypePicture();
-            picture.setRoomType(roomType);
-            picture.setImageData(compressed);
+        roomTypePictureService.replaceCover(roomType,
+                form.coverImage());
+        roomTypePictureService.addNewImages(roomType,
+                form.newImages());
+        roomTypePictureService.removeImages(roomType,
+                form.removeImageIds());
 
-            roomType.getPictures().clear();
-            roomType.getPictures().add(picture);
-        }
         roomTypeRepository.save(roomType);
     }
 
     @Transactional
     public void delete(Long id) {
         RoomType roomType = findById(id);
-        roomTypeRepository.delete(roomType);
+        roomType.setActive(false);
+        roomTypeRepository.save(roomType);
+    }
+
+    public List<RoomTypeView> findAllViews() {
+        return roomTypeRepository.findAll().stream().map(RoomTypeView::from).toList();
+    }
+
+    public RoomTypeView findViewById(Long id) {
+
+        return roomTypeRepository.findById(id).map(RoomTypeView::from).orElseThrow(() -> new ResourceNotFoundException("Room type"));
     }
 }

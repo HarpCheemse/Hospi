@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title th:text="${roomType.name} + ' | Hospi'">
-        Room Type | Hospi
+    <title th:text="'Room Type Details' + ' | Hospi'">
+        Room Type Details | Hospi
     </title>
 
     <link rel="stylesheet" th:href="@{/css/app.css}">
@@ -14,284 +14,173 @@
 
 <body class="staff-layout">
 
-    <!-- SIDEBAR -->
-    <div th:replace="~{fragments/manager-sidebar :: sidebar}"></div>
+<div th:replace="~{fragments/manager-sidebar :: sidebar}"></div>
 
-    <!-- MAIN -->
-    <main class="staff-page">
+<main class="staff-page">
 
-        <!-- PAGE HEADER -->
-        <div class="staff-page-header">
+    <!-- PAGE HEADER -->
+    <div class="staff-page-header">
+
+        <div class="flex items-center gap-4">
+
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/bed-double.svg}" alt="">
+            </div>
 
             <div>
-                <h1 class="staff-page-title"
-                    th:text="${roomType.name}">
-                    Deluxe Ocean Suite
-                </h1>
-
-                <p class="page-description">
-                    View room type details, pricing, amenities,
-                    images, and operational information.
-                </p>
-            </div>
-
-            <div class="flex items-center gap-3">
-
-                <a th:href="@{'/manager/room-types/edit/' + ${roomType.id}}"
-                   class="btn btn-primary">
-                    Edit Room Type
-                </a>
-
-                <a th:href="@{/manager/room-types}"
-                   class="btn btn-secondary">
-                    Back to Room Types
-                </a>
-
+                <h1 class="staff-page-title">Room Type Details</h1>
+                <p class="page-description" th:text="${view.name}">Room Name</p>
             </div>
 
         </div>
+        <div class="gap-1">
+            <a th:href="@{/manager/room-types/{id}/edit(id=${view.id})}"
+               class="btn btn-primary">
+                Edit
+            </a>
 
-        <!-- BANNER IMAGE -->
-        <section class="overflow-hidden card">
+            <a th:href="@{/manager/room-types}"
+               class="btn btn-secondary">
+                Back
+            </a>
+        </div>
 
-            <div class="relative h-[380px] w-full bg-background">
+    </div>
 
-                <div th:if="${roomType.pictures == null or roomType.pictures.isEmpty()}"
-                     class="flex h-full items-center justify-center text-muted-foreground">
-                    No banner image available
+    <!-- CONTENT GRID -->
+    <div class="grid grid-cols-2 gap-6">
+
+        <!-- BASIC INFORMATION -->
+        <section class="card">
+            <div class="border-b border-border px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <img th:src="@{/assets/icons/bed-double.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div><h2 class="text-xl font-semibold">Basic Information</h2>
+                        <p class="mt-1 text-sm text-muted-foreground">Room category, tier, and bed configuration.</p>
+                    </div>
                 </div>
-
-                <!-- STATUS -->
-                <div class="absolute right-5 top-5">
-
-                    <span th:if="${roomType.active}"
-                          class="pill-success">
-                        Active
-                    </span>
-
-                    <span th:unless="${roomType.active}"
-                          class="pill-danger">
-                        Inactive
-                    </span>
-
-                </div>
-
             </div>
-
+            <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-2 xl:grid-cols-3">
+                <div class="rounded-xl border border-border bg-background p-4">
+                    <p class="text-xs uppercase tracking-brand text-muted-foreground">Category</p>
+                    <p class="mt-2 text-base font-semibold" th:text="${view.category}">Double</p>
+                </div>
+                <div class="rounded-xl border border-border bg-background p-4">
+                    <p class="text-xs uppercase tracking-brand text-muted-foreground">Tier</p>
+                    <p class="mt-2 text-base font-semibold" th:text="${view.tier}">Deluxe</p>
+                </div>
+                <div class="rounded-xl border border-border bg-background p-4">
+                    <p class="text-xs uppercase tracking-brand text-muted-foreground">Bed Type</p>
+                    <p class="mt-2 text-base font-semibold" th:text="${view.bedType}">King</p>
+                </div>
+            </div>
         </section>
 
-        <!-- CONTENT -->
-        <div class="mt-6 grid grid-cols-12 gap-6">
-
-            <!-- LEFT -->
-            <div class="col-span-8 flex flex-col gap-6">
-
-                <!-- OVERVIEW -->
-                <section class="card">
-
-                    <div class="border-b border-border p-5">
-                        <h2 class="text-lg font-semibold">
-                            Overview
-                        </h2>
+        <!-- PRICING & CAPACITY -->
+        <section class="card">
+            <div class="border-b border-border px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <img th:src="@{/assets/icons/users.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div><h2 class="text-xl font-semibold">Pricing &amp; Capacity</h2>
+                        <p class="mt-1 text-sm text-muted-foreground">Occupancy limits and room pricing.</p>
                     </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-3">
+                <div class="rounded-xl border border-border bg-background p-4">
+                    <p class="text-xs uppercase tracking-brand text-muted-foreground">Base Price</p>
+                    <p class="mt-2 text-base font-semibold">$<span th:text="${view.basePrice}">320</span> / night
+                    </p>
+                </div>
+                <div class="rounded-xl border border-border bg-background p-4">
+                    <p class="text-xs uppercase tracking-brand text-muted-foreground">Area</p>
+                    <p class="mt-2 text-base font-semibold"><span th:text="${view.area}">48</span> m²</p>
+                </div>
+                <div class="rounded-xl border border-border bg-background p-4">
+                    <p class="text-xs uppercase tracking-brand text-muted-foreground">Max Occupancy</p>
+                    <p class="mt-2 text-base font-semibold"><span th:text="${view.maxOccupancy}">2</span> Guests</p>
+                </div>
+            </div>
+        </section>
 
-                    <div class="grid grid-cols-2 gap-5 p-5">
-
-                        <!-- BED TYPE -->
-                        <div class="rounded-xl border border-border bg-background p-4">
-
-                            <p class="text-xs uppercase tracking-brand text-muted-foreground">
-                                Bed Type
-                            </p>
-
-                            <p class="mt-2 text-base font-semibold"
-                               th:text="${roomType.bedType}">
-                                King Bed
-                            </p>
-
-                        </div>
-
-                        <!-- OCCUPANCY -->
-                        <div class="rounded-xl border border-border bg-background p-4">
-
-                            <p class="text-xs uppercase tracking-brand text-muted-foreground">
-                                Max Occupancy
-                            </p>
-
-                            <p class="mt-2 text-base font-semibold">
-                                <span th:text="${roomType.maxOccupancy}">2</span>
-                                Guests
-                            </p>
-
-                        </div>
-
-                        <!-- AREA -->
-                        <div class="rounded-xl border border-border bg-background p-4">
-
-                            <p class="text-xs uppercase tracking-brand text-muted-foreground">
-                                Area
-                            </p>
-
-                            <p class="mt-2 text-base font-semibold">
-                                <span th:text="${roomType.area}">48</span> m²
-                            </p>
-
-                        </div>
-
-                        <!-- BASE PRICE -->
-                        <div class="rounded-xl border border-border bg-background p-4">
-
-                            <p class="text-xs uppercase tracking-brand text-muted-foreground">
-                                Base Price
-                            </p>
-
-                            <p class="mt-2 text-base font-semibold">
-                                $<span th:text="${roomType.basePrice}">320</span>
-                                / night
-                            </p>
-
-                        </div>
-
+        <!-- DESCRIPTION & FEATURES -->
+        <section class="card col-span-1">
+            <div class="border-b border-border px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <img th:src="@{/assets/icons/file-text.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div><h2 class="text-xl font-semibold">Description &amp; Features</h2>
+                        <p class="mt-1 text-sm text-muted-foreground">Room description and available amenities.</p>
                     </div>
-
-                </section>
-
-                <!-- DESCRIPTION -->
-                <section class="card">
-
-                    <div class="border-b border-border p-5">
-                        <h2 class="text-lg font-semibold">
-                            Description
-                        </h2>
+                </div>
+            </div>
+            <div class="flex flex-col gap-6 p-6">
+                <p class="whitespace-pre-line leading-relaxed text-muted-foreground"
+                   th:text="${view.description}">
+                    Spacious luxury suite with private balcony and premium amenities.
+                </p>
+                <div class="flex flex-wrap gap-3">
+                    <div th:each="feature : ${#strings.arraySplit(view.features, ',')}"
+                         class="rounded-full border border-border bg-background px-4 py-2 text-sm">
+                        <span th:text="${#strings.trim(feature)}">WiFi</span>
                     </div>
+                </div>
+            </div>
+        </section>
 
-                    <div class="p-5">
-
-                        <p class="whitespace-pre-line leading-relaxed text-muted-foreground"
-                           th:text="${roomType.description}">
-                            Spacious luxury suite with private balcony
-                            and premium amenities.
-                        </p>
-
+        <!-- COVER IMAGE -->
+        <section class="card col-span-1">
+            <div class="border-b border-border px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <img th:src="@{/assets/icons/image-plus.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div><h2 class="text-xl font-semibold">Cover Image</h2>
+                        <p class="mt-1 text-sm text-muted-foreground">Primary cover photo for this room type.</p>
                     </div>
-
-                </section>
-
-                <!-- FEATURES -->
-                <section class="card">
-
-                    <div class="border-b border-border p-5">
-                        <h2 class="text-lg font-semibold">
-                            Features & Amenities
-                        </h2>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="relative overflow-hidden rounded-xl border border-border bg-background h-60">
+                    <img th:if="${view.coverPictureId != null}"
+                         th:src="@{/room-type-picture/{id}(id=${view.coverPictureId})}"
+                         alt="" class="h-full w-full object-cover">
+                    <div th:if="${view.coverPictureId == null}"
+                         class="flex h-full items-center justify-center text-muted-foreground">
+                        No cover image
                     </div>
+                </div>
+            </div>
+        </section>
 
-                    <div class="p-5">
-
-                        <div class="flex flex-wrap gap-3">
-
-                            <div th:each="feature : ${#strings.arraySplit(roomType.features, ',')}"
-                                 class="rounded-full border border-border bg-background px-4 py-2 text-sm">
-
-                                <span th:text="${#strings.trim(feature)}">
-                                    WiFi
-                                </span>
-
+        <!-- ADDITIONAL IMAGES -->
+        <section class="card col-span-2">
+            <div class="border-b border-border px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <img th:src="@{/assets/icons/layout-grid.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div><h2 class="text-xl font-semibold">Additional Images</h2>
+                        <p class="mt-1 text-sm text-muted-foreground">Gallery photos for this room type.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="flex flex-wrap gap-3">
+                    <div th:each="pic : ${view.additionalPictureId()}">
+                        <div class="w-32">
+                            <div class="overflow-hidden rounded-xl border border-border bg-background">
+                                <img th:src="@{/room-type-picture/{id}(id=${pic})}"
+                                     alt="" class="aspect-square w-full object-cover">
                             </div>
-
                         </div>
-
                     </div>
-
-                </section>
-
+                    <div th:if="${#lists.isEmpty(view.additionalPictureId())}"
+                         class="flex w-full items-center justify-center rounded-xl border-2 border-dashed border-border py-16 text-muted-foreground">
+                        No additional images
+                    </div>
+                </div>
             </div>
+        </section>
 
-            <!-- RIGHT -->
-            <div class="col-span-4 flex flex-col gap-6">
+    </div>
 
-                <!-- DETAIL IMAGES -->
-                <section class="card">
-
-                    <div class="border-b border-border p-5">
-                        <h2 class="text-lg font-semibold">
-                            Banner Image
-                        </h2>
-                    </div>
-
-                    <div class="grid grid-cols-1 gap-4 p-5">
-
-                        <img th:if="${!#lists.isEmpty(roomType.pictures)}"
-                             th:src="@{/room-type-picture/{id}(id=${roomType.pictures[0].id})}"
-                             alt="Room Image"
-                             class="h-full w-full object-cover">
-
-                        <span th:if="${#lists.isEmpty(roomType.pictures)}">  No Image
-                                     </span>
-
-                    </div>
-
-                </section>
-
-                <!-- SYSTEM INFO -->
-                <section class="card">
-
-                    <div class="border-b border-border p-5">
-                        <h2 class="text-lg font-semibold">
-                            System Information
-                        </h2>
-                    </div>
-
-                    <div class="flex flex-col gap-4 p-5 text-sm">
-
-                        <div class="flex items-center justify-between">
-
-                            <span class="text-muted-foreground">
-                                Room Type ID
-                            </span>
-
-                            <span class="font-medium"
-                                  th:text="${roomType.id}">
-                                1
-                            </span>
-
-                        </div>
-
-                        <div class="flex items-center justify-between">
-
-                            <span class="text-muted-foreground">
-                                Created At
-                            </span>
-
-                            <span class="font-medium"
-                                  th:text="${#temporals.format(roomType.createdAt, 'dd MMM yyyy HH:mm')}">
-                                29 May 2026
-                            </span>
-
-                        </div>
-
-                        <div class="flex items-center justify-between">
-
-                            <span class="text-muted-foreground">
-                                Updated At
-                            </span>
-
-                            <span class="font-medium"
-                                  th:text="${#temporals.format(roomType.updatedAt, 'dd MMM yyyy HH:mm')}">
-                                29 May 2026
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                </section>
-
-            </div>
-
-        </div>
-
-    </main>
+</main>
 
 </body>
 </html>

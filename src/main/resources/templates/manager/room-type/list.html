@@ -12,125 +12,121 @@
 
 <body class="staff-layout">
 
-    <div th:replace="~{fragments/manager-sidebar :: sidebar}"></div>
+<div th:replace="~{fragments/manager-sidebar :: sidebar}"></div>
 
-    <main class="staff-page">
+<main class="staff-page">
 
-        <div class="staff-page-header">
+    <div class="staff-page-header">
+
+        <div class="flex items-center gap-4">
+
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/bed-double.svg}" alt="">
+            </div>
 
             <div>
                 <h1 class="staff-page-title">Room Types</h1>
-
                 <p class="page-description">
                     Manage room categories, pricing, occupancy, and operational availability.
                 </p>
             </div>
 
-            <a th:href="@{/manager/room-types/create}"
-               class="btn btn-primary">
-                + Create Room Type
+        </div>
+
+        <a th:href="@{/manager/room-types/create}"
+           class="btn btn-primary">
+            + Create Room Type
+        </a>
+
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div th:if="${#lists.isEmpty(view)}" class="card-empty">
+        <p class="text-muted-foreground">No room types found. Create your first one.</p>
+    </div>
+
+    <!-- GRID -->
+    <div th:if="${!#lists.isEmpty(view)}"
+         class="grid grid-cols-3 gap-5">
+
+        <!-- CARD -->
+        <section th:each="rt : ${view}"
+                 class="overflow-hidden card">
+
+            <!-- IMAGE -->
+            <a th:if="${rt.coverPictureId() != null}"
+               th:href="@{'/manager/room-types/' + ${rt.id}}"
+               class="flex h-48 items-center justify-center overflow-hidden border-b border-border bg-background">
+                <img th:src="@{/room-type-picture/{id}(id=${rt.coverPictureId()})}"
+                     alt=""
+                     class="h-full w-full object-cover">
             </a>
 
-        </div>
+            <div th:if="${rt.coverPictureId() == null}"
+                 class="flex h-48 items-center justify-center border-b border-border bg-background text-muted-foreground">
+                No Image
+            </div>
 
-        <!-- EMPTY STATE -->
-        <div th:if="${#lists.isEmpty(roomTypes)}" class="card-empty">
-            <p class="text-muted-foreground">No room types found. Create your first one.</p>
-        </div>
+            <div class="p-5">
+                <!-- TOP -->
+                <div class="mb-3 flex items-start justify-between">
 
-        <!-- GRID -->
-        <div th:if="${!#lists.isEmpty(roomTypes)}"
-             class="grid grid-cols-3 gap-5">
+                    <div>
+                        <h2 class="text-lg font-semibold"
+                            th:text="${rt.name}">
+                            Room Name
+                        </h2>
 
-            <!-- CARD -->
-             <section th:each="rt : ${roomTypes}"
-                      class="overflow-hidden card">
-
-                <!-- IMAGE -->
-                <div class="flex h-48 items-center justify-center border-b border-border bg-background text-muted-foreground">
-
-                    <img th:if="${!#lists.isEmpty(rt.pictures)}"
-                         th:src="@{/room-type-picture/{id}(id=${rt.pictures[0].id})}"
-                         alt="Room Image"
-                         class="h-full w-full object-cover">
-
-                    <span th:if="${#lists.isEmpty(rt.pictures)}">  No Image
-                                     </span>
-
+                        <p class="text-sm text-muted-foreground"
+                           th:text="${rt.maxOccupancy + ' guests · ' + rt.area + 'm²'}">
+                            Bed · Area
+                        </p>
+                    </div>
                 </div>
-                <div class="p-5">
 
-                    <!-- TOP -->
-                    <div class="mb-3 flex items-start justify-between">
+                <!-- STATS -->
+                <div class="mb-4 grid grid-cols-2 gap-3">
 
-                        <div>
-                            <h2 class="text-lg font-semibold"
-                                th:text="${rt.name}">
-                                Room Name
-                            </h2>
-
-                            <p class="text-sm text-muted-foreground"
-                               th:text="${rt.bedType + ' · ' + rt.area + 'm²'}">
-                                Bed · Area
-                            </p>
-                        </div>
-
-                        <span th:classappend="${rt.active} ? 'pill-success' : 'pill-danger'"
-                              th:text="${rt.active} ? 'ACTIVE' : 'DISABLED'">
-                            Status
-                        </span>
-
+                    <div class="rounded-lg border border-border bg-background p-3">
+                        <p class="text-xs text-muted-foreground">Rooms</p>
+                        <p class="text-lg font-semibold"
+                           th:text="${rt.roomCount}">
+                            0
+                        </p>
                     </div>
 
-                    <!-- STATS -->
-                    <div class="mb-4 grid grid-cols-2 gap-3">
-
-                        <div class="rounded-lg border border-border bg-background p-3">
-                            <p class="text-xs text-muted-foreground">Rooms</p>
-                            <p class="text-lg font-semibold"
-                                th:text="0">
-                                0
-                            </p>
-                        </div>
-
-                        <div class="rounded-lg border border-border bg-background p-3">
-                            <p class="text-xs text-muted-foreground">Base Price</p>
-                            <p class="text-lg font-semibold"
-                                th:text="|$${rt.basePrice}|">
-                                $0
-                            </p>
-                        </div>
-
-                    </div>
-
-                    <!-- DESCRIPTION -->
-                    <p class="mb-4 line-clamp-2 text-sm text-muted-foreground"
-                       th:text="${rt.description}">
-                        Description
-                    </p>
-
-                    <!-- ACTIONS -->
-                    <div class="flex items-center gap-2">
-
-                        <a th:href="@{'/manager/room-types/' + ${rt.id}}"
-                           class="btn btn-secondary btn-sm">
-                            View
-                        </a>
-
-                        <a th:href="@{'/manager/room-types/edit/' + ${rt.id}}"
-                           class="btn btn-primary btn-sm">
-                            Edit
-                        </a>
-
+                    <div class="rounded-lg border border-border bg-background p-3">
+                        <p class="text-xs text-muted-foreground">Base Price</p>
+                        <p class="text-lg font-semibold"
+                           th:text="|$${rt.basePrice}|">
+                            $0
+                        </p>
                     </div>
 
                 </div>
 
-            </section>
+                <!-- ACTIONS -->
+                <div class="flex items-center gap-2 justify-end">
 
-        </div>
+                    <a th:href="@{'/manager/room-types/{id}'(id=${rt.id})}"
+                       class="btn btn-secondary btn-sm">
+                        View
+                    </a>
 
-    </main>
+                    <a th:href="@{'/manager/room-types/{id}/edit'(id=${rt.id})}"
+                       class="btn btn-primary btn-sm">
+                        Edit
+                    </a>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</main>
 
 </body>
 </html>
