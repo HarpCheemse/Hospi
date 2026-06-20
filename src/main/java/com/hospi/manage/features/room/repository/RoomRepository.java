@@ -1,6 +1,6 @@
 package com.hospi.manage.features.room.repository;
 
-import com.hospi.manage.features.room.dto.room.RoomInventory;
+import com.hospi.manage.features.room.dto.response.RoomInventory;
 import com.hospi.manage.features.room.entity.Room;
 import com.hospi.manage.features.room.entity.RoomType;
 import com.hospi.manage.features.room.enums.OccupancyStatus;
@@ -11,18 +11,20 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RoomRepository extends JpaRepository<Room, Long> {
-    List<Room> findByFloorNumberOrderByRoomNumber(int floor);
+    List<Room> findByActiveTrueOrderByFloorNumberAscRoomNumberAsc();
 
-    Optional<Room> findByRoomNumber(String roomNumber);
+    Optional<Room> findByRoomNumberAndActiveTrue(String roomNumber);
 
     List<Room> findByRoomTypeIdAndOccupancyStatusAndActiveTrue(Long roomTypeId, OccupancyStatus occupancyStatus);
 
-    boolean existsByRoomNumber(String roomNumber);
+    boolean existsByRoomNumberAndActiveTrue(String roomNumber);
+
+    long countByRoomTypeIdAndActiveTrue(Long roomTypeId);
 
     @Query("""
             SELECT MAX(CAST(r.roomNumber AS integer))
             FROM Room r
-            WHERE r.floorNumber = :floor
+            WHERE r.floorNumber = :floor AND r.active = true
             """)
     Integer findHighestRoomNumberByFloor(short floor);
 
@@ -37,10 +39,14 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     default List<RoomInventory> getRoomInventory() {
         return countActiveRoomsByType()
                 .stream()
-                .map(row -> new RoomInventory(
-                        (RoomType) row[0],
-                        ((Long) row[1]).intValue()
-                ))
+                .map(row -> {
+                    RoomType rt = (RoomType) row[0];
+                    return new RoomInventory(
+                            rt.getId(),
+                            rt.getName(),
+                            ((Long) row[1]).intValue()
+                    );
+                })
                 .toList();
     }
 }

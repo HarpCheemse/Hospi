@@ -1,5 +1,6 @@
 package com.hospi.manage.features.room.entity;
 
+import com.hospi.manage.features.room.enums.BedType;
 import com.hospi.manage.features.room.enums.RoomCategory;
 import com.hospi.manage.features.room.enums.RoomTier;
 import jakarta.persistence.*;
@@ -51,8 +52,9 @@ public class RoomType {
     @Column(columnDefinition = "TEXT")
     private String features;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "bed_type")
-    private String bedType;
+    private BedType bedType;
 
     private Integer area;
 

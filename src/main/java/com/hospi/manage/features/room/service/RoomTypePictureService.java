@@ -50,8 +50,6 @@ public class RoomTypePictureService {
         picture.setSortOrder(COVER_ORDER);
 
         roomType.getPictures().add(picture);
-
-        System.out.println("IMAGE SIZE = " + compressed.length);
     }
 
     @Transactional

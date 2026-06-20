@@ -1,7 +1,8 @@
 package com.hospi.manage.features.reservation.dto;
 
-import com.hospi.manage.features.room.dto.room_type.RoomTypeAvailability;
+import com.hospi.manage.features.room.dto.response.RoomTypeAvailability;
 import com.hospi.manage.features.room.entity.RoomTypePicture;
+import com.hospi.manage.features.room.enums.BedType;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -11,7 +12,7 @@ public record RoomTypeAvailabilityView(
         String name,
         Integer maxOccupancy,
         BigDecimal basePrice,
-        String bedType,
+        BedType bedType,
         Integer area,
         String features,
         Boolean active,

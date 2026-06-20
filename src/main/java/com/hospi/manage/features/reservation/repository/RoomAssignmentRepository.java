@@ -1,6 +1,7 @@
 package com.hospi.manage.features.reservation.repository;
 
 import com.hospi.manage.features.reservation.entity.RoomAssignment;
+import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -8,6 +9,8 @@ import java.util.List;
 public interface RoomAssignmentRepository extends JpaRepository<RoomAssignment, Long> {
 
     List<RoomAssignment> findByReservationIdOrderByAssignedAtAsc(Long reservationId);
+
+    List<RoomAssignment> findByRoomIdAndReservation_StatusIn(Long roomId, List<ReservationStatus> statuses);
 
     boolean existsByReservationIdAndRoomId(Long reservationId, Long roomId);
 

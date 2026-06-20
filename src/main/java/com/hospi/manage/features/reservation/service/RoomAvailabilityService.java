@@ -1,6 +1,6 @@
 package com.hospi.manage.features.reservation.service;
 
-import com.hospi.manage.features.room.dto.room_type.RoomTypeAvailability;
+import com.hospi.manage.features.room.dto.response.RoomTypeAvailability;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
