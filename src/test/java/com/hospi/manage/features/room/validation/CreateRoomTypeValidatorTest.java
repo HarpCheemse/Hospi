@@ -1,6 +1,6 @@
-package com.hospi.manage.features.room.room_type;
+package com.hospi.manage.features.room.validation;
 
-import com.hospi.manage.features.room.dto.room_type.RoomTypeCreateForm;
+import com.hospi.manage.features.room.dto.request.RoomTypeCreateForm;
 import com.hospi.manage.features.room.enums.RoomCategory;
 import com.hospi.manage.features.room.enums.RoomTier;
 import com.hospi.manage.features.room.repository.RoomTypeRepository;
@@ -54,7 +54,7 @@ class CreateRoomTypeValidatorTest {
         );
         when(form.coverImage()).thenReturn(file);
 
-        when(roomTypeRepository.existsByCategoryAndTier(any(),
+        when(roomTypeRepository.existsByCategoryAndTierAndActiveTrue(any(),
                 any()))
                 .thenReturn(false);
 
@@ -71,7 +71,7 @@ class CreateRoomTypeValidatorTest {
         when(form.basePrice()).thenReturn(new BigDecimal("100.00"));
         when(form.coverImage()).thenReturn(null);
 
-        when(roomTypeRepository.existsByCategoryAndTier(any(),
+        when(roomTypeRepository.existsByCategoryAndTierAndActiveTrue(any(),
                 any()))
                 .thenReturn(true);
 
@@ -95,7 +95,7 @@ class CreateRoomTypeValidatorTest {
         );
         when(form.coverImage()).thenReturn(file);
 
-        when(roomTypeRepository.existsByCategoryAndTier(any(),
+        when(roomTypeRepository.existsByCategoryAndTierAndActiveTrue(any(),
                 any()))
                 .thenReturn(false);
 
@@ -119,7 +119,7 @@ class CreateRoomTypeValidatorTest {
         );
         when(form.coverImage()).thenReturn(file);
 
-        when(roomTypeRepository.existsByCategoryAndTier(any(),
+        when(roomTypeRepository.existsByCategoryAndTierAndActiveTrue(any(),
                 any()))
                 .thenReturn(false);
 

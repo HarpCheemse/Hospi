@@ -1,14 +1,13 @@
-package com.hospi.manage.features.room.room_type;
+package com.hospi.manage.features.room.service;
 
 import com.hospi.manage.common.exception.ResourceNotFoundException;
-import com.hospi.manage.features.room.dto.room_type.RoomTypeCreateForm;
-import com.hospi.manage.features.room.dto.room_type.RoomTypeEditForm;
+import com.hospi.manage.features.room.dto.request.RoomTypeCreateForm;
+import com.hospi.manage.features.room.dto.request.RoomTypeEditForm;
 import com.hospi.manage.features.room.entity.RoomType;
 import com.hospi.manage.features.room.enums.RoomCategory;
 import com.hospi.manage.features.room.enums.RoomTier;
+import com.hospi.manage.features.room.repository.RoomRepository;
 import com.hospi.manage.features.room.repository.RoomTypeRepository;
-import com.hospi.manage.features.room.service.RoomTypePictureService;
-import com.hospi.manage.features.room.service.RoomTypeService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,6 +30,9 @@ class RoomTypeServiceTest {
 
     @Mock
     private RoomTypePictureService roomTypePictureService;
+
+    @Mock
+    private RoomRepository roomRepository;
 
     @InjectMocks
     private RoomTypeService service;
@@ -66,9 +68,10 @@ class RoomTypeServiceTest {
     }
 
     @Test
-    void findById_shouldReturnRoomType() {
+    void findById_shouldReturnActiveRoomType() {
         RoomType rt = new RoomType();
         rt.setId(1L);
+        rt.setActive(true);
 
         when(roomTypeRepository.findById(1L))
                 .thenReturn(Optional.of(rt));
@@ -89,9 +92,38 @@ class RoomTypeServiceTest {
     }
 
     @Test
+    void findById_shouldThrow_whenInactive() {
+        RoomType rt = new RoomType();
+        rt.setId(1L);
+        rt.setActive(false);
+
+        when(roomTypeRepository.findById(1L))
+                .thenReturn(Optional.of(rt));
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> service.findById(1L));
+    }
+
+    @Test
+    void findAll_shouldReturnActiveOnly() {
+        RoomType rt = new RoomType();
+        rt.setId(1L);
+
+        when(roomTypeRepository.findByActiveTrue())
+                .thenReturn(List.of(rt));
+
+        List<RoomType> result = service.findAll();
+
+        assertEquals(1,
+                result.size());
+        verify(roomTypeRepository).findByActiveTrue();
+    }
+
+    @Test
     void update_shouldCallAllPictureOperations() throws Exception {
         RoomType rt = new RoomType();
         rt.setPictures(new ArrayList<>());
+        rt.setActive(true);
 
         when(roomTypeRepository.findById(1L))
                 .thenReturn(Optional.of(rt));
@@ -129,6 +161,8 @@ class RoomTypeServiceTest {
 
         when(roomTypeRepository.findById(1L))
                 .thenReturn(Optional.of(rt));
+        when(roomRepository.countByRoomTypeIdAndActiveTrue(1L))
+                .thenReturn(0L);
 
         service.delete(1L);
 
@@ -137,11 +171,27 @@ class RoomTypeServiceTest {
     }
 
     @Test
+    void delete_shouldThrow_whenActiveRoomsExist() {
+        RoomType rt = new RoomType();
+        rt.setActive(true);
+
+        when(roomTypeRepository.findById(1L))
+                .thenReturn(Optional.of(rt));
+        when(roomRepository.countByRoomTypeIdAndActiveTrue(1L))
+                .thenReturn(3L);
+
+        assertThrows(IllegalStateException.class,
+                () -> service.delete(1L));
+
+        verify(roomTypeRepository, never()).save(any());
+    }
+
+    @Test
     void findAllViews_shouldMap() {
         RoomType rt = new RoomType();
         rt.setId(1L);
 
-        when(roomTypeRepository.findAll())
+        when(roomTypeRepository.findAllWithRelations())
                 .thenReturn(List.of(rt));
 
         var result = service.findAllViews();

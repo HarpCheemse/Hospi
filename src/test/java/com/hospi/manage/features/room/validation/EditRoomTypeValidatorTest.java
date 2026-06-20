@@ -1,6 +1,6 @@
-package com.hospi.manage.features.room.room_type;
+package com.hospi.manage.features.room.validation;
 
-import com.hospi.manage.features.room.dto.room_type.RoomTypeEditForm;
+import com.hospi.manage.features.room.dto.request.RoomTypeEditForm;
 import com.hospi.manage.features.room.enums.RoomCategory;
 import com.hospi.manage.features.room.enums.RoomTier;
 import com.hospi.manage.features.room.repository.RoomTypeRepository;
@@ -58,12 +58,9 @@ class EditRoomTypeValidatorTest {
         when(form.newImages()).thenReturn(null);
         when(form.removeImageIds()).thenReturn(null);
 
-        when(roomTypeRepository.existsByCategoryAndTierAndIdNot(any(),
+        when(roomTypeRepository.existsByCategoryAndTierAndIdNotAndActiveTrue(any(),
                 any(),
                 anyLong())).thenReturn(false);
-
-        when(roomTypeRepository.existsByCategoryAndTier(any(),
-                any())).thenReturn(false);
 
         validator.validate(1L,
                 form,
@@ -80,7 +77,7 @@ class EditRoomTypeValidatorTest {
         when(form.features()).thenReturn("wifi");
         when(form.basePrice()).thenReturn(new BigDecimal("100.00"));
 
-        when(roomTypeRepository.existsByCategoryAndTierAndIdNot(any(),
+        when(roomTypeRepository.existsByCategoryAndTierAndIdNotAndActiveTrue(any(),
                 any(),
                 anyLong())).thenReturn(true);
 
