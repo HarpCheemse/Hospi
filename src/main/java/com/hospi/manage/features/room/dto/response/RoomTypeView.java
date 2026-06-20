@@ -1,4 +1,4 @@
-package com.hospi.manage.features.room.dto.room_type;
+package com.hospi.manage.features.room.dto.response;
 
 import com.hospi.manage.features.room.entity.RoomType;
 import com.hospi.manage.features.room.enums.BedType;
@@ -8,7 +8,7 @@ import com.hospi.manage.features.room.enums.RoomTier;
 import java.math.BigDecimal;
 import java.util.List;
 
-public record RoomTypeView(Long id, String name, RoomCategory category, RoomTier tier, String bedType, Integer area,
+public record RoomTypeView(Long id, String name, RoomCategory category, RoomTier tier, BedType bedType, Integer area,
                            Integer maxOccupancy, BigDecimal basePrice, int roomCount, Long coverPictureId,
                            String description, String features, List<Long> additionalPictureId,
                            RoomCategory[] categories,

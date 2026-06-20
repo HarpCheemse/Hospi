@@ -1,6 +1,4 @@
-package com.hospi.manage.features.room.dto;
-
-import com.hospi.manage.features.room.dto.room.RoomView;
+package com.hospi.manage.features.room.dto.response;
 
 import java.util.List;
 

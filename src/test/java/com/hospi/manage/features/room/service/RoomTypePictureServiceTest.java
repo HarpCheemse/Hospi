@@ -1,4 +1,4 @@
-package com.hospi.manage.features.room.room_type;
+package com.hospi.manage.features.room.service;
 
 import com.hospi.manage.common.service.ImageCompressionService;
 import com.hospi.manage.features.room.entity.RoomType;

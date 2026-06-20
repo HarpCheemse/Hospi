@@ -52,7 +52,7 @@ public class PaymentService {
 
     @Transactional
     public Payment confirmPayment(Long reservationId, PaymentMethod method, String confirmedBy) {
-        Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
+        Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(() -> new ResourceNotFoundException("Reservation"));
 
         if (reservation.getStatus() != ReservationStatus.PENDING) {
             throw new IllegalStateException("Booking is not in PENDING status");

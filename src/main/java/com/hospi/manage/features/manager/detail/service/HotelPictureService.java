@@ -15,6 +15,6 @@ public class HotelPictureService {
 
     public HotelPicture findById(Long id) {
         return hotelPictureRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("Hotel picture not found"));
+                () -> new ResourceNotFoundException("Hotel picture"));
     }
 }

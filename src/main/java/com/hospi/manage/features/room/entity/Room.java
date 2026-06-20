@@ -25,8 +25,8 @@ public class Room {
     @Column(name = "floor_number")
     private Short floorNumber;
 
-    @Column(name = "is_active")
-    private Boolean active;
+    @Column(name = "is_active", nullable = false)
+    private boolean active = true;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "occupancy_status")

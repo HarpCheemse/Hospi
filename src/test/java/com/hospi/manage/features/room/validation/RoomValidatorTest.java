@@ -1,7 +1,7 @@
-package com.hospi.manage.features.manager.room.validator;
+package com.hospi.manage.features.room.validation;
 
-import com.hospi.manage.features.room.dto.room.RoomCreateForm;
-import com.hospi.manage.features.room.dto.room.RoomEditForm;
+import com.hospi.manage.features.room.dto.request.RoomCreateForm;
+import com.hospi.manage.features.room.dto.request.RoomEditForm;
 import com.hospi.manage.features.room.entity.Room;
 import com.hospi.manage.features.room.enums.ConditionStatus;
 import com.hospi.manage.features.room.repository.RoomRepository;
@@ -61,7 +61,7 @@ public class RoomValidatorTest {
                         1L,
                         ConditionStatus.CLEAN);
 
-        when(roomRepository.existsByRoomNumber("101"))
+        when(roomRepository.existsByRoomNumberAndActiveTrue("101"))
                 .thenReturn(true);
 
         BindingResult errors =

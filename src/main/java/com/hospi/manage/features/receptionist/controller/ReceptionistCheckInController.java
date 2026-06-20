@@ -35,7 +35,7 @@ public class ReceptionistCheckInController {
     @GetMapping("/{id}/checkin")
     String checkInForm(@PathVariable Long id, Model model) {
         Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Reservation"));
 
         if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
             return "redirect:/receptionist/reservations";

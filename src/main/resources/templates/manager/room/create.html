@@ -14,132 +14,102 @@
 
 <body class="staff-layout">
 
-    <!-- SIDEBAR -->
-    <div th:replace="~{fragments/manager-sidebar :: sidebar}"></div>
+<!-- SIDEBAR -->
+<div th:replace="~{fragments/manager-sidebar :: sidebar}"></div>
 
-    <!-- MAIN -->
-    <main class="staff-page">
-        <!-- TOASTS -->
-        <div th:replace="~{fragments/components/toast :: toast}"></div>
+<!-- MAIN -->
+<main class="staff-page">
 
-        <!-- HEADER -->
-        <div class="staff-page-header">
+    <!-- TOAST -->
+    <div th:replace="~{fragments/components/toast :: toast}"></div>
 
-            <div>
+    <!-- PAGE HEADER -->
+    <div class="staff-page-header">
 
-                <h1 class="staff-page-title">
-                    Add Rooms
-                </h1>
+        <div class="flex items-center gap-4">
 
-                <p class="page-description">
-                    Generate multiple rooms at once for a selected floor.
-                </p>
-
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/door-open.svg}" alt="">
             </div>
 
-            <a th:href="@{/manager/rooms}"
-               class="btn btn-secondary">
-                Back to Rooms
-            </a>
+            <div>
+                <h1 class="staff-page-title">Add Rooms</h1>
+                <p class="page-description">Generate multiple rooms at once for a selected floor.</p>
+            </div>
 
         </div>
 
-        <form th:action="@{/manager/rooms/create}"
-              th:object="${form}"
-              method="post"
-              novalidate>
+        <a th:href="@{/manager/rooms}"
+           class="btn btn-secondary">
+            Back
+        </a>
 
-            <section class="card">
+    </div>
 
-                <div class="border-b border-border p-5">
+    <!-- FORM -->
+    <form th:action="@{/manager/rooms/create}"
+          th:object="${form}"
+          method="post"
+          class="grid grid-cols-2 gap-6"
+          novalidate>
 
-                    <h2 class="text-lg font-semibold">
-                        Room Generation Settings
-                    </h2>
+        <!-- ROOM GENERATION SETTINGS -->
+        <section class="card col-span-2">
 
-                    <p class="mt-1 text-sm text-muted-foreground">
-                        Configure how room numbers should be generated.
-                    </p>
+            <div class="border-b border-border px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <img th:src="@{/assets/icons/door-open.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div>
+                        <h2 class="text-xl font-semibold">Room Generation Settings</h2>
+                        <p class="mt-1 text-sm text-muted-foreground">Configure how room numbers should be generated.</p>
+                    </div>
+                </div>
+            </div>
 
+            <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-3">
+
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Floor</label>
+                    <div th:replace="fragments/form-error :: error('floor')"></div>
+                    <select th:field="*{floor}" class="input"
+                            th:classappend="${#fields.hasErrors('floor')} ? 'input-error' : ''">
+                        <option value="">Select Floor</option>
+                        <option th:each="floor : ${#numbers.sequence(1, hotel.floorCount)}"
+                                th:value="${floor}" th:text="|Floor ${floor}|">
+                        </option>
+                    </select>
                 </div>
 
-                <div class="grid grid-cols-2 gap-5 p-5">
-
-                    <!-- FLOOR -->
-                    <div>
-
-                        <label class="mb-2 block text-sm font-medium">
-                            Floor
-                        </label>
-
-                        <select th:field="*{floor}" class="input w-full">
-
-                            <option value="">
-                                Select Floor
-                            </option>
-
-                            <option th:each="floor : ${#numbers.sequence(1, hotel.floorCount)}"
-                                    th:value="${floor}"
-                                    th:text="|Floor ${floor}|">
-                            </option>
-
-                        </select>
-                        <p th:if="${#fields.hasErrors('floor')}"
-                           th:errors="*{floor}"
-                           class="mt-1 text-sm text-danger">
-                        </p>
-
-                    </div>
-
-                    <!-- ROOM COUNT -->
-                    <div>
-
-                        <label class="mb-2 block text-sm font-medium">
-                            Number of Rooms
-                        </label>
-
-                        <input type="number"
-                               th:field="*{numberOfRooms}"
-                               class="input w-full"
-                               placeholder="10">
-                        <p th:if="${#fields.hasErrors('numberOfRooms')}"
-                           th:errors="*{numberOfRooms}"
-                           class="mt-1 text-sm text-danger">
-                        </p>
-                    </div>
-
-                    <!-- ROOM TYPE -->
-                    <div>
-
-                        <label class="mb-2 block text-sm font-medium">
-                            Default Room Type
-                        </label>
-
-                        <select th:field="*{roomTypeId}" class="input w-full">
-
-                            <option value="">
-                                No Room Type
-                            </option>
-
-                            <option th:each="roomType : ${roomTypes}"
-                                    th:value="${roomType.id}"
-                                    th:text="${roomType.name}">
-                            </option>
-
-                        </select>
-                        <p th:if="${#fields.hasErrors('roomTypeId')}"
-                           th:errors="*{roomTypeId}"
-                           class="mt-1 text-sm text-danger">
-                        </p>
-
-                    </div>
-
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Number of Rooms</label>
+                    <div th:replace="fragments/form-error :: error('numberOfRooms')"></div>
+                    <input type="number" min="1" max="99"
+                           th:field="*{numberOfRooms}"
+                           class="input"
+                           th:classappend="${#fields.hasErrors('numberOfRooms')} ? 'input-error' : ''"
+                           placeholder="10">
                 </div>
 
-            </section>
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Default Room Type</label>
+                    <div th:replace="fragments/form-error :: error('roomTypeId')"></div>
+                    <select th:field="*{roomTypeId}" class="input"
+                            th:classappend="${#fields.hasErrors('roomTypeId')} ? 'input-error' : ''">
+                        <option value="">No Room Type</option>
+                        <option th:each="roomType : ${roomTypes}"
+                                th:value="${roomType.id}" th:text="${roomType.name}">
+                        </option>
+                    </select>
+                </div>
 
-            <!-- ACTIONS -->
-            <div class="mt-6 flex justify-end gap-3">
+            </div>
+
+        </section>
+
+        <!-- ACTIONS -->
+        <section class="card col-span-2">
+
+            <div class="flex items-center justify-end gap-3 p-5">
 
                 <a th:href="@{/manager/rooms}"
                    class="btn btn-secondary btn-lg">
@@ -153,9 +123,11 @@
 
             </div>
 
-        </form>
+        </section>
 
-    </main>
+    </form>
+
+</main>
 
 </body>
 </html>

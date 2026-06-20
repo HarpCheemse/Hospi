@@ -7,10 +7,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
-    public String handleNotFound(
-            ResourceNotFoundException ex, Model model
-    ) {
-        model.addAttribute("messege", ex.getMessage());
+    public String handleNotFound(ResourceNotFoundException ex, Model model) {
+        model.addAttribute("resource",
+                ex.getResource());
         return "error/404";
     }
 }

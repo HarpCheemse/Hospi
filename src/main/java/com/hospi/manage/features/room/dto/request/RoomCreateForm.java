@@ -1,4 +1,4 @@
-package com.hospi.manage.features.room.dto.room;
+package com.hospi.manage.features.room.dto.request;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

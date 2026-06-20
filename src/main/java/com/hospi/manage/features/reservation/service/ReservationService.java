@@ -10,7 +10,7 @@ import com.hospi.manage.features.reservation.entity.ReservationDetail;
 import com.hospi.manage.features.reservation.enums.BookingSource;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
-import com.hospi.manage.features.room.dto.room.RoomSelection;
+import com.hospi.manage.features.room.dto.response.RoomSelection;
 import com.hospi.manage.features.room.entity.RoomType;
 import com.hospi.manage.features.room.repository.RoomTypeRepository;
 import jakarta.transaction.Transactional;
@@ -52,7 +52,7 @@ public class ReservationService {
     }
 
     public Reservation findById(Long id) {
-        return reservationRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+        return reservationRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Reservation"));
     }
 
     /// This function return RoomTypeId and amount of reservations for a given day range
