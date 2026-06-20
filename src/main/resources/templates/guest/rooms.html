@@ -22,14 +22,14 @@
       <div class="mx-auto max-w-7xl px-6 text-center">
         <p class="text-xs font-semibold uppercase tracking-widest text-accent mb-2 font-sans">EXPLORE ACCOMMODATIONS</p>
         <h1 class="text-4xl md:text-5xl font-bold font-display text-text">Choose Your Perfect Room</h1>
-        <p class="mt-4 max-w-xl mx-auto text-sm text-muted">Select from our premium rooms and suites. Designed with elegance and ultimate guest comfort in mind.</p>
+        <p class="mt-4 max-w-xl mx-auto text-sm text-muted-foreground">Select from our premium rooms and suites. Designed with elegance and ultimate guest comfort in mind.</p>
       </div>
     </section>
 
     <!-- ROOM TYPES GRID -->
     <section class="mx-auto max-w-7xl px-6 py-20">
       <div th:if="${#lists.isEmpty(roomTypes)}" class="text-center py-20 bg-surface rounded-2xl border border-border shadow-card">
-        <p class="text-lg text-muted">No room types configured yet. Please check back later!</p>
+        <p class="text-lg text-muted-foreground">No room types configured yet. Please check back later!</p>
       </div>
 
       <div th:if="${not #lists.isEmpty(roomTypes)}" class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -47,12 +47,12 @@
           <!-- Room Type Content -->
           <div class="p-6 flex flex-col flex-grow">
             <h3 class="text-2xl font-bold font-display text-text mb-2" th:text="${roomType.name}">Deluxe Room</h3>
-            <p class="text-sm text-muted line-clamp-3 mb-4 leading-relaxed" th:text="${roomType.description}">
+            <p class="text-sm text-muted-foreground line-clamp-3 mb-4 leading-relaxed" th:text="${roomType.description}">
               Spacious and elegant room with amenities.
             </p>
 
             <!-- Room Specs -->
-            <div class="grid grid-cols-2 gap-y-3 gap-x-2 border-t border-b border-border/50 py-4 mb-6 text-xs text-muted font-sans mt-auto">
+            <div class="grid grid-cols-2 gap-y-3 gap-x-2 border-t border-b border-border/50 py-4 mb-6 text-xs text-muted-foreground font-sans mt-auto">
               <div class="flex items-center gap-2">
                 <span>📐</span>
                 <span th:text="${roomType.area} + ' m²'">32 m²</span>

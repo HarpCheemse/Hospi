@@ -59,7 +59,7 @@
           <h2 class="text-4xl md:text-5xl font-bold font-display leading-tight">
             Designed for unforgettable stays and relaxing breaks
           </h2>
-          <p class="mt-6 text-muted leading-relaxed" th:text="${hotel != null ? hotel.description : 'Welcome to our premium hospitality system where we prioritize clean rooms, fast checkout, and stellar service.'}">
+          <p class="mt-6 text-muted-foreground leading-relaxed" th:text="${hotel != null ? hotel.description : 'Welcome to our premium hospitality system where we prioritize clean rooms, fast checkout, and stellar service.'}">
             Welcome to our premium hospitality system.
           </p>
 
@@ -70,7 +70,7 @@
             </div>
             <div>
               <p class="text-2xl font-bold text-text font-display" th:text="${hotel != null ? hotel.averageRating + ' / 5.0' : '4.8 / 5.0'}">4.8 / 5.0</p>
-              <p class="text-sm text-muted" th:text="'Based on ' + ${hotel != null ? hotel.reviewCount : '120'} + ' guest reviews'">Based on 120 guest reviews</p>
+              <p class="text-sm text-muted-foreground" th:text="'Based on ' + ${hotel != null ? hotel.reviewCount : '120'} + ' guest reviews'">Based on 120 guest reviews</p>
             </div>
           </div>
         </div>
@@ -80,25 +80,25 @@
           <div class="rounded-xl border border-border bg-surface p-6 shadow-card hover:-translate-y-1 transition-transform duration-slow">
             <div class="h-10 w-10 rounded-lg bg-primary-soft flex items-center justify-center text-primary text-xl mb-4">🛜</div>
             <h3 class="font-bold text-lg mb-2">High-Speed WiFi</h3>
-            <p class="text-sm text-muted">Stay connected anywhere inside the hotel premises.</p>
+            <p class="text-sm text-muted-foreground">Stay connected anywhere inside the hotel premises.</p>
           </div>
 
           <div class="rounded-xl border border-border bg-surface p-6 shadow-card hover:-translate-y-1 transition-transform duration-slow">
             <div class="h-10 w-10 rounded-lg bg-primary-soft flex items-center justify-center text-primary text-xl mb-4">🏊</div>
             <h3 class="font-bold text-lg mb-2">Swimming Pool</h3>
-            <p class="text-sm text-muted">Take a refreshing dip in our outdoor heated pool.</p>
+            <p class="text-sm text-muted-foreground">Take a refreshing dip in our outdoor heated pool.</p>
           </div>
 
           <div class="rounded-xl border border-border bg-surface p-6 shadow-card hover:-translate-y-1 transition-transform duration-slow">
             <div class="h-10 w-10 rounded-lg bg-primary-soft flex items-center justify-center text-primary text-xl mb-4">🍳</div>
             <h3 class="font-bold text-lg mb-2">Free Breakfast</h3>
-            <p class="text-sm text-muted">Start your morning with chef-curated breakfast selections.</p>
+            <p class="text-sm text-muted-foreground">Start your morning with chef-curated breakfast selections.</p>
           </div>
 
           <div class="rounded-xl border border-border bg-surface p-6 shadow-card hover:-translate-y-1 transition-transform duration-slow">
             <div class="h-10 w-10 rounded-lg bg-primary-soft flex items-center justify-center text-primary text-xl mb-4">🛎️</div>
             <h3 class="font-bold text-lg mb-2">24/7 Concierge</h3>
-            <p class="text-sm text-muted">Helpful support at any hour for all reservation requests.</p>
+            <p class="text-sm text-muted-foreground">Helpful support at any hour for all reservation requests.</p>
           </div>
         </div>
       </div>

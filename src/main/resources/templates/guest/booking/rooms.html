@@ -5,98 +5,223 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Select Rooms | Hospi Hotel</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.9/cdn.min.js" defer></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap"
-          rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>[x-cloak] { display: none !important; }</style>
 </head>
 <body class="bg-background text-text flex flex-col min-h-screen pt-24">
 
 <div th:replace="~{guest/layout :: header('book')}"></div>
+
+<!-- DATA BRIDGE -->
+<script th:inline="javascript">
+    var ROOMS_DATA = [
+        /*[# th:each="rt : ${availability}"]*/
+        {
+            id: /*[[${rt.roomTypeId}]]*/,
+            name: /*[[${rt.name}]]*/,
+            price: /*[[${rt.basePrice}]]*/,
+            available: /*[[${rt.availableRooms}]]*/,
+            maxOccupancy: /*[[${rt.maxOccupancy}]]*/,
+            area: /*[[${rt.area}]]*/,
+            pictureId: /*[[${#lists.isEmpty(rt.pictures) ? null : rt.pictures[0].id}]]*/
+        },
+        /*[/]*/
+    ];
+    var MAX_ROOMS = /*[[${maxRooms}]]*/ 10;
+    var DEPOSIT_PCT = /*[[${depositPercentage}]]*/ 20;
+</script>
 
 <main class="flex-grow">
 
     <section class="bg-surface-muted py-16 border-b border-border/30">
         <div class="mx-auto max-w-7xl px-6 text-center">
             <p class="text-xs font-semibold uppercase tracking-widest text-accent mb-2 font-sans">STEP 2 OF 5</p>
-            <h1 class="text-4xl md:text-5xl font-bold font-display text-text">Choose Your Rooms</h1>
-            <p class="mt-4 max-w-xl mx-auto text-sm text-muted">
-                Select the rooms you'd like for <strong th:text="${draft.checkInAt}">check-in</strong> to <strong
-                    th:text="${draft.checkOutAt}">check-out</strong>.
-            </p>
+            <div class="flex items-center justify-center gap-4 mb-4">
+                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    <img th:src="@{/assets/icons/bed-double.svg}" alt="">
+                </div>
+                <div class="text-left">
+                    <h1 class="text-4xl md:text-5xl font-bold font-display text-text">Choose Your Rooms</h1>
+                    <p class="mt-1 text-sm text-muted-foreground">
+                        Select the rooms you'd like for <strong th:text="${draft.checkInAt}">check-in</strong> to <strong
+                            th:text="${draft.checkOutAt}">check-out</strong>.
+                    </p>
+                </div>
+            </div>
         </div>
     </section>
 
-    <section class="mx-auto max-w-5xl px-6 py-20">
-
-        <div th:if="${#lists.isEmpty(availability)}"
-             class="text-center py-20 bg-surface rounded-2xl border border-border shadow-card">
-            <p class="text-lg text-muted">No rooms available for the selected dates. Please try different dates.</p>
-            <a th:href="@{/book}"
-               class="mt-4 inline-block rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-card hover:opacity-90 transition-opacity">
-                Change Dates
-            </a>
+    <!-- Empty State -->
+    <div th:if="${#lists.isEmpty(availability)}" class="mx-auto max-w-5xl px-6 py-20">
+        <div class="card-empty">
+            <p class="text-lg text-muted-foreground">No rooms available for the selected dates. Please try different dates.</p>
+            <a th:href="@{/book}" class="mt-4 btn btn-primary btn-lg">Change Dates</a>
         </div>
+    </div>
 
-        <form th:if="${not #lists.isEmpty(availability)}"
-              th:action="@{/book/rooms}" method="post">
+    <!-- Room Selection -->
+    <section th:if="${not #lists.isEmpty(availability)}" class="mx-auto max-w-7xl px-6 py-10">
 
-            <div class="grid gap-6 md:grid-cols-2">
+        <form th:action="@{/book/rooms}" method="post"
+              x-data="{
+                  maxRooms: MAX_ROOMS,
+                  depositPct: DEPOSIT_PCT,
+                  rooms: ROOMS_DATA,
+                  selections: {},
+                  init() {
+                      this.rooms.forEach(r => { this.selections[r.id] = 0; });
+                  },
+                  get selectedRooms() {
+                      return this.rooms.filter(r => this.selections[r.id] > 0)
+                          .map(r => ({ ...r, count: this.selections[r.id] }));
+                  },
+                  get totalCount() {
+                      return this.selectedRooms.reduce((a, r) => a + r.count, 0);
+                  },
+                  get totalPrice() {
+                      return this.selectedRooms.reduce((a, r) => a + r.count * r.price, 0);
+                  },
+                  get depositAmount() {
+                      return this.totalPrice * this.depositPct / 100;
+                  },
+                  adjust(id, delta) {
+                      const cur = this.selections[id] ?? 0;
+                      const room = this.rooms.find(r => r.id === id);
+                      if (!room) return;
+                      const next = cur + delta;
+                      if (next >= 0 && next <= room.available && this.totalCount + delta <= this.maxRooms) {
+                          this.selections[id] = next;
+                      }
+                  }
+              }"
+              class="flex gap-8 items-start w-full">
 
-                <article th:each="rt, iter : ${availability}"
-                         class="overflow-hidden rounded-2xl bg-surface border border-border/80 shadow-card flex flex-col">
+            <!-- LEFT: Room Type Grid -->
+            <div class="flex-1 min-w-0">
+                <div class="flex flex-col gap-6">
+                    <template x-for="room in rooms" :key="room.id">
+                        <article class="card overflow-hidden flex flex-col p-0"
+                                 x-bind:class="selections[room.id] > 0 ? 'ring-2 ring-primary' : ''">
 
-                    <div class="relative h-48 w-full overflow-hidden">
-                        <img th:if="${#lists.isEmpty(rt.picutres)}"
-                             class="h-full w-full object-cover"
-                             th:src="@{/images/hotel2.jpg}" alt="Room"/>
-                        <img th:if="${not #lists.isEmpty(rt.picutres)}"
-                             class="h-full w-full object-cover"
-                             th:src="@{'/room-type-picture/' + ${rt.picutres[0].id}}" alt="Room Type Image"/>
-                        <span class="absolute top-4 right-4 bg-primary text-white font-sans text-xs font-semibold px-3 py-1.5 rounded-full shadow-md"
-                              th:text="'$' + ${rt.basePrice} + ' / night'"></span>
-                    </div>
+                            <!-- Image -->
+                            <div class="relative h-48 w-full overflow-hidden">
+                                <img class="h-full w-full object-cover"
+                                     x-bind:src="room.pictureId ? '/room-type-picture/' + room.pictureId : '/images/hotel2.jpg'"
+                                     alt="Room"/>
+                                <span class="absolute top-4 right-4 bg-primary text-white font-sans text-xs font-semibold px-3 py-1.5 rounded-full shadow-md"
+                                      x-text="'$' + room.price.toFixed(2) + ' / night'"></span>
+                                <span x-show="selections[room.id] > 0"
+                                      x-text="selections[room.id] + ' selected'"
+                                      x-cloak
+                                      class="absolute top-4 left-4 bg-primary text-white font-sans text-xs font-semibold px-3 py-1.5 rounded-full shadow-md">
+                                </span>
+                            </div>
 
-                    <div class="p-5 flex flex-col flex-grow">
-                        <h3 class="text-xl font-bold font-display text-text" th:text="${rt.name}">Deluxe</h3>
-                        <p class="mt-1 text-xs text-muted"
-                           th:text="${rt.maxOccupancy} + ' guests max | ' + ${rt.area} + ' m²'">
-                            2 guests max | 32 m²
-                        </p>
+                            <!-- Details -->
+                            <div class="p-5 flex flex-col flex-grow">
+                                <h3 class="text-xl font-bold font-display text-text" x-text="room.name"></h3>
+                                <p class="mt-1 text-xs text-muted-foreground"
+                                   x-text="room.maxOccupancy + ' guests max | ' + room.area + ' m²'"></p>
 
-                        <div class="flex items-center justify-between mt-4 pt-4 border-t border-border/50">
-                <span class="text-sm text-muted-foreground">
-                  Available: <strong th:text="${rt.availableRooms}"></strong>
-                </span>
-                            <div class="flex items-center gap-2">
-                                <label class="text-sm font-medium text-foreground" th:for="'count-' + ${rt.roomTypeId}">Qty:</label>
-                                <input type="hidden" th:name="'roomTypeIds'" th:value="${rt.roomTypeId}"/>
-                                <select th:id="'count-' + ${rt.roomTypeId}"
-                                        th:name="'counts'"
-                                        class="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary">
-                                    <option value="0">0</option>
-                                    <option th:each="i : ${#numbers.sequence(1, rt.availableRooms)}"
-                                            th:value="${i}"
-                                            th:text="${i}">1
-                                    </option>
-                                </select>
+                                <!-- Qty Selector -->
+                                <div class="flex items-center justify-between mt-4 pt-4 border-t border-border/50">
+                                    <span class="text-sm text-muted-foreground">
+                                        Available: <strong x-text="room.available"></strong>
+                                    </span>
+                                    <div class="flex items-center gap-1">
+                                        <button type="button"
+                                                @click="adjust(room.id, -1)"
+                                                :disabled="selections[room.id] <= 0"
+                                                class="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-background text-foreground transition-colors hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed">
+                                            −
+                                        </button>
+                                        <span class="w-8 text-center text-sm font-medium tabular-nums text-foreground"
+                                              x-text="selections[room.id]">0</span>
+                                        <button type="button"
+                                                @click="adjust(room.id, 1)"
+                                                :disabled="selections[room.id] >= room.available || totalCount >= maxRooms"
+                                                class="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-background text-foreground transition-colors hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed">
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Hidden inputs for form submission -->
+                            <input type="hidden" name="roomTypeIds" x-bind:value="room.id"/>
+                            <input type="hidden" name="counts" x-bind:value="selections[room.id]"/>
+                        </article>
+                    </template>
+                </div>
+            </div>
+
+            <!-- RIGHT: Selection Summary Sidebar -->
+            <div class="w-80 shrink-0">
+                <div class="card">
+                    <div class="border-b border-border px-6 py-5">
+                        <div class="flex items-center gap-3">
+                            <img th:src="@{/assets/icons/list-todo.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                            <div>
+                                <h2 class="text-xl font-semibold">Your Selection</h2>
+                                <p class="mt-1 text-sm text-muted-foreground">
+                                    <span x-text="totalCount">0</span> room(s) selected
+                                </p>
                             </div>
                         </div>
                     </div>
 
-                </article>
+                    <div class="p-6">
+                        <!-- Empty state -->
+                        <div x-show="totalCount === 0" class="text-center py-8">
+                            <p class="text-sm text-muted-foreground">No rooms selected yet.</p>
+                            <p class="text-xs text-muted-foreground mt-1">
+                                Tap <strong>+</strong> to add rooms up to <span x-text="maxRooms"></span> total.
+                            </p>
+                        </div>
 
-            </div>
+                        <!-- Selected rooms list -->
+                        <template x-for="room in selectedRooms" :key="room.id">
+                            <div class="flex items-center justify-between py-3 border-b border-border/50">
+                                <div>
+                                    <p class="text-sm font-medium text-foreground" x-text="room.name"></p>
+                                    <p class="text-xs text-muted-foreground" x-text="room.count + ' × $' + room.price.toFixed(2) + '/night'"></p>
+                                </div>
+                                <span class="text-sm font-medium text-foreground" x-text="'$' + (room.count * room.price).toFixed(2)"></span>
+                            </div>
+                        </template>
 
-            <div class="mt-8 flex items-center justify-between rounded-2xl bg-surface border border-border/80 shadow-card p-6">
-                <a th:href="@{/book}"
-                   class="rounded-xl border border-border bg-background px-6 py-3 text-sm font-medium text-foreground hover:bg-muted transition-colors">
-                    &larr; Change Dates
-                </a>
-                <button type="submit"
-                        class="rounded-xl bg-primary px-8 py-3.5 text-sm font-semibold text-white shadow-card hover:opacity-90 transition-opacity">
-                    Continue to Guest Details &rarr;
-                </button>
+                        <!-- Totals -->
+                        <div x-show="totalCount > 0">
+                            <div class="flex items-center justify-between py-3 border-b border-border/50">
+                                <span class="text-sm text-muted-foreground">Total Rooms</span>
+                                <span class="text-sm font-medium text-foreground" x-text="totalCount">0</span>
+                            </div>
+                            <div class="flex items-center justify-between py-3 border-b border-border/50">
+                                <span class="text-sm text-muted-foreground">Total Price</span>
+                                <span class="text-sm font-semibold text-foreground" x-text="'$' + totalPrice.toFixed(2)">$0.00</span>
+                            </div>
+                            <div class="flex items-center justify-between py-3">
+                                <span class="text-sm text-muted-foreground">Deposit Due (<span x-text="depositPct"></span>%)</span>
+                                <span class="text-base font-bold text-primary" x-text="'$' + depositAmount.toFixed(2)">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="border-t border-border px-6 py-5">
+                        <div class="flex items-center justify-between gap-3">
+                            <a th:href="@{/book}" class="btn btn-secondary btn-lg">&larr; Change Dates</a>
+                            <button type="submit"
+                                    class="btn btn-primary btn-lg"
+                                    x-bind:disabled="totalCount === 0">
+                                Continue &rarr;
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </form>
