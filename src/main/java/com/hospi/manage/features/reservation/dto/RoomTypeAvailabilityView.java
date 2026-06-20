@@ -16,7 +16,7 @@ public record RoomTypeAvailabilityView(
         Integer area,
         String features,
         Boolean active,
-        List<RoomTypePicture> picutres,
+        List<RoomTypePicture> pictures,
         int totalRooms,
         int availableRooms
 ) {

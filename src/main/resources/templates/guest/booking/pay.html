@@ -20,81 +20,103 @@
     <section class="bg-surface-muted py-16 border-b border-border/30">
       <div class="mx-auto max-w-7xl px-6 text-center">
         <p class="text-xs font-semibold uppercase tracking-widest text-accent mb-2 font-sans">STEP 4 OF 5</p>
-        <h1 class="text-4xl md:text-5xl font-bold font-display text-text">Complete Payment</h1>
-        <p class="mt-4 max-w-xl mx-auto text-sm text-muted">Secure your booking with a deposit. The remaining balance is due at check-out.</p>
+        <div class="flex items-center justify-center gap-4 mb-4">
+          <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <img th:src="@{/assets/icons/credit-card.svg}" alt="">
+          </div>
+          <div class="text-left">
+            <h1 class="text-4xl md:text-5xl font-bold font-display text-text">Complete Payment</h1>
+            <p class="mt-1 text-sm text-muted-foreground-foreground">Secure your booking with a deposit. The remaining balance is due at check-out.</p>
+          </div>
+        </div>
       </div>
     </section>
 
     <section class="mx-auto max-w-2xl px-6 py-20">
 
       <!-- Booking Summary -->
-      <div class="rounded-2xl bg-surface border border-border/80 shadow-card p-8 mb-6">
+      <section class="card">
 
-        <h2 class="text-xl font-bold font-display text-text mb-6">Booking Summary</h2>
-
-        <div class="flex items-center justify-between py-3 border-b border-border/50">
-          <span class="text-sm text-muted-foreground">Guest</span>
-          <span class="text-sm font-medium text-foreground" th:text="${draft.guestName}">John Smith</span>
+        <div class="border-b border-border px-6 py-5">
+          <div class="flex items-center gap-3">
+            <img th:src="@{/assets/icons/file-text.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+            <div>
+              <h2 class="text-xl font-semibold">Booking Summary</h2>
+              <p class="mt-1 text-sm text-muted-foreground-foreground">Review your booking details before payment.</p>
+            </div>
+          </div>
         </div>
 
-        <div class="flex items-center justify-between py-3 border-b border-border/50">
-          <span class="text-sm text-muted-foreground">Email</span>
-          <span class="text-sm font-medium text-foreground" th:text="${draft.guestEmail}">john@email.com</span>
+        <div class="p-6">
+          <div class="flex items-center justify-between py-3 border-b border-border/50">
+            <span class="text-sm text-muted-foreground-foreground">Guest</span>
+            <span class="text-sm font-medium text-foreground" th:text="${draft.guestName}">John Smith</span>
+          </div>
+
+          <div class="flex items-center justify-between py-3 border-b border-border/50">
+            <span class="text-sm text-muted-foreground-foreground">Email</span>
+            <span class="text-sm font-medium text-foreground" th:text="${draft.guestEmail}">john@email.com</span>
+          </div>
+
+          <div class="flex items-center justify-between py-3 border-b border-border/50">
+            <span class="text-sm text-muted-foreground-foreground">Check-In</span>
+            <span class="text-sm font-medium text-foreground" th:text="${draft.checkInAt}">15 Jun 2026</span>
+          </div>
+
+          <div class="flex items-center justify-between py-3 border-b border-border/50">
+            <span class="text-sm text-muted-foreground-foreground">Check-Out</span>
+            <span class="text-sm font-medium text-foreground" th:text="${draft.checkOutAt}">18 Jun 2026</span>
+          </div>
+
+          <div class="flex items-center justify-between py-3 border-b border-border/50">
+            <span class="text-sm text-muted-foreground-foreground">Nights</span>
+            <span class="text-sm font-medium text-foreground" th:text="${draft.checkOutAt.toEpochDay() - draft.checkInAt.toEpochDay()}">3</span>
+          </div>
+
+          <div th:each="room : ${draft.roomSelections}"
+               class="flex items-center justify-between py-3 border-b border-border/50">
+            <span class="text-sm text-muted-foreground-foreground" th:text="${room.roomTypeName} + ' x' + ${room.count} + ' @ $' + ${#numbers.formatDecimal(room.basePrice, 0, 2)} + '/night'">Deluxe x2 @ $240/night</span>
+            <span class="text-sm font-medium text-foreground" th:text="'$' + ${#numbers.formatDecimal(room.basePrice * room.count, 0, 2)}">$480.00</span>
+          </div>
+
+          <div class="flex items-center justify-between py-3">
+            <span class="text-base font-semibold text-foreground">Total</span>
+            <span class="text-base font-bold text-foreground" th:text="'$' + ${#numbers.formatDecimal(draft.totalPrice, 0, 2)}">$960.00</span>
+          </div>
         </div>
 
-        <div class="flex items-center justify-between py-3 border-b border-border/50">
-          <span class="text-sm text-muted-foreground">Check-In</span>
-          <span class="text-sm font-medium text-foreground" th:text="${draft.checkInAt}">15 Jun 2026</span>
-        </div>
-
-        <div class="flex items-center justify-between py-3 border-b border-border/50">
-          <span class="text-sm text-muted-foreground">Check-Out</span>
-          <span class="text-sm font-medium text-foreground" th:text="${draft.checkOutAt}">18 Jun 2026</span>
-        </div>
-
-        <div class="flex items-center justify-between py-3 border-b border-border/50">
-          <span class="text-sm text-muted-foreground">Nights</span>
-          <span class="text-sm font-medium text-foreground" th:text="${draft.checkOutAt.toEpochDay() - draft.checkInAt.toEpochDay()}">3</span>
-        </div>
-
-        <div th:each="room : ${draft.roomSelections}"
-             class="flex items-center justify-between py-3 border-b border-border/50">
-          <span class="text-sm text-muted-foreground" th:text="${room.roomTypeName} + ' x' + ${room.count} + ' @ $' + ${#numbers.formatDecimal(room.basePrice, 0, 2)} + '/night'">Deluxe x2 @ $240/night</span>
-          <span class="text-sm font-medium text-foreground" th:text="'$' + ${#numbers.formatDecimal(room.basePrice * room.count, 0, 2)}">$480.00</span>
-        </div>
-
-        <div class="flex items-center justify-between py-3">
-          <span class="text-base font-semibold text-foreground">Total</span>
-          <span class="text-base font-bold text-foreground" th:text="'$' + ${#numbers.formatDecimal(draft.totalPrice, 0, 2)}">$960.00</span>
-        </div>
-
-      </div>
+      </section>
 
       <!-- Deposit Amount -->
-      <div class="rounded-2xl bg-surface border-2 border-primary shadow-card p-8 mb-6">
-        <div class="text-center">
-          <p class="text-sm text-muted-foreground mb-1">Deposit Due Now</p>
+      <section class="card-elevated mt-6">
+
+        <div class="p-8 text-center">
+          <p class="text-sm text-muted-foreground-foreground mb-1">Deposit Due Now</p>
           <p class="text-4xl font-bold text-primary"
              th:text="'$' + ${#numbers.formatDecimal(draft.depositAmount, 0, 2)}">
             $96.00
           </p>
-          <p class="mt-1 text-xs text-muted">
+          <p class="mt-1 text-xs text-muted-foreground">
             Remaining balance of <strong th:text="'$' + ${#numbers.formatDecimal(draft.totalPrice - draft.depositAmount, 0, 2)}">$864.00</strong> payable at check-out
           </p>
         </div>
-      </div>
+
+      </section>
 
       <!-- PayPal Button -->
-      <form th:action="@{/book/pay}" method="post">
-        <button type="submit"
-                class="w-full rounded-xl bg-primary px-8 py-4 text-base font-semibold text-white shadow-card hover:opacity-90 transition-opacity">
-          Pay with PayPal
-        </button>
+      <form th:action="@{/book/pay}" method="post" class="mt-6">
+        <div class="card">
+          <div class="flex items-center justify-end gap-3 p-5">
+            <button type="submit" class="btn btn-primary btn-lg">
+              Pay with PayPal
+            </button>
+          </div>
+        </div>
       </form>
 
       <div class="mt-4 text-center">
         <a th:href="@{/book/verify}"
-           class="text-sm text-muted-foreground hover:text-primary transition-colors">
+           class="btn btn-ghost btn-lg">
           &larr; Back to Verification
         </a>
       </div>

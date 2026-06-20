@@ -20,112 +20,137 @@
     <section class="bg-surface-muted py-16 border-b border-border/30">
       <div class="mx-auto max-w-7xl px-6 text-center">
         <p class="text-xs font-semibold uppercase tracking-widest text-accent mb-2 font-sans">STEP 3 OF 5</p>
-        <h1 class="text-4xl md:text-5xl font-bold font-display text-text">Guest Details &amp; Verification</h1>
-        <p class="mt-4 max-w-xl mx-auto text-sm text-muted">Enter your details and verify your email to continue.</p>
+        <div class="flex items-center justify-center gap-4 mb-4">
+          <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <img th:src="@{/assets/icons/users.svg}" alt="">
+          </div>
+          <div class="text-left">
+            <h1 class="text-4xl md:text-5xl font-bold font-display text-text">Guest Details &amp; Verification</h1>
+            <p class="mt-1 text-sm text-muted-foreground-foreground">Enter your details and verify your email to continue.</p>
+          </div>
+        </div>
       </div>
     </section>
 
     <section class="mx-auto max-w-2xl px-6 py-20">
 
       <!-- Guest Details Form -->
-      <div class="rounded-2xl bg-surface border border-border/80 shadow-card p-8">
+      <section class="card">
 
-        <h2 class="text-xl font-bold font-display text-text mb-6">Your Information</h2>
+        <div class="border-b border-border px-6 py-5">
+          <div class="flex items-center gap-3">
+            <img th:src="@{/assets/icons/users.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+            <div>
+              <h2 class="text-xl font-semibold">Your Information</h2>
+              <p class="mt-1 text-sm text-muted-foreground-foreground">Enter your personal details.</p>
+            </div>
+          </div>
+        </div>
 
-        <form th:action="@{/book/verify/send-otp}" th:object="${guestDetailForm}" method="post" class="flex flex-col gap-5">
+        <form th:action="@{/book/verify/send-otp}" th:object="${guestDetailForm}" method="post" class="flex flex-col gap-5 p-6">
+
+          <div th:if="${#fields.hasGlobalErrors()}"
+               class="rounded-xl border border-danger bg-red-50 px-4 py-3 text-sm text-danger">
+            <p th:each="err : ${#fields.allErrors()}" th:text="${err}"></p>
+          </div>
 
           <div class="grid grid-cols-2 gap-5">
-            <div>
-              <label class="mb-2 block text-sm font-medium text-foreground" for="guestName">
-                Full Name <span class="text-danger">*</span>
-              </label>
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium" for="guestName">Full Name <span class="text-danger">*</span></label>
+              <div th:replace="fragments/form-error :: error('guestName')"></div>
               <input type="text" id="guestName" th:field="*{guestName}"
-                     class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"
+                     class="input"
+                     th:classappend="${#fields.hasErrors('guestName')} ? 'input-error' : ''"
                      required>
-              <p th:if="${#fields.hasErrors('guestName')}" class="mt-1 text-xs text-danger" th:errors="*{guestName}">Error</p>
             </div>
 
-            <div>
-              <label class="mb-2 block text-sm font-medium text-foreground" for="guestEmail">
-                Email <span class="text-danger">*</span>
-              </label>
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium" for="guestEmail">Email <span class="text-danger">*</span></label>
+              <div th:replace="fragments/form-error :: error('guestEmail')"></div>
               <input type="email" id="guestEmail" th:field="*{guestEmail}"
-                     class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"
+                     class="input"
+                     th:classappend="${#fields.hasErrors('guestEmail')} ? 'input-error' : ''"
                      required>
-              <p th:if="${#fields.hasErrors('guestEmail')}" class="mt-1 text-xs text-danger" th:errors="*{guestEmail}">Error</p>
             </div>
 
-            <div>
-              <label class="mb-2 block text-sm font-medium text-foreground" for="guestPhone">
-                Phone <span class="text-danger">*</span>
-              </label>
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium" for="guestPhone">Phone <span class="text-danger">*</span></label>
+              <div th:replace="fragments/form-error :: error('guestPhone')"></div>
               <input type="tel" id="guestPhone" th:field="*{guestPhone}"
-                     class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"
+                     class="input"
+                     th:classappend="${#fields.hasErrors('guestPhone')} ? 'input-error' : ''"
                      required>
-              <p th:if="${#fields.hasErrors('guestPhone')}" class="mt-1 text-xs text-danger" th:errors="*{guestPhone}">Error</p>
             </div>
 
-            <div>
-              <label class="mb-2 block text-sm font-medium text-foreground" for="guestDateOfBirth">
-                Date of Birth <span class="text-danger">*</span>
-              </label>
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium" for="guestDateOfBirth">Date of Birth <span class="text-danger">*</span></label>
+              <div th:replace="fragments/form-error :: error('guestDateOfBirth')"></div>
               <input type="date" id="guestDateOfBirth" th:field="*{guestDateOfBirth}"
-                     class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"
+                     class="input"
+                     th:classappend="${#fields.hasErrors('guestDateOfBirth')} ? 'input-error' : ''"
                      required>
-              <p th:if="${#fields.hasErrors('guestDateOfBirth')}" class="mt-1 text-xs text-danger" th:errors="*{guestDateOfBirth}">Error</p>
             </div>
           </div>
 
-          <div>
-            <label class="mb-2 block text-sm font-medium text-foreground" for="guestNationality">
-              Nationality
-            </label>
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium" for="guestNationality">Nationality</label>
+            <div th:replace="fragments/form-error :: error('guestNationality')"></div>
             <input type="text" id="guestNationality" th:field="*{guestNationality}"
-                   class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+                   class="input">
           </div>
 
-          <button type="submit"
-                  class="w-full rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-white shadow-card hover:opacity-90 transition-opacity">
-            Send OTP Code
-          </button>
+          <div class="flex items-center justify-end gap-3 pt-2">
+            <button type="submit" class="btn btn-primary btn-lg">
+              Send OTP Code
+            </button>
+          </div>
         </form>
 
-      </div>
+      </section>
 
       <!-- OTP Verification (shown after OTP is sent) -->
-      <div th:if="${otpSent}" class="mt-6 rounded-2xl bg-surface border border-border/80 shadow-card p-8">
+      <section th:if="${otpSent}" class="card mt-6">
 
-        <h2 class="text-xl font-bold font-display text-text mb-2">Verify Your Email</h2>
-        <p class="text-sm text-muted mb-6">Enter the 6-digit code sent to your email.</p>
+        <div class="border-b border-border px-6 py-5">
+          <div class="flex items-center gap-3">
+            <img th:src="@{/assets/icons/shield-check.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+            <div>
+              <h2 class="text-xl font-semibold">Verify Your Email</h2>
+              <p class="mt-1 text-sm text-muted-foreground-foreground">Enter the 6-digit code sent to your email.</p>
+            </div>
+          </div>
+        </div>
 
-        <form th:action="@{/book/verify}" th:object="${otpForm}" method="post" class="flex flex-col gap-5">
+        <form th:action="@{/book/verify}" th:object="${otpForm}" method="post" class="flex flex-col gap-5 p-6">
 
-          <div>
-            <label class="mb-2 block text-sm font-medium text-foreground" for="otp">
-              OTP Code
-            </label>
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium" for="otp">OTP Code</label>
+            <div th:replace="fragments/form-error :: error('otp')"></div>
             <input type="text" id="otp" th:field="*{otp}"
                    placeholder="000000"
                    maxlength="6"
                    inputmode="numeric"
                    pattern="[0-9]{6}"
-                   class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary text-center text-2xl tracking-widest"
+                   class="input text-center text-2xl tracking-widest"
+                   th:classappend="${#fields.hasErrors('otp')} ? 'input-error' : ''"
                    required>
-            <p th:if="${#fields.hasErrors('otp')}" class="mt-1 text-xs text-danger" th:errors="*{otp}">Error</p>
           </div>
 
-          <button type="submit"
-                  class="w-full rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-white shadow-card hover:opacity-90 transition-opacity">
-            Verify &amp; Continue
-          </button>
+          <div class="flex items-center justify-end gap-3 pt-2">
+            <button type="submit" class="btn btn-primary btn-lg">
+              Verify &amp; Continue
+            </button>
+          </div>
         </form>
 
-        <p class="mt-4 text-center text-xs text-muted">
-          Didn't receive the code?
-          <a th:href="@{/book/verify}" class="text-primary hover:underline">Resend OTP</a>
-        </p>
+        <div class="px-6 pb-6">
+          <p class="text-center text-xs text-muted-foreground">
+            Didn't receive the code?
+            <a th:href="@{/book/verify}" class="text-primary hover:underline">Resend OTP</a>
+          </p>
+        </div>
 
-      </div>
+      </section>
 
     </section>
 

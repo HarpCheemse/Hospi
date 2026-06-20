@@ -5,7 +5,7 @@
 
 <div th:fragment="statCard(label, value, change, tone)"
      class="rounded-xl border border-border bg-surface p-4 shadow-card">
-    <p class="text-sm text-muted" th:text="${label}">Label</p>
+    <p class="text-sm text-muted-foreground" th:text="${label}">Label</p>
     <p class="mt-1 text-2xl font-bold" th:text="${value}">0</p>
     <p class="mt-1 text-xs"
        th:classappend="${tone == 'positive'} ? ' text-green-600' : (${tone == 'negative'} ? ' text-danger' : ' text-accent')"
@@ -17,7 +17,7 @@
     <div class="mb-4 flex items-center justify-between">
         <div>
             <h2 class="text-lg font-semibold" th:text="${title}">Panel Title</h2>
-            <p class="text-sm text-muted" th:text="${subtitle}">Panel subtitle</p>
+            <p class="text-sm text-muted-foreground" th:text="${subtitle}">Panel subtitle</p>
         </div>
         <div th:replace="${action} ?: ~{}"></div>
     </div>
@@ -38,13 +38,13 @@
          th:text="${initials}">JD</div>
     <div>
         <p class="text-sm font-medium text-text" th:text="${name}">John Doe</p>
-        <p class="text-xs text-muted" th:text="${role}">Manager</p>
+        <p class="text-xs text-muted-foreground" th:text="${role}">Manager</p>
     </div>
 </div>
 
 <div th:fragment="metricTile(label, value)"
      class="rounded-lg border border-border bg-background p-3">
-    <p class="text-sm text-muted" th:text="${label}">Label</p>
+    <p class="text-sm text-muted-foreground" th:text="${label}">Label</p>
     <p class="text-lg font-semibold" th:text="${value}">0</p>
 </div>
 
@@ -54,7 +54,7 @@
          th:classappend="${tone == 'success'} ? ' bg-green-500' : (${tone == 'warning'} ? ' bg-yellow-500' : ' bg-primary')"></div>
     <div>
         <p class="text-sm font-medium" th:text="${title}">Activity title</p>
-        <p class="text-xs text-muted" th:text="${time}">Just now</p>
+        <p class="text-xs text-muted-foreground" th:text="${time}">Just now</p>
     </div>
 </div>
 

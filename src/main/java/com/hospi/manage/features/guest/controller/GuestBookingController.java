@@ -6,6 +6,7 @@ import com.hospi.manage.features.auth.enums.OtpType;
 import com.hospi.manage.features.auth.service.OtpService;
 import com.hospi.manage.features.guest.dto.BookingDraft;
 import com.hospi.manage.features.guest.dto.GuestDetailForm;
+import com.hospi.manage.features.guest.validation.BookingDateValidator;
 import com.hospi.manage.features.guest.dto.OtpForm;
 import com.hospi.manage.features.payment.service.PaymentService;
 import com.hospi.manage.features.reservation.dto.DateSearchForm;
@@ -36,6 +37,7 @@ public class GuestBookingController {
     private final OtpService otpService;
     private final EmailService emailService;
     private final PaymentService paymentService;
+    private final BookingDateValidator bookingDateValidator;
 
     public GuestBookingController(
             ReservationService reservationService,
@@ -43,7 +45,8 @@ public class GuestBookingController {
             SystemConfigService systemConfigService,
             OtpService otpService,
             EmailService emailService,
-            PaymentService paymentService) {
+            PaymentService paymentService,
+            BookingDateValidator bookingDateValidator) {
 
         this.reservationService = reservationService;
         this.roomAvailabilityService = roomAvailabilityService;
@@ -51,6 +54,7 @@ public class GuestBookingController {
         this.otpService = otpService;
         this.emailService = emailService;
         this.paymentService = paymentService;
+        this.bookingDateValidator = bookingDateValidator;
     }
 
     private BookingDraft getDraft(HttpSession session) {
@@ -74,12 +78,7 @@ public class GuestBookingController {
     String submitDates(@Valid @ModelAttribute("form") DateSearchForm form,
                        BindingResult binding,
                        HttpSession session) {
-        if (form.getCheckOutAt() != null && form.getCheckInAt() != null
-                && !form.getCheckOutAt().isAfter(form.getCheckInAt())) {
-            binding.rejectValue("checkOutAt",
-                    "error",
-                    "Check-out must be after check-in");
-        }
+        bookingDateValidator.validate(form, binding);
 
         if (binding.hasErrors()) {
             return "guest/booking/book";
@@ -106,8 +105,13 @@ public class GuestBookingController {
                 .map(RoomTypeAvailabilityView::new)
                 .toList();
 
+        var config = systemConfigService.getConfig();
         model.addAttribute("availability",
                 availability);
+        model.addAttribute("maxRooms",
+                config.getMaximumRoomPerBook());
+        model.addAttribute("depositPercentage",
+                config.getDefaultDepositPercentage());
         model.addAttribute("draft",
                 draft);
         return "guest/booking/rooms";
@@ -160,12 +164,21 @@ public class GuestBookingController {
             return "redirect:/book/rooms";
         }
 
+        var config = systemConfigService.getConfig();
+        int maxRooms = config.getMaximumRoomPerBook() != null ? config.getMaximumRoomPerBook() : Integer.MAX_VALUE;
+        int totalRooms = selections.stream().mapToInt(BookingDraft.RoomSelection::count).sum();
+        if (totalRooms > maxRooms) {
+            redirect.addFlashAttribute("error",
+                    "Total rooms selected (" + totalRooms + ") exceeds the maximum of " + maxRooms + " per booking.");
+            return "redirect:/book/rooms";
+        }
+
         BigDecimal totalPrice = BigDecimal.ZERO;
         for (BookingDraft.RoomSelection s : selections) {
             totalPrice = totalPrice.add(s.basePrice().multiply(BigDecimal.valueOf(s.count())));
         }
 
-        BigDecimal depositPercentage = systemConfigService.getConfig().getDefaultDepositPercentage();
+        BigDecimal depositPercentage = config.getDefaultDepositPercentage();
         BigDecimal depositAmount = totalPrice.multiply(depositPercentage)
                 .divide(BigDecimal.valueOf(100),
                         RoundingMode.HALF_UP);
