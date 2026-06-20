@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Staying Guests | Hospi</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.9/cdn.min.js" defer></script>
 </head>
 
 <body class="staff-layout">
@@ -18,14 +20,19 @@
 
     <header class="staff-page-header">
 
-        <section>
-            <h1 class="staff-page-title">
-                Manage Staying Guests
-            </h1>
-            <p class="page-description">
-                Record individual guests staying under this booking.
-            </p>
-        </section>
+        <div class="flex items-center gap-4">
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/settings.svg}" class="h-7 w-7" alt="">
+            </div>
+            <section>
+                <h1 class="staff-page-title">
+                    Manage Staying Guests
+                </h1>
+                <p class="page-description">
+                    Record individual guests staying under this booking.
+                </p>
+            </section>
+        </div>
 
         <a th:href="@{/receptionist/reservations}"
            class="btn btn-secondary btn-lg">
@@ -34,320 +41,341 @@
 
     </header>
 
-    <!-- BOOKING SUMMARY -->
-    <section class="card">
+    <div class="grid grid-cols-3 gap-6">
 
-        <div class="border-b border-border p-5">
-            <h2 class="text-lg font-semibold text-foreground">Booking Summary</h2>
-        </div>
+        <!-- MAIN COLUMN -->
+        <div class="col-span-2 flex flex-col gap-6">
 
-        <div class="p-5">
+            <!-- STAYING GUESTS -->
+            <section class="card">
 
-            <div class="grid grid-cols-2 gap-5">
-
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-muted-foreground">Guest Name</label>
-                    <p class="text-foreground font-medium" th:text="${reservation.guestName}">John Smith</p>
+                <div class="border-b border-border px-6 py-5">
+                    <div class="flex items-center gap-3">
+                        <img th:src="@{/assets/icons/users.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                        <div>
+                            <h2 class="text-xl font-semibold">Registered Guests</h2>
+                            <p class="mt-1 text-sm text-muted-foreground" th:if="${#lists.isEmpty(guests)}">
+                                No guests recorded yet. Use the form below to add guests staying under this booking.
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-muted-foreground">Phone</label>
-                    <p class="text-foreground" th:text="${reservation.guestPhone}">+84 912 345 678</p>
+                <div th:if="${!#lists.isEmpty(guests)}" class="p-5">
+                    <table class="w-full text-left text-sm">
+                        <thead>
+                        <tr class="border-b border-border text-muted-foreground">
+                            <th class="pb-3 pr-4 font-medium">#</th>
+                            <th class="pb-3 pr-4 font-medium">Name</th>
+                            <th class="pb-3 pr-4 font-medium">Date of Birth</th>
+                            <th class="pb-3 pr-4 font-medium">Nationality</th>
+                            <th class="pb-3 text-right font-medium">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr class="border-b border-border/50" th:each="guest, stat : ${guests}">
+                            <td class="py-3 pr-4 text-muted-foreground" th:text="${stat.count}">1</td>
+                            <td class="py-3 pr-4 font-medium text-foreground" th:text="${guest.guestName}">Nguyen Van
+                                A
+                            </td>
+                            <td class="py-3 pr-4 text-muted-foreground"
+                                th:text="${#temporals.format(guest.dateOfBirth, 'dd MMM yyyy')}">12 May 1990
+                            </td>
+                            <td class="py-3 pr-4 text-muted-foreground" th:text="${guest.nationality}">Vietnamese</td>
+                            <td class="py-3 text-right">
+                                <a th:href="@{/receptionist/reservations/{id}/manage(id=${reservation.id}, edit=${guest.id})}"
+                                   class="text-sm text-primary hover:opacity-80 mr-3">Edit</a>
+                                <form th:action="@{/receptionist/reservations/{id}/manage/guests/{gid}/delete(id=${reservation.id}, gid=${guest.id})}"
+                                      method="post"
+                                      class="inline"
+                                      onsubmit="return confirm('Remove this guest record?')">
+                                    <button type="submit" class="text-sm text-danger hover:opacity-80">
+                                        Remove
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
 
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-muted-foreground">Check-In</label>
-                    <p class="text-foreground"
-                       th:text="${#temporals.format(reservation.checkInAt, 'dd MMM yyyy')}">15 Jun 2026</p>
+                <div class="p-6">
+                    <h2 class="text-lg font-semibold text-foreground"
+                        th:text="${editGuestId} != null ? 'Edit Guest' : 'Add Guest'">Add Guest</h2>
                 </div>
 
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-muted-foreground">Check-Out</label>
-                    <p class="text-foreground"
-                       th:text="${#temporals.format(reservation.checkOutAt, 'dd MMM yyyy')}">18 Jun 2026</p>
+                <form th:action="${editGuestId} != null
+                        ? @{/receptionist/reservations/{id}/manage/guests/{gid}(id=${reservation.id}, gid=${editGuestId})}
+                        : @{/receptionist/reservations/{id}/manage/guests(id=${reservation.id})}"
+                      th:object="${form}"
+                      method="post"
+                      class="p-6">
+
+                    <div class="grid grid-cols-3 gap-4">
+
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-medium" for="guestName">Guest Name *</label>
+                            <div th:replace="~{fragments/form-error :: error('guestName')}"></div>
+                            <input type="text"
+                                   id="guestName"
+                                   th:field="*{guestName}"
+                                   placeholder="Full name"
+                                   class="input">
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-medium" for="dateOfBirth">Date of Birth *</label>
+                            <div th:replace="~{fragments/form-error :: error('dateOfBirth')}"></div>
+                            <input type="date"
+                                   id="dateOfBirth"
+                                   th:field="*{dateOfBirth}"
+                                   class="input">
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-medium" for="nationality">Nationality</label>
+                            <div th:replace="~{fragments/form-error :: error('nationality')}"></div>
+                            <input type="text"
+                                   id="nationality"
+                                   th:field="*{nationality}"
+                                   placeholder="e.g. Vietnamese"
+                                   class="input">
+                        </div>
+
+                    </div>
+
+                    <div class="mt-5 flex items-center gap-3">
+                        <button type="submit" class="btn btn-primary btn-lg"
+                                th:text="${editGuestId} != null ? 'Update Guest' : 'Add Guest'">Add Guest
+                        </button>
+                        <a th:if="${editGuestId} != null"
+                           th:href="@{/receptionist/reservations/{id}/manage(id=${reservation.id})}"
+                           class="btn btn-secondary btn-lg">Cancel</a>
+                    </div>
+
+                </form>
+
+            </section>
+
+            <!-- ASSIGNED ROOMS -->
+            <section class="card">
+
+                <div class="border-b border-border px-6 py-5">
+                    <div class="flex items-center gap-3">
+                        <img th:src="@{/assets/icons/door-open.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                        <div>
+                            <h2 class="text-xl font-semibold">Assigned Rooms</h2>
+                        </div>
+                    </div>
                 </div>
 
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-muted-foreground">Duration</label>
-                    <p class="text-foreground"
-                       th:text="${reservation.checkOutAt.toEpochDay() - reservation.checkInAt.toEpochDay() + ' nights'}">
-                        3 nights</p>
-                </div>
+                <div class="p-6">
 
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-muted-foreground">Source</label>
-                    <span class="pill-muted text-sm"
-                          th:text="${reservation.source.name()}">ONLINE</span>
-                </div>
+                    <!-- expected vs assigned summary -->
+                    <div class="mb-4 flex flex-wrap gap-3 text-sm">
+                        <th:block th:each="detail : ${reservation.details}">
+                            <span th:text="${assignedCounts.getOrDefault(detail.roomType.id, 0)} + '/' + ${detail.roomCount} + ' ' + ${detail.roomType.name}">
+                                0/2 Deluxe
+                            </span>
+                        </th:block>
+                    </div>
 
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-muted-foreground">Total Price</label>
-                    <p class="text-foreground" th:text="${reservation.totalPrice}">400$</p>
-                </div>
-            </div>
+                    <!-- assigned rooms table -->
+                    <div th:if="${!#lists.isEmpty(assignedRooms)}" class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead>
+                            <tr class="border-b border-border text-muted-foreground">
+                                <th class="pb-3 pr-4 font-medium">#</th>
+                                <th class="pb-3 pr-4 font-medium">Room</th>
+                                <th class="pb-3 pr-4 font-medium">Type</th>
+                                <th class="pb-3 pr-4 font-medium">Floor</th>
+                                <th class="pb-3 text-right font-medium">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr class="border-b border-border/50" th:each="a, stat : ${assignedRooms}">
+                                <td class="py-3 pr-4 text-muted-foreground" th:text="${stat.count}">1</td>
+                                <td class="py-3 pr-4 font-medium text-foreground"
+                                    th:text="${a.room.roomNumber}">201
+                                </td>
+                                <td class="py-3 pr-4 text-muted-foreground"
+                                    th:text="${a.room.roomType.name}">Deluxe
+                                </td>
+                                <td class="py-3 pr-4 text-muted-foreground"
+                                    th:text="${'Floor ' + a.room.floorNumber}">Floor 2
+                                </td>
+                                <td class="py-3 text-right">
+                                    <form th:action="@{/receptionist/reservations/{id}/manage/rooms/{aid}/remove(id=${reservation.id}, aid=${a.id})}"
+                                          method="post"
+                                          class="inline"
+                                          onsubmit="return confirm('Remove this room assignment?')">
+                                        <button type="submit" class="text-sm text-danger hover:opacity-80">
+                                            Remove
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-            <div class="mt-5">
-                <label class="mb-2 block text-sm font-medium text-muted-foreground">Rooms</label>
-                <div class="flex flex-wrap gap-2">
-                    <th:block th:each="room : ${reservation.details}">
-                        <span class="pill-muted"
-                              th:text="${room.roomType.name} + ' x' + ${room.roomCount}">
-                            Deluxe x2
-                        </span>
-                    </th:block>
-                </div>
-            </div>
+                    <p th:if="${#lists.isEmpty(assignedRooms)}" class="mb-4 text-sm text-muted-foreground">
+                        No rooms assigned yet.
+                    </p>
 
-        </div>
-
-    </section>
-
-    <!-- STAYING GUESTS -->
-    <section class="card mt">
-
-        <div class="border-b border-border p-5">
-            <h2 class="text-lg font-semibold text-foreground">Registered Guests</h2>
-            <p class="page-description" th:if="${#lists.isEmpty(guests)}">
-                No guests recorded yet. Use the form below to add guests staying under this booking.
-            </p>
-        </div>
-
-        <div th:if="${!#lists.isEmpty(guests)}" class="p-5">
-            <table class="w-full text-left text-sm">
-                <thead>
-                <tr class="border-b border-border text-muted-foreground">
-                    <th class="pb-3 pr-4 font-medium">#</th>
-                    <th class="pb-3 pr-4 font-medium">Name</th>
-                    <th class="pb-3 pr-4 font-medium">Date of Birth</th>
-                    <th class="pb-3 pr-4 font-medium">Nationality</th>
-                    <th class="pb-3 text-right font-medium">Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr class="border-b border-border/50" th:each="guest, stat : ${guests}">
-                    <td class="py-3 pr-4 text-muted-foreground" th:text="${stat.count}">1</td>
-                    <td class="py-3 pr-4 font-medium text-foreground" th:text="${guest.guestName}">Nguyen Van A</td>
-                    <td class="py-3 pr-4 text-muted-foreground"
-                        th:text="${#temporals.format(guest.dateOfBirth, 'dd MMM yyyy')}">12 May 1990
-                    </td>
-                    <td class="py-3 pr-4 text-muted-foreground" th:text="${guest.nationality}">Vietnamese</td>
-                    <td class="py-3 text-right">
-                        <a th:href="@{/receptionist/reservations/{id}/manage(id=${reservation.id}, edit=${guest.id})}"
-                           class="text-sm text-primary hover:opacity-80 mr-3">Edit</a>
-                        <form th:action="@{/receptionist/reservations/{id}/manage/guests/{gid}/delete(id=${reservation.id}, gid=${guest.id})}"
+                    <!-- assign room form -->
+                    <div th:if="${!#lists.isEmpty(availableRooms)}" class="mt-4">
+                        <form th:action="@{/receptionist/reservations/{id}/manage/rooms(id=${reservation.id})}"
                               method="post"
-                              class="inline"
-                              onsubmit="return confirm('Remove this guest record?')">
-                            <button type="submit" class="text-sm text-danger hover:opacity-80">
-                                Remove
+                              class="flex items-end gap-3">
+                            <div class="flex flex-col gap-2 flex-1">
+                                <label class="text-sm font-medium" for="roomId">Assign Room</label>
+                                <select id="roomId" name="roomId" required class="input">
+                                    <option value="">Select a room...</option>
+                                    <option th:each="r : ${availableRooms}"
+                                            th:value="${r.id}"
+                                            th:text="${'Room ' + r.roomNumber + ' - ' + r.roomType.name + ' (Floor ' + r.floorNumber + ')'}">
+                                        Room 201 - Deluxe (Floor 2)
+                                    </option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg whitespace-nowrap">
+                                Assign
                             </button>
                         </form>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="p-5">
-            <h2 class="text-lg font-semibold text-foreground"
-                th:text="${editGuestId} != null ? 'Edit Guest' : 'Add Guest'">Add Guest</h2>
-        </div>
-
-        <form th:action="${editGuestId} != null
-                ? @{/receptionist/reservations/{id}/manage/guests/{gid}(id=${reservation.id}, gid=${editGuestId})}
-                : @{/receptionist/reservations/{id}/manage/guests(id=${reservation.id})}"
-              th:object="${form}"
-              method="post"
-              class="p-5">
-
-            <div class="grid grid-cols-3 gap-4">
-
-                <div>
-                    <label class="mb-2 block text-sm font-medium text-foreground" for="guestName">
-                        Guest Name *
-                    </label>
-                    <input type="text"
-                           id="guestName"
-                           th:field="*{guestName}"
-                           placeholder="Full name"
-                           class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
-                    <p th:if="${#fields.hasErrors('guestName')}"
-                       class="mt-1 text-xs text-danger"
-                       th:errors="*{guestName}">Error</p>
-                </div>
-
-                <div>
-                    <label class="mb-2 block text-sm font-medium text-foreground" for="dateOfBirth">
-                        Date of Birth *
-                    </label>
-                    <input type="date"
-                           id="dateOfBirth"
-                           th:field="*{dateOfBirth}"
-                           class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
-                    <p th:if="${#fields.hasErrors('dateOfBirth')}"
-                       class="mt-1 text-xs text-danger"
-                       th:errors="*{dateOfBirth}">Error</p>
-                </div>
-
-                <div>
-                    <label class="mb-2 block text-sm font-medium text-foreground" for="nationality">
-                        Nationality
-                    </label>
-                    <input type="text"
-                           id="nationality"
-                           th:field="*{nationality}"
-                           placeholder="e.g. Vietnamese"
-                           class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
-                </div>
-
-            </div>
-
-            <div class="mt-5 flex items-center gap-3">
-                <button type="submit" class="btn btn-primary btn-lg"
-                        th:text="${editGuestId} != null ? 'Update Guest' : 'Add Guest'">Add Guest
-                </button>
-                <a th:if="${editGuestId} != null"
-                   th:href="@{/receptionist/reservations/{id}/manage(id=${reservation.id})}"
-                   class="btn btn-secondary btn-lg">Cancel</a>
-            </div>
-
-        </form>
-
-    </section>
-
-    <!-- ASSIGNED ROOMS -->
-    <section class="card">
-
-        <div class="border-b border-border p-5">
-            <h2 class="text-lg font-semibold text-foreground">Assigned Rooms</h2>
-        </div>
-
-        <div class="p-5">
-
-            <!-- expected vs assigned summary -->
-            <div class="mb-4 flex flex-wrap gap-3 text-sm">
-                <th:block th:each="detail : ${reservation.details}">
-                    <span th:text="${assignedCounts.getOrDefault(detail.roomType.id, 0)} + '/' + ${detail.roomCount} + ' ' + ${detail.roomType.name}">
-                        0/2 Deluxe
-                    </span>
-                </th:block>
-            </div>
-
-            <!-- assigned rooms table -->
-            <div th:if="${!#lists.isEmpty(assignedRooms)}" class="overflow-x-auto">
-                <table class="w-full text-left text-sm">
-                    <thead>
-                    <tr class="border-b border-border text-muted-foreground">
-                        <th class="pb-3 pr-4 font-medium">#</th>
-                        <th class="pb-3 pr-4 font-medium">Room</th>
-                        <th class="pb-3 pr-4 font-medium">Type</th>
-                        <th class="pb-3 pr-4 font-medium">Floor</th>
-                        <th class="pb-3 text-right font-medium">Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr class="border-b border-border/50" th:each="a, stat : ${assignedRooms}">
-                        <td class="py-3 pr-4 text-muted-foreground" th:text="${stat.count}">1</td>
-                        <td class="py-3 pr-4 font-medium text-foreground"
-                            th:text="${a.room.roomNumber}">201
-                        </td>
-                        <td class="py-3 pr-4 text-muted-foreground"
-                            th:text="${a.room.roomType.name}">Deluxe
-                        </td>
-                        <td class="py-3 pr-4 text-muted-foreground"
-                            th:text="${'Floor ' + a.room.floorNumber}">Floor 2
-                        </td>
-                        <td class="py-3 text-right">
-                            <form th:action="@{/receptionist/reservations/{id}/manage/rooms/{aid}/remove(id=${reservation.id}, aid=${a.id})}"
-                                  method="post"
-                                  class="inline"
-                                  onsubmit="return confirm('Remove this room assignment?')">
-                                <button type="submit" class="text-sm text-danger hover:opacity-80">
-                                    Remove
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <p th:if="${#lists.isEmpty(assignedRooms)}" class="mb-4 text-sm text-muted-foreground">
-                No rooms assigned yet.
-            </p>
-
-            <!-- assign room form -->
-            <div th:if="${!#lists.isEmpty(availableRooms)}" class="mt-4">
-                <form th:action="@{/receptionist/reservations/{id}/manage/rooms(id=${reservation.id})}"
-                      method="post"
-                      class="flex items-end gap-3">
-                    <div class="flex-1">
-                        <label class="mb-2 block text-sm font-medium text-foreground" for="roomId">
-                            Assign Room
-                        </label>
-                        <select id="roomId" name="roomId" required
-                                class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
-                            <option value="">Select a room...</option>
-                            <option th:each="r : ${availableRooms}"
-                                    th:value="${r.id}"
-                                    th:text="${'Room ' + r.roomNumber + ' - ' + r.roomType.name + ' (Floor ' + r.floorNumber + ')'}">
-                                Room 201 - Deluxe (Floor 2)
-                            </option>
-                        </select>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-lg whitespace-nowrap">
-                        Assign
-                    </button>
-                </form>
-            </div>
 
-            <p th:if="${#lists.isEmpty(availableRooms)}" class="mt-4 text-sm text-muted-foreground">
-                No vacant rooms available for this booking's room types.
-            </p>
+                    <p th:if="${#lists.isEmpty(availableRooms)}" class="mt-4 text-sm text-muted-foreground">
+                        No vacant rooms available for this booking's room types.
+                    </p>
 
-        </div>
-
-    </section>
-
-    <!-- EXTEND STAY -->
-    <section class="card mt">
-
-        <div class="border-b border-border p-5">
-            <h2 class="text-lg font-semibold text-foreground">Extend Stay</h2>
-            <p class="page-description">
-                This will extend checkout date and recalculate price. (Subject to availability)
-            </p>
-        </div>
-
-        <div class="p-5">
-
-            <form th:action="@{/receptionist/reservations/{id}/manage/extend(id=${reservation.id})}"
-                  method="post"
-                  class="flex items-end gap-4">
-
-                <div class="flex-1">
-                    <label class="mb-2 block text-sm font-medium text-foreground" for="extraDays">
-                        Extra Nights
-                    </label>
-
-                    <input type="number"
-                           id="extraDays"
-                           name="extraDays"
-                           min="1"
-                           placeholder="days"
-                           class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
                 </div>
 
-                <button type="submit"
-                        class="btn btn-primary btn-lg whitespace-nowrap">
-                    Extend
-                </button>
-
-            </form>
+            </section>
 
         </div>
 
-    </section>
+        <!-- SIDEBAR -->
+        <div class="flex flex-col gap-6">
+
+            <!-- BOOKING SUMMARY -->
+            <section class="card">
+
+                <div class="border-b border-border px-6 py-5">
+                    <div class="flex items-center gap-3">
+                        <img th:src="@{/assets/icons/file-text.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                        <div>
+                            <h2 class="text-xl font-semibold">Booking Summary</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-6">
+
+                    <div class="grid grid-cols-2 gap-5">
+
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-muted-foreground">Guest Name</label>
+                            <p class="text-foreground font-medium" th:text="${reservation.guestName}">John Smith</p>
+                        </div>
+
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-muted-foreground">Phone</label>
+                            <p class="text-foreground" th:text="${reservation.guestPhone}">+84 912 345 678</p>
+                        </div>
+
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-muted-foreground">Check-In</label>
+                            <p class="text-foreground"
+                               th:text="${#temporals.format(reservation.checkInAt, 'dd MMM yyyy')}">15 Jun 2026</p>
+                        </div>
+
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-muted-foreground">Check-Out</label>
+                            <p class="text-foreground"
+                               th:text="${#temporals.format(reservation.checkOutAt, 'dd MMM yyyy')}">18 Jun 2026</p>
+                        </div>
+
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-muted-foreground">Duration</label>
+                            <p class="text-foreground"
+                               th:text="${reservation.checkOutAt.toEpochDay() - reservation.checkInAt.toEpochDay() + ' nights'}">
+                                3 nights</p>
+                        </div>
+
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-muted-foreground">Source</label>
+                            <span class="pill-muted text-sm"
+                                  th:text="${reservation.source.name()}">ONLINE</span>
+                        </div>
+
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-muted-foreground">Total Price</label>
+                            <p class="text-foreground" th:text="${reservation.totalPrice}">400$</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-5">
+                        <label class="mb-2 block text-sm font-medium text-muted-foreground">Rooms</label>
+                        <div class="flex flex-wrap gap-2">
+                            <th:block th:each="room : ${reservation.details}">
+                                <span class="pill-muted"
+                                      th:text="${room.roomType.name} + ' x' + ${room.roomCount}">
+                                    Deluxe x2
+                                </span>
+                            </th:block>
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- EXTEND STAY -->
+            <section class="card">
+
+                <div class="border-b border-border px-6 py-5">
+                    <div class="flex items-center gap-3">
+                        <img th:src="@{/assets/icons/clock.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                        <div>
+                            <h2 class="text-xl font-semibold">Extend Stay</h2>
+                            <p class="mt-1 text-sm text-muted-foreground">
+                                This will extend checkout date and recalculate price. (Subject to availability)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-6">
+
+                    <form th:action="@{/receptionist/reservations/{id}/manage/extend(id=${reservation.id})}"
+                          method="post"
+                          class="flex items-end gap-4">
+
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-sm font-medium" for="extraDays">Extra Nights</label>
+                            <input type="number"
+                                   id="extraDays"
+                                   name="extraDays"
+                                   min="1"
+                                   placeholder="days"
+                                   class="input">
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-primary btn-lg whitespace-nowrap">
+                            Extend
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </div>
 </main>
 
 </body>

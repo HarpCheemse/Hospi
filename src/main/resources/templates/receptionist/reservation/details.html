@@ -18,12 +18,20 @@
 
     <header class="staff-page-header">
 
-        <section>
-            <h1 class="staff-page-title">Complete Booking</h1>
-            <p class="page-description">
-                Select room types and enter guest details to create the reservation.
-            </p>
-        </section>
+        <div class="flex items-center gap-4">
+
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/calendar-check.svg}" alt="">
+            </div>
+
+            <div>
+                <h1 class="staff-page-title">Complete Booking</h1>
+                <p class="page-description">
+                    Select room types and enter guest details to create the reservation.
+                </p>
+            </div>
+
+        </div>
 
         <a th:href="@{/receptionist/reservations/create}"
            class="btn btn-secondary btn-lg">
@@ -44,11 +52,16 @@
         <!-- DATE BAR -->
         <section class="card">
 
-            <div class="border-b border-border p-5">
-                <h2 class="text-lg font-semibold text-foreground">Stay Dates</h2>
+            <div class="border-b border-border px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <img th:src="@{/assets/icons/calendar-days.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div>
+                        <h2 class="text-xl font-semibold">Stay Dates</h2>
+                    </div>
+                </div>
             </div>
 
-            <div class="flex gap-5 p-5">
+            <div class="flex gap-5 p-6">
 
                 <div class="flex-1">
                     <label class="mb-2 block text-sm font-medium text-foreground">
@@ -90,18 +103,23 @@
         <!-- ROOM SELECTION -->
         <section class="card">
 
-            <div class="border-b border-border p-5">
-                <h2 class="text-lg font-semibold text-foreground">Select Room Types</h2>
-                <p class="page-description">
-                    Choose how many rooms of each type to book.
-                    <span class="text-muted-foreground">
-                        (<span th:text="${#lists.size(view)}"></span> types available)
-                    </span>
-                </p>
+            <div class="border-b border-border px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <img th:src="@{/assets/icons/bed-double.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div>
+                        <h2 class="text-xl font-semibold">Select Room Types</h2>
+                        <p class="mt-1 text-sm text-muted-foreground">
+                            Choose how many rooms of each type to book.
+                            <span class="text-muted-foreground">
+                                (<span th:text="${#lists.size(view)}"></span> types available)
+                            </span>
+                        </p>
+                    </div>
+                </div>
             </div>
 
             <div th:if="${#fields.hasGlobalErrors()}"
-                 class="mx-5 mt-5 mb-6 rounded-xl border border-danger bg-red-50 px-4 py-3 text-sm text-danger">
+                 class="mx-6 mt-5 mb-6 rounded-xl border border-danger bg-red-50 px-4 py-3 text-sm text-danger">
                 <p th:each="err : ${#fields.allErrors()}" th:text="${err}"></p>
             </div>
 
@@ -174,7 +192,7 @@
                                    th:field="*{roomSelections[__${stat.index}__].roomCount}"
                                    min="0"
                                    th:max="${rt.availableRooms}"
-                                   class="w-24 rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"/>
+                                   class="input w-24"/>
 
                         </td>
 
@@ -203,71 +221,60 @@
         <!-- GUEST INFORMATION -->
         <section class="card">
 
-            <div class="border-b border-border p-5">
-                <h2 class="text-lg font-semibold text-foreground">Guest Information</h2>
-                <p class="page-description">Enter the guest's details.</p>
+            <div class="border-b border-border px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <img th:src="@{/assets/icons/users.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div>
+                        <h2 class="text-xl font-semibold">Guest Information</h2>
+                        <p class="mt-1 text-sm text-muted-foreground">Enter the guest's details.</p>
+                    </div>
+                </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-5 p-5">
+            <div class="grid grid-cols-2 gap-5 p-6">
 
-                <div class="col-span-2">
-                    <label class="mb-2 block text-sm font-medium text-foreground">
-                        Full Name
-                    </label>
-
+                <div class="flex flex-col gap-2 col-span-2">
+                    <label class="text-sm font-medium">Full Name</label>
+                    <div th:replace="~{fragments/form-error :: error('guestName')}"></div>
                     <input type="text"
                            th:field="*{guestName}"
                            placeholder="e.g. Nguyen Van A"
-                           class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
-
-                    <div th:replace="~{fragments/form-error :: error('guestName')}"></div>
+                           class="input">
                 </div>
 
-                <div>
-                    <label class="mb-2 block text-sm font-medium text-foreground">
-                        Email
-                    </label>
-
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Email</label>
+                    <div th:replace="~{fragments/form-error :: error('guestEmail')}"></div>
                     <input type="email"
                            th:field="*{guestEmail}"
                            placeholder="e.g. nguyen@email.com"
-                           class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
-
-                    <div th:replace="~{fragments/form-error :: error('guestEmail')}"></div>
+                           class="input">
                 </div>
 
-                <div>
-                    <label class="mb-2 block text-sm font-medium text-foreground">
-                        Phone
-                    </label>
-
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Phone</label>
+                    <div th:replace="~{fragments/form-error :: error('guestPhone')}"></div>
                     <input type="text"
                            th:field="*{guestPhone}"
                            placeholder="e.g. +84 912 345 678"
-                           class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
-
-                    <div th:replace="~{fragments/form-error :: error('guestPhone')}"></div>
+                           class="input">
                 </div>
 
-                <div>
-                    <label class="mb-2 block text-sm font-medium text-foreground">
-                        Date of Birth
-                    </label>
-
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Date of Birth *</label>
+                    <div th:replace="~{fragments/form-error :: error('guestDateOfBirth')}"></div>
                     <input type="date"
                            th:field="*{guestDateOfBirth}"
-                           class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+                           class="input">
                 </div>
 
-                <div>
-                    <label class="mb-2 block text-sm font-medium text-foreground">
-                        Nationality
-                    </label>
-
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Nationality</label>
+                    <div th:replace="~{fragments/form-error :: error('guestNationality')}"></div>
                     <input type="text"
                            th:field="*{guestNationality}"
                            placeholder="e.g. Vietnamese"
-                           class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+                           class="input">
                 </div>
 
             </div>
@@ -275,19 +282,21 @@
         </section>
 
         <!-- ACTIONS -->
-        <div class="flex items-center justify-end gap-3">
+        <section class="card">
+            <div class="flex items-center justify-end gap-3 p-5">
 
-            <a th:href="@{/receptionist/reservations}"
-               class="btn btn-secondary btn-lg">
-                Cancel
-            </a>
+                <a th:href="@{/receptionist/reservations}"
+                   class="btn btn-secondary btn-lg">
+                    Cancel
+                </a>
 
-            <button type="submit"
-                    class="btn btn-primary btn-lg">
-                Create Booking
-            </button>
+                <button type="submit"
+                        class="btn btn-primary btn-lg">
+                    Create Booking
+                </button>
 
-        </div>
+            </div>
+        </section>
 
     </form>
 

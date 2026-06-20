@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Confirm Payment | Hospi</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.9/cdn.min.js" defer></script>
 </head>
 
 <body class="staff-layout">
@@ -18,12 +19,17 @@
 
     <header class="staff-page-header">
 
-        <section>
-            <h1 class="staff-page-title">Confirm Payment</h1>
-            <p class="page-description">
-                Review booking details and confirm offline payment to finalise the reservation.
-            </p>
-        </section>
+        <div class="flex items-center gap-4">
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/circle-dollar-sign.svg}" class="h-7 w-7" alt="">
+            </div>
+            <section>
+                <h1 class="staff-page-title">Confirm Payment</h1>
+                <p class="page-description">
+                    Review booking details and confirm offline payment to finalise the reservation.
+                </p>
+            </section>
+        </div>
 
         <a th:href="@{/receptionist/reservations}"
            class="btn btn-secondary btn-lg">
@@ -39,11 +45,16 @@
         <!-- BOOKING SUMMARY -->
         <section class="card">
 
-            <div class="border-b border-border p-5">
-                <h2 class="text-lg font-semibold text-foreground">Booking Summary</h2>
+            <div class="border-b border-border px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <img th:src="@{/assets/icons/file-text.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div>
+                        <h2 class="text-xl font-semibold">Booking Summary</h2>
+                    </div>
+                </div>
             </div>
 
-            <div class="p-5">
+            <div class="p-6">
 
                 <div class="grid grid-cols-2 gap-5">
 
@@ -97,11 +108,16 @@
         <!-- TOTAL AMOUNT -->
         <section class="card border-2 border-primary">
 
-            <div class="border-b border-border p-5">
-                <h2 class="text-lg font-semibold text-foreground">Total Due</h2>
+            <div class="border-b border-border px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <img th:src="@{/assets/icons/circle-dollar-sign.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div>
+                        <h2 class="text-xl font-semibold">Total Due</h2>
+                    </div>
+                </div>
             </div>
 
-            <div class="p-5 text-center">
+            <div class="p-6 text-center">
                 <p class="text-4xl font-bold text-foreground"
                    th:text="|$ ${#numbers.formatDecimal(view.totalPrice, 0, 2)}|">
                     $960.00
@@ -116,12 +132,17 @@
         <!-- PAYMENT METHOD -->
         <section class="card">
 
-            <div class="border-b border-border p-5">
-                <h2 class="text-lg font-semibold text-foreground">Payment Method</h2>
-                <p class="page-description">Select how the guest paid at the front desk.</p>
+            <div class="border-b border-border px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <img th:src="@{/assets/icons/credit-card.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div>
+                        <h2 class="text-xl font-semibold">Payment Method</h2>
+                        <p class="mt-1 text-sm text-muted-foreground">Select how the guest paid at the front desk.</p>
+                    </div>
+                </div>
             </div>
 
-            <div class="flex gap-6 p-5">
+            <div class="flex gap-6 p-6">
 
                 <div th:each="method : ${view.paymentMethods}">
                     <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-border px-5 py-4 has-[:checked]:border-primary has-[:checked]:bg-primary/5 transition-colors">
@@ -140,19 +161,86 @@
         </section>
 
         <!-- ACTIONS -->
-        <div class="flex items-center justify-end gap-3">
+        <section class="card">
+            <div x-data="{ paymentModalOpen: false, paymentConfirmed: false }"
+                 class="flex items-center justify-end gap-3 p-5">
 
-            <a th:href="@{/receptionist/reservations}"
-               class="btn btn-secondary btn-lg">
-                Cancel
-            </a>
+                <a th:href="@{/receptionist/reservations}"
+                   class="btn btn-secondary btn-lg">
+                    Cancel
+                </a>
 
-            <button type="submit"
-                    class="btn btn-accent btn-lg">
-                Confirm Payment
-            </button>
+                <button type="button"
+                        @click="paymentModalOpen = true"
+                        class="btn btn-accent btn-lg">
+                    Confirm Payment
+                </button>
 
-        </div>
+                <!-- CONFIRM PAYMENT MODAL -->
+                <div x-show="paymentModalOpen"
+                     x-cloak
+                     class="fixed inset-0 z-50 flex items-center justify-center">
+
+                    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                         @click="paymentModalOpen = false">
+                    </div>
+
+                    <div x-show="paymentModalOpen"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         @click.stop
+                         class="relative mx-4 w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl">
+
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-warning/10 text-warning">
+                                <img th:src="@{/assets/icons/circle-dollar-sign.svg}" class="h-5 w-5" alt="">
+                            </div>
+                            <h2 class="text-lg font-semibold text-foreground">Confirm Payment Collection</h2>
+                        </div>
+
+                        <p class="mt-4 text-sm text-muted-foreground">
+                            You are about to mark this booking as paid. By confirming, you certify that the full payment of
+                            <strong class="text-foreground" th:text="|$ ${#numbers.formatDecimal(view.totalPrice, 0, 2)}|">$960.00</strong>
+                            has been collected from the guest at the front desk.
+                        </p>
+
+                        <p class="mt-2 text-sm text-muted-foreground">
+                            This action cannot be undone.
+                        </p>
+
+                        <div class="mt-5 rounded-xl border border-border bg-background p-4">
+                            <label class="flex items-start gap-3 cursor-pointer">
+                                <input type="checkbox"
+                                       x-model="paymentConfirmed"
+                                       class="mt-0.5 h-4 w-4 accent-primary rounded">
+                                <span class="text-sm text-foreground">
+                                    I confirm that I have collected the full payment from the guest.
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="mt-6 flex justify-end gap-3">
+                            <button type="button"
+                                    @click="paymentModalOpen = false"
+                                    class="btn btn-secondary">
+                                Cancel
+                            </button>
+                            <button type="submit"
+                                    :disabled="!paymentConfirmed"
+                                    :class="paymentConfirmed ? 'btn btn-accent' : 'btn btn-accent opacity-50 cursor-not-allowed'">
+                                Confirm Payment
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
 
     </form>
 

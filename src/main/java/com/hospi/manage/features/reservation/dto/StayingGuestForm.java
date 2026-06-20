@@ -1,7 +1,8 @@
-package com.hospi.manage.features.receptionist.dto;
+package com.hospi.manage.features.reservation.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -12,6 +13,7 @@ public class StayingGuestForm {
     private String guestName;
 
     @NotNull(message = "Date of birth is required")
+    @Past(message = "Date of birth must be in the past")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateOfBirth;
 

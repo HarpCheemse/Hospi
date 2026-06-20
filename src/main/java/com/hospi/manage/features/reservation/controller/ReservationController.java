@@ -1,18 +1,20 @@
-package com.hospi.manage.features.receptionist.controller;
+package com.hospi.manage.features.reservation.controller;
 
 import com.hospi.manage.common.constant.Attributes;
-import com.hospi.manage.features.receptionist.dto.StayingGuestForm;
 import com.hospi.manage.features.reservation.dto.DateSearchForm;
 import com.hospi.manage.features.reservation.dto.OfflineBookingForm;
 import com.hospi.manage.features.reservation.dto.RoomTypeAvailabilityView;
+import com.hospi.manage.features.reservation.dto.StayingGuestForm;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.reservation.service.RoomAssignmentService;
 import com.hospi.manage.features.reservation.service.RoomAvailabilityService;
 import com.hospi.manage.features.reservation.service.StayingGuestService;
-import com.hospi.manage.features.reservation.validator.OfflineBookingValidator;
+import com.hospi.manage.features.reservation.validation.DateSearchValidator;
+import com.hospi.manage.features.reservation.validation.OfflineBookingValidator;
 import com.hospi.manage.features.room.dto.response.RoomSelection;
 import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -25,21 +27,24 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/receptionist/reservations")
-public class ReceptionistReservationController {
+public class ReservationController {
 
     private final ReservationService reservationService;
     private final OfflineBookingValidator offlineBookingValidator;
+    private final DateSearchValidator dateSearchValidator;
     private final RoomAvailabilityService roomAvailabilityService;
     private final StayingGuestService stayingGuestService;
     private final RoomAssignmentService roomAssignmentService;
 
-    public ReceptionistReservationController(ReservationService reservationService,
-                                             OfflineBookingValidator offlineBookingValidator,
-                                             RoomAvailabilityService roomAvailabilityService,
-                                             StayingGuestService stayingGuestService,
-                                             RoomAssignmentService roomAssignmentService) {
+    public ReservationController(ReservationService reservationService,
+                                 OfflineBookingValidator offlineBookingValidator,
+                                 DateSearchValidator dateSearchValidator,
+                                 RoomAvailabilityService roomAvailabilityService,
+                                 StayingGuestService stayingGuestService,
+                                 RoomAssignmentService roomAssignmentService) {
         this.reservationService = reservationService;
         this.offlineBookingValidator = offlineBookingValidator;
+        this.dateSearchValidator = dateSearchValidator;
         this.roomAvailabilityService = roomAvailabilityService;
         this.stayingGuestService = stayingGuestService;
         this.roomAssignmentService = roomAssignmentService;
@@ -52,14 +57,24 @@ public class ReceptionistReservationController {
     }
 
     @GetMapping
-    String list(Model model) {
+    String list(@RequestParam(required = false) String status,
+                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                @RequestParam(required = false) String search,
+                Model model) {
+        List<ReservationStatus> statuses;
+        if (status != null && !status.isBlank()) {
+            statuses = List.of(ReservationStatus.valueOf(status));
+        } else {
+            statuses = List.of(ReservationStatus.PENDING, ReservationStatus.CONFIRMED);
+        }
+
         model.addAttribute("checkedInBookings",
                 reservationService.findByStatus(ReservationStatus.CHECKED_IN));
         model.addAttribute("activeBookings",
-                reservationService.findByStatuses(List.of(
-                        ReservationStatus.PENDING,
-                        ReservationStatus.CONFIRMED
-                )));
+                reservationService.findFiltered(statuses, search, date));
+        model.addAttribute("filterStatus", status);
+        model.addAttribute("filterDate", date);
+        model.addAttribute("filterSearch", search);
         return "receptionist/reservation/list";
     }
 
@@ -73,11 +88,7 @@ public class ReceptionistReservationController {
     @PostMapping("/create")
     String searchDates(@Valid @ModelAttribute(Attributes.FORM) DateSearchForm form, BindingResult binding,
                        Model model) {
-        if (form.getCheckOutAt() != null && form.getCheckInAt() != null && !form.getCheckOutAt().isAfter(form.getCheckInAt())) {
-            binding.rejectValue("checkOutAt",
-                    "error",
-                    "Check-out must be after check-in");
-        }
+        dateSearchValidator.validate(form, binding);
 
         if (binding.hasErrors()) {
             return "receptionist/reservation/create";

@@ -4,6 +4,7 @@ import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -36,6 +37,27 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                                LocalDate end);
 
     Optional<Reservation> findByConfirmationCode(String confirmationCode);
+
+    @Query("""
+                SELECT r FROM Reservation r
+                WHERE r.status IN :statuses
+                AND LOWER(r.guestName) LIKE :guestName
+                ORDER BY r.checkInAt DESC
+            """)
+    List<Reservation> findFiltered(@Param("statuses") List<ReservationStatus> statuses,
+                                   @Param("guestName") String guestName);
+
+    @Query("""
+                SELECT r FROM Reservation r
+                WHERE r.status IN :statuses
+                AND LOWER(r.guestName) LIKE :guestName
+                AND r.checkInAt <= :date
+                AND r.checkOutAt >= :date
+                ORDER BY r.checkInAt DESC
+            """)
+    List<Reservation> findFilteredWithDate(@Param("statuses") List<ReservationStatus> statuses,
+                                           @Param("guestName") String guestName,
+                                           @Param("date") LocalDate date);
 
     Optional<Reservation> findByGuestEmailAndConfirmationCode(String guestEmail, String confirmationCode);
 }

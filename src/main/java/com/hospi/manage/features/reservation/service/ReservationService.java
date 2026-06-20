@@ -51,6 +51,19 @@ public class ReservationService {
         return reservationRepository.findByStatusInOrderByCheckInAtDesc(statuses);
     }
 
+    public List<Reservation> findFiltered(List<ReservationStatus> statuses,
+                                           String guestName,
+                                           LocalDate date) {
+        String searchPattern = "%";
+        if (guestName != null && !guestName.isBlank()) {
+            searchPattern = "%" + guestName.trim().toLowerCase() + "%";
+        }
+        if (date != null) {
+            return reservationRepository.findFilteredWithDate(statuses, searchPattern, date);
+        }
+        return reservationRepository.findFiltered(statuses, searchPattern);
+    }
+
     public Reservation findById(Long id) {
         return reservationRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Reservation"));
     }
