@@ -1,7 +1,7 @@
 package com.hospi.manage.features.room.validation;
 
-import com.hospi.manage.features.room.dto.room.RoomCreateForm;
-import com.hospi.manage.features.room.dto.room.RoomEditForm;
+import com.hospi.manage.features.room.dto.request.RoomCreateForm;
+import com.hospi.manage.features.room.dto.request.RoomEditForm;
 import com.hospi.manage.features.room.entity.Room;
 import com.hospi.manage.features.room.repository.RoomRepository;
 import org.springframework.stereotype.Component;
@@ -55,7 +55,7 @@ public class RoomValidator {
     }
 
     private boolean roomNumberExists(String roomNumber) {
-        return roomRepository.existsByRoomNumber(roomNumber);
+        return roomRepository.existsByRoomNumberAndActiveTrue(roomNumber);
     }
 
     private boolean isValidRoomNumber(short floor, String roomNumber) {

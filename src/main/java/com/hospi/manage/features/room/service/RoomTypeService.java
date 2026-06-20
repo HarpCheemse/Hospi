@@ -1,12 +1,13 @@
 package com.hospi.manage.features.room.service;
 
 import com.hospi.manage.common.exception.ResourceNotFoundException;
-import com.hospi.manage.features.room.dto.room_type.RoomTypeCreateForm;
-import com.hospi.manage.features.room.dto.room_type.RoomTypeEditForm;
-import com.hospi.manage.features.room.dto.room_type.RoomTypeView;
+import com.hospi.manage.features.room.dto.request.RoomTypeCreateForm;
+import com.hospi.manage.features.room.dto.request.RoomTypeEditForm;
+import com.hospi.manage.features.room.dto.response.RoomTypeView;
 import com.hospi.manage.features.room.entity.RoomType;
 import com.hospi.manage.features.room.enums.RoomCategory;
 import com.hospi.manage.features.room.enums.RoomTier;
+import com.hospi.manage.features.room.repository.RoomRepository;
 import com.hospi.manage.features.room.repository.RoomTypeRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -18,15 +19,18 @@ import java.util.List;
 public class RoomTypeService {
     private final RoomTypeRepository roomTypeRepository;
     private final RoomTypePictureService roomTypePictureService;
+    private final RoomRepository roomRepository;
 
     private static final int CoverWidth = 1080;
     private static final int GALLERY_WIDTH = 720;
     private static final float IMAGE_QUALITY = 0.75f;
 
     public RoomTypeService(RoomTypeRepository roomTypeRepository,
-                           RoomTypePictureService roomTypePictureService) {
+                           RoomTypePictureService roomTypePictureService,
+                           RoomRepository roomRepository) {
         this.roomTypeRepository = roomTypeRepository;
         this.roomTypePictureService = roomTypePictureService;
+        this.roomRepository = roomRepository;
     }
 
     @Transactional
@@ -39,7 +43,7 @@ public class RoomTypeService {
         roomType.setMaxOccupancy(form.maxOccupancy());
         roomType.setDescription(form.description());
         roomType.setFeatures(form.features());
-        roomType.setBedType(form.bedType() != null ? form.bedType().toString() : null);
+        roomType.setBedType(form.bedType());
         roomType.setArea(form.area());
         roomType.setBasePrice(form.basePrice());
         roomType.setActive(true);
@@ -55,11 +59,16 @@ public class RoomTypeService {
     }
 
     public List<RoomType> findAll() {
-        return roomTypeRepository.findAll();
+        return roomTypeRepository.findByActiveTrue();
     }
 
     public RoomType findById(Long id) {
-        return roomTypeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Room type not found"));
+        RoomType roomType = roomTypeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Room type"));
+        if (!roomType.getActive()) {
+            throw new ResourceNotFoundException("Room type");
+        }
+        return roomType;
     }
 
     @Transactional
@@ -71,7 +80,7 @@ public class RoomTypeService {
                 form.tier()));
         roomType.setCategory(form.category());
         roomType.setTier(form.tier());
-        roomType.setBedType(form.bedType() != null ? form.bedType().toString() : null);
+        roomType.setBedType(form.bedType());
         roomType.setMaxOccupancy(form.maxOccupancy());
         roomType.setArea(form.area());
         roomType.setBasePrice(form.basePrice());
@@ -91,12 +100,18 @@ public class RoomTypeService {
     @Transactional
     public void delete(Long id) {
         RoomType roomType = findById(id);
+        long activeRoomCount = roomRepository.countByRoomTypeIdAndActiveTrue(id);
+        if (activeRoomCount > 0) {
+            throw new IllegalStateException(
+                    "Cannot delete room type with " + activeRoomCount + " active room(s) assigned"
+            );
+        }
         roomType.setActive(false);
         roomTypeRepository.save(roomType);
     }
 
     public List<RoomTypeView> findAllViews() {
-        return roomTypeRepository.findAll().stream().map(RoomTypeView::from).toList();
+        return roomTypeRepository.findAllWithRelations().stream().map(RoomTypeView::from).toList();
     }
 
     public RoomTypeView findViewById(Long id) {

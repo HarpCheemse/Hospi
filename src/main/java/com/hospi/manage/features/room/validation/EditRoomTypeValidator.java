@@ -1,6 +1,6 @@
 package com.hospi.manage.features.room.validation;
 
-import com.hospi.manage.features.room.dto.room_type.RoomTypeEditForm;
+import com.hospi.manage.features.room.dto.request.RoomTypeEditForm;
 import com.hospi.manage.features.room.repository.RoomTypeRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
@@ -45,7 +45,7 @@ public class EditRoomTypeValidator {
             return;
         }
 
-        boolean exists = roomTypeRepository.existsByCategoryAndTierAndIdNot(form.category(),
+        boolean exists = roomTypeRepository.existsByCategoryAndTierAndIdNotAndActiveTrue(form.category(),
                 form.tier(),
                 id);
 

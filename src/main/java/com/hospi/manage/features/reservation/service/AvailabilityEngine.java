@@ -2,9 +2,11 @@ package com.hospi.manage.features.reservation.service;
 
 import com.hospi.manage.features.reservation.entity.ReservationDetail;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
-import com.hospi.manage.features.room.dto.room.RoomInventory;
-import com.hospi.manage.features.room.dto.room_type.RoomTypeAvailability;
+import com.hospi.manage.features.room.dto.response.RoomInventory;
+import com.hospi.manage.features.room.dto.response.RoomTypeAvailability;
+import com.hospi.manage.features.room.entity.RoomType;
 import com.hospi.manage.features.room.repository.RoomRepository;
+import com.hospi.manage.features.room.repository.RoomTypeRepository;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -17,11 +19,14 @@ public class AvailabilityEngine {
 
     private final ReservationRepository reservationRepository;
     private final RoomRepository roomRepository;
+    private final RoomTypeRepository roomTypeRepository;
 
     public AvailabilityEngine(ReservationRepository reservationRepository,
-                              RoomRepository roomRepository) {
+                              RoomRepository roomRepository,
+                              RoomTypeRepository roomTypeRepository) {
         this.reservationRepository = reservationRepository;
         this.roomRepository = roomRepository;
+        this.roomTypeRepository = roomTypeRepository;
     }
 
     /**
@@ -37,12 +42,16 @@ public class AvailabilityEngine {
                 excludedReservationId);
         List<RoomInventory> inventory = roomRepository.getRoomInventory();
 
+        Map<Long, RoomType> typeMap = roomTypeRepository.findAll().stream()
+                .collect(Collectors.toMap(RoomType::getId, rt -> rt));
+
         return inventory.stream()
                 .map(i -> {
-                    int bookedCount = booked.getOrDefault(i.roomType().getId(),
+                    int bookedCount = booked.getOrDefault(i.roomTypeId(),
                             0);
+                    RoomType roomType = typeMap.get(i.roomTypeId());
                     return new RoomTypeAvailability(
-                            i.roomType(),
+                            roomType,
                             i.totalRooms(),
                             i.totalRooms() - bookedCount
                     );
