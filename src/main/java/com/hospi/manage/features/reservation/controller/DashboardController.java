@@ -1,4 +1,4 @@
-package com.hospi.manage.features.receptionist.controller;
+package com.hospi.manage.features.reservation.controller;
 
 import com.hospi.manage.common.constant.Attributes;
 import org.springframework.stereotype.Controller;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/receptionist")
-public class ReceptionistDashboardController {
+public class DashboardController {
     @GetMapping
     String dashboard(Model model) {
         model.addAttribute(Attributes.ACTIVE_SIDEBAR,

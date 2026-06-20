@@ -1,6 +1,6 @@
 package com.hospi.manage.features.reservation.service;
 
-import com.hospi.manage.features.receptionist.dto.StayingGuestForm;
+import com.hospi.manage.features.reservation.dto.StayingGuestForm;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.StayingGuest;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;

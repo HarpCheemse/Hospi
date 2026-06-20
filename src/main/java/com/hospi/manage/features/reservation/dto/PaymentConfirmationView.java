@@ -1,22 +1,23 @@
-package com.hospi.manage.features.receptionist.dto;
+package com.hospi.manage.features.reservation.dto;
 
+import com.hospi.manage.features.payment.enums.PaymentMethod;
 import com.hospi.manage.features.reservation.entity.Reservation;
-import com.hospi.manage.features.reservation.enums.BookingSource;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-public record CheckInView(
+public record PaymentConfirmationView(
         Long id,
         String guestName,
         String guestEmail,
-        String guestPhone,
         LocalDate checkInAt,
         LocalDate checkOutAt,
-        BookingSource source,
-        List<RoomDetailView> rooms
+        BigDecimal totalPrice,
+        List<RoomDetailView> rooms,
+        PaymentMethod[] paymentMethods
 ) {
-    public static CheckInView from(Reservation reservation) {
+    public static PaymentConfirmationView from(Reservation reservation) {
         List<RoomDetailView> rooms = reservation.getDetails().stream()
                 .map(d -> new RoomDetailView(
                         d.getRoomType().getName(),
@@ -24,15 +25,15 @@ public record CheckInView(
                 ))
                 .toList();
 
-        return new CheckInView(
+        return new PaymentConfirmationView(
                 reservation.getId(),
                 reservation.getGuestName(),
                 reservation.getGuestEmail(),
-                reservation.getGuestPhone(),
                 reservation.getCheckInAt(),
                 reservation.getCheckOutAt(),
-                reservation.getSource(),
-                rooms
+                reservation.getTotalPrice(),
+                rooms,
+                PaymentMethod.values()
         );
     }
 }

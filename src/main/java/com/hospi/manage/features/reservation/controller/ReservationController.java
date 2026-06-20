@@ -1,16 +1,16 @@
-package com.hospi.manage.features.receptionist.controller;
+package com.hospi.manage.features.reservation.controller;
 
 import com.hospi.manage.common.constant.Attributes;
-import com.hospi.manage.features.receptionist.dto.StayingGuestForm;
 import com.hospi.manage.features.reservation.dto.DateSearchForm;
 import com.hospi.manage.features.reservation.dto.OfflineBookingForm;
 import com.hospi.manage.features.reservation.dto.RoomTypeAvailabilityView;
+import com.hospi.manage.features.reservation.dto.StayingGuestForm;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.reservation.service.RoomAssignmentService;
 import com.hospi.manage.features.reservation.service.RoomAvailabilityService;
 import com.hospi.manage.features.reservation.service.StayingGuestService;
-import com.hospi.manage.features.reservation.validator.OfflineBookingValidator;
+import com.hospi.manage.features.reservation.validation.OfflineBookingValidator;
 import com.hospi.manage.features.room.dto.response.RoomSelection;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/receptionist/reservations")
-public class ReceptionistReservationController {
+public class ReservationController {
 
     private final ReservationService reservationService;
     private final OfflineBookingValidator offlineBookingValidator;
@@ -34,11 +34,11 @@ public class ReceptionistReservationController {
     private final StayingGuestService stayingGuestService;
     private final RoomAssignmentService roomAssignmentService;
 
-    public ReceptionistReservationController(ReservationService reservationService,
-                                             OfflineBookingValidator offlineBookingValidator,
-                                             RoomAvailabilityService roomAvailabilityService,
-                                             StayingGuestService stayingGuestService,
-                                             RoomAssignmentService roomAssignmentService) {
+    public ReservationController(ReservationService reservationService,
+                                 OfflineBookingValidator offlineBookingValidator,
+                                 RoomAvailabilityService roomAvailabilityService,
+                                 StayingGuestService stayingGuestService,
+                                 RoomAssignmentService roomAssignmentService) {
         this.reservationService = reservationService;
         this.offlineBookingValidator = offlineBookingValidator;
         this.roomAvailabilityService = roomAvailabilityService;

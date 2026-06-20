@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Staying Guests | Hospi</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.9/cdn.min.js" defer></script>
 </head>
 
 <body class="staff-layout">
@@ -73,7 +75,9 @@
                         <tbody>
                         <tr class="border-b border-border/50" th:each="guest, stat : ${guests}">
                             <td class="py-3 pr-4 text-muted-foreground" th:text="${stat.count}">1</td>
-                            <td class="py-3 pr-4 font-medium text-foreground" th:text="${guest.guestName}">Nguyen Van A</td>
+                            <td class="py-3 pr-4 font-medium text-foreground" th:text="${guest.guestName}">Nguyen Van
+                                A
+                            </td>
                             <td class="py-3 pr-4 text-muted-foreground"
                                 th:text="${#temporals.format(guest.dateOfBirth, 'dd MMM yyyy')}">12 May 1990
                             </td>
@@ -128,15 +132,15 @@
                                    class="input">
                         </div>
 
-                    <div class="flex flex-col gap-2">
-                        <label class="text-sm font-medium" for="nationality">Nationality</label>
-                        <div th:replace="~{fragments/form-error :: error('nationality')}"></div>
-                        <input type="text"
-                               id="nationality"
-                               th:field="*{nationality}"
-                               placeholder="e.g. Vietnamese"
-                               class="input">
-                    </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-medium" for="nationality">Nationality</label>
+                            <div th:replace="~{fragments/form-error :: error('nationality')}"></div>
+                            <input type="text"
+                                   id="nationality"
+                                   th:field="*{nationality}"
+                                   placeholder="e.g. Vietnamese"
+                                   class="input">
+                        </div>
 
                     </div>
 

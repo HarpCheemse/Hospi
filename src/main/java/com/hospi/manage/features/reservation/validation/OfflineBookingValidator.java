@@ -1,4 +1,4 @@
-package com.hospi.manage.features.reservation.validator;
+package com.hospi.manage.features.reservation.validation;
 
 import com.hospi.manage.features.reservation.dto.OfflineBookingForm;
 import org.springframework.stereotype.Component;
