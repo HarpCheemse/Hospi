@@ -24,7 +24,7 @@ public class HotelService {
     /// There is only 1 hotel
     public Hotel find() {
         return hotelRepository.findById(HotelConstants.HOTEL_ID).orElseThrow(
-                () -> new ResourceNotFoundException("Hotel not found")
+                () -> new ResourceNotFoundException("Hotel")
         );
     }
 

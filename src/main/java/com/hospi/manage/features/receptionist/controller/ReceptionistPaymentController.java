@@ -36,7 +36,7 @@ public class ReceptionistPaymentController {
     @GetMapping("/{id}/payment")
     String paymentForm(@PathVariable Long id, Model model) {
         Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Reservation"));
 
         if (reservation.getStatus() != ReservationStatus.PENDING) {
             return "redirect:/receptionist/reservations";
