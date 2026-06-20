@@ -10,6 +10,7 @@ import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.reservation.service.RoomAssignmentService;
 import com.hospi.manage.features.reservation.service.RoomAvailabilityService;
 import com.hospi.manage.features.reservation.service.StayingGuestService;
+import com.hospi.manage.features.reservation.validation.DateSearchValidator;
 import com.hospi.manage.features.reservation.validation.OfflineBookingValidator;
 import com.hospi.manage.features.room.dto.response.RoomSelection;
 import jakarta.validation.Valid;
@@ -30,17 +31,20 @@ public class ReservationController {
 
     private final ReservationService reservationService;
     private final OfflineBookingValidator offlineBookingValidator;
+    private final DateSearchValidator dateSearchValidator;
     private final RoomAvailabilityService roomAvailabilityService;
     private final StayingGuestService stayingGuestService;
     private final RoomAssignmentService roomAssignmentService;
 
     public ReservationController(ReservationService reservationService,
                                  OfflineBookingValidator offlineBookingValidator,
+                                 DateSearchValidator dateSearchValidator,
                                  RoomAvailabilityService roomAvailabilityService,
                                  StayingGuestService stayingGuestService,
                                  RoomAssignmentService roomAssignmentService) {
         this.reservationService = reservationService;
         this.offlineBookingValidator = offlineBookingValidator;
+        this.dateSearchValidator = dateSearchValidator;
         this.roomAvailabilityService = roomAvailabilityService;
         this.stayingGuestService = stayingGuestService;
         this.roomAssignmentService = roomAssignmentService;
@@ -84,11 +88,7 @@ public class ReservationController {
     @PostMapping("/create")
     String searchDates(@Valid @ModelAttribute(Attributes.FORM) DateSearchForm form, BindingResult binding,
                        Model model) {
-        if (form.getCheckOutAt() != null && form.getCheckInAt() != null && !form.getCheckOutAt().isAfter(form.getCheckInAt())) {
-            binding.rejectValue("checkOutAt",
-                    "error",
-                    "Check-out must be after check-in");
-        }
+        dateSearchValidator.validate(form, binding);
 
         if (binding.hasErrors()) {
             return "receptionist/reservation/create";

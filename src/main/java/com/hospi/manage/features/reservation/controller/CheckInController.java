@@ -13,6 +13,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
+
 @Controller
 @RequestMapping("/receptionist/reservations")
 public class CheckInController {
@@ -52,6 +54,17 @@ public class CheckInController {
                           @AuthenticationPrincipal AccountPrincipal principal,
                           RedirectAttributes redirect) {
         try {
+            Reservation reservation = reservationRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Reservation"));
+
+            LocalDate today = LocalDate.now();
+            if (reservation.getCheckInAt().isAfter(today)) {
+                throw new IllegalStateException("Cannot check in before the booking start date");
+            }
+            if (reservation.getCheckOutAt().isBefore(today)) {
+                throw new IllegalStateException("Cannot check in after the booking has ended");
+            }
+
             reservationService.checkIn(id,
                     bookingCode,
                     principal.getUsername());

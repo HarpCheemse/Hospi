@@ -1,0 +1,33 @@
+package com.hospi.manage.features.reservation.validation;
+
+import com.hospi.manage.features.reservation.dto.DateSearchForm;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.BindingResult;
+
+import java.time.LocalDate;
+
+@Component
+public class DateSearchValidator {
+
+    public void validate(DateSearchForm form, BindingResult bindingResult) {
+        validateCheckInAt(form, bindingResult);
+        validateCheckOutAt(form, bindingResult);
+    }
+
+    private void validateCheckInAt(DateSearchForm form, BindingResult bindingResult) {
+        if (form.getCheckInAt() != null && form.getCheckInAt().isBefore(LocalDate.now())) {
+            bindingResult.rejectValue("checkInAt",
+                    "error.pastCheckIn",
+                    "Check-in date must be today or later");
+        }
+    }
+
+    private void validateCheckOutAt(DateSearchForm form, BindingResult bindingResult) {
+        if (form.getCheckOutAt() != null && form.getCheckInAt() != null
+                && !form.getCheckOutAt().isAfter(form.getCheckInAt())) {
+            bindingResult.rejectValue("checkOutAt",
+                    "error.checkOutBeforeCheckIn",
+                    "Check-out must be after check-in");
+        }
+    }
+}
