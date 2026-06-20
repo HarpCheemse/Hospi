@@ -158,33 +158,39 @@
         </div>
 
         <!-- FILTERS -->
-        <div class="grid grid-cols-4 gap-5 border-b border-border p-5">
+        <form th:action="@{/receptionist/reservations}"
+              method="get"
+              class="flex w-full items-end gap-4 border-b border-border p-5">
 
-            <div class="flex flex-col gap-2">
+            <div class="flex-1 flex flex-col gap-2">
                 <label class="text-sm font-medium">Status</label>
                 <select name="status" class="input">
-                    <option value="">All Statuses</option>
-                    <option value="PENDING">Pending</option>
-                    <option value="CONFIRMED">Confirmed</option>
+                    <option value="" th:selected="${filterStatus == null}">All Statuses</option>
+                    <option value="PENDING" th:selected="${filterStatus == 'PENDING'}">Pending</option>
+                    <option value="CONFIRMED" th:selected="${filterStatus == 'CONFIRMED'}">Confirmed</option>
                 </select>
             </div>
 
-            <div class="flex flex-col gap-2">
-                <label class="text-sm font-medium">From</label>
-                <input type="date" name="from" class="input">
+            <div class="flex-1 flex flex-col gap-2">
+                <label class="text-sm font-medium">Date</label>
+                <input type="date" name="date" class="input"
+                       th:value="${filterDate}">
             </div>
 
-            <div class="flex flex-col gap-2">
-                <label class="text-sm font-medium">To</label>
-                <input type="date" name="to" class="input">
-            </div>
-
-            <div class="flex flex-col gap-2">
+            <div class="flex-1 flex flex-col gap-2">
                 <label class="text-sm font-medium">Search</label>
-                <input type="text" name="search" placeholder="Search by guest name..." class="input">
+                <input type="text" name="search" placeholder="Search by guest name..." class="input"
+                       th:value="${filterSearch}">
             </div>
 
-        </div>
+            <div class="flex items-center gap-3">
+                <a th:href="@{/receptionist/reservations}"
+                   class="btn btn-secondary btn-sm">Clear</a>
+                <button type="submit"
+                        class="btn btn-primary btn-sm">Filter</button>
+            </div>
+
+        </form>
 
         <!-- TABLE -->
         <div class="overflow-x-auto">

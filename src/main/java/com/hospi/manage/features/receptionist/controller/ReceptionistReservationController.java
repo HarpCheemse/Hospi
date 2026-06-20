@@ -13,6 +13,7 @@ import com.hospi.manage.features.reservation.service.StayingGuestService;
 import com.hospi.manage.features.reservation.validator.OfflineBookingValidator;
 import com.hospi.manage.features.room.dto.response.RoomSelection;
 import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -52,14 +53,24 @@ public class ReceptionistReservationController {
     }
 
     @GetMapping
-    String list(Model model) {
+    String list(@RequestParam(required = false) String status,
+                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                @RequestParam(required = false) String search,
+                Model model) {
+        List<ReservationStatus> statuses;
+        if (status != null && !status.isBlank()) {
+            statuses = List.of(ReservationStatus.valueOf(status));
+        } else {
+            statuses = List.of(ReservationStatus.PENDING, ReservationStatus.CONFIRMED);
+        }
+
         model.addAttribute("checkedInBookings",
                 reservationService.findByStatus(ReservationStatus.CHECKED_IN));
         model.addAttribute("activeBookings",
-                reservationService.findByStatuses(List.of(
-                        ReservationStatus.PENDING,
-                        ReservationStatus.CONFIRMED
-                )));
+                reservationService.findFiltered(statuses, search, date));
+        model.addAttribute("filterStatus", status);
+        model.addAttribute("filterDate", date);
+        model.addAttribute("filterSearch", search);
         return "receptionist/reservation/list";
     }
 
