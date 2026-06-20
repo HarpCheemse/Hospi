@@ -22,12 +22,20 @@
 
     <header class="staff-page-header">
 
-        <section>
-            <h1 class="staff-page-title">Reservations</h1>
-            <p class="page-description">
-                Manage active bookings and guest stays.
-            </p>
-        </section>
+        <div class="flex items-center gap-4">
+
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/calendar-check.svg}" alt="">
+            </div>
+
+            <div>
+                <h1 class="staff-page-title">Reservations</h1>
+                <p class="page-description">
+                    Manage active bookings and guest stays.
+                </p>
+            </div>
+
+        </div>
 
         <a th:href="@{/receptionist/reservations/create}" class="btn btn-primary btn-lg">
             + Add Offline Booking
@@ -38,9 +46,14 @@
     <!-- CHECKED-IN GUESTS -->
     <section th:if="${!#lists.isEmpty(checkedInBookings)}" class="card">
 
-        <div class="border-b border-border p-5">
-            <h2 class="text-lg font-semibold text-foreground">Checked-In Guests</h2>
-            <p class="page-description">Currently active stays requiring front-desk attention</p>
+        <div class="border-b border-border px-6 py-5">
+            <div class="flex items-center gap-3">
+                <img th:src="@{/assets/icons/users.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                <div>
+                    <h2 class="text-xl font-semibold">Checked-In Guests</h2>
+                    <p class="mt-1 text-sm text-muted-foreground">Currently active stays</p>
+                </div>
+            </div>
         </div>
 
         <div class="overflow-x-auto">
@@ -134,56 +147,41 @@
     <!-- ACTIVE BOOKINGS -->
     <section class="overflow-hidden card" th:classappend="${!#lists.isEmpty(checkedInBookings)} ? 'mt-6' : ''">
 
-        <div class="border-b border-border p-5">
-            <h2 class="text-lg font-semibold text-foreground">Active Bookings</h2>
-            <p class="page-description">Pending and confirmed bookings awaiting action</p>
+        <div class="border-b border-border px-6 py-5">
+            <div class="flex items-center gap-3">
+                <img th:src="@{/assets/icons/list-todo.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                <div>
+                    <h2 class="text-xl font-semibold">Active Bookings</h2>
+                    <p class="mt-1 text-sm text-muted-foreground">Pending and confirmed bookings awaiting action</p>
+                </div>
+            </div>
         </div>
 
         <!-- FILTERS -->
         <div class="grid grid-cols-4 gap-5 border-b border-border p-5">
 
-            <div>
-                <label class="mb-2 block text-sm font-medium text-foreground">
-                    Status
-                </label>
-
-                <select name="status"
-                        class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+            <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium">Status</label>
+                <select name="status" class="input">
                     <option value="">All Statuses</option>
                     <option value="PENDING">Pending</option>
                     <option value="CONFIRMED">Confirmed</option>
                 </select>
             </div>
 
-            <div>
-                <label class="mb-2 block text-sm font-medium text-foreground">
-                    From
-                </label>
-
-                <input type="date"
-                       name="from"
-                       class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+            <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium">From</label>
+                <input type="date" name="from" class="input">
             </div>
 
-            <div>
-                <label class="mb-2 block text-sm font-medium text-foreground">
-                    To
-                </label>
-
-                <input type="date"
-                       name="to"
-                       class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+            <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium">To</label>
+                <input type="date" name="to" class="input">
             </div>
 
-            <div>
-                <label class="mb-2 block text-sm font-medium text-foreground">
-                    Search
-                </label>
-
-                <input type="text"
-                       name="search"
-                       placeholder="Search by guest name..."
-                       class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+            <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium">Search</label>
+                <input type="text" name="search" placeholder="Search by guest name..." class="input">
             </div>
 
         </div>
