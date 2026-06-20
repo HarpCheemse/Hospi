@@ -1,8 +1,10 @@
 package com.hospi.manage.features.payment.service;
 
 import com.hospi.manage.common.exception.ResourceNotFoundException;
+import com.hospi.manage.features.admin.account.enums.Role;
 import com.hospi.manage.features.admin.config.entity.SystemConfig;
 import com.hospi.manage.features.admin.config.service.SystemConfigService;
+import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.payment.entity.Payment;
 import com.hospi.manage.features.payment.enums.PaymentMethod;
 import com.hospi.manage.features.payment.repository.PaymentRepository;
@@ -26,14 +28,17 @@ public class PaymentService {
     private final ReservationRepository reservationRepository;
     private final SystemConfigService systemConfigService;
     private final PayPalService payPalService;
+    private final NotificationService notificationService;
 
     public PaymentService(PaymentRepository paymentRepository, ReservationRepository reservationRepository,
-                          SystemConfigService systemConfigService, PayPalService payPalService) {
+                          SystemConfigService systemConfigService, PayPalService payPalService,
+                          NotificationService notificationService) {
 
         this.paymentRepository = paymentRepository;
         this.reservationRepository = reservationRepository;
         this.systemConfigService = systemConfigService;
         this.payPalService = payPalService;
+        this.notificationService = notificationService;
     }
 
     public String createOnlineBookingPayment(BigDecimal amount, String returnUrl, String cancelUrl) throws IOException {
@@ -75,6 +80,24 @@ public class PaymentService {
 
         paymentRepository.save(payment);
         reservationRepository.save(reservation);
+
+        // Notify receptionists and managers of payment received
+        notificationService.notifyRole(
+                reservation.getHotelId(),
+                notificationService.roleToId(Role.RECEPTIONIST),
+                "Payment Received",
+                "Payment confirmed for " + reservation.getGuestName() + " (" + method + ")",
+                "PAYMENT",
+                String.valueOf(reservation.getId())
+        );
+        notificationService.notifyRole(
+                reservation.getHotelId(),
+                notificationService.roleToId(Role.MANAGER),
+                "Payment Received",
+                "Payment confirmed for " + reservation.getGuestName() + " (" + method + ")",
+                "PAYMENT",
+                String.valueOf(reservation.getId())
+        );
 
         return payment;
     }

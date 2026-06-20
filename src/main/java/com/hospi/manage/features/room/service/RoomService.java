@@ -2,8 +2,10 @@ package com.hospi.manage.features.room.service;
 
 import com.hospi.manage.common.constant.HotelConstants;
 import com.hospi.manage.common.exception.ResourceNotFoundException;
+import com.hospi.manage.features.admin.account.enums.Role;
 import com.hospi.manage.features.manager.detail.entity.Hotel;
 import com.hospi.manage.features.manager.detail.repository.HotelRepository;
+import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.room.dto.FloorView;
 import com.hospi.manage.features.room.dto.room.RoomCreateForm;
 import com.hospi.manage.features.room.dto.room.RoomEditForm;
@@ -25,13 +27,16 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final RoomTypeRepository roomTypeRepository;
     private final HotelRepository hotelRepository;
+    private final NotificationService notificationService;
 
     RoomService(RoomRepository roomRepository,
                 RoomTypeRepository roomTypeRepository,
-                HotelRepository hotelRepository) {
+                HotelRepository hotelRepository,
+                NotificationService notificationService) {
         this.roomRepository = roomRepository;
         this.roomTypeRepository = roomTypeRepository;
         this.hotelRepository = hotelRepository;
+        this.notificationService = notificationService;
     }
 
     public List<Room> findAll() {
@@ -120,6 +125,8 @@ public class RoomService {
     public void updateRoom(Long id, RoomEditForm form) {
         Room room = findById(id);
 
+        ConditionStatus oldCondition = room.getConditionStatus();
+
         RoomType roomType =
                 roomTypeRepository.findById(form.roomTypeId()).orElseThrow(
                         () -> new ResourceNotFoundException("Room type not found")
@@ -130,6 +137,18 @@ public class RoomService {
         room.setRoomNumber(form.roomNumber());
 
         roomRepository.save(room);
+
+        // Notify receptionists when room becomes clean
+        if (oldCondition != ConditionStatus.CLEAN && form.conditionStatus() == ConditionStatus.CLEAN) {
+            notificationService.notifyRole(
+                    room.getRoomType().getHotelId(),
+                    notificationService.roleToId(Role.RECEPTIONIST),
+                    "Room Ready",
+                    "Room " + room.getRoomNumber() + " is now clean and available",
+                    "ROOM",
+                    String.valueOf(room.getId())
+            );
+        }
     }
 
     //TODO optimize this

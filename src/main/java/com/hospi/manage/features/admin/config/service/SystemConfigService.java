@@ -1,18 +1,23 @@
 package com.hospi.manage.features.admin.config.service;
 
+import com.hospi.manage.features.admin.account.enums.Role;
 import com.hospi.manage.common.constant.HotelConstants;
 import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.admin.config.dto.SystemConfigForm;
 import com.hospi.manage.features.admin.config.entity.SystemConfig;
 import com.hospi.manage.features.admin.config.repository.SystemConfigRepository;
+import com.hospi.manage.features.notification.service.NotificationService;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SystemConfigService {
     private final SystemConfigRepository systemConfigRepository;
+    private final NotificationService notificationService;
 
-    SystemConfigService(SystemConfigRepository systemConfigRepository) {
+    SystemConfigService(SystemConfigRepository systemConfigRepository,
+                        NotificationService notificationService) {
         this.systemConfigRepository = systemConfigRepository;
+        this.notificationService = notificationService;
     }
 
     public SystemConfig getConfig() {
@@ -52,5 +57,15 @@ public class SystemConfigService {
         configs.setFullRefundWindowHours(form.fullRefundWindowHours());
 
         systemConfigRepository.save(configs);
+
+        // Notify admins of config change
+        notificationService.notifyRole(
+                HotelConstants.HOTEL_ID,
+                notificationService.roleToId(Role.ADMIN),
+                "System Configuration Updated",
+                "Hotel system settings have been modified",
+                "CONFIG",
+                "system"
+        );
     }
 }

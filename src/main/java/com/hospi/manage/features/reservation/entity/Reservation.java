@@ -22,6 +22,9 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "hotel_id")
+    private Long hotelId;
+
     @Column(name = "guest_name", nullable = false)
     private String guestName;
 
