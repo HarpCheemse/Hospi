@@ -1,4 +1,4 @@
-package com.hospi.manage.features.manager.room.controller;
+package com.hospi.manage.features.room.controller;
 
 import com.hospi.manage.features.room.entity.RoomTypePicture;
 import com.hospi.manage.features.room.service.RoomTypePictureService;

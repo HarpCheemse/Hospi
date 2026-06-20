@@ -1,10 +1,10 @@
-package com.hospi.manage.features.manager.room.controller;
+package com.hospi.manage.features.room.controller;
 
 import com.hospi.manage.common.constant.Attributes;
-import com.hospi.manage.features.room.dto.room_type.RoomTypeCreateForm;
-import com.hospi.manage.features.room.dto.room_type.RoomTypeCreateView;
-import com.hospi.manage.features.room.dto.room_type.RoomTypeEditForm;
-import com.hospi.manage.features.room.dto.room_type.RoomTypeView;
+import com.hospi.manage.features.room.dto.request.RoomTypeCreateForm;
+import com.hospi.manage.features.room.dto.request.RoomTypeEditForm;
+import com.hospi.manage.features.room.dto.response.RoomTypeCreateView;
+import com.hospi.manage.features.room.dto.response.RoomTypeView;
 import com.hospi.manage.features.room.entity.RoomType;
 import com.hospi.manage.features.room.service.RoomTypeService;
 import com.hospi.manage.features.room.validation.CreateRoomTypeValidator;
@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 
@@ -125,8 +126,15 @@ public class RoomTypeController {
     }
 
     @PostMapping("/delete/{id}")
-    public String deleteRoomType(@PathVariable Long id) {
-        roomTypeService.delete(id);
+    public String deleteRoomType(@PathVariable Long id,
+                                 RedirectAttributes redirectAttributes) {
+        try {
+            roomTypeService.delete(id);
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute(Attributes.ERROR,
+                    e.getMessage());
+            return "redirect:/manager/room-types/" + id + "/edit";
+        }
 
         return "redirect:/manager/room-types";
     }

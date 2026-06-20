@@ -1,4 +1,4 @@
-package com.hospi.manage.features.room.dto.room_type;
+package com.hospi.manage.features.room.dto.response;
 
 import com.hospi.manage.features.room.enums.BedType;
 import com.hospi.manage.features.room.enums.RoomCategory;

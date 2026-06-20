@@ -1,15 +1,17 @@
-package com.hospi.manage.features.manager.room.controller;
+package com.hospi.manage.features.room.controller;
 
 import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.features.manager.detail.service.HotelService;
-import com.hospi.manage.features.room.dto.room.RoomCreateForm;
-import com.hospi.manage.features.room.dto.room.RoomEditForm;
+import com.hospi.manage.features.room.dto.request.RoomCreateForm;
+import com.hospi.manage.features.room.dto.request.RoomEditForm;
+import com.hospi.manage.features.room.dto.response.RoomOccupancyView;
 import com.hospi.manage.features.room.entity.Room;
 import com.hospi.manage.features.room.enums.ConditionStatus;
 import com.hospi.manage.features.room.service.RoomService;
 import com.hospi.manage.features.room.service.RoomTypeService;
 import com.hospi.manage.features.room.validation.RoomValidator;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -43,11 +45,14 @@ public class RoomController {
     }
 
     @GetMapping
-    public String list(Model model) {
+    public String list(@RequestParam(required = false) Integer floor,
+                       Model model) {
         model.addAttribute("hotel",
                 hotelService.find());
         model.addAttribute("floors",
-                roomService.getFloorViews());
+                roomService.getFloorViews(floor));
+        model.addAttribute("selectedFloor",
+                floor);
         return "manager/room/list";
     }
 
@@ -145,6 +150,35 @@ public class RoomController {
                 Attributes.SUCCESS,
                 "Room updated successfully"
         );
+        return "redirect:/manager/rooms";
+    }
+
+    @GetMapping("/{id}/occupancy")
+    @ResponseBody
+    public ResponseEntity<RoomOccupancyView> getRoomOccupancy(@PathVariable Long id) {
+        RoomOccupancyView occupancy = roomService.getRoomOccupancy(id);
+        return ResponseEntity.ok(occupancy);
+    }
+
+    @PostMapping("/{id}/condition")
+    @ResponseBody
+    public ResponseEntity<Void> updateCondition(@PathVariable Long id,
+                                                 @RequestParam ConditionStatus conditionStatus) {
+        roomService.updateConditionStatus(id, conditionStatus);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/delete/{id}")
+    public String deleteRoom(@PathVariable Long id,
+                             RedirectAttributes redirectAttributes) {
+        try {
+            roomService.delete(id);
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute(Attributes.ERROR,
+                    e.getMessage());
+            return "redirect:/manager/rooms/" + id + "/edit";
+        }
+
         return "redirect:/manager/rooms";
     }
 

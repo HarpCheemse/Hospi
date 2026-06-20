@@ -1,6 +1,5 @@
-package com.hospi.manage.features.room.dto.room_type;
+package com.hospi.manage.features.room.dto.request;
 
-import com.hospi.manage.features.room.entity.RoomType;
 import com.hospi.manage.features.room.enums.BedType;
 import com.hospi.manage.features.room.enums.RoomCategory;
 import com.hospi.manage.features.room.enums.RoomTier;
@@ -8,9 +7,8 @@ import jakarta.validation.constraints.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
-import java.util.List;
 
-public record RoomTypeEditForm(
+public record RoomTypeCreateForm(
         @NotNull(message = "Room category is required")
         RoomCategory category,
 
@@ -41,22 +39,17 @@ public record RoomTypeEditForm(
         @DecimalMin(value = "0.0", inclusive = false, message = "Base price must be greater than 0")
         BigDecimal basePrice,
 
-        MultipartFile coverImage,
-
-        List<MultipartFile> newImages,
-
-        List<Long> removeImageIds
+        @NotNull(message = "Cover image is required")
+        MultipartFile coverImage
 ) {
-    public static RoomTypeEditForm from(RoomType roomType) {
-        return new RoomTypeEditForm(
-                roomType.getCategory(),
-                roomType.getTier(),
-                roomType.getMaxOccupancy(),
-                roomType.getDescription(),
-                roomType.getFeatures(),
-                roomType.getBedType() != null ? BedType.valueOf(roomType.getBedType()) : null,
-                roomType.getArea(),
-                roomType.getBasePrice(),
+    public static RoomTypeCreateForm empty() {
+        return new RoomTypeCreateForm(
+                null,
+                null,
+                null,
+                null,
+                "",
+                null,
                 null,
                 null,
                 null
