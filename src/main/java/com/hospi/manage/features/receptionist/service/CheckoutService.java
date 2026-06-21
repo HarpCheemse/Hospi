@@ -41,7 +41,7 @@ public class CheckoutService {
         this.invoiceRepository = invoiceRepository;
     }
 
-    public CheckoutCalculation calculate(Reservation reservation, LocalDateTime actualCheckoutTime, int registeredGuestCount) {
+    public CheckoutCalculation calculate(Reservation reservation, LocalDateTime actualCheckoutTime, int adultGuestCount) {
         var config = systemConfigService.getConfig();
         BigDecimal totalPrice = reservation.getTotalPrice();
 
@@ -72,7 +72,7 @@ public class CheckoutService {
         int totalRoomCapacity = reservation.getDetails().stream()
                 .mapToInt(d -> d.getRoomType().getMaxOccupancy() * d.getRoomCount())
                 .sum();
-        int extraGuestCount = Math.max(0, registeredGuestCount - totalRoomCapacity);
+        int extraGuestCount = Math.max(0, adultGuestCount - totalRoomCapacity);
         BigDecimal extraGuestFee = config.getExtraGuestFee().multiply(BigDecimal.valueOf(extraGuestCount));
 
         BigDecimal totalDue = remainingBalance.add(lateCheckoutFee).add(extraGuestFee);
@@ -87,7 +87,7 @@ public class CheckoutService {
     @Transactional
     public Reservation complete(Long reservationId, CheckoutCalculation calc, BigDecimal amountReceived,
                                  PaymentMethod method, String principal, LocalDateTime actualCheckoutTime,
-                                 boolean applyLateFee, BigDecimal extraGuestFeeOverride) {
+                                 boolean applyLateFee) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
 
@@ -117,8 +117,7 @@ public class CheckoutService {
         paymentRepository.save(payment);
 
         BigDecimal appliedLateFee = applyLateFee ? calc.lateCheckoutFee() : BigDecimal.ZERO;
-        BigDecimal appliedExtraGuestFee = extraGuestFeeOverride != null
-                ? extraGuestFeeOverride : calc.extraGuestFee();
+        BigDecimal appliedExtraGuestFee = calc.extraGuestFee();
 
         // Create invoice
         Invoice invoice = new Invoice();

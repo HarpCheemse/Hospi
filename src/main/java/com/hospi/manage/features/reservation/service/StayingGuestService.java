@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -21,6 +23,13 @@ public class StayingGuestService {
 
     public List<StayingGuest> getGuests(Long reservationId) {
         return stayingGuestRepository.findByReservationIdOrderByCreatedAtAsc(reservationId);
+    }
+
+    public int getAdultGuestCount(Long reservationId, LocalDate checkInAt) {
+        return (int) stayingGuestRepository.findByReservationIdOrderByCreatedAtAsc(reservationId)
+                .stream()
+                .filter(g -> ChronoUnit.YEARS.between(g.getDateOfBirth(), checkInAt) >= 14)
+                .count();
     }
 
     public StayingGuest addGuest(Long reservationId, StayingGuestForm form) {

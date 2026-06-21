@@ -12,8 +12,6 @@ public class CheckoutForm {
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime actualCheckoutTime;
 
-    private BigDecimal extraGuestFeeOverride;
-
     private BigDecimal amountReceived;
 
     private String paymentMethod;
@@ -22,8 +20,6 @@ public class CheckoutForm {
     public void setApplyLateFee(boolean v) { this.applyLateFee = v; }
     public LocalDateTime getActualCheckoutTime() { return actualCheckoutTime; }
     public void setActualCheckoutTime(LocalDateTime v) { this.actualCheckoutTime = v; }
-    public BigDecimal getExtraGuestFeeOverride() { return extraGuestFeeOverride; }
-    public void setExtraGuestFeeOverride(BigDecimal v) { this.extraGuestFeeOverride = v; }
     public BigDecimal getAmountReceived() { return amountReceived; }
     public void setAmountReceived(BigDecimal v) { this.amountReceived = v; }
     public String getPaymentMethod() { return paymentMethod; }

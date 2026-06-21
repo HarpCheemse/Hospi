@@ -57,13 +57,13 @@ public class ReceptionistCheckoutController {
             return "redirect:/receptionist/reservations";
         }
 
-        int registeredGuests = stayingGuestService.getGuests(id).size();
-        CheckoutCalculation calc = checkoutService.calculate(reservation, null, registeredGuests);
+        int adultGuests = stayingGuestService.getAdultGuestCount(id, reservation.getCheckInAt());
+        CheckoutCalculation calc = checkoutService.calculate(reservation, null, adultGuests);
 
         model.addAttribute("reservation", reservation);
         model.addAttribute("calc", calc);
         model.addAttribute("config", systemConfigService.getConfig());
-        model.addAttribute("registeredGuests", registeredGuests);
+        model.addAttribute("adultGuests", adultGuests);
         model.addAttribute("form", new CheckoutForm());
 
         return "receptionist/reservation/checkout";
@@ -76,16 +76,16 @@ public class ReceptionistCheckoutController {
                             RedirectAttributes redirect) {
         try {
             Reservation reservation = reservationService.findById(id);
-            int registeredGuests = stayingGuestService.getGuests(id).size();
+            int adultGuests = stayingGuestService.getAdultGuestCount(id, reservation.getCheckInAt());
 
             LocalDateTime actualTime = form.isApplyLateFee() ? form.getActualCheckoutTime() : null;
-            CheckoutCalculation calc = checkoutService.calculate(reservation, actualTime, registeredGuests);
+            CheckoutCalculation calc = checkoutService.calculate(reservation, actualTime, adultGuests);
 
             PaymentMethod method = PaymentMethod.valueOf(form.getPaymentMethod());
 
             checkoutService.complete(id, calc, form.getAmountReceived(), method,
                     principal.getName(), form.getActualCheckoutTime(),
-                    form.isApplyLateFee(), form.getExtraGuestFeeOverride());
+                    form.isApplyLateFee());
 
             redirect.addFlashAttribute("success", "Checkout completed successfully.");
             return "redirect:/receptionist/reservations/" + id + "/receipt";

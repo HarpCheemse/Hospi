@@ -180,7 +180,7 @@ class CheckoutServiceTest {
         );
 
         Reservation result = checkoutService.complete(1L, calc, BigDecimal.valueOf(1000),
-                PaymentMethod.CASH, "receptionist", null, false, null);
+                PaymentMethod.CASH, "receptionist", null, false);
 
         assertEquals(ReservationStatus.CHECKED_OUT, result.getStatus());
         assertNotNull(result.getCheckedOutAt());
@@ -208,7 +208,7 @@ class CheckoutServiceTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> checkoutService.complete(2L, calc, BigDecimal.valueOf(500),
-                        PaymentMethod.CASH, "receptionist", null, false, null));
+                        PaymentMethod.CASH, "receptionist", null, false));
     }
 
     @Test
@@ -246,7 +246,7 @@ class CheckoutServiceTest {
         );
 
         checkoutService.complete(1L, calc, BigDecimal.valueOf(1000),
-                PaymentMethod.CASH, "receptionist", null, false, null);
+                PaymentMethod.CASH, "receptionist", null, false);
 
         verify(invoiceRepository).save(any());
     }
@@ -273,7 +273,7 @@ class CheckoutServiceTest {
         );
 
         Reservation result = checkoutService.complete(3L, calc, BigDecimal.valueOf(800),
-                PaymentMethod.CARD, "receptionist", null, false, null);
+                PaymentMethod.CARD, "receptionist", null, false);
 
         assertEquals(ReservationStatus.CHECKED_OUT, result.getStatus());
         assertNotNull(result.getCheckedInAt());
