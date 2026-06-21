@@ -1,6 +1,11 @@
 package com.hospi.manage.features.receptionist.service;
 
 import com.hospi.manage.features.admin.config.service.SystemConfigService;
+import com.hospi.manage.features.invoice.entity.Invoice;
+import com.hospi.manage.features.invoice.entity.InvoiceItem;
+import com.hospi.manage.features.invoice.enums.InvoiceItemType;
+import com.hospi.manage.features.invoice.enums.InvoiceStatus;
+import com.hospi.manage.features.invoice.repository.InvoiceRepository;
 import com.hospi.manage.features.payment.entity.Payment;
 import com.hospi.manage.features.payment.enums.PaymentMethod;
 import com.hospi.manage.features.payment.repository.PaymentRepository;
@@ -12,8 +17,10 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -22,13 +29,16 @@ public class CheckoutService {
     private final ReservationRepository reservationRepository;
     private final PaymentRepository paymentRepository;
     private final SystemConfigService systemConfigService;
+    private final InvoiceRepository invoiceRepository;
 
     public CheckoutService(ReservationRepository reservationRepository,
                            PaymentRepository paymentRepository,
-                           SystemConfigService systemConfigService) {
+                           SystemConfigService systemConfigService,
+                           InvoiceRepository invoiceRepository) {
         this.reservationRepository = reservationRepository;
         this.paymentRepository = paymentRepository;
         this.systemConfigService = systemConfigService;
+        this.invoiceRepository = invoiceRepository;
     }
 
     public CheckoutCalculation calculate(Reservation reservation, LocalDateTime actualCheckoutTime, int registeredGuestCount) {
@@ -81,6 +91,8 @@ public class CheckoutService {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
 
+        List<Payment> payments = paymentRepository.findAllByReservationId(reservationId);
+
         if (reservation.getStatus() != ReservationStatus.CHECKED_IN
                 && reservation.getStatus() != ReservationStatus.CONFIRMED) {
             throw new IllegalStateException("Only CHECKED_IN or CONFIRMED reservations can be checked out");
@@ -103,6 +115,90 @@ public class CheckoutService {
         payment.setConfirmedAt(LocalDateTime.now());
         payment.setConfirmedBy(principal);
         paymentRepository.save(payment);
+
+        // Create invoice
+        Invoice invoice = new Invoice();
+        invoice.setBookingId(reservation.getId());
+        invoice.setStatus(InvoiceStatus.PAID);
+        invoice.setBalanceDue(BigDecimal.ZERO);
+
+        var config = systemConfigService.getConfig();
+        int nights = (int) ChronoUnit.DAYS.between(reservation.getCheckInAt(), reservation.getCheckOutAt());
+        BigDecimal subtotal = reservation.getTotalPrice();
+        BigDecimal taxAmount = BigDecimal.ZERO;
+        if (config.getTaxRate() != null) {
+            taxAmount = subtotal.multiply(config.getTaxRate()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        }
+        BigDecimal depositUsed = payments.stream()
+                .map(Payment::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        invoice.setSubtotal(subtotal);
+        invoice.setTaxAmount(taxAmount);
+        invoice.setDepositUsed(depositUsed);
+        invoice.setTotalAmount(amountReceived);
+
+        // ROOM line items
+        for (var detail : reservation.getDetails()) {
+            InvoiceItem roomItem = new InvoiceItem();
+            roomItem.setInvoice(invoice);
+            roomItem.setItemType(InvoiceItemType.ROOM);
+            roomItem.setDescription(detail.getRoomType().getName() + " x" + detail.getRoomCount());
+            roomItem.setQuantity(nights);
+            roomItem.setUnitPrice(detail.getBasePrice().multiply(BigDecimal.valueOf(detail.getRoomCount())));
+            roomItem.setAmount(detail.getTotalPrice());
+            invoice.getItems().add(roomItem);
+        }
+
+        // DISCOUNT for deposit
+        if (depositUsed.compareTo(BigDecimal.ZERO) > 0) {
+            InvoiceItem discountItem = new InvoiceItem();
+            discountItem.setInvoice(invoice);
+            discountItem.setItemType(InvoiceItemType.DISCOUNT);
+            discountItem.setDescription("Deposit applied");
+            discountItem.setQuantity(1);
+            discountItem.setUnitPrice(depositUsed.negate());
+            discountItem.setAmount(depositUsed.negate());
+            invoice.getItems().add(discountItem);
+        }
+
+        // CHARGE for late checkout fee
+        if (appliedLateFee.compareTo(BigDecimal.ZERO) > 0) {
+            InvoiceItem lateFeeItem = new InvoiceItem();
+            lateFeeItem.setInvoice(invoice);
+            lateFeeItem.setItemType(InvoiceItemType.CHARGE);
+            lateFeeItem.setDescription("Late checkout fee");
+            lateFeeItem.setQuantity(1);
+            lateFeeItem.setUnitPrice(appliedLateFee);
+            lateFeeItem.setAmount(appliedLateFee);
+            invoice.getItems().add(lateFeeItem);
+        }
+
+        // CHARGE for extra guest fee
+        if (appliedExtraGuestFee.compareTo(BigDecimal.ZERO) > 0) {
+            InvoiceItem extraGuestItem = new InvoiceItem();
+            extraGuestItem.setInvoice(invoice);
+            extraGuestItem.setItemType(InvoiceItemType.CHARGE);
+            extraGuestItem.setDescription("Extra guest fee");
+            extraGuestItem.setQuantity(1);
+            extraGuestItem.setUnitPrice(appliedExtraGuestFee);
+            extraGuestItem.setAmount(appliedExtraGuestFee);
+            invoice.getItems().add(extraGuestItem);
+        }
+
+        // TAX
+        if (taxAmount.compareTo(BigDecimal.ZERO) > 0) {
+            InvoiceItem taxItem = new InvoiceItem();
+            taxItem.setInvoice(invoice);
+            taxItem.setItemType(InvoiceItemType.TAX);
+            taxItem.setDescription("Tax (" + config.getTaxRate() + "%)");
+            taxItem.setQuantity(1);
+            taxItem.setUnitPrice(taxAmount);
+            taxItem.setAmount(taxAmount);
+            invoice.getItems().add(taxItem);
+        }
+
+        invoiceRepository.save(invoice);
 
         reservation.setStatus(ReservationStatus.CHECKED_OUT);
         reservation.setCheckedOutAt(LocalDateTime.now());
