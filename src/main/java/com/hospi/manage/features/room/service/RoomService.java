@@ -1,8 +1,6 @@
 package com.hospi.manage.features.room.service;
 
-import com.hospi.manage.common.constant.HotelConstants;
 import com.hospi.manage.common.exception.ResourceNotFoundException;
-import com.hospi.manage.features.manager.detail.entity.Hotel;
 import com.hospi.manage.features.manager.detail.repository.HotelRepository;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.RoomAssignment;
@@ -88,7 +86,8 @@ public class RoomService {
 
 
     private FloorView buildFloorView(int floorNumber, List<Room> rooms) {
-        return RoomMapper.toFloorView(floorNumber, rooms);
+        return RoomMapper.toFloorView(floorNumber,
+                rooms);
     }
 
     public List<FloorView> getFloorViews() {
@@ -139,7 +138,8 @@ public class RoomService {
                 .collect(Collectors.groupingBy(r -> (int) r.getFloorNumber()));
 
         return roomsByFloor.entrySet().stream()
-                .map(e -> buildFloorView(e.getKey(), e.getValue()))
+                .map(e -> buildFloorView(e.getKey(),
+                        e.getValue()))
                 .toList();
     }
 
@@ -179,7 +179,8 @@ public class RoomService {
         }
 
         List<RoomAssignment> assignments = roomAssignmentRepository
-                .findByRoomIdAndReservation_StatusIn(id, List.of(ReservationStatus.CHECKED_IN));
+                .findByRoomIdAndReservation_StatusIn(id,
+                        List.of(ReservationStatus.CHECKED_IN));
 
         if (assignments.isEmpty()) {
             return RoomOccupancyView.vacant(room);
@@ -200,36 +201,5 @@ public class RoomService {
                 reservation.getCheckOutAt(),
                 stayingGuests.stream().map(GuestView::from).toList()
         );
-    }
-
-    public boolean generateDefaultRoomLayout() {
-        if (roomRepository.count() > 0) {
-            return false;
-        }
-        Hotel hotel = hotelRepository.findById(HotelConstants.HOTEL_ID).orElseThrow(
-                () -> new ResourceNotFoundException("Hotel")
-        );
-        List<RoomType> roomTypes = roomTypeRepository.findByActiveTrue();
-        List<Room> rooms = new ArrayList<>();
-        for (short floor = 1; floor <= hotel.getFloorCount(); floor++) {
-            int number = floor * 100;
-            for (RoomType roomType : roomTypes) {
-                for (int i = 1; i <= 5; i++) {
-                    number++;
-                    Room room = new Room();
-
-                    room.setRoomType(roomType);
-                    room.setFloorNumber(floor);
-                    room.setOccupancyStatus(OccupancyStatus.VACANT);
-                    room.setConditionStatus(ConditionStatus.CLEAN);
-                    room.setActive(true);
-                    room.setRoomNumber(String.valueOf(number));
-
-                    rooms.add(room);
-                }
-            }
-        }
-        roomRepository.saveAll(rooms);
-        return true;
     }
 }

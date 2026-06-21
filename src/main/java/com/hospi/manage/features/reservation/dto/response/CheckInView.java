@@ -1,23 +1,24 @@
-package com.hospi.manage.features.reservation.dto;
+package com.hospi.manage.features.reservation.dto.response;
 
-import com.hospi.manage.features.payment.enums.PaymentMethod;
 import com.hospi.manage.features.reservation.entity.Reservation;
+import com.hospi.manage.features.reservation.enums.BookingSource;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-public record PaymentConfirmationView(
+public record CheckInView(
         Long id,
         String guestName,
         String guestEmail,
+        String guestPhone,
         LocalDate checkInAt,
         LocalDate checkOutAt,
-        BigDecimal totalPrice,
+        BookingSource source,
         List<RoomDetailView> rooms,
-        PaymentMethod[] paymentMethods
+        boolean onlineBooking
 ) {
-    public static PaymentConfirmationView from(Reservation reservation) {
+    public static CheckInView from(Reservation reservation) {
         List<RoomDetailView> rooms = reservation.getDetails().stream()
                 .map(d -> new RoomDetailView(
                         d.getRoomType().getName(),
@@ -25,15 +26,20 @@ public record PaymentConfirmationView(
                 ))
                 .toList();
 
-        return new PaymentConfirmationView(
+        return new CheckInView(
                 reservation.getId(),
                 reservation.getGuestName(),
                 reservation.getGuestEmail(),
+                reservation.getGuestPhone(),
                 reservation.getCheckInAt(),
                 reservation.getCheckOutAt(),
-                reservation.getTotalPrice(),
+                reservation.getSource(),
                 rooms,
-                PaymentMethod.values()
+                reservation.getSource() == BookingSource.ONLINE
         );
+    }
+
+    public long nights() {
+        return ChronoUnit.DAYS.between(checkInAt, checkOutAt);
     }
 }

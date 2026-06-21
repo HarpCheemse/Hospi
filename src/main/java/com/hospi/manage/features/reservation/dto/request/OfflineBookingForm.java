@@ -1,4 +1,4 @@
-package com.hospi.manage.features.reservation.dto;
+package com.hospi.manage.features.reservation.dto.request;
 
 import com.hospi.manage.features.room.dto.response.RoomSelection;
 import jakarta.validation.constraints.Email;

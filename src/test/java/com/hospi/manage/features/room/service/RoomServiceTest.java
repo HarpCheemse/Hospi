@@ -1,10 +1,11 @@
 package com.hospi.manage.features.room.service;
 
 import com.hospi.manage.common.exception.ResourceNotFoundException;
-import com.hospi.manage.features.manager.detail.entity.Hotel;
 import com.hospi.manage.features.manager.detail.repository.HotelRepository;
 import com.hospi.manage.features.reservation.entity.RoomAssignment;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
+import com.hospi.manage.features.reservation.repository.RoomAssignmentRepository;
+import com.hospi.manage.features.reservation.repository.StayingGuestRepository;
 import com.hospi.manage.features.room.dto.request.RoomCreateForm;
 import com.hospi.manage.features.room.dto.request.RoomEditForm;
 import com.hospi.manage.features.room.dto.response.FloorView;
@@ -12,8 +13,6 @@ import com.hospi.manage.features.room.entity.Room;
 import com.hospi.manage.features.room.entity.RoomType;
 import com.hospi.manage.features.room.enums.ConditionStatus;
 import com.hospi.manage.features.room.enums.OccupancyStatus;
-import com.hospi.manage.features.reservation.repository.RoomAssignmentRepository;
-import com.hospi.manage.features.reservation.repository.StayingGuestRepository;
 import com.hospi.manage.features.room.repository.RoomRepository;
 import com.hospi.manage.features.room.repository.RoomTypeRepository;
 import org.junit.jupiter.api.Test;
@@ -61,7 +60,8 @@ class RoomServiceTest {
 
         List<Room> result = roomService.findAll();
 
-        assertEquals(1, result.size());
+        assertEquals(1,
+                result.size());
         verify(roomRepository).findByActiveTrueOrderByFloorNumberAscRoomNumberAsc();
     }
 
@@ -76,7 +76,8 @@ class RoomServiceTest {
 
         Room result = roomService.findById(1L);
 
-        assertEquals(1L, result.getId());
+        assertEquals(1L,
+                result.getId());
     }
 
     @Test
@@ -113,18 +114,24 @@ class RoomServiceTest {
         roomType.setId(2L);
         roomType.setActive(true);
 
-        RoomEditForm form = new RoomEditForm("102", 2L, ConditionStatus.DIRTY);
+        RoomEditForm form = new RoomEditForm("102",
+                2L,
+                ConditionStatus.DIRTY);
 
         when(roomRepository.findById(1L))
                 .thenReturn(Optional.of(room));
         when(roomTypeRepository.findById(2L))
                 .thenReturn(Optional.of(roomType));
 
-        roomService.updateRoom(1L, form);
+        roomService.updateRoom(1L,
+                form);
 
-        assertEquals("102", room.getRoomNumber());
-        assertEquals(roomType, room.getRoomType());
-        assertEquals(ConditionStatus.DIRTY, room.getConditionStatus());
+        assertEquals("102",
+                room.getRoomNumber());
+        assertEquals(roomType,
+                room.getRoomType());
+        assertEquals(ConditionStatus.DIRTY,
+                room.getConditionStatus());
         verify(roomRepository).save(room);
     }
 
@@ -138,7 +145,9 @@ class RoomServiceTest {
         roomType.setId(2L);
         roomType.setActive(false);
 
-        RoomEditForm form = new RoomEditForm("102", 2L, ConditionStatus.CLEAN);
+        RoomEditForm form = new RoomEditForm("102",
+                2L,
+                ConditionStatus.CLEAN);
 
         when(roomRepository.findById(1L))
                 .thenReturn(Optional.of(room));
@@ -146,7 +155,8 @@ class RoomServiceTest {
                 .thenReturn(Optional.of(roomType));
 
         assertThrows(ResourceNotFoundException.class,
-                () -> roomService.updateRoom(1L, form));
+                () -> roomService.updateRoom(1L,
+                        form));
     }
 
     @Test
@@ -155,7 +165,9 @@ class RoomServiceTest {
         roomType.setId(1L);
         roomType.setActive(true);
 
-        RoomCreateForm form = new RoomCreateForm((short) 1, 3, 1L);
+        RoomCreateForm form = new RoomCreateForm((short) 1,
+                3,
+                1L);
 
         when(roomRepository.findHighestRoomNumberByFloor((short) 1))
                 .thenReturn(null);
@@ -180,7 +192,9 @@ class RoomServiceTest {
         roomType.setId(1L);
         roomType.setActive(true);
 
-        RoomCreateForm form = new RoomCreateForm((short) 1, 2, 1L);
+        RoomCreateForm form = new RoomCreateForm((short) 1,
+                2,
+                1L);
 
         when(roomRepository.findHighestRoomNumberByFloor((short) 1))
                 .thenReturn(105);
@@ -203,7 +217,9 @@ class RoomServiceTest {
         roomType.setId(1L);
         roomType.setActive(false);
 
-        RoomCreateForm form = new RoomCreateForm((short) 1, 1, 1L);
+        RoomCreateForm form = new RoomCreateForm((short) 1,
+                1,
+                1L);
 
         when(roomRepository.findHighestRoomNumberByFloor((short) 1))
                 .thenReturn(null);
@@ -233,50 +249,19 @@ class RoomServiceTest {
         room2.setConditionStatus(ConditionStatus.DIRTY);
 
         when(roomRepository.findByActiveTrueOrderByFloorNumberAscRoomNumberAsc())
-                .thenReturn(List.of(room1, room2));
+                .thenReturn(List.of(room1,
+                        room2));
 
         List<FloorView> result = roomService.getFloorViews();
 
-        assertEquals(1, result.size());
-        assertEquals(1, result.get(0).number());
-        assertEquals(2, result.get(0).roomCount());
-        assertEquals(2, result.get(0).rooms().size());
-    }
-
-    @Test
-    void generateDefaultRoomLayout_shouldSucceed() {
-        when(roomRepository.count()).thenReturn(0L);
-
-        Hotel hotel = new Hotel();
-        hotel.setFloorCount((short) 2);
-        when(hotelRepository.findById(1L))
-                .thenReturn(Optional.of(hotel));
-
-        RoomType rt1 = new RoomType();
-        rt1.setId(1L);
-        rt1.setActive(true);
-
-        RoomType rt2 = new RoomType();
-        rt2.setId(2L);
-        rt2.setActive(true);
-
-        when(roomTypeRepository.findByActiveTrue())
-                .thenReturn(List.of(rt1, rt2));
-
-        boolean result = roomService.generateDefaultRoomLayout();
-
-        assertTrue(result);
-        verify(roomRepository).saveAll(any());
-    }
-
-    @Test
-    void generateDefaultRoomLayout_shouldReturnFalse_whenRoomsExist() {
-        when(roomRepository.count()).thenReturn(5L);
-
-        boolean result = roomService.generateDefaultRoomLayout();
-
-        assertFalse(result);
-        verify(roomRepository, never()).saveAll(any());
+        assertEquals(1,
+                result.size());
+        assertEquals(1,
+                result.get(0).number());
+        assertEquals(2,
+                result.get(0).roomCount());
+        assertEquals(2,
+                result.get(0).rooms().size());
     }
 
     @Test
@@ -318,6 +303,7 @@ class RoomServiceTest {
         assertThrows(IllegalStateException.class,
                 () -> roomService.delete(1L));
 
-        verify(roomRepository, never()).save(any());
+        verify(roomRepository,
+                never()).save(any());
     }
 }

@@ -1,19 +1,17 @@
 package com.hospi.manage.features.reservation.service;
 
 import com.hospi.manage.features.room.dto.response.RoomTypeAvailability;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class RoomAvailabilityService {
 
-    private final AvailabilityEngine engine;
-
-    public RoomAvailabilityService(AvailabilityEngine engine) {
-        this.engine = engine;
-    }
+    private final AvailabilityService engine;
 
     /**
      * For search and new bookings — includes all reservations.

@@ -1,4 +1,4 @@
-package com.hospi.manage.features.reservation.dto;
+package com.hospi.manage.features.reservation.dto.response;
 
 public record RoomDetailView(
         String roomTypeName,

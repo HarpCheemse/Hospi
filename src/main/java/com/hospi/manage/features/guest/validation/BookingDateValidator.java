@@ -1,6 +1,6 @@
 package com.hospi.manage.features.guest.validation;
 
-import com.hospi.manage.features.reservation.dto.DateSearchForm;
+import com.hospi.manage.features.reservation.dto.request.DateSearchForm;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 
@@ -15,7 +15,7 @@ public class BookingDateValidator {
     }
 
     private void validateCheckInAt(DateSearchForm form, BindingResult bindingResult) {
-        if (form.getCheckInAt() != null && form.getCheckInAt().isBefore(LocalDate.now())) {
+        if (form.checkInAt() != null && form.checkInAt().isBefore(LocalDate.now())) {
             bindingResult.rejectValue("checkInAt",
                     "error.pastCheckIn",
                     "Check-in date must be today or later");
@@ -23,8 +23,8 @@ public class BookingDateValidator {
     }
 
     private void validateCheckOutAt(DateSearchForm form, BindingResult bindingResult) {
-        if (form.getCheckOutAt() != null && form.getCheckInAt() != null
-                && !form.getCheckOutAt().isAfter(form.getCheckInAt())) {
+        if (form.checkOutAt() != null && form.checkInAt() != null
+                && !form.checkOutAt().isAfter(form.checkInAt())) {
             bindingResult.rejectValue("checkOutAt",
                     "error.checkOutBeforeCheckIn",
                     "Check-out must be after check-in");

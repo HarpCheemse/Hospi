@@ -1,5 +1,6 @@
 package com.hospi.manage.features.reservation.service;
 
+import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.ReservationDetail;
 import com.hospi.manage.features.reservation.entity.RoomAssignment;
@@ -8,6 +9,7 @@ import com.hospi.manage.features.reservation.repository.RoomAssignmentRepository
 import com.hospi.manage.features.room.entity.Room;
 import com.hospi.manage.features.room.enums.OccupancyStatus;
 import com.hospi.manage.features.room.repository.RoomRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,19 +20,12 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class RoomAssignmentService {
 
     private final RoomAssignmentRepository roomAssignmentRepository;
     private final ReservationRepository reservationRepository;
     private final RoomRepository roomRepository;
-
-    public RoomAssignmentService(RoomAssignmentRepository roomAssignmentRepository,
-                                 ReservationRepository reservationRepository,
-                                 RoomRepository roomRepository) {
-        this.roomAssignmentRepository = roomAssignmentRepository;
-        this.reservationRepository = reservationRepository;
-        this.roomRepository = roomRepository;
-    }
 
     public List<RoomAssignment> getAssignedRooms(Long reservationId) {
         return roomAssignmentRepository.findByReservationIdOrderByAssignedAtAsc(reservationId);
@@ -38,7 +33,7 @@ public class RoomAssignmentService {
 
     public List<Room> getAvailableRooms(Long reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
 
         Set<Long> typeIds = reservation.getDetails().stream()
                 .map(d -> d.getRoomType().getId())
@@ -70,10 +65,10 @@ public class RoomAssignmentService {
         }
 
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
 
         Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("Room not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Room"));
 
         if (room.getOccupancyStatus() != OccupancyStatus.VACANT) {
             throw new IllegalStateException("Room is not vacant");
@@ -88,9 +83,13 @@ public class RoomAssignmentService {
         return roomAssignmentRepository.save(assignment);
     }
 
-    public void removeAssignment(Long assignmentId) {
+    public void removeAssignment(Long reservationId, Long assignmentId) {
         RoomAssignment assignment = roomAssignmentRepository.findById(assignmentId)
-                .orElseThrow(() -> new IllegalArgumentException("Assignment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Assignment"));
+
+        if (!assignment.getReservation().getId().equals(reservationId)) {
+            throw new IllegalArgumentException("Assignment does not belong to this reservation");
+        }
 
         Room room = assignment.getRoom();
         room.setOccupancyStatus(OccupancyStatus.VACANT);

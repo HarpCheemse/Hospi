@@ -1,6 +1,7 @@
 package com.hospi.manage.features.reservation.service;
 
-import com.hospi.manage.features.reservation.dto.OfflineBookingForm;
+import com.hospi.manage.common.exception.ResourceNotFoundException;
+import com.hospi.manage.features.reservation.dto.request.OfflineBookingForm;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.ReservationDetail;
 import com.hospi.manage.features.reservation.enums.BookingSource;
@@ -11,7 +12,6 @@ import com.hospi.manage.features.room.entity.RoomType;
 import com.hospi.manage.features.room.repository.RoomTypeRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -41,7 +41,7 @@ class ReservationServiceTest {
     private RoomAvailabilityService roomAvailabilityService;
 
     @Mock
-    private AvailabilityEngine availabilityEngine;
+    private AvailabilityService availabilityService;
 
     @InjectMocks
     private ReservationService reservationService;
@@ -201,11 +201,13 @@ class ReservationServiceTest {
         reservation.setId(1L);
         reservation.setStatus(ReservationStatus.CONFIRMED);
         reservation.setSource(BookingSource.OFFLINE);
+        reservation.setCheckInAt(LocalDate.now());
+        reservation.setCheckOutAt(LocalDate.now().plusDays(1));
 
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
         when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        Reservation result = reservationService.checkIn(1L, null, "receptionist");
+        Reservation result = reservationService.checkIn(1L, LocalDate.now(), null, "receptionist");
 
         assertEquals(ReservationStatus.CHECKED_IN, result.getStatus());
         assertNotNull(result.getCheckedInAt());
@@ -222,7 +224,7 @@ class ReservationServiceTest {
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
 
         assertThrows(IllegalStateException.class,
-                () -> reservationService.checkIn(1L, null, "receptionist"));
+                () -> reservationService.checkIn(1L, LocalDate.now(), null, "receptionist"));
 
         verify(reservationRepository, never()).save(any());
     }
@@ -234,11 +236,13 @@ class ReservationServiceTest {
         reservation.setStatus(ReservationStatus.CONFIRMED);
         reservation.setSource(BookingSource.ONLINE);
         reservation.setConfirmationCode("HSP-ABC123");
+        reservation.setCheckInAt(LocalDate.now());
+        reservation.setCheckOutAt(LocalDate.now().plusDays(1));
 
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
         when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        Reservation result = reservationService.checkIn(1L, "HSP-ABC123", "receptionist");
+        Reservation result = reservationService.checkIn(1L, LocalDate.now(), "HSP-ABC123", "receptionist");
 
         assertEquals(ReservationStatus.CHECKED_IN, result.getStatus());
     }
@@ -249,11 +253,13 @@ class ReservationServiceTest {
         reservation.setId(1L);
         reservation.setStatus(ReservationStatus.CONFIRMED);
         reservation.setSource(BookingSource.ONLINE);
+        reservation.setCheckInAt(LocalDate.now());
+        reservation.setCheckOutAt(LocalDate.now().plusDays(1));
 
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
 
         assertThrows(IllegalStateException.class,
-                () -> reservationService.checkIn(1L, null, "receptionist"));
+                () -> reservationService.checkIn(1L, LocalDate.now(), null, "receptionist"));
 
         verify(reservationRepository, never()).save(any());
     }
@@ -265,11 +271,13 @@ class ReservationServiceTest {
         reservation.setStatus(ReservationStatus.CONFIRMED);
         reservation.setSource(BookingSource.ONLINE);
         reservation.setConfirmationCode("HSP-ABC123");
+        reservation.setCheckInAt(LocalDate.now());
+        reservation.setCheckOutAt(LocalDate.now().plusDays(1));
 
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
 
         assertThrows(IllegalStateException.class,
-                () -> reservationService.checkIn(1L, "WRONG-CODE", "receptionist"));
+                () -> reservationService.checkIn(1L, LocalDate.now(), "WRONG-CODE", "receptionist"));
 
         verify(reservationRepository, never()).save(any());
     }
@@ -278,8 +286,8 @@ class ReservationServiceTest {
     void checkIn_shouldThrow_whenReservationNotFound() {
         when(reservationRepository.findById(999L)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class,
-                () -> reservationService.checkIn(999L, null, "receptionist"));
+        assertThrows(ResourceNotFoundException.class,
+                () -> reservationService.checkIn(999L, LocalDate.now(), null, "receptionist"));
     }
 
     // --- extendStay ---
@@ -306,14 +314,14 @@ class ReservationServiceTest {
         reservation.setDetails(List.of(detail));
 
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
-        when(availabilityEngine.canFulfil(any(), any(), any(), any())).thenReturn(true);
+        when(availabilityService.canFulfil(any(), any(), any(), any())).thenReturn(true);
         when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         Reservation result = reservationService.extendStay(1L, 2);
 
         assertEquals(LocalDate.now().plusDays(5), result.getCheckOutAt());
         assertEquals(new BigDecimal("1600.00"), result.getTotalPrice());
-        verify(availabilityEngine).canFulfil(any(), eq(originalCheckOut),
+        verify(availabilityService).canFulfil(any(), eq(originalCheckOut),
                 eq(LocalDate.now().plusDays(5)), eq(1L));
     }
 
@@ -362,7 +370,7 @@ class ReservationServiceTest {
         reservation.setDetails(List.of(detail));
 
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
-        when(availabilityEngine.canFulfil(any(), any(), any(), any())).thenReturn(false);
+        when(availabilityService.canFulfil(any(), any(), any(), any())).thenReturn(false);
 
         assertThrows(IllegalStateException.class,
                 () -> reservationService.extendStay(1L, 3));
@@ -454,7 +462,7 @@ class ReservationServiceTest {
     void findById_shouldThrow_whenNotFound() {
         when(reservationRepository.findById(999L)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(ResourceNotFoundException.class,
                 () -> reservationService.findById(999L));
     }
 }

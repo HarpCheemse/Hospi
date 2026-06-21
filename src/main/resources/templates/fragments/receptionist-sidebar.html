@@ -27,15 +27,27 @@
 
         </a>
 
-        <!-- RESERVATIONS -->
+        <!-- ACTIVE BOOKINGS -->
         <a th:href="@{/receptionist/reservations}"
            class="flex items-center gap-3 rounded-lg p-2"
-           th:classappend="${activeSidebar == 'RESERVATIONS'}
+           th:classappend="${activeSidebar == 'ACTIVE_BOOKINGS'}
                  ? ' bg-primary/10 text-primary font-medium'
                  : ' hover:bg-muted text-foreground'">
 
-            <img th:src="@{/assets/icons/calendar-check.svg}" alt="Reservations"/>
-            Reservations
+            <img th:src="@{/assets/icons/list-todo.svg}" alt="Active Bookings"/>
+            Active Bookings
+
+        </a>
+
+        <!-- CURRENT STAYS -->
+        <a th:href="@{/receptionist/reservations/stays}"
+           class="flex items-center gap-3 rounded-lg p-2"
+           th:classappend="${activeSidebar == 'CURRENT_STAYS'}
+                 ? ' bg-primary/10 text-primary font-medium'
+                 : ' hover:bg-muted text-foreground'">
+
+            <img th:src="@{/assets/icons/users.svg}" alt="Current Stays"/>
+            Current Stays
 
         </a>
 
@@ -73,7 +85,7 @@
 
     <!-- LOGOUT -->
     <div class="mt-auto pt-4">
-        <form th:action="@{/logout}" method="post">
+        <form th:action="@{/logout}" method="post" novalidate>
             <button type="submit" class="btn btn-danger w-full justify-start">
                 <img th:src="@{/assets/icons/log-out.svg}"
                      class="h-5 w-5 brightness-0 invert" alt="Logout">

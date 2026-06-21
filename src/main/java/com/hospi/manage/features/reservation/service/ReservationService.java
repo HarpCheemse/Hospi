@@ -4,17 +4,21 @@ import com.hospi.manage.features.guest.dto.BookingDraft;
 import com.hospi.manage.features.payment.entity.Payment;
 import com.hospi.manage.features.payment.enums.PaymentMethod;
 import com.hospi.manage.features.payment.repository.PaymentRepository;
-import com.hospi.manage.features.reservation.dto.OfflineBookingForm;
+import com.hospi.manage.features.reservation.dto.request.OfflineBookingForm;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.ReservationDetail;
 import com.hospi.manage.features.reservation.enums.BookingSource;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
+import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.room.dto.response.RoomSelection;
 import com.hospi.manage.features.room.entity.RoomType;
 import com.hospi.manage.features.room.repository.RoomTypeRepository;
-import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.security.SecureRandom;
@@ -26,22 +30,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final RoomTypeRepository roomTypeRepository;
     private final PaymentRepository paymentRepository;
     private final RoomAvailabilityService roomAvailabilityService;
-    private final AvailabilityEngine availabilityEngine;
-
-    public ReservationService(ReservationRepository reservationRepository, RoomTypeRepository roomTypeRepository,
-                              PaymentRepository paymentRepository, RoomAvailabilityService roomAvailabilityService,
-                              AvailabilityEngine engine) {
-        this.reservationRepository = reservationRepository;
-        this.roomTypeRepository = roomTypeRepository;
-        this.paymentRepository = paymentRepository;
-        this.roomAvailabilityService = roomAvailabilityService;
-        this.availabilityEngine = engine;
-    }
+    private final AvailabilityService availabilityService;
 
     public List<Reservation> findByStatus(ReservationStatus status) {
         return reservationRepository.findByStatusOrderByCheckInAtDesc(status);
@@ -64,13 +59,41 @@ public class ReservationService {
         return reservationRepository.findFiltered(statuses, searchPattern);
     }
 
+    public Page<Reservation> findFiltered(List<ReservationStatus> statuses,
+                                           String guestName,
+                                           LocalDate date,
+                                           Pageable pageable) {
+        String searchPattern = "%";
+        if (guestName != null && !guestName.isBlank()) {
+            searchPattern = "%" + guestName.trim().toLowerCase() + "%";
+        }
+        if (date != null) {
+            return reservationRepository.findFilteredWithDate(statuses, searchPattern, date, pageable);
+        }
+        return reservationRepository.findFiltered(statuses, searchPattern, pageable);
+    }
+
+    public List<Reservation> findCheckedInFiltered(String search) {
+        if (search == null || search.isBlank()) {
+            return findByStatus(ReservationStatus.CHECKED_IN);
+        }
+        return reservationRepository.findCheckedInFiltered("%" + search.trim().toLowerCase() + "%");
+    }
+
+    public Page<Reservation> findCheckedInFiltered(String search, Pageable pageable) {
+        if (search == null || search.isBlank()) {
+            return reservationRepository.findByStatusOrderByCheckInAtDesc(ReservationStatus.CHECKED_IN, pageable);
+        }
+        return reservationRepository.findCheckedInFiltered("%" + search.trim().toLowerCase() + "%", pageable);
+    }
+
     public Reservation findById(Long id) {
-        return reservationRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Reservation"));
+        return reservationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Reservation"));
     }
 
     /// This function return RoomTypeId and amount of reservations for a given day range
     public Map<Long, Integer> getBookedCounts(LocalDate checkInAt, LocalDate checkOutAt) {
-        return availabilityEngine.computeBookedCounts(checkInAt,
+        return availabilityService.computeBookedCounts(checkInAt,
                 checkOutAt,
                 null);
     }
@@ -120,11 +143,19 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation checkIn(Long reservationId, String bookingCode, String principal) {
-        Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+    public Reservation checkIn(Long reservationId, LocalDate today, String bookingCode, String principal) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
 
         if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
             throw new IllegalStateException("Only confirmed bookings can be checked in");
+        }
+
+        if (reservation.getCheckInAt().isAfter(today)) {
+            throw new IllegalStateException("Cannot check in before the booking start date");
+        }
+        if (reservation.getCheckOutAt().isBefore(today)) {
+            throw new IllegalStateException("Cannot check in after the booking has ended");
         }
 
         if (reservation.getSource() == BookingSource.ONLINE) {
@@ -228,7 +259,7 @@ public class ReservationService {
                 Collectors.summingInt(ReservationDetail::getRoomCount)));
 
         // canFulfil returns true when rooms ARE available — no inversion needed
-        if (!availabilityEngine.canFulfil(required,
+        if (!availabilityService.canFulfil(required,
                 reservation.getCheckOutAt(),
                 newCheckout,
                 reservationId)) {

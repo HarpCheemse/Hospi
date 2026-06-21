@@ -2,11 +2,11 @@ package com.hospi.manage.features.reservation.controller;
 
 import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.core.security.session.AccountPrincipal;
-import com.hospi.manage.features.reservation.dto.CheckInView;
-import com.hospi.manage.features.reservation.entity.Reservation;
+import com.hospi.manage.features.reservation.dto.request.CheckInForm;
+import com.hospi.manage.features.reservation.dto.response.CheckInView;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
-import com.hospi.manage.features.reservation.repository.ReservationRepository;
 import com.hospi.manage.features.reservation.service.ReservationService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,16 +17,10 @@ import java.time.LocalDate;
 
 @Controller
 @RequestMapping("/receptionist/reservations")
+@RequiredArgsConstructor
 public class CheckInController {
 
-    private final ReservationRepository reservationRepository;
     private final ReservationService reservationService;
-
-    public CheckInController(ReservationRepository reservationRepository,
-                             ReservationService reservationService) {
-        this.reservationRepository = reservationRepository;
-        this.reservationService = reservationService;
-    }
 
     @ModelAttribute
     void addCommonAttributes(Model model) {
@@ -36,8 +30,7 @@ public class CheckInController {
 
     @GetMapping("/{id}/checkin")
     String checkInForm(@PathVariable Long id, Model model) {
-        Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Reservation"));
+        var reservation = reservationService.findById(id);
 
         if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
             return "redirect:/receptionist/reservations";
@@ -45,28 +38,20 @@ public class CheckInController {
 
         model.addAttribute(Attributes.VIEW,
                 CheckInView.from(reservation));
+        model.addAttribute(Attributes.FORM,
+                new CheckInForm(null));
         return "receptionist/reservation/checkin";
     }
 
     @PostMapping("/{id}/checkin")
     String confirmCheckIn(@PathVariable Long id,
-                          @RequestParam(required = false) String bookingCode,
+                          @ModelAttribute(Attributes.FORM) CheckInForm form,
                           @AuthenticationPrincipal AccountPrincipal principal,
                           RedirectAttributes redirect) {
         try {
-            Reservation reservation = reservationRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Reservation"));
-
-            LocalDate today = LocalDate.now();
-            if (reservation.getCheckInAt().isAfter(today)) {
-                throw new IllegalStateException("Cannot check in before the booking start date");
-            }
-            if (reservation.getCheckOutAt().isBefore(today)) {
-                throw new IllegalStateException("Cannot check in after the booking has ended");
-            }
-
             reservationService.checkIn(id,
-                    bookingCode,
+                    LocalDate.now(),
+                    form.bookingCode(),
                     principal.getUsername());
             redirect.addFlashAttribute(Attributes.SUCCESS,
                     "Guest checked in successfully.");

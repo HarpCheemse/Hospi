@@ -9,8 +9,8 @@ import com.hospi.manage.features.guest.dto.GuestDetailForm;
 import com.hospi.manage.features.guest.validation.BookingDateValidator;
 import com.hospi.manage.features.guest.dto.OtpForm;
 import com.hospi.manage.features.payment.service.PaymentService;
-import com.hospi.manage.features.reservation.dto.DateSearchForm;
-import com.hospi.manage.features.reservation.dto.RoomTypeAvailabilityView;
+import com.hospi.manage.features.reservation.dto.request.DateSearchForm;
+import com.hospi.manage.features.reservation.dto.response.RoomTypeAvailabilityView;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.reservation.service.RoomAvailabilityService;
@@ -70,7 +70,7 @@ public class GuestBookingController {
     @GetMapping
     String showDateForm(Model model) {
         model.addAttribute("form",
-                new DateSearchForm());
+                new DateSearchForm(null, null));
         return "guest/booking/book";
     }
 
@@ -85,8 +85,8 @@ public class GuestBookingController {
         }
 
         BookingDraft draft = getDraft(session);
-        draft.setCheckInAt(form.getCheckInAt());
-        draft.setCheckOutAt(form.getCheckOutAt());
+        draft.setCheckInAt(form.checkInAt());
+        draft.setCheckOutAt(form.checkOutAt());
 
         return "redirect:/book/rooms";
     }

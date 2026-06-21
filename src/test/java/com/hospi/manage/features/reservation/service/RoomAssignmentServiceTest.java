@@ -1,5 +1,6 @@
 package com.hospi.manage.features.reservation.service;
 
+import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.ReservationDetail;
 import com.hospi.manage.features.reservation.entity.RoomAssignment;
@@ -17,7 +18,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -87,7 +87,7 @@ class RoomAssignmentServiceTest {
         when(roomAssignmentRepository.existsByReservationIdAndRoomId(1L, 10L)).thenReturn(false);
         when(reservationRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(ResourceNotFoundException.class,
                 () -> roomAssignmentService.assignRoom(1L, 10L));
     }
 
@@ -97,7 +97,7 @@ class RoomAssignmentServiceTest {
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(new Reservation()));
         when(roomRepository.findById(10L)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(ResourceNotFoundException.class,
                 () -> roomAssignmentService.assignRoom(1L, 10L));
     }
 
@@ -125,17 +125,21 @@ class RoomAssignmentServiceTest {
 
     @Test
     void removeAssignment_shouldRemove() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+
         Room room = new Room();
         room.setId(10L);
         room.setOccupancyStatus(OccupancyStatus.OCCUPIED);
 
         RoomAssignment assignment = new RoomAssignment();
         assignment.setId(100L);
+        assignment.setReservation(reservation);
         assignment.setRoom(room);
 
         when(roomAssignmentRepository.findById(100L)).thenReturn(Optional.of(assignment));
 
-        roomAssignmentService.removeAssignment(100L);
+        roomAssignmentService.removeAssignment(1L, 100L);
 
         assertEquals(OccupancyStatus.VACANT, room.getOccupancyStatus());
         verify(roomRepository).save(room);
@@ -146,11 +150,33 @@ class RoomAssignmentServiceTest {
     void removeAssignment_shouldThrow_whenNotFound() {
         when(roomAssignmentRepository.findById(999L)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class,
-                () -> roomAssignmentService.removeAssignment(999L));
+        assertThrows(ResourceNotFoundException.class,
+                () -> roomAssignmentService.removeAssignment(1L, 999L));
 
         verify(roomRepository, never()).save(any());
         verify(roomAssignmentRepository, never()).delete(any());
+    }
+
+    @Test
+    void removeAssignment_shouldThrow_whenNotOwnedByReservation() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+
+        Reservation otherReservation = new Reservation();
+        otherReservation.setId(2L);
+
+        Room room = new Room();
+        room.setId(10L);
+
+        RoomAssignment assignment = new RoomAssignment();
+        assignment.setId(100L);
+        assignment.setReservation(otherReservation);
+        assignment.setRoom(room);
+
+        when(roomAssignmentRepository.findById(100L)).thenReturn(Optional.of(assignment));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> roomAssignmentService.removeAssignment(1L, 100L));
     }
 
     // --- getAssignedRooms ---

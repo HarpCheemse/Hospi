@@ -65,7 +65,7 @@
     <!-- Room Selection -->
     <section th:if="${not #lists.isEmpty(availability)}" class="mx-auto max-w-7xl px-6 py-10">
 
-        <form th:action="@{/book/rooms}" method="post"
+        <form th:action="@{/book/rooms}" method="post" novalidate
               x-data="{
                   maxRooms: MAX_ROOMS,
                   depositPct: DEPOSIT_PCT,

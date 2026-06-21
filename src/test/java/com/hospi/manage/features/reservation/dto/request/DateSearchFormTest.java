@@ -1,4 +1,4 @@
-package com.hospi.manage.features.reservation.dto;
+package com.hospi.manage.features.reservation.dto.request;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -24,9 +24,7 @@ class DateSearchFormTest {
 
     @Test
     void shouldPass_whenValid() {
-        DateSearchForm form = new DateSearchForm();
-        form.setCheckInAt(LocalDate.now());
-        form.setCheckOutAt(LocalDate.now().plusDays(3));
+        DateSearchForm form = new DateSearchForm(LocalDate.now(), LocalDate.now().plusDays(3));
 
         Set<ConstraintViolation<DateSearchForm>> violations = validator.validate(form);
 
@@ -35,8 +33,7 @@ class DateSearchFormTest {
 
     @Test
     void shouldFail_whenCheckInAtNull() {
-        DateSearchForm form = new DateSearchForm();
-        form.setCheckOutAt(LocalDate.now().plusDays(3));
+        DateSearchForm form = new DateSearchForm(null, LocalDate.now().plusDays(3));
 
         Set<ConstraintViolation<DateSearchForm>> violations = validator.validate(form);
 
@@ -46,8 +43,7 @@ class DateSearchFormTest {
 
     @Test
     void shouldFail_whenCheckOutAtNull() {
-        DateSearchForm form = new DateSearchForm();
-        form.setCheckInAt(LocalDate.now());
+        DateSearchForm form = new DateSearchForm(LocalDate.now(), null);
 
         Set<ConstraintViolation<DateSearchForm>> violations = validator.validate(form);
 

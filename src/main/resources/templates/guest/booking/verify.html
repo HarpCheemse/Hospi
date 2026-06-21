@@ -47,7 +47,7 @@
           </div>
         </div>
 
-        <form th:action="@{/book/verify/send-otp}" th:object="${guestDetailForm}" method="post" class="flex flex-col gap-5 p-6">
+        <form th:action="@{/book/verify/send-otp}" th:object="${guestDetailForm}" method="post" class="flex flex-col gap-5 p-6" novalidate>
 
           <div th:if="${#fields.hasGlobalErrors()}"
                class="rounded-xl border border-danger bg-red-50 px-4 py-3 text-sm text-danger">
@@ -121,10 +121,10 @@
           </div>
         </div>
 
-        <form th:action="@{/book/verify}" th:object="${otpForm}" method="post" class="flex flex-col gap-5 p-6">
+        <form th:action="@{/book/verify}" th:object="${otpForm}" method="post" class="flex flex-col gap-5 p-6" novalidate>
 
           <div class="flex flex-col gap-2">
-            <label class="text-sm font-medium" for="otp">OTP Code</label>
+            <label class="text-sm font-medium" for="otp">OTP Code <span class="text-danger">*</span></label>
             <div th:replace="fragments/form-error :: error('otp')"></div>
             <input type="text" id="otp" th:field="*{otp}"
                    placeholder="000000"

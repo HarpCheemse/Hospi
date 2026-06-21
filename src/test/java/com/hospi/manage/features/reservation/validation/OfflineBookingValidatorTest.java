@@ -1,6 +1,6 @@
 package com.hospi.manage.features.reservation.validation;
 
-import com.hospi.manage.features.reservation.dto.OfflineBookingForm;
+import com.hospi.manage.features.reservation.dto.request.OfflineBookingForm;
 import com.hospi.manage.features.room.dto.response.RoomSelection;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,9 +14,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-class OfflineBookingValidatorTest {
+class OfflineBookingFormValidatorTest {
 
-    private final OfflineBookingValidator validator = new OfflineBookingValidator();
+    private final OfflineBookingFormValidator validator = new OfflineBookingFormValidator();
 
     private final LocalDate today = LocalDate.now();
     private final LocalDate futureCheckIn = today.plusDays(5);
@@ -34,7 +34,7 @@ class OfflineBookingValidatorTest {
 
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
 
-        validator.validateCreate(form, errors);
+        validator.validate(form, errors);
 
         assertFalse(errors.hasErrors());
     }
@@ -50,7 +50,7 @@ class OfflineBookingValidatorTest {
 
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
 
-        validator.validateCreate(form, errors);
+        validator.validate(form, errors);
 
         assertTrue(errors.hasFieldErrors("checkInAt"));
         assertEquals("Check-in date must be today or later",
@@ -68,7 +68,7 @@ class OfflineBookingValidatorTest {
 
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
 
-        validator.validateCreate(form, errors);
+        validator.validate(form, errors);
 
         assertTrue(errors.hasFieldErrors("checkOutAt"));
         assertEquals("Check-out must be after check-in",
@@ -86,7 +86,7 @@ class OfflineBookingValidatorTest {
 
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
 
-        validator.validateCreate(form, errors);
+        validator.validate(form, errors);
 
         assertTrue(errors.hasFieldErrors("guestDateOfBirth"));
         assertEquals("Date of birth must be in the past",
@@ -104,7 +104,7 @@ class OfflineBookingValidatorTest {
 
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
 
-        validator.validateCreate(form, errors);
+        validator.validate(form, errors);
 
         assertTrue(errors.hasGlobalErrors());
         assertEquals("At least one room type must be selected",
@@ -122,7 +122,7 @@ class OfflineBookingValidatorTest {
 
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
 
-        validator.validateCreate(form, errors);
+        validator.validate(form, errors);
 
         assertTrue(errors.hasGlobalErrors());
         assertEquals("At least one room type must have a count greater than 0",
@@ -140,7 +140,7 @@ class OfflineBookingValidatorTest {
 
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
 
-        validator.validateCreate(form, errors);
+        validator.validate(form, errors);
 
         assertTrue(errors.hasGlobalErrors());
         assertEquals("At least one room type must be selected",
