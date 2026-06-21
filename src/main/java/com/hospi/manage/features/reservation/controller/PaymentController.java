@@ -4,7 +4,7 @@ import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.core.security.session.AccountPrincipal;
 import com.hospi.manage.features.payment.enums.PaymentMethod;
 import com.hospi.manage.features.payment.service.PaymentService;
-import com.hospi.manage.features.reservation.dto.PaymentConfirmationView;
+import com.hospi.manage.features.reservation.dto.response.PaymentConfirmationView;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import lombok.RequiredArgsConstructor;

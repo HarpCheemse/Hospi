@@ -39,6 +39,7 @@
     </header>
 
     <form th:action="@{/receptionist/reservations/{id}/checkin(id=${view.id})}"
+          th:object="${form}"
           method="post"
           class="flex flex-col gap-6"
           novalidate>
@@ -129,7 +130,7 @@
                     <label class="text-sm font-medium" for="bookingCode">Booking Code</label>
                     <input type="text"
                            id="bookingCode"
-                           name="bookingCode"
+                           th:field="*{bookingCode}"
                            placeholder="Enter the guest's confirmation code"
                            class="input"
                            required>

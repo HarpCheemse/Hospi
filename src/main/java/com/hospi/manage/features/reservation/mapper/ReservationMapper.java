@@ -1,9 +1,9 @@
 package com.hospi.manage.features.reservation.mapper;
 
-import com.hospi.manage.features.reservation.dto.ActiveBookingsView;
-import com.hospi.manage.features.reservation.dto.CurrentStaysView;
-import com.hospi.manage.features.reservation.dto.ManageReservationView;
-import com.hospi.manage.features.reservation.dto.ReservationListItemView;
+import com.hospi.manage.features.reservation.dto.response.ActiveBookingsView;
+import com.hospi.manage.features.reservation.dto.response.CurrentStaysView;
+import com.hospi.manage.features.reservation.dto.response.ManageReservationView;
+import com.hospi.manage.features.reservation.dto.response.ReservationListItemView;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.RoomAssignment;
 import com.hospi.manage.features.reservation.entity.StayingGuest;

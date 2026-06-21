@@ -1,7 +1,7 @@
 package com.hospi.manage.features.reservation.service;
 
 import com.hospi.manage.common.exception.ResourceNotFoundException;
-import com.hospi.manage.features.reservation.dto.StayingGuestForm;
+import com.hospi.manage.features.reservation.dto.request.StayingGuestForm;
 import com.hospi.manage.features.reservation.entity.StayingGuest;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
 import com.hospi.manage.features.reservation.repository.StayingGuestRepository;

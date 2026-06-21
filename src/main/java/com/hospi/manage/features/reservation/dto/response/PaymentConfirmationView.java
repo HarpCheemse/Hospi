@@ -1,4 +1,4 @@
-package com.hospi.manage.features.reservation.dto;
+package com.hospi.manage.features.reservation.dto.response;
 
 import com.hospi.manage.features.payment.enums.PaymentMethod;
 import com.hospi.manage.features.reservation.entity.Reservation;

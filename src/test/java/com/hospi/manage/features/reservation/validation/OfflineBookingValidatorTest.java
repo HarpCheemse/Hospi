@@ -1,6 +1,6 @@
 package com.hospi.manage.features.reservation.validation;
 
-import com.hospi.manage.features.reservation.dto.OfflineBookingForm;
+import com.hospi.manage.features.reservation.dto.request.OfflineBookingForm;
 import com.hospi.manage.features.room.dto.response.RoomSelection;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,9 +14,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-class OfflineBookingValidatorTest {
+class OfflineBookingFormValidatorTest {
 
-    private final OfflineBookingValidator validator = new OfflineBookingValidator();
+    private final OfflineBookingFormValidator validator = new OfflineBookingFormValidator();
 
     private final LocalDate today = LocalDate.now();
     private final LocalDate futureCheckIn = today.plusDays(5);

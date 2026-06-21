@@ -1,6 +1,6 @@
 package com.hospi.manage.features.guest.validation;
 
-import com.hospi.manage.features.reservation.dto.DateSearchForm;
+import com.hospi.manage.features.reservation.dto.request.DateSearchForm;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 

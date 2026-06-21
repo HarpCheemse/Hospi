@@ -1,13 +1,13 @@
 package com.hospi.manage.features.reservation.validation;
 
-import com.hospi.manage.features.reservation.dto.OfflineBookingForm;
+import com.hospi.manage.features.reservation.dto.request.OfflineBookingForm;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 
 import java.time.LocalDate;
 
 @Component
-public class OfflineBookingValidator {
+public class OfflineBookingFormValidator {
 
     public void validate(OfflineBookingForm form, BindingResult bindingResult) {
         validateCheckInAt(form, bindingResult);

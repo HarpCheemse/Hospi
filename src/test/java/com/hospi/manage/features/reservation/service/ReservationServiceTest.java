@@ -1,7 +1,7 @@
 package com.hospi.manage.features.reservation.service;
 
 import com.hospi.manage.common.exception.ResourceNotFoundException;
-import com.hospi.manage.features.reservation.dto.OfflineBookingForm;
+import com.hospi.manage.features.reservation.dto.request.OfflineBookingForm;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.ReservationDetail;
 import com.hospi.manage.features.reservation.enums.BookingSource;
@@ -41,7 +41,7 @@ class ReservationServiceTest {
     private RoomAvailabilityService roomAvailabilityService;
 
     @Mock
-    private AvailabilityEngine availabilityEngine;
+    private AvailabilityService availabilityService;
 
     @InjectMocks
     private ReservationService reservationService;
@@ -314,14 +314,14 @@ class ReservationServiceTest {
         reservation.setDetails(List.of(detail));
 
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
-        when(availabilityEngine.canFulfil(any(), any(), any(), any())).thenReturn(true);
+        when(availabilityService.canFulfil(any(), any(), any(), any())).thenReturn(true);
         when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         Reservation result = reservationService.extendStay(1L, 2);
 
         assertEquals(LocalDate.now().plusDays(5), result.getCheckOutAt());
         assertEquals(new BigDecimal("1600.00"), result.getTotalPrice());
-        verify(availabilityEngine).canFulfil(any(), eq(originalCheckOut),
+        verify(availabilityService).canFulfil(any(), eq(originalCheckOut),
                 eq(LocalDate.now().plusDays(5)), eq(1L));
     }
 
@@ -370,7 +370,7 @@ class ReservationServiceTest {
         reservation.setDetails(List.of(detail));
 
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
-        when(availabilityEngine.canFulfil(any(), any(), any(), any())).thenReturn(false);
+        when(availabilityService.canFulfil(any(), any(), any(), any())).thenReturn(false);
 
         assertThrows(IllegalStateException.class,
                 () -> reservationService.extendStay(1L, 3));

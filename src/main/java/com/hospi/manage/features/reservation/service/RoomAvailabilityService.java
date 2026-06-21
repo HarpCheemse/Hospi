@@ -11,7 +11,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RoomAvailabilityService {
 
-    private final AvailabilityEngine engine;
+    private final AvailabilityService engine;
 
     /**
      * For search and new bookings — includes all reservations.

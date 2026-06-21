@@ -17,20 +17,15 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class AvailabilityEngine {
+public class AvailabilityService {
 
     private final ReservationRepository reservationRepository;
     private final RoomRepository roomRepository;
     private final RoomTypeRepository roomTypeRepository;
 
-    /**
-     * Computes room availability for a date range.
-     * Pass an excludedReservationId to ignore one reservation (use for extensions/edits).
-     * Pass null to include all active reservations (use for new bookings).
-     */
     public List<RoomTypeAvailability> getAvailability(LocalDate checkIn,
-                                                      LocalDate checkOut,
-                                                      Long excludedReservationId) {
+                                                       LocalDate checkOut,
+                                                       Long excludedReservationId) {
         Map<Long, Integer> booked = computeBookedCounts(checkIn,
                 checkOut,
                 excludedReservationId);
@@ -53,14 +48,10 @@ public class AvailabilityEngine {
                 .toList();
     }
 
-    /**
-     * Returns true if the required rooms can be fulfilled for the given date range.
-     * The excludedReservationId param works the same as in getAvailability.
-     */
     public boolean canFulfil(Map<Long, Integer> required,
-                             LocalDate checkIn,
-                             LocalDate checkOut,
-                             Long excludedReservationId) {
+                              LocalDate checkIn,
+                              LocalDate checkOut,
+                              Long excludedReservationId) {
         Map<Long, Integer> available = getAvailability(checkIn,
                 checkOut,
                 excludedReservationId)
@@ -75,13 +66,9 @@ public class AvailabilityEngine {
                         0) >= e.getValue());
     }
 
-    /**
-     * Returns roomTypeId → total booked rooms for overlapping reservations,
-     * optionally excluding one reservation by ID.
-     */
     public Map<Long, Integer> computeBookedCounts(LocalDate checkIn,
-                                                  LocalDate checkOut,
-                                                  Long excludedReservationId) {
+                                                   LocalDate checkOut,
+                                                   Long excludedReservationId) {
         var reservations = excludedReservationId != null
                 ? reservationRepository.findOverlappingExcluding(excludedReservationId,
                 checkIn,

@@ -4,7 +4,7 @@ import com.hospi.manage.features.guest.dto.BookingDraft;
 import com.hospi.manage.features.payment.entity.Payment;
 import com.hospi.manage.features.payment.enums.PaymentMethod;
 import com.hospi.manage.features.payment.repository.PaymentRepository;
-import com.hospi.manage.features.reservation.dto.OfflineBookingForm;
+import com.hospi.manage.features.reservation.dto.request.OfflineBookingForm;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.ReservationDetail;
 import com.hospi.manage.features.reservation.enums.BookingSource;
@@ -36,7 +36,7 @@ public class ReservationService {
     private final RoomTypeRepository roomTypeRepository;
     private final PaymentRepository paymentRepository;
     private final RoomAvailabilityService roomAvailabilityService;
-    private final AvailabilityEngine availabilityEngine;
+    private final AvailabilityService availabilityService;
 
     public List<Reservation> findByStatus(ReservationStatus status) {
         return reservationRepository.findByStatusOrderByCheckInAtDesc(status);
@@ -93,7 +93,7 @@ public class ReservationService {
 
     /// This function return RoomTypeId and amount of reservations for a given day range
     public Map<Long, Integer> getBookedCounts(LocalDate checkInAt, LocalDate checkOutAt) {
-        return availabilityEngine.computeBookedCounts(checkInAt,
+        return availabilityService.computeBookedCounts(checkInAt,
                 checkOutAt,
                 null);
     }
@@ -259,7 +259,7 @@ public class ReservationService {
                 Collectors.summingInt(ReservationDetail::getRoomCount)));
 
         // canFulfil returns true when rooms ARE available — no inversion needed
-        if (!availabilityEngine.canFulfil(required,
+        if (!availabilityService.canFulfil(required,
                 reservation.getCheckOutAt(),
                 newCheckout,
                 reservationId)) {

@@ -1,7 +1,8 @@
 package com.hospi.manage.features.reservation.controller;
 
 import com.hospi.manage.common.constant.Attributes;
-import com.hospi.manage.features.reservation.dto.*;
+import com.hospi.manage.features.reservation.dto.request.*;
+import com.hospi.manage.features.reservation.dto.response.*;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.mapper.ReservationMapper;
@@ -10,7 +11,7 @@ import com.hospi.manage.features.reservation.service.RoomAssignmentService;
 import com.hospi.manage.features.reservation.service.RoomAvailabilityService;
 import com.hospi.manage.features.reservation.service.StayingGuestService;
 import com.hospi.manage.features.reservation.validation.DateSearchValidator;
-import com.hospi.manage.features.reservation.validation.OfflineBookingValidator;
+import com.hospi.manage.features.reservation.validation.OfflineBookingFormValidator;
 import com.hospi.manage.features.room.dto.response.RoomSelection;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,7 @@ import java.util.List;
 public class ReceptionistReservationController {
 
     private final ReservationService reservationService;
-    private final OfflineBookingValidator offlineBookingValidator;
+    private final OfflineBookingFormValidator offlineBookingFormValidator;
     private final DateSearchValidator dateSearchValidator;
     private final RoomAvailabilityService roomAvailabilityService;
     private final StayingGuestService stayingGuestService;
@@ -146,7 +147,7 @@ public class ReceptionistReservationController {
     String createBooking(@Valid @ModelAttribute(Attributes.FORM) OfflineBookingForm form, BindingResult bindingResult,
                          RedirectAttributes redirect, Model model) {
 
-        offlineBookingValidator.validate(form,
+        offlineBookingFormValidator.validate(form,
                 bindingResult);
 
         if (bindingResult.hasErrors()) {

@@ -1,4 +1,4 @@
-package com.hospi.manage.features.reservation.dto;
+package com.hospi.manage.features.reservation.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 

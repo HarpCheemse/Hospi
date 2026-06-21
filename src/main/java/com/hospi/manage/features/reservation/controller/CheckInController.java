@@ -2,7 +2,8 @@ package com.hospi.manage.features.reservation.controller;
 
 import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.core.security.session.AccountPrincipal;
-import com.hospi.manage.features.reservation.dto.CheckInView;
+import com.hospi.manage.features.reservation.dto.request.CheckInForm;
+import com.hospi.manage.features.reservation.dto.response.CheckInView;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import lombok.RequiredArgsConstructor;
@@ -37,18 +38,20 @@ public class CheckInController {
 
         model.addAttribute(Attributes.VIEW,
                 CheckInView.from(reservation));
+        model.addAttribute(Attributes.FORM,
+                new CheckInForm(null));
         return "receptionist/reservation/checkin";
     }
 
     @PostMapping("/{id}/checkin")
     String confirmCheckIn(@PathVariable Long id,
-                          @RequestParam(required = false) String bookingCode,
+                          @ModelAttribute(Attributes.FORM) CheckInForm form,
                           @AuthenticationPrincipal AccountPrincipal principal,
                           RedirectAttributes redirect) {
         try {
             reservationService.checkIn(id,
                     LocalDate.now(),
-                    bookingCode,
+                    form.bookingCode(),
                     principal.getUsername());
             redirect.addFlashAttribute(Attributes.SUCCESS,
                     "Guest checked in successfully.");

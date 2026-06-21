@@ -1,6 +1,6 @@
 package com.hospi.manage.features.reservation.validation;
 
-import com.hospi.manage.features.reservation.dto.DateSearchForm;
+import com.hospi.manage.features.reservation.dto.request.DateSearchForm;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
