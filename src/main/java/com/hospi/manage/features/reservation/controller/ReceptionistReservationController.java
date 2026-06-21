@@ -39,13 +39,13 @@ public class ReceptionistReservationController {
     private final StayingGuestService stayingGuestService;
     private final RoomAssignmentService roomAssignmentService;
 
+    private final static int pageSize = 10;
+
     @GetMapping
-    String activeBookings(
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestParam(required = false) String search,
-            @RequestParam(name = "page", defaultValue = "0") int page,
-            Model model) {
+    String activeBookings(@RequestParam(required = false) String status,
+                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                          @RequestParam(required = false) String search,
+                          @RequestParam(name = "page", defaultValue = "0") int page, Model model) {
         List<ReservationStatus> statuses;
         if (status != null && !status.isBlank()) {
             statuses = List.of(ReservationStatus.valueOf(status));
@@ -57,11 +57,11 @@ public class ReceptionistReservationController {
         model.addAttribute(Attributes.ACTIVE_SIDEBAR,
                 Attributes.ACTIVE_BOOKINGS);
         model.addAttribute(Attributes.VIEW,
-                ReservationMapper.toActiveBookingsView(
-                        reservationService.findFiltered(statuses,
+                ReservationMapper.toActiveBookingsView(reservationService.findFiltered(statuses,
                                 search,
                                 date,
-                                PageRequest.of(page, 20)),
+                                PageRequest.of(page,
+                                        pageSize)),
                         status,
                         date,
                         search));
@@ -69,16 +69,14 @@ public class ReceptionistReservationController {
     }
 
     @GetMapping("/stays")
-    String currentStays(
-            @RequestParam(name = "search", required = false) String search,
-            @RequestParam(name = "page", defaultValue = "0") int page,
-            Model model) {
+    String currentStays(@RequestParam(name = "search", required = false) String search,
+                        @RequestParam(name = "page", defaultValue = "0") int page, Model model) {
         model.addAttribute(Attributes.ACTIVE_SIDEBAR,
                 Attributes.CURRENT_STAYS);
         model.addAttribute(Attributes.VIEW,
-                ReservationMapper.toCurrentStaysView(
-                        reservationService.findCheckedInFiltered(search,
-                                PageRequest.of(page, 10)),
+                ReservationMapper.toCurrentStaysView(reservationService.findCheckedInFiltered(search,
+                                PageRequest.of(page,
+                                        pageSize)),
                         search));
         return "receptionist/reservation/stays";
     }
@@ -103,12 +101,9 @@ public class ReceptionistReservationController {
             return "receptionist/reservation/create";
         }
 
-        return "redirect:" + UriComponentsBuilder.fromPath("/receptionist/reservations/create/details")
-                .queryParam("checkInAt",
-                        form.checkInAt())
-                .queryParam("checkOutAt",
-                        form.checkOutAt())
-                .build().toUriString();
+        return "redirect:" + UriComponentsBuilder.fromPath("/receptionist/reservations/create/details").queryParam("checkInAt",
+                form.checkInAt()).queryParam("checkOutAt",
+                form.checkOutAt()).build().toUriString();
     }
 
     @GetMapping("/create/details")
@@ -118,16 +113,14 @@ public class ReceptionistReservationController {
             return "redirect:/receptionist/reservations/create";
         }
 
-        List<RoomTypeAvailabilityView> availabilityView = getAvailabilityView(
-                checkInAt,
+        List<RoomTypeAvailabilityView> availabilityView = getAvailabilityView(checkInAt,
                 checkOutAt);
 
         long nights = ChronoUnit.DAYS.between(checkInAt,
                 checkOutAt);
 
-        List<RoomSelection> roomSelections = availabilityView.stream()
-                .map(rt -> new RoomSelection(rt.roomTypeId(),
-                        0)).toList();
+        List<RoomSelection> roomSelections = availabilityView.stream().map(rt -> new RoomSelection(rt.roomTypeId(),
+                0)).toList();
 
         OfflineBookingForm form = new OfflineBookingForm(checkInAt,
                 checkOutAt,
@@ -150,22 +143,14 @@ public class ReceptionistReservationController {
     }
 
     @PostMapping("/create/details")
-    String createBooking(
-            @Valid @ModelAttribute(Attributes.FORM)
-            OfflineBookingForm form,
-            BindingResult bindingResult,
-            RedirectAttributes redirect,
-            Model model
-    ) {
+    String createBooking(@Valid @ModelAttribute(Attributes.FORM) OfflineBookingForm form, BindingResult bindingResult,
+                         RedirectAttributes redirect, Model model) {
 
-        offlineBookingValidator.validate(
-                form,
-                bindingResult
-        );
+        offlineBookingValidator.validate(form,
+                bindingResult);
 
         if (bindingResult.hasErrors()) {
-            List<RoomTypeAvailabilityView> availabilityView = getAvailabilityView(
-                    form.checkInAt(),
+            List<RoomTypeAvailabilityView> availabilityView = getAvailabilityView(form.checkInAt(),
                     form.checkOutAt());
             long nights = ChronoUnit.DAYS.between(form.checkInAt(),
                     form.checkOutAt());
@@ -180,18 +165,14 @@ public class ReceptionistReservationController {
 
         reservationService.createReservation(form);
 
-        redirect.addFlashAttribute(
-                Attributes.SUCCESS,
-                "Offline booking created successfully."
-        );
+        redirect.addFlashAttribute(Attributes.SUCCESS,
+                "Offline booking created successfully.");
 
         return "redirect:/receptionist/reservations";
     }
 
     @GetMapping("/{id}/manage")
-    String manage(@PathVariable Long id,
-                  @RequestParam(required = false) Long edit,
-                  Model model) {
+    String manage(@PathVariable Long id, @RequestParam(required = false) Long edit, Model model) {
         var reservation = reservationService.findById(id);
         if (reservation.getStatus() != ReservationStatus.CHECKED_IN) {
             return "redirect:/receptionist/reservations/stays";
@@ -207,8 +188,7 @@ public class ReceptionistReservationController {
             var guest = stayingGuestService.getGuest(id,
                     edit);
             model.addAttribute(Attributes.FORM,
-                    new StayingGuestForm(
-                            guest.getGuestName(),
+                    new StayingGuestForm(guest.getGuestName(),
                             guest.getDateOfBirth(),
                             guest.getNationality()));
             model.addAttribute("editGuestId",
@@ -224,10 +204,8 @@ public class ReceptionistReservationController {
     }
 
     @PostMapping("/{id}/manage/guests")
-    String addGuest(@PathVariable Long id,
-                    @Valid @ModelAttribute(Attributes.FORM) StayingGuestForm form,
-                    BindingResult binding, Model model,
-                    RedirectAttributes redirect) {
+    String addGuest(@PathVariable Long id, @Valid @ModelAttribute(Attributes.FORM) StayingGuestForm form,
+                    BindingResult binding, Model model, RedirectAttributes redirect) {
         if (binding.hasErrors()) {
             model.addAttribute(Attributes.VIEW,
                     buildManageView(id,
@@ -245,8 +223,7 @@ public class ReceptionistReservationController {
 
     @PostMapping("/{id}/manage/guests/{guestId}")
     String editGuest(@PathVariable Long id, @PathVariable Long guestId,
-                     @Valid @ModelAttribute(Attributes.FORM) StayingGuestForm form,
-                     BindingResult binding, Model model,
+                     @Valid @ModelAttribute(Attributes.FORM) StayingGuestForm form, BindingResult binding, Model model,
                      RedirectAttributes redirect) {
         if (binding.hasErrors()) {
             model.addAttribute(Attributes.VIEW,
@@ -267,8 +244,7 @@ public class ReceptionistReservationController {
     }
 
     @PostMapping("/{id}/manage/guests/{guestId}/delete")
-    String deleteGuest(@PathVariable Long id, @PathVariable Long guestId,
-                       RedirectAttributes redirect) {
+    String deleteGuest(@PathVariable Long id, @PathVariable Long guestId, RedirectAttributes redirect) {
         stayingGuestService.deleteGuest(id,
                 guestId);
         redirect.addFlashAttribute(Attributes.SUCCESS,
@@ -277,9 +253,7 @@ public class ReceptionistReservationController {
     }
 
     @PostMapping("/{id}/manage/rooms")
-    String assignRoom(@PathVariable Long id,
-                      @RequestParam Long roomId,
-                      RedirectAttributes redirect) {
+    String assignRoom(@PathVariable Long id, @RequestParam Long roomId, RedirectAttributes redirect) {
         try {
             roomAssignmentService.assignRoom(id,
                     roomId);
@@ -293,8 +267,7 @@ public class ReceptionistReservationController {
     }
 
     @PostMapping("/{id}/manage/rooms/{assignmentId}/remove")
-    String removeRoom(@PathVariable Long id, @PathVariable Long assignmentId,
-                      RedirectAttributes redirect) {
+    String removeRoom(@PathVariable Long id, @PathVariable Long assignmentId, RedirectAttributes redirect) {
         roomAssignmentService.removeAssignment(id,
                 assignmentId);
         redirect.addFlashAttribute(Attributes.SUCCESS,
@@ -303,30 +276,19 @@ public class ReceptionistReservationController {
     }
 
     private ManageReservationView buildManageView(Long id, Reservation reservation) {
-        return ReservationMapper.toManageView(
-                reservation,
+        return ReservationMapper.toManageView(reservation,
                 stayingGuestService.getGuests(id),
                 roomAssignmentService.getAssignedRooms(id),
                 roomAssignmentService.getAvailableRooms(id));
     }
 
-    private List<RoomTypeAvailabilityView> getAvailabilityView(
-            LocalDate checkInAt,
-            LocalDate checkOutAt
-    ) {
-        return roomAvailabilityService.getAvailability(
-                        checkInAt,
-                        checkOutAt
-                )
-                .stream()
-                .map(RoomTypeAvailabilityView::new)
-                .toList();
+    private List<RoomTypeAvailabilityView> getAvailabilityView(LocalDate checkInAt, LocalDate checkOutAt) {
+        return roomAvailabilityService.getAvailability(checkInAt,
+                checkOutAt).stream().map(RoomTypeAvailabilityView::new).toList();
     }
 
     @PostMapping("/{id}/manage/extend")
-    public String extendStay(@PathVariable Long id,
-                             @RequestParam int extraDays,
-                             RedirectAttributes redirect) {
+    public String extendStay(@PathVariable Long id, @RequestParam int extraDays, RedirectAttributes redirect) {
 
         try {
             reservationService.extendStay(id,
