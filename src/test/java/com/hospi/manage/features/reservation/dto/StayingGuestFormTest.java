@@ -24,9 +24,7 @@ class StayingGuestFormTest {
 
     @Test
     void shouldPass_whenValid() {
-        StayingGuestForm form = new StayingGuestForm();
-        form.setGuestName("Jane Guest");
-        form.setDateOfBirth(LocalDate.of(1992, 6, 15));
+        StayingGuestForm form = new StayingGuestForm("Jane Guest", LocalDate.of(1992, 6, 15), null);
 
         Set<ConstraintViolation<StayingGuestForm>> violations = validator.validate(form);
 
@@ -35,9 +33,7 @@ class StayingGuestFormTest {
 
     @Test
     void shouldFail_whenGuestNameBlank() {
-        StayingGuestForm form = new StayingGuestForm();
-        form.setGuestName("");
-        form.setDateOfBirth(LocalDate.of(1992, 6, 15));
+        StayingGuestForm form = new StayingGuestForm("", LocalDate.of(1992, 6, 15), null);
 
         Set<ConstraintViolation<StayingGuestForm>> violations = validator.validate(form);
 
@@ -47,8 +43,7 @@ class StayingGuestFormTest {
 
     @Test
     void shouldFail_whenDateOfBirthNull() {
-        StayingGuestForm form = new StayingGuestForm();
-        form.setGuestName("Jane Guest");
+        StayingGuestForm form = new StayingGuestForm("Jane Guest", null, null);
 
         Set<ConstraintViolation<StayingGuestForm>> violations = validator.validate(form);
 
@@ -58,9 +53,7 @@ class StayingGuestFormTest {
 
     @Test
     void shouldFail_whenDateOfBirthFuture() {
-        StayingGuestForm form = new StayingGuestForm();
-        form.setGuestName("Jane Guest");
-        form.setDateOfBirth(LocalDate.now().plusDays(1));
+        StayingGuestForm form = new StayingGuestForm("Jane Guest", LocalDate.now().plusDays(1), null);
 
         Set<ConstraintViolation<StayingGuestForm>> violations = validator.validate(form);
 

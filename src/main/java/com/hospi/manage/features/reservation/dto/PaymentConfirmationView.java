@@ -5,6 +5,7 @@ import com.hospi.manage.features.reservation.entity.Reservation;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 public record PaymentConfirmationView(
@@ -35,5 +36,9 @@ public record PaymentConfirmationView(
                 rooms,
                 PaymentMethod.values()
         );
+    }
+
+    public long nights() {
+        return ChronoUnit.DAYS.between(checkInAt, checkOutAt);
     }
 }

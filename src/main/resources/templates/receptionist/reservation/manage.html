@@ -174,7 +174,7 @@
                     <!-- expected vs assigned summary -->
                     <div class="mb-4 flex flex-wrap gap-3 text-sm">
                         <th:block th:each="detail : ${view.reservation().details}">
-                            <span th:text="${view.assignedCounts().getOrDefault(detail.roomType.id, 0)} + '/' + ${detail.roomCount} + ' ' + ${detail.roomType.name}">
+                            <span th:text="${view.assignedCount(detail.roomType.id)} + '/' + ${detail.roomCount} + ' ' + ${detail.roomType.name}">
                                 0/2 Deluxe
                             </span>
                         </th:block>
@@ -299,7 +299,7 @@
                         <div>
                             <label class="mb-1 block text-sm font-medium text-muted-foreground">Duration</label>
                             <p class="text-foreground"
-                               th:text="${view.reservation().checkOutAt.toEpochDay() - view.reservation().checkInAt.toEpochDay() + ' nights'}">
+                               th:text="${view.nights() + ' nights'}">
                                 3 nights</p>
                         </div>
 

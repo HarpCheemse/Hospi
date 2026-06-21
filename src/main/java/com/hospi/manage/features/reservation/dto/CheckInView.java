@@ -4,6 +4,7 @@ import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.BookingSource;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 public record CheckInView(
@@ -14,7 +15,8 @@ public record CheckInView(
         LocalDate checkInAt,
         LocalDate checkOutAt,
         BookingSource source,
-        List<RoomDetailView> rooms
+        List<RoomDetailView> rooms,
+        boolean onlineBooking
 ) {
     public static CheckInView from(Reservation reservation) {
         List<RoomDetailView> rooms = reservation.getDetails().stream()
@@ -32,7 +34,12 @@ public record CheckInView(
                 reservation.getCheckInAt(),
                 reservation.getCheckOutAt(),
                 reservation.getSource(),
-                rooms
+                rooms,
+                reservation.getSource() == BookingSource.ONLINE
         );
+    }
+
+    public long nights() {
+        return ChronoUnit.DAYS.between(checkInAt, checkOutAt);
     }
 }

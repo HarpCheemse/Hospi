@@ -44,7 +44,7 @@
     </header>
 
     <!-- CHECKED-IN GUESTS -->
-    <section th:if="${!#lists.isEmpty(checkedInBookings)}" class="card">
+    <section class="card">
 
         <div class="border-b border-border px-6 py-5">
             <div class="flex items-center gap-3">
@@ -88,7 +88,7 @@
 
                 <tbody>
 
-                <tr th:each="b : ${checkedInBookings}"
+                <tr th:each="b : ${view.checkedIn()}"
                     class="border-t border-border">
 
                     <td class="px-5 py-4">
@@ -145,7 +145,7 @@
     </section>
 
     <!-- ACTIVE BOOKINGS -->
-    <section class="overflow-hidden card" th:classappend="${!#lists.isEmpty(checkedInBookings)} ? 'mt-6' : ''">
+    <section class="overflow-hidden card" th:classappend="${!#lists.isEmpty(view.checkedIn())} ? 'mt-6' : ''">
 
         <div class="border-b border-border px-6 py-5">
             <div class="flex items-center gap-3">
@@ -165,22 +165,22 @@
             <div class="flex-1 flex flex-col gap-2">
                 <label class="text-sm font-medium">Status</label>
                 <select name="status" class="input">
-                    <option value="" th:selected="${filterStatus == null}">All Statuses</option>
-                    <option value="PENDING" th:selected="${filterStatus == 'PENDING'}">Pending</option>
-                    <option value="CONFIRMED" th:selected="${filterStatus == 'CONFIRMED'}">Confirmed</option>
+                    <option value="" th:selected="${view.filterStatus() == null}">All Statuses</option>
+                    <option value="PENDING" th:selected="${view.filterStatus() == 'PENDING'}">Pending</option>
+                    <option value="CONFIRMED" th:selected="${view.filterStatus() == 'CONFIRMED'}">Confirmed</option>
                 </select>
             </div>
 
             <div class="flex-1 flex flex-col gap-2">
                 <label class="text-sm font-medium">Date</label>
                 <input type="date" name="date" class="input"
-                       th:value="${filterDate}">
+                       th:value="${view.filterDate()}">
             </div>
 
             <div class="flex-1 flex flex-col gap-2">
                 <label class="text-sm font-medium">Search</label>
                 <input type="text" name="search" placeholder="Search by guest name..." class="input"
-                       th:value="${filterSearch}">
+                       th:value="${view.filterSearch()}">
             </div>
 
             <div class="flex items-center gap-3">
@@ -229,7 +229,7 @@
 
                 <tbody>
 
-                <tr th:each="b : ${activeBookings}"
+                <tr th:each="b : ${view.active()}"
                     class="border-t border-border">
 
                     <td class="px-5 py-4">
@@ -272,26 +272,19 @@
                     </td>
 
                     <td class="px-5 py-4 text-right">
-                        <a th:if="${b.status.name() == 'PENDING' and b.source.name() == 'OFFLINE'}"
+                        <a th:if="${b.showPayButton()}"
                            th:href="@{/receptionist/reservations/{id}/payment(id=${b.id})}"
                            class="btn btn-accent btn-sm">Pay</a>
-                        <a th:if="${b.status.name() == 'CONFIRMED'}"
+                        <a th:if="${b.showCheckInButton()}"
                            th:href="@{/receptionist/reservations/{id}/checkin(id=${b.id})}"
                            class="btn btn-primary btn-sm">Check-In</a>
-                        <a th:if="${b.status.name() == 'PENDING' and b.source.name() == 'ONLINE'}"
+                        <a th:if="${b.showViewButton()}"
                            class="btn btn-ghost btn-sm">View</a>
                     </td>
 
                 </tr>
 
-                <tr th:if="${#lists.isEmpty(activeBookings)}">
 
-                    <td colspan="6"
-                        class="px-5 py-10 text-center text-muted-foreground">
-                        No active bookings.
-                    </td>
-
-                </tr>
 
                 </tbody>
 

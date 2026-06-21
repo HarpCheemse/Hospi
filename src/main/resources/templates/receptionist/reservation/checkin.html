@@ -88,7 +88,7 @@
                     <div>
                         <label class="mb-1 block text-sm font-medium text-muted-foreground">Duration</label>
                         <p class="text-foreground"
-                           th:text="${view.checkOutAt.toEpochDay() - view.checkInAt.toEpochDay() + ' nights'}">3
+                           th:text="${view.nights() + ' nights'}">3
                             nights</p>
                     </div>
 
@@ -111,7 +111,7 @@
         </section>
 
         <!-- BOOKING CODE VERIFICATION (ONLINE BOOKINGS ONLY) -->
-        <section class="card" th:if="${view.source.name() == 'ONLINE'}">
+        <section class="card" th:if="${view.onlineBooking}">
 
             <div class="border-b border-border px-6 py-5">
                 <div class="flex items-center gap-3">
@@ -141,7 +141,7 @@
         <section class="card">
 
             <!-- ONLINE: direct submit (already verified via booking code) -->
-            <div th:if="${view.source.name() == 'ONLINE'}"
+            <div th:if="${view.onlineBooking}"
                  class="flex items-center justify-end gap-3 p-5">
 
                 <a th:href="@{/receptionist/reservations}"
@@ -157,7 +157,7 @@
             </div>
 
             <!-- OFFLINE: confirmation modal -->
-            <div th:if="${view.source.name() != 'ONLINE'}"
+            <div th:if="${!view.onlineBooking}"
                  x-data="{ checkinModalOpen: false, checkinConfirmed: false }"
                  class="flex items-center justify-end gap-3 p-5">
 

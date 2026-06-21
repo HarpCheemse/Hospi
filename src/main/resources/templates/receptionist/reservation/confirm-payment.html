@@ -83,7 +83,7 @@
                     <div>
                         <label class="mb-1 block text-sm font-medium text-muted-foreground">Duration</label>
                         <p class="text-foreground"
-                           th:text="${view.checkOutAt.toEpochDay() - view.checkInAt.toEpochDay() + ' nights'}">3
+                           th:text="${view.nights() + ' nights'}">3
                             nights</p>
                     </div>
 

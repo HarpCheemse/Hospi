@@ -91,7 +91,7 @@
                     </label>
 
                     <p class="text-foreground"
-                       th:text="${form.checkOutAt.toEpochDay() - form.checkInAt.toEpochDay() + ' nights'}">
+                       th:text="${view.nights() + ' nights'}">
                         3 nights
                     </p>
                 </div>
@@ -111,7 +111,7 @@
                         <p class="mt-1 text-sm text-muted-foreground">
                             Choose how many rooms of each type to book.
                             <span class="text-muted-foreground">
-                                (<span th:text="${#lists.size(view)}"></span> types available)
+                                (<span th:text="${#lists.size(view.roomTypes())}"></span> types available)
                             </span>
                         </p>
                     </div>
@@ -155,7 +155,7 @@
 
                     <tbody>
 
-                    <tr th:each="rt, stat : ${view}"
+                    <tr th:each="rt, stat : ${view.roomTypes()}"
                         class="border-t border-border">
 
                         <td class="px-5 py-4">
@@ -199,7 +199,7 @@
                     </tr>
 
 
-                    <tr th:if="${#lists.isEmpty(view)}">
+                    <tr th:if="${#lists.isEmpty(view.roomTypes())}">
                         <td colspan="5"
                             class="px-5 py-10 text-center text-muted-foreground">
                             No rooms available for the selected dates.

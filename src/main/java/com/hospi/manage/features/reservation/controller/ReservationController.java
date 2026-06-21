@@ -1,14 +1,10 @@
 package com.hospi.manage.features.reservation.controller;
 
 import com.hospi.manage.common.constant.Attributes;
-import com.hospi.manage.features.reservation.dto.DateSearchForm;
-import com.hospi.manage.features.reservation.dto.ManageReservationView;
-import com.hospi.manage.features.reservation.dto.OfflineBookingForm;
-import com.hospi.manage.features.reservation.dto.RoomTypeAvailabilityView;
-import com.hospi.manage.features.reservation.dto.StayingGuestForm;
+import com.hospi.manage.features.reservation.dto.*;
 import com.hospi.manage.features.reservation.entity.Reservation;
-import com.hospi.manage.features.reservation.mapper.ReservationMapper;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
+import com.hospi.manage.features.reservation.mapper.ReservationMapper;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.reservation.service.RoomAssignmentService;
 import com.hospi.manage.features.reservation.service.RoomAvailabilityService;
@@ -19,14 +15,15 @@ import com.hospi.manage.features.room.dto.response.RoomSelection;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Controller
@@ -60,25 +57,23 @@ public class ReservationController {
                     ReservationStatus.CONFIRMED);
         }
 
-        model.addAttribute("checkedInBookings",
-                reservationService.findByStatus(ReservationStatus.CHECKED_IN));
-        model.addAttribute("activeBookings",
-                reservationService.findFiltered(statuses,
-                        search,
-                        date));
-        model.addAttribute("filterStatus",
-                status);
-        model.addAttribute("filterDate",
-                date);
-        model.addAttribute("filterSearch",
-                search);
+        model.addAttribute(Attributes.VIEW,
+                ReservationMapper.toListView(
+                        reservationService.findByStatus(ReservationStatus.CHECKED_IN),
+                        reservationService.findFiltered(statuses,
+                                search,
+                                date),
+                        status,
+                        date,
+                        search));
         return "receptionist/reservation/list";
     }
 
     @GetMapping("/create")
     String create(Model model) {
         model.addAttribute(Attributes.FORM,
-                new DateSearchForm());
+                new DateSearchForm(null,
+                        null));
         return "receptionist/reservation/create";
     }
 
@@ -93,8 +88,10 @@ public class ReservationController {
         }
 
         return UriComponentsBuilder.fromPath("/receptionist/reservations/create/details")
-                .queryParam("checkInAt", form.getCheckInAt())
-                .queryParam("checkOutAt", form.getCheckOutAt())
+                .queryParam("checkInAt",
+                        form.checkInAt())
+                .queryParam("checkOutAt",
+                        form.checkOutAt())
                 .build().toUriString();
     }
 
@@ -105,14 +102,16 @@ public class ReservationController {
             return "redirect:/receptionist/reservations/create";
         }
 
-        List<RoomTypeAvailabilityView> view = getAvailabilityView(
+        List<RoomTypeAvailabilityView> availabilityView = getAvailabilityView(
                 checkInAt,
-                checkOutAt
-        );
+                checkOutAt);
 
-        List<RoomSelection> roomSelections = view.stream().map(rt -> new RoomSelection(
-                rt.roomTypeId(),
-                0)).toList();
+        long nights = ChronoUnit.DAYS.between(checkInAt,
+                checkOutAt);
+
+        List<RoomSelection> roomSelections = availabilityView.stream()
+                .map(rt -> new RoomSelection(rt.roomTypeId(),
+                        0)).toList();
 
         OfflineBookingForm form = new OfflineBookingForm(checkInAt,
                 checkOutAt,
@@ -124,8 +123,8 @@ public class ReservationController {
                 roomSelections);
 
         model.addAttribute(Attributes.VIEW,
-                view
-        );
+                new CreateDetailsView(availabilityView,
+                        nights));
         model.addAttribute(Attributes.FORM,
                 form);
 
@@ -147,14 +146,14 @@ public class ReservationController {
         );
 
         if (bindingResult.hasErrors()) {
-
-            model.addAttribute(
-                    Attributes.VIEW,
-                    getAvailabilityView(
-                            form.checkInAt(),
-                            form.checkOutAt()
-                    )
-            );
+            List<RoomTypeAvailabilityView> availabilityView = getAvailabilityView(
+                    form.checkInAt(),
+                    form.checkOutAt());
+            long nights = ChronoUnit.DAYS.between(form.checkInAt(),
+                    form.checkOutAt());
+            model.addAttribute(Attributes.VIEW,
+                    new CreateDetailsView(availabilityView,
+                            nights));
 
             return "receptionist/reservation/details";
         }
@@ -178,18 +177,25 @@ public class ReservationController {
             return "redirect:/receptionist/reservations";
         }
 
-        model.addAttribute(Attributes.VIEW, buildManageView(id, reservation));
+        model.addAttribute(Attributes.VIEW,
+                buildManageView(id,
+                        reservation));
 
         if (edit != null) {
-            var guest = stayingGuestService.getGuest(id, edit);
-            var form = new StayingGuestForm();
-            form.setGuestName(guest.getGuestName());
-            form.setDateOfBirth(guest.getDateOfBirth());
-            form.setNationality(guest.getNationality());
-            model.addAttribute(Attributes.FORM, form);
-            model.addAttribute("editGuestId", edit);
+            var guest = stayingGuestService.getGuest(id,
+                    edit);
+            model.addAttribute(Attributes.FORM,
+                    new StayingGuestForm(
+                            guest.getGuestName(),
+                            guest.getDateOfBirth(),
+                            guest.getNationality()));
+            model.addAttribute("editGuestId",
+                    edit);
         } else {
-            model.addAttribute(Attributes.FORM, new StayingGuestForm());
+            model.addAttribute(Attributes.FORM,
+                    new StayingGuestForm(null,
+                            null,
+                            null));
         }
 
         return "receptionist/reservation/manage";
@@ -201,7 +207,9 @@ public class ReservationController {
                     BindingResult binding, Model model,
                     RedirectAttributes redirect) {
         if (binding.hasErrors()) {
-            model.addAttribute(Attributes.VIEW, buildManageView(id, reservationService.findById(id)));
+            model.addAttribute(Attributes.VIEW,
+                    buildManageView(id,
+                            reservationService.findById(id)));
             return "receptionist/reservation/manage";
         }
         stayingGuestService.addGuest(id,
@@ -217,11 +225,15 @@ public class ReservationController {
                      BindingResult binding, Model model,
                      RedirectAttributes redirect) {
         if (binding.hasErrors()) {
-            model.addAttribute(Attributes.VIEW, buildManageView(id, reservationService.findById(id)));
-            model.addAttribute("editGuestId", guestId);
+            model.addAttribute(Attributes.VIEW,
+                    buildManageView(id,
+                            reservationService.findById(id)));
+            model.addAttribute("editGuestId",
+                    guestId);
             return "receptionist/reservation/manage";
         }
-        stayingGuestService.updateGuest(id, guestId,
+        stayingGuestService.updateGuest(id,
+                guestId,
                 form);
         redirect.addFlashAttribute(Attributes.SUCCESS,
                 "Guest updated successfully.");
@@ -231,7 +243,8 @@ public class ReservationController {
     @PostMapping("/{id}/manage/guests/{guestId}/delete")
     String deleteGuest(@PathVariable Long id, @PathVariable Long guestId,
                        RedirectAttributes redirect) {
-        stayingGuestService.deleteGuest(id, guestId);
+        stayingGuestService.deleteGuest(id,
+                guestId);
         redirect.addFlashAttribute(Attributes.SUCCESS,
                 "Guest removed successfully.");
         return "redirect:/receptionist/reservations/" + id + "/manage";
@@ -256,7 +269,8 @@ public class ReservationController {
     @PostMapping("/{id}/manage/rooms/{assignmentId}/remove")
     String removeRoom(@PathVariable Long id, @PathVariable Long assignmentId,
                       RedirectAttributes redirect) {
-        roomAssignmentService.removeAssignment(id, assignmentId);
+        roomAssignmentService.removeAssignment(id,
+                assignmentId);
         redirect.addFlashAttribute(Attributes.SUCCESS,
                 "Room assignment removed successfully.");
         return "redirect:/receptionist/reservations/" + id + "/manage";

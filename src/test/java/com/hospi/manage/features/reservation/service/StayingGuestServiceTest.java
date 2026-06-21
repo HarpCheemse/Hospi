@@ -32,13 +32,7 @@ class StayingGuestServiceTest {
     @InjectMocks
     private StayingGuestService stayingGuestService;
 
-    private final StayingGuestForm form = new StayingGuestForm();
-
-    {
-        form.setGuestName("Jane Guest");
-        form.setDateOfBirth(LocalDate.of(1992, 6, 15));
-        form.setNationality("UK");
-    }
+    private final StayingGuestForm form = new StayingGuestForm("Jane Guest", LocalDate.of(1992, 6, 15), "UK");
 
     @Test
     void addGuest_shouldCreate() {

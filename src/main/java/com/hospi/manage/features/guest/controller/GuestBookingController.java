@@ -70,7 +70,7 @@ public class GuestBookingController {
     @GetMapping
     String showDateForm(Model model) {
         model.addAttribute("form",
-                new DateSearchForm());
+                new DateSearchForm(null, null));
         return "guest/booking/book";
     }
 
@@ -85,8 +85,8 @@ public class GuestBookingController {
         }
 
         BookingDraft draft = getDraft(session);
-        draft.setCheckInAt(form.getCheckInAt());
-        draft.setCheckOutAt(form.getCheckOutAt());
+        draft.setCheckInAt(form.checkInAt());
+        draft.setCheckOutAt(form.checkOutAt());
 
         return "redirect:/book/rooms";
     }

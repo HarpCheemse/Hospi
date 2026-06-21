@@ -29,9 +29,9 @@ public class StayingGuestService {
 
         StayingGuest guest = new StayingGuest();
         guest.setReservation(reservation);
-        guest.setGuestName(form.getGuestName());
-        guest.setDateOfBirth(form.getDateOfBirth());
-        guest.setNationality(form.getNationality());
+        guest.setGuestName(form.guestName());
+        guest.setDateOfBirth(form.dateOfBirth());
+        guest.setNationality(form.nationality());
 
         return stayingGuestRepository.save(guest);
     }
@@ -44,9 +44,9 @@ public class StayingGuestService {
             throw new IllegalArgumentException("Guest does not belong to this reservation");
         }
 
-        guest.setGuestName(form.getGuestName());
-        guest.setDateOfBirth(form.getDateOfBirth());
-        guest.setNationality(form.getNationality());
+        guest.setGuestName(form.guestName());
+        guest.setDateOfBirth(form.dateOfBirth());
+        guest.setNationality(form.nationality());
 
         return stayingGuestRepository.save(guest);
     }

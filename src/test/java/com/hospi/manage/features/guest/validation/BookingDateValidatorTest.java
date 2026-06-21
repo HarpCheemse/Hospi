@@ -18,9 +18,7 @@ class BookingDateValidatorTest {
 
     @Test
     void validate_shouldPass_whenCheckInTodayAndCheckOutAfter() {
-        DateSearchForm form = new DateSearchForm();
-        form.setCheckInAt(LocalDate.now());
-        form.setCheckOutAt(LocalDate.now().plusDays(1));
+        DateSearchForm form = new DateSearchForm(LocalDate.now(), LocalDate.now().plusDays(1));
 
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
 
@@ -31,9 +29,7 @@ class BookingDateValidatorTest {
 
     @Test
     void validate_shouldPass_whenCheckInFutureAndCheckOutAfter() {
-        DateSearchForm form = new DateSearchForm();
-        form.setCheckInAt(LocalDate.now().plusDays(5));
-        form.setCheckOutAt(LocalDate.now().plusDays(10));
+        DateSearchForm form = new DateSearchForm(LocalDate.now().plusDays(5), LocalDate.now().plusDays(10));
 
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
 
@@ -44,9 +40,7 @@ class BookingDateValidatorTest {
 
     @Test
     void validate_shouldReject_whenCheckInPast() {
-        DateSearchForm form = new DateSearchForm();
-        form.setCheckInAt(LocalDate.now().minusDays(1));
-        form.setCheckOutAt(LocalDate.now().plusDays(5));
+        DateSearchForm form = new DateSearchForm(LocalDate.now().minusDays(1), LocalDate.now().plusDays(5));
 
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
 
@@ -59,9 +53,7 @@ class BookingDateValidatorTest {
 
     @Test
     void validate_shouldReject_whenCheckOutSameAsCheckIn() {
-        DateSearchForm form = new DateSearchForm();
-        form.setCheckInAt(LocalDate.now());
-        form.setCheckOutAt(LocalDate.now());
+        DateSearchForm form = new DateSearchForm(LocalDate.now(), LocalDate.now());
 
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
 
@@ -74,9 +66,7 @@ class BookingDateValidatorTest {
 
     @Test
     void validate_shouldReject_whenCheckOutBeforeCheckIn() {
-        DateSearchForm form = new DateSearchForm();
-        form.setCheckInAt(LocalDate.now().plusDays(5));
-        form.setCheckOutAt(LocalDate.now().plusDays(3));
+        DateSearchForm form = new DateSearchForm(LocalDate.now().plusDays(5), LocalDate.now().plusDays(3));
 
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
 
