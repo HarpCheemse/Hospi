@@ -7,6 +7,8 @@ import com.hospi.manage.features.payment.enums.PaymentMethod;
 import com.hospi.manage.features.payment.repository.PaymentRepository;
 import com.hospi.manage.features.receptionist.dto.CheckoutCalculation;
 import com.hospi.manage.features.receptionist.dto.CheckoutForm;
+import com.hospi.manage.features.receptionist.dto.CheckoutView;
+import com.hospi.manage.features.receptionist.dto.ReceiptView;
 import com.hospi.manage.features.receptionist.service.CheckoutService;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
@@ -50,11 +52,9 @@ public class ReceptionistCheckoutController {
         int adultGuests = stayingGuestService.getAdultGuestCount(id, reservation.getCheckInAt());
         CheckoutCalculation calc = checkoutService.calculate(reservation, null, adultGuests);
 
-        model.addAttribute("reservation", reservation);
-        model.addAttribute("calc", calc);
+        model.addAttribute(Attributes.VIEW, new CheckoutView(reservation, calc, adultGuests));
         model.addAttribute("config", systemConfigService.getConfig());
-        model.addAttribute("adultGuests", adultGuests);
-        model.addAttribute("form", new CheckoutForm(null, null, null));
+        model.addAttribute(Attributes.FORM, new CheckoutForm(null, null, null));
 
         return "receptionist/reservation/checkout";
     }
@@ -95,21 +95,7 @@ public class ReceptionistCheckoutController {
         }
 
         List<Payment> payments = paymentRepository.findAllByReservationId(id);
-        BigDecimal depositPaid = payments.stream()
-                .map(Payment::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal totalPaid = depositPaid;
-        if (reservation.getLateCheckoutFeeApplied() != null) {
-            totalPaid = totalPaid.add(reservation.getLateCheckoutFeeApplied());
-        }
-        if (reservation.getExtraGuestFeeApplied() != null) {
-            totalPaid = totalPaid.add(reservation.getExtraGuestFeeApplied());
-        }
-
-        model.addAttribute("reservation", reservation);
-        model.addAttribute("depositPaid", depositPaid);
-        model.addAttribute("totalPaid", totalPaid);
+        model.addAttribute(Attributes.VIEW, ReceiptView.from(reservation, payments));
         return "receptionist/reservation/receipt";
     }
 }

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
@@ -37,17 +37,17 @@
         <div class="p-5">
             <div class="grid grid-cols-2 gap-5 mb-5">
                 <div>
-                    <p class="text-sm text-muted-foreground">Reservation #<span th:text="${reservation.id}">123</span></p>
-                    <p class="font-medium text-foreground" th:text="${reservation.guestName}">John Smith</p>
-                    <p class="text-sm text-muted-foreground" th:text="${reservation.guestEmail}">john@hospi.com</p>
-                    <p class="text-sm text-muted-foreground" th:text="${reservation.guestPhone}">+84 912 345 678</p>
+                    <p class="text-sm text-muted-foreground">Reservation #<span th:text="${view.reservation.id}">123</span></p>
+                    <p class="font-medium text-foreground" th:text="${view.reservation.guestName}">John Smith</p>
+                    <p class="text-sm text-muted-foreground" th:text="${view.reservation.guestEmail}">john@hospi.com</p>
+                    <p class="text-sm text-muted-foreground" th:text="${view.reservation.guestPhone}">+84 912 345 678</p>
                 </div>
                 <div class="text-right">
-                    <p class="text-sm text-muted-foreground" th:text="|Check-In: ${#temporals.format(reservation.checkInAt, 'dd MMM yyyy')}|">15 Jun 2026</p>
-                    <p class="text-sm text-muted-foreground" th:text="|Scheduled Check-Out: ${#temporals.format(reservation.checkOutAt, 'dd MMM yyyy')}|">18 Jun 2026</p>
-                    <p class="text-sm text-muted-foreground" th:text="|Source: ${reservation.source.name()}|">ONLINE</p>
-                    <p class="text-sm text-muted-foreground" th:if="${reservation.checkedOutAt != null}"
-                       th:text="|Checked out: ${#temporals.format(reservation.checkedOutAt, 'dd MMM yyyy HH:mm')}|">18 Jun 2026 10:30</p>
+                    <p class="text-sm text-muted-foreground" th:text="|Check-In: ${#temporals.format(view.reservation.checkInAt, 'dd MMM yyyy')}|">15 Jun 2026</p>
+                    <p class="text-sm text-muted-foreground" th:text="|Scheduled Check-Out: ${#temporals.format(view.reservation.checkOutAt, 'dd MMM yyyy')}|">18 Jun 2026</p>
+                    <p class="text-sm text-muted-foreground" th:text="|Source: ${view.reservation.source.name()}|">ONLINE</p>
+                    <p class="text-sm text-muted-foreground" th:if="${view.reservation.checkedOutAt != null}"
+                       th:text="|Checked out: ${#temporals.format(view.reservation.checkedOutAt, 'dd MMM yyyy HH:mm')}|">18 Jun 2026 10:30</p>
                 </div>
             </div>
 
@@ -61,30 +61,30 @@
                 <tbody>
                 <tr class="border-b border-border/50">
                     <td class="py-2">Total Room Charges</td>
-                    <td class="py-2 text-right" th:text="|$${#numbers.formatDecimal(reservation.totalPrice, 0, 2)}|">$1000.00</td>
+                    <td class="py-2 text-right" th:text="|$${#numbers.formatDecimal(view.reservation.totalPrice, 0, 2)}|">$1000.00</td>
                 </tr>
                 <tr class="border-b border-border/50 text-success">
                     <td class="py-2">Deposit Paid</td>
-                    <td class="py-2 text-right">-<span th:text="|$${#numbers.formatDecimal(depositPaid, 0, 2)}|">$200.00</span></td>
+                    <td class="py-2 text-right">-<span th:text="|$${#numbers.formatDecimal(view.depositPaid, 0, 2)}|">$200.00</span></td>
                 </tr>
-                <tr class="border-b border-border/50" th:if="${reservation.lateCheckoutFeeApplied != null and reservation.lateCheckoutFeeApplied.signum() == 1}">
+                <tr class="border-b border-border/50" th:if="${view.reservation.lateCheckoutFeeApplied != null and view.reservation.lateCheckoutFeeApplied.signum() == 1}">
                     <td class="py-2">Late Checkout Fee</td>
-                    <td class="py-2 text-right" th:text="|$${#numbers.formatDecimal(reservation.lateCheckoutFeeApplied, 0, 2)}|">$50.00</td>
+                    <td class="py-2 text-right" th:text="|$${#numbers.formatDecimal(view.reservation.lateCheckoutFeeApplied, 0, 2)}|">$50.00</td>
                 </tr>
-                <tr class="border-b border-border/50" th:if="${reservation.extraGuestFeeApplied != null and reservation.extraGuestFeeApplied.signum() == 1}">
+                <tr class="border-b border-border/50" th:if="${view.reservation.extraGuestFeeApplied != null and view.reservation.extraGuestFeeApplied.signum() == 1}">
                     <td class="py-2">Extra Guest Fee</td>
-                    <td class="py-2 text-right" th:text="|$${#numbers.formatDecimal(reservation.extraGuestFeeApplied, 0, 2)}|">$25.00</td>
+                    <td class="py-2 text-right" th:text="|$${#numbers.formatDecimal(view.reservation.extraGuestFeeApplied, 0, 2)}|">$25.00</td>
                 </tr>
                 <tr class="font-bold text-base">
                     <td class="py-3">Total Paid</td>
-                    <td class="py-3 text-right" th:text="|$${#numbers.formatDecimal(totalPaid, 0, 2)}|">$875.00</td>
+                    <td class="py-3 text-right" th:text="|$${#numbers.formatDecimal(view.totalPaid, 0, 2)}|">$875.00</td>
                 </tr>
                 </tbody>
             </table>
 
             <div class="text-center text-sm text-muted-foreground pt-5 border-t border-border">
                 <p>Thank you for staying with us!</p>
-                <p th:if="${reservation.checkedOutBy != null}" th:text="|Checked out by: ${reservation.checkedOutBy}|">Checked out by: receptionist</p>
+                <p th:if="${view.reservation.checkedOutBy != null}" th:text="|Checked out by: ${view.reservation.checkedOutBy}|">Checked out by: receptionist</p>
             </div>
         </div>
     </section>
@@ -93,3 +93,5 @@
 
 </body>
 </html>
+
+
