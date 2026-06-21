@@ -116,6 +116,10 @@ public class CheckoutService {
         payment.setConfirmedBy(principal);
         paymentRepository.save(payment);
 
+        BigDecimal appliedLateFee = applyLateFee ? calc.lateCheckoutFee() : BigDecimal.ZERO;
+        BigDecimal appliedExtraGuestFee = extraGuestFeeOverride != null
+                ? extraGuestFeeOverride : calc.extraGuestFee();
+
         // Create invoice
         Invoice invoice = new Invoice();
         invoice.setBookingId(reservation.getId());
@@ -204,11 +208,7 @@ public class CheckoutService {
         reservation.setCheckedOutAt(LocalDateTime.now());
         reservation.setCheckedOutBy(principal);
 
-        BigDecimal appliedLateFee = applyLateFee ? calc.lateCheckoutFee() : BigDecimal.ZERO;
         reservation.setLateCheckoutFeeApplied(appliedLateFee);
-
-        BigDecimal appliedExtraGuestFee = extraGuestFeeOverride != null
-                ? extraGuestFeeOverride : calc.extraGuestFee();
         reservation.setExtraGuestFeeApplied(appliedExtraGuestFee);
 
         return reservationRepository.save(reservation);

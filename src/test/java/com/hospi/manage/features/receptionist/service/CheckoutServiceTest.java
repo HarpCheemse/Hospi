@@ -1,6 +1,7 @@
 package com.hospi.manage.features.receptionist.service;
 
 import com.hospi.manage.features.admin.config.entity.SystemConfig;
+import com.hospi.manage.features.invoice.repository.InvoiceRepository;
 import com.hospi.manage.features.admin.config.service.SystemConfigService;
 import com.hospi.manage.features.payment.entity.Payment;
 import com.hospi.manage.features.payment.enums.PaymentMethod;
@@ -37,6 +38,8 @@ class CheckoutServiceTest {
     PaymentRepository paymentRepository;
     @Mock
     SystemConfigService systemConfigService;
+    @Mock
+    InvoiceRepository invoiceRepository;
 
     CheckoutService checkoutService;
 
@@ -45,7 +48,7 @@ class CheckoutServiceTest {
 
     @BeforeEach
     void setUp() {
-        checkoutService = new CheckoutService(reservationRepository, paymentRepository, systemConfigService);
+        checkoutService = new CheckoutService(reservationRepository, paymentRepository, systemConfigService, invoiceRepository);
 
         config = new SystemConfig();
         config.setDefaultDepositPercentage(BigDecimal.valueOf(20));
@@ -157,11 +160,15 @@ class CheckoutServiceTest {
 
     @Test
     void complete_checkedIn_checkoutSuccess() {
+        when(systemConfigService.getConfig()).thenReturn(config);
+
         Reservation r = new Reservation();
         r.setId(1L);
         r.setSource(BookingSource.OFFLINE);
         r.setTotalPrice(BigDecimal.valueOf(1000));
         r.setStatus(ReservationStatus.CHECKED_IN);
+        r.setCheckInAt(LocalDate.of(2026, 6, 15));
+        r.setCheckOutAt(LocalDate.of(2026, 6, 18));
 
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(r));
         when(reservationRepository.save(any())).thenReturn(r);
@@ -205,12 +212,56 @@ class CheckoutServiceTest {
     }
 
     @Test
+    void complete_createsInvoice() {
+        when(systemConfigService.getConfig()).thenReturn(config);
+
+        Reservation r = new Reservation();
+        r.setId(1L);
+        r.setSource(BookingSource.OFFLINE);
+        r.setTotalPrice(BigDecimal.valueOf(1000));
+        r.setStatus(ReservationStatus.CHECKED_IN);
+        r.setCheckInAt(LocalDate.of(2026, 6, 15));
+        r.setCheckOutAt(LocalDate.of(2026, 6, 18));
+
+        RoomType rt = new RoomType();
+        rt.setId(1L);
+        rt.setName("Deluxe");
+        rt.setMaxOccupancy(2);
+
+        ReservationDetail detail = new ReservationDetail();
+        detail.setRoomType(rt);
+        detail.setRoomCount(2);
+        detail.setBasePrice(BigDecimal.valueOf(200));
+        detail.setTotalPrice(BigDecimal.valueOf(400));
+        r.setDetails(List.of(detail));
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(r));
+        when(reservationRepository.save(any())).thenReturn(r);
+        when(paymentRepository.findAllByReservationId(1L)).thenReturn(List.of());
+
+        CheckoutCalculation calc = new CheckoutCalculation(
+                BigDecimal.valueOf(1000), BigDecimal.ZERO, BigDecimal.valueOf(1000),
+                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.valueOf(1000),
+                false, 0
+        );
+
+        checkoutService.complete(1L, calc, BigDecimal.valueOf(1000),
+                PaymentMethod.CASH, "receptionist", null, false, null);
+
+        verify(invoiceRepository).save(any());
+    }
+
+    @Test
     void complete_autoCheckIn_whenConfirmed() {
+        when(systemConfigService.getConfig()).thenReturn(config);
+
         Reservation r = new Reservation();
         r.setId(3L);
         r.setSource(BookingSource.ONLINE);
         r.setTotalPrice(BigDecimal.valueOf(1000));
         r.setStatus(ReservationStatus.CONFIRMED);
+        r.setCheckInAt(LocalDate.of(2026, 6, 15));
+        r.setCheckOutAt(LocalDate.of(2026, 6, 18));
 
         when(reservationRepository.findById(3L)).thenReturn(Optional.of(r));
         when(reservationRepository.save(any())).thenReturn(r);
