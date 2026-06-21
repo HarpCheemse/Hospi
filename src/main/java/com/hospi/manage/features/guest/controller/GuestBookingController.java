@@ -16,17 +16,20 @@ import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.reservation.service.RoomAvailabilityService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.stream.IntStream;
 
+@Slf4j
 @Controller
 @RequestMapping("/book")
 public class GuestBookingController {
@@ -330,11 +333,12 @@ public class GuestBookingController {
         }
 
         try {
-            String returnUrl =
-                    "http://localhost:8080/book/pay/capture";
+            String returnUrl = UriComponentsBuilder.fromPath("/book/pay/capture")
+                    .build().toUriString();
 
-            String cancelUrl =
-                    "http://localhost:8080/book/pay?cancelled=true";
+            String cancelUrl = UriComponentsBuilder.fromPath("/book/pay")
+                    .queryParam("cancelled", "true")
+                    .build().toUriString();
 
             String approvalUrl =
                     paymentService.createOnlineBookingPayment(
@@ -399,10 +403,13 @@ public class GuestBookingController {
                             + "Total: $" + reservation.getTotalPrice() + "\n\n"
                             + "Please present your booking code at check-in.\n\n"
                             + "Thank you for choosing Hospi!");
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            log.warn("Failed to send confirmation email for booking {}", reservation.getConfirmationCode(), e);
         }
 
-        return "redirect:/book/confirmation?code=" + reservation.getConfirmationCode();
+        return "redirect:" + UriComponentsBuilder.fromPath("/book/confirmation")
+                .queryParam("code", reservation.getConfirmationCode())
+                .build().toUriString();
     }
 
 

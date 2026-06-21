@@ -5,6 +5,7 @@ import com.hospi.manage.features.auth.entity.OtpChallenge;
 import com.hospi.manage.features.auth.enums.OtpType;
 import com.hospi.manage.features.auth.repository.OtpChallengeRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -21,6 +22,7 @@ public class OtpService {
 
     private static int OTP_EXPIRED_MINUTES = 10;
 
+    @Transactional
     public String createOtp(String email, OtpType type) {
         String rawOtp = OtpGenerator.generate6DigitOtp();
 
@@ -34,8 +36,9 @@ public class OtpService {
         return rawOtp;
     }
 
+    @Transactional
     public boolean verifyOtp(String email, String inputOtp, OtpType type) {
-        OtpChallenge challenge = otpChallengeRepository
+        var challenge = otpChallengeRepository
                 .findTopByEmailAndTypeAndVerifiedFalseOrderByCreatedAtDesc(email,
                         type)
                 .orElse(null);
@@ -50,6 +53,7 @@ public class OtpService {
         return true;
     }
 
+    @Transactional
     public String issueResetToken(String email, OtpType type) {
         OtpChallenge challenge = otpChallengeRepository
                 .findTopByEmailAndTypeAndVerifiedTrueOrderByCreatedAtDesc(email,
@@ -77,6 +81,7 @@ public class OtpService {
                 .orElseThrow(() -> new IllegalStateException("Invalid or expired reset token"));
     }
 
+    @Transactional
     public void invalidateResetToken(String token) {
         otpChallengeRepository.findByResetToken(token).ifPresent(challenge -> {
             challenge.setResetTokenUsed(true);

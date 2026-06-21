@@ -1,11 +1,13 @@
 package com.hospi.manage.features.guest.service;
 
+import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.Review;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
 import com.hospi.manage.features.reservation.repository.ReviewRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,8 +26,9 @@ public class BookingTrackerService {
         this.reviewRepository = reviewRepository;
     }
 
-    public Optional<Reservation> lookupByEmailAndCode(String email, String code) {
-        return reservationRepository.findByGuestEmailAndConfirmationCode(email, code);
+    public Reservation lookupByEmailAndCode(String email, String code) {
+        return reservationRepository.findByGuestEmailAndConfirmationCode(email, code)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
     }
 
     public List<Reservation> resolveByCodes(Set<String> codes) {
@@ -50,14 +53,16 @@ public class BookingTrackerService {
         return map;
     }
 
+    @Transactional
     public Review submitReview(Long reservationId, Integer rating) {
         if (reviewRepository.existsByReservationId(reservationId)) {
             throw new IllegalStateException("You have already reviewed this booking.");
         }
 
-        Reservation reservation = reservationRepository.findById(reservationId).orElse(null);
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
 
-        if (reservation == null || reservation.getStatus() != ReservationStatus.CHECKED_OUT) {
+        if (reservation.getStatus() != ReservationStatus.CHECKED_OUT) {
             throw new IllegalStateException("Reviews are only available for completed stays.");
         }
 

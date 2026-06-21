@@ -2,11 +2,13 @@ package com.hospi.manage.features.guest.controller;
 
 import com.hospi.manage.features.manager.detail.entity.Hotel;
 import com.hospi.manage.features.manager.detail.service.HotelService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+@Slf4j
 @Controller
 @RequestMapping("/contact")
 public class ContactPageController {
@@ -23,6 +25,7 @@ public class ContactPageController {
             model.addAttribute("hotel",
                     hotel);
         } catch (Exception e) {
+            log.warn("Failed to load hotel details for contact page", e);
             model.addAttribute("hotel",
                     null);
         }
