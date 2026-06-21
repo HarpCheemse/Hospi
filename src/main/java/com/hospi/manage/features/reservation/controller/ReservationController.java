@@ -2,9 +2,12 @@ package com.hospi.manage.features.reservation.controller;
 
 import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.features.reservation.dto.DateSearchForm;
+import com.hospi.manage.features.reservation.dto.ManageReservationView;
 import com.hospi.manage.features.reservation.dto.OfflineBookingForm;
 import com.hospi.manage.features.reservation.dto.RoomTypeAvailabilityView;
 import com.hospi.manage.features.reservation.dto.StayingGuestForm;
+import com.hospi.manage.features.reservation.entity.Reservation;
+import com.hospi.manage.features.reservation.mapper.ReservationMapper;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.reservation.service.RoomAssignmentService;
@@ -23,7 +26,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/receptionist/reservations")
@@ -65,16 +67,22 @@ public class ReservationController {
         if (status != null && !status.isBlank()) {
             statuses = List.of(ReservationStatus.valueOf(status));
         } else {
-            statuses = List.of(ReservationStatus.PENDING, ReservationStatus.CONFIRMED);
+            statuses = List.of(ReservationStatus.PENDING,
+                    ReservationStatus.CONFIRMED);
         }
 
         model.addAttribute("checkedInBookings",
                 reservationService.findByStatus(ReservationStatus.CHECKED_IN));
         model.addAttribute("activeBookings",
-                reservationService.findFiltered(statuses, search, date));
-        model.addAttribute("filterStatus", status);
-        model.addAttribute("filterDate", date);
-        model.addAttribute("filterSearch", search);
+                reservationService.findFiltered(statuses,
+                        search,
+                        date));
+        model.addAttribute("filterStatus",
+                status);
+        model.addAttribute("filterDate",
+                date);
+        model.addAttribute("filterSearch",
+                search);
         return "receptionist/reservation/list";
     }
 
@@ -88,7 +96,8 @@ public class ReservationController {
     @PostMapping("/create")
     String searchDates(@Valid @ModelAttribute(Attributes.FORM) DateSearchForm form, BindingResult binding,
                        Model model) {
-        dateSearchValidator.validate(form, binding);
+        dateSearchValidator.validate(form,
+                binding);
 
         if (binding.hasErrors()) {
             return "receptionist/reservation/create";
@@ -176,38 +185,19 @@ public class ReservationController {
         if (reservation.getStatus() != ReservationStatus.CHECKED_IN) {
             return "redirect:/receptionist/reservations";
         }
-        model.addAttribute("reservation",
-                reservation);
-        model.addAttribute("guests",
-                stayingGuestService.getGuests(id));
 
-        var assignedRooms = roomAssignmentService.getAssignedRooms(id);
-        model.addAttribute("assignedRooms",
-                assignedRooms);
-        model.addAttribute("availableRooms",
-                roomAssignmentService.getAvailableRooms(id));
-
-        var assignedCounts = assignedRooms.stream()
-                .collect(Collectors.groupingBy(
-                        a -> a.getRoom().getRoomType().getId(),
-                        Collectors.summingInt(a -> 1)
-                ));
-        model.addAttribute("assignedCounts",
-                assignedCounts);
+        model.addAttribute(Attributes.VIEW, buildManageView(id, reservation));
 
         if (edit != null) {
-            var guest = stayingGuestService.getGuest(edit);
+            var guest = stayingGuestService.getGuest(id, edit);
             var form = new StayingGuestForm();
             form.setGuestName(guest.getGuestName());
             form.setDateOfBirth(guest.getDateOfBirth());
             form.setNationality(guest.getNationality());
-            model.addAttribute(Attributes.FORM,
-                    form);
-            model.addAttribute("editGuestId",
-                    edit);
+            model.addAttribute(Attributes.FORM, form);
+            model.addAttribute("editGuestId", edit);
         } else {
-            model.addAttribute(Attributes.FORM,
-                    new StayingGuestForm());
+            model.addAttribute(Attributes.FORM, new StayingGuestForm());
         }
 
         return "receptionist/reservation/manage";
@@ -216,69 +206,76 @@ public class ReservationController {
     @PostMapping("/{id}/manage/guests")
     String addGuest(@PathVariable Long id,
                     @Valid @ModelAttribute(Attributes.FORM) StayingGuestForm form,
-                    BindingResult binding, Model model) {
-        var reservation = reservationService.findById(id);
+                    BindingResult binding, Model model,
+                    RedirectAttributes redirect) {
         if (binding.hasErrors()) {
-            model.addAttribute("reservation",
-                    reservation);
-            model.addAttribute("guests",
-                    stayingGuestService.getGuests(id));
-            model.addAttribute("assignedRooms",
-                    roomAssignmentService.getAssignedRooms(id));
-            model.addAttribute("availableRooms",
-                    roomAssignmentService.getAvailableRooms(id));
+            model.addAttribute(Attributes.VIEW, buildManageView(id, reservationService.findById(id)));
             return "receptionist/reservation/manage";
         }
         stayingGuestService.addGuest(id,
                 form);
+        redirect.addFlashAttribute(Attributes.SUCCESS,
+                "Guest added successfully.");
         return "redirect:/receptionist/reservations/" + id + "/manage";
     }
 
     @PostMapping("/{id}/manage/guests/{guestId}")
     String editGuest(@PathVariable Long id, @PathVariable Long guestId,
                      @Valid @ModelAttribute(Attributes.FORM) StayingGuestForm form,
-                     BindingResult binding, Model model) {
+                     BindingResult binding, Model model,
+                     RedirectAttributes redirect) {
         if (binding.hasErrors()) {
-            model.addAttribute("reservation",
-                    reservationService.findById(id));
-            model.addAttribute("guests",
-                    stayingGuestService.getGuests(id));
-            model.addAttribute("assignedRooms",
-                    roomAssignmentService.getAssignedRooms(id));
-            model.addAttribute("availableRooms",
-                    roomAssignmentService.getAvailableRooms(id));
-            model.addAttribute("editGuestId",
-                    guestId);
+            model.addAttribute(Attributes.VIEW, buildManageView(id, reservationService.findById(id)));
+            model.addAttribute("editGuestId", guestId);
             return "receptionist/reservation/manage";
         }
-        stayingGuestService.updateGuest(guestId,
+        stayingGuestService.updateGuest(id, guestId,
                 form);
+        redirect.addFlashAttribute(Attributes.SUCCESS,
+                "Guest updated successfully.");
         return "redirect:/receptionist/reservations/" + id + "/manage";
     }
 
     @PostMapping("/{id}/manage/guests/{guestId}/delete")
-    String deleteGuest(@PathVariable Long id, @PathVariable Long guestId) {
-        stayingGuestService.deleteGuest(guestId);
+    String deleteGuest(@PathVariable Long id, @PathVariable Long guestId,
+                       RedirectAttributes redirect) {
+        stayingGuestService.deleteGuest(id, guestId);
+        redirect.addFlashAttribute(Attributes.SUCCESS,
+                "Guest removed successfully.");
         return "redirect:/receptionist/reservations/" + id + "/manage";
     }
 
     @PostMapping("/{id}/manage/rooms")
     String assignRoom(@PathVariable Long id,
                       @RequestParam Long roomId,
-                      Model model) {
+                      RedirectAttributes redirect) {
         try {
             roomAssignmentService.assignRoom(id,
                     roomId);
+            redirect.addFlashAttribute(Attributes.SUCCESS,
+                    "Room assigned successfully.");
         } catch (IllegalStateException e) {
-            // ignore duplicate or already-occupied
+            redirect.addFlashAttribute(Attributes.ERROR,
+                    e.getMessage());
         }
         return "redirect:/receptionist/reservations/" + id + "/manage";
     }
 
     @PostMapping("/{id}/manage/rooms/{assignmentId}/remove")
-    String removeRoom(@PathVariable Long id, @PathVariable Long assignmentId) {
-        roomAssignmentService.removeAssignment(assignmentId);
+    String removeRoom(@PathVariable Long id, @PathVariable Long assignmentId,
+                      RedirectAttributes redirect) {
+        roomAssignmentService.removeAssignment(id, assignmentId);
+        redirect.addFlashAttribute(Attributes.SUCCESS,
+                "Room assignment removed successfully.");
         return "redirect:/receptionist/reservations/" + id + "/manage";
+    }
+
+    private ManageReservationView buildManageView(Long id, Reservation reservation) {
+        return ReservationMapper.toManageView(
+                reservation,
+                stayingGuestService.getGuests(id),
+                roomAssignmentService.getAssignedRooms(id),
+                roomAssignmentService.getAvailableRooms(id));
     }
 
     private List<RoomTypeAvailabilityView> getAvailabilityView(
@@ -303,11 +300,11 @@ public class ReservationController {
             reservationService.extendStay(id,
                     extraDays);
 
-            redirect.addFlashAttribute("success",
+            redirect.addFlashAttribute(Attributes.SUCCESS,
                     "Stay extended successfully.");
 
         } catch (IllegalStateException | IllegalArgumentException e) {
-            redirect.addFlashAttribute("error",
+            redirect.addFlashAttribute(Attributes.ERROR,
                     e.getMessage());
         }
 
