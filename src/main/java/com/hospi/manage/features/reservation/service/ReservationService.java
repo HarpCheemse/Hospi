@@ -10,11 +10,12 @@ import com.hospi.manage.features.reservation.entity.ReservationDetail;
 import com.hospi.manage.features.reservation.enums.BookingSource;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
+import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.room.dto.response.RoomSelection;
 import com.hospi.manage.features.room.entity.RoomType;
 import com.hospi.manage.features.room.repository.RoomTypeRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.security.SecureRandom;
@@ -65,7 +66,7 @@ public class ReservationService {
     }
 
     public Reservation findById(Long id) {
-        return reservationRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Reservation"));
+        return reservationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Reservation"));
     }
 
     /// This function return RoomTypeId and amount of reservations for a given day range
@@ -120,11 +121,19 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation checkIn(Long reservationId, String bookingCode, String principal) {
-        Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+    public Reservation checkIn(Long reservationId, LocalDate today, String bookingCode, String principal) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
 
         if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
             throw new IllegalStateException("Only confirmed bookings can be checked in");
+        }
+
+        if (reservation.getCheckInAt().isAfter(today)) {
+            throw new IllegalStateException("Cannot check in before the booking start date");
+        }
+        if (reservation.getCheckOutAt().isBefore(today)) {
+            throw new IllegalStateException("Cannot check in after the booking has ended");
         }
 
         if (reservation.getSource() == BookingSource.ONLINE) {
