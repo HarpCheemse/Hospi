@@ -83,7 +83,7 @@ public class ReceptionistCheckoutController {
 
             PaymentMethod method = PaymentMethod.valueOf(form.getPaymentMethod());
 
-            checkoutService.complete(id, calc, form.getAmountReceived(), method,
+            checkoutService.complete(id, calc, method,
                     principal.getName(), form.getActualCheckoutTime(),
                     form.isApplyLateFee());
 

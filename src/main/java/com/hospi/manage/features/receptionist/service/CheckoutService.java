@@ -85,7 +85,7 @@ public class CheckoutService {
     }
 
     @Transactional
-    public Reservation complete(Long reservationId, CheckoutCalculation calc, BigDecimal amountReceived,
+    public Reservation complete(Long reservationId, CheckoutCalculation calc,
                                  PaymentMethod method, String principal, LocalDateTime actualCheckoutTime,
                                  boolean applyLateFee) {
         Reservation reservation = reservationRepository.findById(reservationId)
@@ -104,13 +104,9 @@ public class CheckoutService {
             reservation.setCheckedInBy(principal);
         }
 
-        if (amountReceived.compareTo(calc.totalDue()) != 0) {
-            throw new IllegalArgumentException("Received amount does not match total due");
-        }
-
         Payment payment = new Payment();
         payment.setReservation(reservation);
-        payment.setAmount(amountReceived);
+        payment.setAmount(calc.totalDue());
         payment.setPaymentMethod(method);
         payment.setConfirmedAt(LocalDateTime.now());
         payment.setConfirmedBy(principal);
@@ -139,7 +135,7 @@ public class CheckoutService {
         invoice.setSubtotal(subtotal);
         invoice.setTaxAmount(taxAmount);
         invoice.setDepositUsed(depositUsed);
-        invoice.setTotalAmount(amountReceived);
+        invoice.setTotalAmount(calc.totalDue());
 
         // ROOM line items
         for (var detail : reservation.getDetails()) {

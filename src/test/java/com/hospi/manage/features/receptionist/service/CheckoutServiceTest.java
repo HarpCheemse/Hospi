@@ -179,7 +179,7 @@ class CheckoutServiceTest {
                 false, 0
         );
 
-        Reservation result = checkoutService.complete(1L, calc, BigDecimal.valueOf(1000),
+        Reservation result = checkoutService.complete(1L, calc,
                 PaymentMethod.CASH, "receptionist", null, false);
 
         assertEquals(ReservationStatus.CHECKED_OUT, result.getStatus());
@@ -188,27 +188,6 @@ class CheckoutServiceTest {
         assertEquals(BigDecimal.ZERO, result.getLateCheckoutFeeApplied());
         assertEquals(BigDecimal.ZERO, result.getExtraGuestFeeApplied());
         verify(paymentRepository).save(any());
-    }
-
-    @Test
-    void complete_wrongAmount_throwsException() {
-        Reservation r = new Reservation();
-        r.setId(2L);
-        r.setSource(BookingSource.OFFLINE);
-        r.setTotalPrice(BigDecimal.valueOf(1000));
-        r.setStatus(ReservationStatus.CHECKED_IN);
-
-        when(reservationRepository.findById(2L)).thenReturn(Optional.of(r));
-
-        CheckoutCalculation calc = new CheckoutCalculation(
-                BigDecimal.valueOf(1000), BigDecimal.ZERO, BigDecimal.valueOf(1000),
-                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.valueOf(1000),
-                false, 0
-        );
-
-        assertThrows(IllegalArgumentException.class,
-                () -> checkoutService.complete(2L, calc, BigDecimal.valueOf(500),
-                        PaymentMethod.CASH, "receptionist", null, false));
     }
 
     @Test
@@ -245,7 +224,7 @@ class CheckoutServiceTest {
                 false, 0
         );
 
-        checkoutService.complete(1L, calc, BigDecimal.valueOf(1000),
+        checkoutService.complete(1L, calc,
                 PaymentMethod.CASH, "receptionist", null, false);
 
         verify(invoiceRepository).save(any());
@@ -272,7 +251,7 @@ class CheckoutServiceTest {
                 false, 0
         );
 
-        Reservation result = checkoutService.complete(3L, calc, BigDecimal.valueOf(800),
+        Reservation result = checkoutService.complete(3L, calc,
                 PaymentMethod.CARD, "receptionist", null, false);
 
         assertEquals(ReservationStatus.CHECKED_OUT, result.getStatus());
