@@ -3,6 +3,7 @@ package com.hospi.manage.features.guest.dto;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 public class ReviewForm {
 
@@ -11,6 +12,8 @@ public class ReviewForm {
     @Max(value = 5, message = "Rating must be at most 5")
     private Integer rating;
 
+    @NotNull(message = "Reservation is required")
+    @Positive(message = "Invalid reservation")
     private Long reservationId;
 
     public Integer getRating() {
