@@ -19,6 +19,7 @@ public record AccountCreateForm(
         String email,
 
         @NotBlank(message = "Password is required")
+        @Size(max = 255, message = "Password must not exceed 255 characters")
         String password,
 
         @Size(max = 20, message = "Phone must not exceed 20 characters")

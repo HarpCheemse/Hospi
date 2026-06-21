@@ -27,6 +27,7 @@ public record RoomTypeEditForm(
         String description,
 
         @NotBlank(message = "Features are required")
+        @Size(max = 2000, message = "Features must not exceed 2000 characters")
         String features,
 
         @NotNull(message = "Bed type is required")
