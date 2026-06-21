@@ -75,11 +75,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 SELECT r FROM Reservation r
                 WHERE r.status IN :statuses
                 AND LOWER(r.guestName) LIKE :guestName
+                AND NOT (r.status = 'PENDING' AND r.source = 'ONLINE')
             """,
             countQuery = """
                 SELECT COUNT(r) FROM Reservation r
                 WHERE r.status IN :statuses
                 AND LOWER(r.guestName) LIKE :guestName
+                AND NOT (r.status = 'PENDING' AND r.source = 'ONLINE')
             """)
     Page<Reservation> findFiltered(@Param("statuses") List<ReservationStatus> statuses,
                                    @Param("guestName") String guestName,
@@ -103,6 +105,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 AND LOWER(r.guestName) LIKE :guestName
                 AND r.checkInAt <= :date
                 AND r.checkOutAt >= :date
+                AND NOT (r.status = 'PENDING' AND r.source = 'ONLINE')
             """,
             countQuery = """
                 SELECT COUNT(r) FROM Reservation r
@@ -110,6 +113,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 AND LOWER(r.guestName) LIKE :guestName
                 AND r.checkInAt <= :date
                 AND r.checkOutAt >= :date
+                AND NOT (r.status = 'PENDING' AND r.source = 'ONLINE')
             """)
     Page<Reservation> findFilteredWithDate(@Param("statuses") List<ReservationStatus> statuses,
                                            @Param("guestName") String guestName,

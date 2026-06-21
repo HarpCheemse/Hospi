@@ -30,7 +30,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/receptionist/reservations")
 @RequiredArgsConstructor
-public class ReservationController {
+public class ReceptionistReservationController {
 
     private final ReservationService reservationService;
     private final OfflineBookingValidator offlineBookingValidator;
