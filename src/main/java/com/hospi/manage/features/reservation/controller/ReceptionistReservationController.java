@@ -201,6 +201,11 @@ public class ReceptionistReservationController {
                             null));
         }
 
+        model.addAttribute("roomForm",
+                new AssignRoomForm(null));
+        model.addAttribute("extendForm",
+                new ExtendStayForm(null));
+
         return "receptionist/reservation/manage";
     }
 
@@ -213,6 +218,10 @@ public class ReceptionistReservationController {
                             reservationService.findById(id)));
             model.addAttribute(Attributes.ACTIVE_SIDEBAR,
                     Attributes.CURRENT_STAYS);
+            model.addAttribute("roomForm",
+                    new AssignRoomForm(null));
+            model.addAttribute("extendForm",
+                    new ExtendStayForm(null));
             return "receptionist/reservation/manage";
         }
         stayingGuestService.addGuest(id,
@@ -234,6 +243,10 @@ public class ReceptionistReservationController {
                     guestId);
             model.addAttribute(Attributes.ACTIVE_SIDEBAR,
                     Attributes.CURRENT_STAYS);
+            model.addAttribute("roomForm",
+                    new AssignRoomForm(null));
+            model.addAttribute("extendForm",
+                    new ExtendStayForm(null));
             return "receptionist/reservation/manage";
         }
         stayingGuestService.updateGuest(id,
@@ -254,10 +267,23 @@ public class ReceptionistReservationController {
     }
 
     @PostMapping("/{id}/manage/rooms")
-    String assignRoom(@PathVariable Long id, @RequestParam Long roomId, RedirectAttributes redirect) {
+    String assignRoom(@PathVariable Long id, @Valid @ModelAttribute("roomForm") AssignRoomForm form,
+                      BindingResult binding, Model model, RedirectAttributes redirect) {
+        if (binding.hasErrors()) {
+            model.addAttribute(Attributes.VIEW,
+                    buildManageView(id,
+                            reservationService.findById(id)));
+            model.addAttribute(Attributes.ACTIVE_SIDEBAR,
+                    Attributes.CURRENT_STAYS);
+            model.addAttribute(Attributes.FORM,
+                    new StayingGuestForm(null, null, null));
+            model.addAttribute("extendForm",
+                    new ExtendStayForm(null));
+            return "receptionist/reservation/manage";
+        }
         try {
             roomAssignmentService.assignRoom(id,
-                    roomId);
+                    form.roomId());
             redirect.addFlashAttribute(Attributes.SUCCESS,
                     "Room assigned successfully.");
         } catch (IllegalStateException e) {
@@ -289,11 +315,24 @@ public class ReceptionistReservationController {
     }
 
     @PostMapping("/{id}/manage/extend")
-    public String extendStay(@PathVariable Long id, @RequestParam int extraDays, RedirectAttributes redirect) {
+    public String extendStay(@PathVariable Long id, @Valid @ModelAttribute("extendForm") ExtendStayForm form,
+                             BindingResult binding, Model model, RedirectAttributes redirect) {
+        if (binding.hasErrors()) {
+            model.addAttribute(Attributes.VIEW,
+                    buildManageView(id,
+                            reservationService.findById(id)));
+            model.addAttribute(Attributes.ACTIVE_SIDEBAR,
+                    Attributes.CURRENT_STAYS);
+            model.addAttribute(Attributes.FORM,
+                    new StayingGuestForm(null, null, null));
+            model.addAttribute("roomForm",
+                    new AssignRoomForm(null));
+            return "receptionist/reservation/manage";
+        }
 
         try {
             reservationService.extendStay(id,
-                    extraDays);
+                    form.extraDays());
 
             redirect.addFlashAttribute(Attributes.SUCCESS,
                     "Stay extended successfully.");
