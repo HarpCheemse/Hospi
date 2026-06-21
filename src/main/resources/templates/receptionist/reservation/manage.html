@@ -229,12 +229,14 @@
                     <!-- assign room form -->
                     <div th:if="${!#lists.isEmpty(view.availableRooms())}" class="mt-4">
                         <form th:action="@{/receptionist/reservations/{id}/manage/rooms(id=${view.reservation().id})}"
+                              th:object="${roomForm}"
                               method="post"
                               class="flex items-end gap-3"
                               novalidate>
                             <div class="flex flex-col gap-2 flex-1">
                                 <label class="text-sm font-medium" for="roomId">Assign Room <span class="text-danger">*</span></label>
-                                <select id="roomId" name="roomId" required class="input">
+                                <div th:replace="~{fragments/form-error :: error('roomId')}"></div>
+                                <select id="roomId" th:field="*{roomId}" class="input">
                                     <option value="">Select a room...</option>
                                     <option th:each="r : ${view.availableRooms()}"
                                             th:value="${r.id}"
@@ -353,15 +355,17 @@
                 <div class="p-6">
 
                     <form th:action="@{/receptionist/reservations/{id}/manage/extend(id=${view.reservation().id})}"
+                          th:object="${extendForm}"
                           method="post"
                           class="flex items-end gap-4"
                           novalidate>
 
                         <div class="flex flex-col gap-2 flex-1">
-                            <label class="text-sm font-medium" for="extraDays">Extra Nights</label>
+                            <label class="text-sm font-medium" for="extraDays">Extra Nights <span class="text-danger">*</span></label>
+                            <div th:replace="~{fragments/form-error :: error('extraDays')}"></div>
                             <input type="number"
                                    id="extraDays"
-                                   name="extraDays"
+                                   th:field="*{extraDays}"
                                    min="1"
                                    placeholder="days"
                                    class="input">
