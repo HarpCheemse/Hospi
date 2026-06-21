@@ -146,6 +146,31 @@
 
                 </tbody>
 
+                <tfoot th:if="${view.checkedInTotalPages() > 1}">
+                    <tr>
+                        <td colspan="5" class="px-5 py-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-muted-foreground">
+                                    Page <span th:text="${view.checkedInPage() + 1}">1</span>
+                                    of <span th:text="${view.checkedInTotalPages()}">1</span>
+                                </span>
+                                <div class="flex items-center gap-2">
+                                    <a th:href="@{/receptionist/reservations(checkedInSearch=${view.checkedInSearch()}, status=${view.filterStatus()}, date=${view.filterDate()}, search=${view.filterSearch()}, checkedInPage=${view.checkedInPage() - 1}, activePage=${view.activePage()})}"
+                                       th:classappend="${view.checkedInPage() == 0} ? 'pointer-events-none opacity-50' : ''"
+                                       class="btn btn-ghost btn-sm">Prev</a>
+                                    <input type="number" x-data
+                                           @keydown.enter="const p = new URLSearchParams(window.location.search); p.set('checkedInPage', Math.max(0, (parseInt($event.target.value) || 1) - 1)); window.location.href = '?' + p.toString();"
+                                           min="1" th:max="${view.checkedInTotalPages()}"
+                                           class="input w-16 text-center" placeholder="#">
+                                    <a th:href="@{/receptionist/reservations(checkedInSearch=${view.checkedInSearch()}, status=${view.filterStatus()}, date=${view.filterDate()}, search=${view.filterSearch()}, checkedInPage=${view.checkedInPage() + 1}, activePage=${view.activePage()})}"
+                                       th:classappend="${view.checkedInPage() >= view.checkedInTotalPages() - 1} ? 'pointer-events-none opacity-50' : ''"
+                                       class="btn btn-ghost btn-sm">Next</a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tfoot>
+
             </table>
 
         </div>
@@ -296,6 +321,31 @@
 
 
                 </tbody>
+
+                <tfoot th:if="${view.activeTotalPages() > 1}">
+                    <tr>
+                        <td colspan="6" class="px-5 py-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-muted-foreground">
+                                    Page <span th:text="${view.activePage() + 1}">1</span>
+                                    of <span th:text="${view.activeTotalPages()}">1</span>
+                                </span>
+                                <div class="flex items-center gap-2">
+                                    <a th:href="@{/receptionist/reservations(checkedInSearch=${view.checkedInSearch()}, status=${view.filterStatus()}, date=${view.filterDate()}, search=${view.filterSearch()}, activePage=${view.activePage() - 1}, checkedInPage=${view.checkedInPage()})}"
+                                       th:classappend="${view.activePage() == 0} ? 'pointer-events-none opacity-50' : ''"
+                                       class="btn btn-ghost btn-sm">Prev</a>
+                                    <input type="number" x-data
+                                           @keydown.enter="const p = new URLSearchParams(window.location.search); p.set('activePage', Math.max(0, (parseInt($event.target.value) || 1) - 1)); window.location.href = '?' + p.toString();"
+                                           min="1" th:max="${view.activeTotalPages()}"
+                                           class="input w-16 text-center" placeholder="#">
+                                    <a th:href="@{/receptionist/reservations(checkedInSearch=${view.checkedInSearch()}, status=${view.filterStatus()}, date=${view.filterDate()}, search=${view.filterSearch()}, activePage=${view.activePage() + 1}, checkedInPage=${view.checkedInPage()})}"
+                                       th:classappend="${view.activePage() >= view.activeTotalPages() - 1} ? 'pointer-events-none opacity-50' : ''"
+                                       class="btn btn-ghost btn-sm">Next</a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tfoot>
 
             </table>
 

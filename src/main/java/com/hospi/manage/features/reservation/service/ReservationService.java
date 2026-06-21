@@ -15,6 +15,8 @@ import com.hospi.manage.features.room.dto.response.RoomSelection;
 import com.hospi.manage.features.room.entity.RoomType;
 import com.hospi.manage.features.room.repository.RoomTypeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,11 +59,32 @@ public class ReservationService {
         return reservationRepository.findFiltered(statuses, searchPattern);
     }
 
+    public Page<Reservation> findFiltered(List<ReservationStatus> statuses,
+                                           String guestName,
+                                           LocalDate date,
+                                           Pageable pageable) {
+        String searchPattern = "%";
+        if (guestName != null && !guestName.isBlank()) {
+            searchPattern = "%" + guestName.trim().toLowerCase() + "%";
+        }
+        if (date != null) {
+            return reservationRepository.findFilteredWithDate(statuses, searchPattern, date, pageable);
+        }
+        return reservationRepository.findFiltered(statuses, searchPattern, pageable);
+    }
+
     public List<Reservation> findCheckedInFiltered(String search) {
         if (search == null || search.isBlank()) {
             return findByStatus(ReservationStatus.CHECKED_IN);
         }
         return reservationRepository.findCheckedInFiltered("%" + search.trim().toLowerCase() + "%");
+    }
+
+    public Page<Reservation> findCheckedInFiltered(String search, Pageable pageable) {
+        if (search == null || search.isBlank()) {
+            return reservationRepository.findByStatusOrderByCheckInAtDesc(ReservationStatus.CHECKED_IN, pageable);
+        }
+        return reservationRepository.findCheckedInFiltered("%" + search.trim().toLowerCase() + "%", pageable);
     }
 
     public Reservation findById(Long id) {

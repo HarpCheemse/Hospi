@@ -14,6 +14,7 @@ import com.hospi.manage.features.reservation.validation.OfflineBookingValidator;
 import com.hospi.manage.features.room.dto.response.RoomSelection;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -49,6 +50,8 @@ public class ReservationController {
                 @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
                 @RequestParam(required = false) String search,
                 @RequestParam(name = "checkedInSearch", required = false) String checkedInSearch,
+                @RequestParam(name = "checkedInPage", defaultValue = "0") int checkedInPage,
+                @RequestParam(name = "activePage", defaultValue = "0") int activePage,
                 Model model) {
         List<ReservationStatus> statuses;
         if (status != null && !status.isBlank()) {
@@ -60,10 +63,12 @@ public class ReservationController {
 
         model.addAttribute(Attributes.VIEW,
                 ReservationMapper.toListView(
-                        reservationService.findCheckedInFiltered(checkedInSearch),
+                        reservationService.findCheckedInFiltered(checkedInSearch,
+                                PageRequest.of(checkedInPage, 10)),
                         reservationService.findFiltered(statuses,
                                 search,
-                                date),
+                                date,
+                                PageRequest.of(activePage, 20)),
                         status,
                         date,
                         search,

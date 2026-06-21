@@ -9,6 +9,7 @@ import com.hospi.manage.features.reservation.entity.StayingGuest;
 import com.hospi.manage.features.reservation.enums.BookingSource;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.room.entity.Room;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -47,7 +48,30 @@ public class ReservationMapper {
                 filterStatus,
                 filterDate,
                 filterSearch,
-                checkedInSearch);
+                checkedInSearch,
+                0, 0, 0, 0, 0, 0);
+    }
+
+    public static ReservationListView toListView(
+            Page<Reservation> checkedIn,
+            Page<Reservation> active,
+            String filterStatus,
+            LocalDate filterDate,
+            String filterSearch,
+            String checkedInSearch) {
+        return new ReservationListView(
+                toListItemViews(checkedIn.getContent()),
+                toListItemViews(active.getContent()),
+                filterStatus,
+                filterDate,
+                filterSearch,
+                checkedInSearch,
+                checkedIn.getNumber(),
+                checkedIn.getTotalPages(),
+                checkedIn.getTotalElements(),
+                active.getNumber(),
+                active.getTotalPages(),
+                active.getTotalElements());
     }
 
     public static List<ReservationListItemView> toListItemViews(List<Reservation> reservations) {

@@ -9,5 +9,11 @@ public record ReservationListView(
     String filterStatus,
     LocalDate filterDate,
     String filterSearch,
-    String checkedInSearch
+    String checkedInSearch,
+    int checkedInPage,
+    int checkedInTotalPages,
+    long checkedInTotal,
+    int activePage,
+    int activeTotalPages,
+    long activeTotal
 ) {}

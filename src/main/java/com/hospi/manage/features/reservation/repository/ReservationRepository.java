@@ -2,6 +2,8 @@ package com.hospi.manage.features.reservation.repository;
 
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +15,8 @@ import java.util.Optional;
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
     List<Reservation> findByStatusOrderByCheckInAtDesc(ReservationStatus status);
+
+    Page<Reservation> findByStatusOrderByCheckInAtDesc(ReservationStatus status, Pageable pageable);
 
     List<Reservation> findByStatusInOrderByCheckInAtDesc(List<ReservationStatus> statuses);
 
@@ -46,6 +50,18 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             """)
     List<Reservation> findCheckedInFiltered(@Param("search") String search);
 
+    @Query(value = """
+                SELECT r FROM Reservation r
+                WHERE r.status = 'CHECKED_IN'
+                AND (LOWER(r.guestName) LIKE :search OR r.guestPhone LIKE :search)
+            """,
+            countQuery = """
+                SELECT COUNT(r) FROM Reservation r
+                WHERE r.status = 'CHECKED_IN'
+                AND (LOWER(r.guestName) LIKE :search OR r.guestPhone LIKE :search)
+            """)
+    Page<Reservation> findCheckedInFiltered(@Param("search") String search, Pageable pageable);
+
     @Query("""
                 SELECT r FROM Reservation r
                 WHERE r.status IN :statuses
@@ -54,6 +70,20 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             """)
     List<Reservation> findFiltered(@Param("statuses") List<ReservationStatus> statuses,
                                    @Param("guestName") String guestName);
+
+    @Query(value = """
+                SELECT r FROM Reservation r
+                WHERE r.status IN :statuses
+                AND LOWER(r.guestName) LIKE :guestName
+            """,
+            countQuery = """
+                SELECT COUNT(r) FROM Reservation r
+                WHERE r.status IN :statuses
+                AND LOWER(r.guestName) LIKE :guestName
+            """)
+    Page<Reservation> findFiltered(@Param("statuses") List<ReservationStatus> statuses,
+                                   @Param("guestName") String guestName,
+                                   Pageable pageable);
 
     @Query("""
                 SELECT r FROM Reservation r
@@ -66,6 +96,25 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findFilteredWithDate(@Param("statuses") List<ReservationStatus> statuses,
                                            @Param("guestName") String guestName,
                                            @Param("date") LocalDate date);
+
+    @Query(value = """
+                SELECT r FROM Reservation r
+                WHERE r.status IN :statuses
+                AND LOWER(r.guestName) LIKE :guestName
+                AND r.checkInAt <= :date
+                AND r.checkOutAt >= :date
+            """,
+            countQuery = """
+                SELECT COUNT(r) FROM Reservation r
+                WHERE r.status IN :statuses
+                AND LOWER(r.guestName) LIKE :guestName
+                AND r.checkInAt <= :date
+                AND r.checkOutAt >= :date
+            """)
+    Page<Reservation> findFilteredWithDate(@Param("statuses") List<ReservationStatus> statuses,
+                                           @Param("guestName") String guestName,
+                                           @Param("date") LocalDate date,
+                                           Pageable pageable);
 
     Optional<Reservation> findByGuestEmailAndConfirmationCode(String guestEmail, String confirmationCode);
 }
