@@ -1,223 +1,187 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Booking | Hospi Hotel</title>
-  <link rel="stylesheet" th:href="@{/css/app.css}">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Booking | Hospi Hotel</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap"
+          rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js" defer></script>
 </head>
 <body class="bg-background text-text flex flex-col min-h-screen pt-24">
 
-  <div th:replace="~{guest/layout :: header('my-booking')}"></div>
+<div th:replace="~{guest/layout :: header('my-booking')}"></div>
 
-  <main class="flex-grow">
+<main class="flex-grow">
 
     <div th:replace="~{fragments/components/toast :: toast}"></div>
 
     <section class="bg-surface-muted py-16 border-b border-border/30">
-      <div class="mx-auto max-w-7xl px-6 text-center">
-        <div class="flex items-center justify-center gap-4 mb-4">
-          <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <img th:src="@{/assets/icons/list-todo.svg}" alt="">
-          </div>
-          <div class="text-left">
-            <h1 class="text-4xl md:text-5xl font-bold font-display text-text">My Booking</h1>
-            <p class="mt-1 text-sm text-muted-foreground-foreground">View your booking details and share your experience.</p>
-          </div>
+        <div class="mx-auto max-w-7xl px-6 text-center">
+            <div class="flex items-center justify-center gap-4 mb-4">
+                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    <img th:src="@{/assets/icons/list-todo.svg}" alt="">
+                </div>
+                <div class="text-left">
+                    <h1 class="text-4xl md:text-5xl font-bold font-display text-text">My Booking</h1>
+                    <p class="mt-1 text-sm text-muted-foreground">View your booking details and share your
+                        experience.</p>
+                </div>
+            </div>
         </div>
-      </div>
     </section>
 
     <!-- TRACK FORM (no session) -->
     <section th:if="${#lists.isEmpty(reservations)}" class="mx-auto max-w-lg px-6 py-20">
 
-      <section class="card">
+        <section class="card">
 
-        <div class="border-b border-border px-6 py-5">
-          <div class="flex items-center gap-3">
-            <img th:src="@{/assets/icons/search.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
-            <div>
-              <h2 class="text-xl font-semibold">Track Your Booking</h2>
-              <p class="mt-1 text-sm text-muted-foreground-foreground">Enter your email and booking code to look up your reservation.</p>
+            <div class="border-b border-border px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <img th:src="@{/assets/icons/search.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div>
+                        <h2 class="text-xl font-semibold">Track Your Booking</h2>
+                        <p class="mt-1 text-sm text-muted-foreground">Enter your email and booking code to look up your
+                            reservation.</p>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
 
-        <form th:action="@{/my-booking/lookup}" th:object="${form}" method="post" class="flex flex-col gap-5 p-6">
+            <form th:action="@{/my-booking/lookup}" th:object="${form}" method="post" class="flex flex-col gap-5 p-6">
 
-          <div class="flex flex-col gap-2">
-            <label class="text-sm font-medium" for="email">Email Address <span class="text-danger">*</span></label>
-            <div th:replace="fragments/form-error :: error('email')"></div>
-            <input type="email" id="email" th:field="*{email}"
-                   placeholder="example@email.com"
-                   class="input"
-                   th:classappend="${#fields.hasErrors('email')} ? 'input-error' : ''"
-                   required>
-          </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium" for="email">Email Address <span
+                            class="text-danger">*</span></label>
+                    <div th:replace="fragments/form-error :: error('email')"></div>
+                    <input type="email" id="email" th:field="*{email}"
+                           placeholder="example@email.com"
+                           class="input"
+                           th:classappend="${#fields.hasErrors('email')} ? 'input-error' : ''"
+                           required>
+                </div>
 
-          <div class="flex flex-col gap-2">
-            <label class="text-sm font-medium" for="bookingCode">Booking Code <span class="text-danger">*</span></label>
-            <div th:replace="fragments/form-error :: error('bookingCode')"></div>
-            <input type="text" id="bookingCode" th:field="*{bookingCode}"
-                   placeholder="HSP-XXXXXX"
-                   class="input"
-                   th:classappend="${#fields.hasErrors('bookingCode')} ? 'input-error' : ''"
-                   required>
-          </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium" for="bookingCode">Booking Code <span class="text-danger">*</span></label>
+                    <div th:replace="fragments/form-error :: error('bookingCode')"></div>
+                    <input type="text" id="bookingCode" th:field="*{bookingCode}"
+                           placeholder="HSP-XXXXXX"
+                           class="input"
+                           th:classappend="${#fields.hasErrors('bookingCode')} ? 'input-error' : ''"
+                           required>
+                </div>
 
-          <div class="flex items-center justify-end gap-3 pt-2">
-            <button type="submit" class="btn btn-primary btn-lg">
-              Send Verification Code
-            </button>
-          </div>
-        </form>
+                <div class="flex items-center justify-end gap-3 pt-2">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        Send Verification Code
+                    </button>
+                </div>
+            </form>
 
-      </section>
+        </section>
 
-      <!-- OTP Verification -->
-      <section th:if="${verifyEmail != null}" class="card mt-6">
-
-        <div class="border-b border-border px-6 py-5">
-          <div class="flex items-center gap-3">
-            <img th:src="@{/assets/icons/shield-check.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
-            <div>
-              <h2 class="text-xl font-semibold">Verify Your Email</h2>
-              <p class="mt-1 text-sm text-muted-foreground-foreground">
-                Enter the 6-digit code sent to <strong th:text="${verifyEmail}">email@example.com</strong>.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <form th:action="@{/my-booking/verify}" method="post" class="flex flex-col gap-5 p-6">
-
-          <div class="flex flex-col gap-2">
-            <label class="text-sm font-medium" for="otp">OTP Code</label>
-            <div th:replace="fragments/form-error :: error('otp')"></div>
-            <input type="text" id="otp" name="otp"
-                   placeholder="000000" maxlength="6" inputmode="numeric" pattern="[0-9]{6}"
-                   class="input text-center text-2xl tracking-widest"
-                   required>
-          </div>
-
-          <div class="flex items-center justify-end gap-3 pt-2">
-            <button type="submit" class="btn btn-primary btn-lg">
-              Verify &amp; View Booking
-            </button>
-          </div>
-        </form>
-
-        <div class="px-6 pb-6">
-          <p class="text-center text-xs text-muted-foreground">
-            Didn't receive the code?
-            <a th:href="@{/my-booking}" class="text-primary hover:underline">Try again</a>
-          </p>
-        </div>
-
-      </section>
 
     </section>
 
     <!-- BOOKINGS LIST (has session) -->
     <section th:if="${!#lists.isEmpty(reservations)}" class="mx-auto max-w-3xl px-6 py-20">
 
-      <div class="flex items-center justify-between mb-8">
-        <h2 class="text-2xl font-bold font-display text-text">Your Bookings</h2>
-        <form th:action="@{/my-booking/clear}" method="post" class="inline">
-          <button type="submit" class="btn btn-ghost btn-sm">+ Track Another Booking</button>
-        </form>
-      </div>
+        <div class="flex items-center justify-between mb-8">
+            <h2 class="text-2xl font-bold font-display text-text">Your Bookings</h2>
+            <form th:action="@{/my-booking/clear}" method="post" class="inline">
+                <button type="submit" class="btn btn-ghost btn-sm">+ Track Another Booking</button>
+            </form>
+        </div>
 
-      <div class="flex flex-col gap-6">
-        <div th:each="reservation : ${reservations}"
-             class="card p-8">
+        <div class="flex flex-col gap-6">
+            <div th:each="reservation : ${reservations}"
+                 class="card p-8">
 
-          <!-- Header -->
-          <div class="flex items-start justify-between mb-4">
-            <div>
-              <p class="text-xs font-semibold uppercase tracking-widest text-accent"
-                 th:text="${reservation.confirmationCode}">HSP-A1B2C3</p>
-              <h3 class="text-xl font-bold font-display text-text mt-1"
-                  th:text="${reservation.guestName}">Nguyen Van A</h3>
-            </div>
-            <span th:classappend="${pillClasses.get(reservation.id)}"
-                  class="text-xs font-semibold px-3 py-1 rounded-full"
-                  th:text="${reservation.status.name()}">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-widest text-accent"
+                           th:text="${reservation.confirmationCode}">HSP-A1B2C3</p>
+                        <h3 class="text-xl font-bold font-display text-text mt-1"
+                            th:text="${reservation.guestName}">Nguyen Van A</h3>
+                    </div>
+                    <span th:classappend="${pillClasses.get(reservation.id)}"
+                          class="text-xs font-semibold px-3 py-1 rounded-full"
+                          th:text="${reservation.status.name()}">
               CONFIRMED
             </span>
-          </div>
+                </div>
 
-          <!-- Details Grid -->
-          <div class="grid grid-cols-2 gap-4 text-sm mb-4">
-            <div>
-              <span class="text-muted-foreground">Check-In</span>
-              <p class="font-medium text-foreground"
-                 th:text="${#temporals.format(reservation.checkInAt, 'dd MMM yyyy')}">15 Jun 2026</p>
-            </div>
-            <div>
-              <span class="text-muted-foreground">Check-Out</span>
-              <p class="font-medium text-foreground"
-                 th:text="${#temporals.format(reservation.checkOutAt, 'dd MMM yyyy')}">18 Jun 2026</p>
-            </div>
-          </div>
+                <!-- Details Grid -->
+                <div class="grid grid-cols-2 gap-4 text-sm mb-4">
+                    <div>
+                        <span class="text-muted-foreground">Check-In</span>
+                        <p class="font-medium text-foreground"
+                           th:text="${#temporals.format(reservation.checkInAt, 'dd MMM yyyy')}">15 Jun 2026</p>
+                    </div>
+                    <div>
+                        <span class="text-muted-foreground">Check-Out</span>
+                        <p class="font-medium text-foreground"
+                           th:text="${#temporals.format(reservation.checkOutAt, 'dd MMM yyyy')}">18 Jun 2026</p>
+                    </div>
+                </div>
 
-          <!-- Rooms -->
-          <div class="mb-4">
-            <span class="text-xs text-muted-foreground">Rooms</span>
-            <div class="flex flex-wrap gap-2 mt-1">
-              <th:block th:each="detail : ${reservation.details}">
+                <!-- Rooms -->
+                <div class="mb-4">
+                    <span class="text-xs text-muted-foreground">Rooms</span>
+                    <div class="flex flex-wrap gap-2 mt-1">
+                        <th:block th:each="detail : ${reservation.details}">
                 <span class="inline-block rounded-full bg-background border border-border/60 px-3 py-1 text-xs text-foreground"
                       th:text="${detail.roomType.name} + ' x' + ${detail.roomCount}">
                   Deluxe x2
                 </span>
-              </th:block>
-            </div>
-          </div>
+                        </th:block>
+                    </div>
+                </div>
 
-          <!-- Review Section (only for CHECKED_OUT) -->
-          <div th:if="${reservation.status.name() == 'CHECKED_OUT'}" class="mt-6 pt-4 border-t border-border/60">
+                <!-- Review Section (only for CHECKED_OUT) -->
+                <div th:if="${reservation.status.name() == 'CHECKED_OUT'}" class="mt-6 pt-4 border-t border-border/60">
 
-            <!-- Already reviewed -->
-            <div th:if="${reviewMap.containsKey(reservation.id)}" class="flex items-center gap-2">
-              <span class="text-sm text-muted-foreground">Your rating:</span>
-              <span th:each="i : ${#numbers.sequence(1, 5)}"
-                    th:text="${i <= reviewMap.get(reservation.id).rating} ? '★' : '☆'"
-                    class="text-lg"
-                    th:classappend="${i <= reviewMap.get(reservation.id).rating} ? 'text-amber-400' : 'text-muted-foreground'">
+                    <!-- Already reviewed -->
+                    <div th:if="${reviewMap.containsKey(reservation.id)}" class="flex items-center gap-2">
+                        <span class="text-sm text-muted-foreground">Your rating:</span>
+                        <span th:each="i : ${#numbers.sequence(1, 5)}"
+                              th:text="${i <= reviewMap.get(reservation.id).rating} ? '★' : '☆'"
+                              class="text-lg"
+                              th:classappend="${i <= reviewMap.get(reservation.id).rating} ? 'text-amber-400' : 'text-muted-foreground'">
                 ★
               </span>
+                    </div>
+
+                    <!-- Not yet reviewed -->
+                    <div th:if="${!reviewMap.containsKey(reservation.id)}" class="flex items-center gap-3">
+                        <span class="text-sm text-muted-foreground">Rate your stay:</span>
+                        <form th:action="@{/my-booking/review}" method="post" class="flex items-center gap-2">
+                            <input type="hidden" name="reservationId" th:value="${reservation.id}"/>
+                            <select name="rating" required class="input">
+                                <option value="">Rate...</option>
+                                <option value="1">1 - Poor</option>
+                                <option value="2">2 - Fair</option>
+                                <option value="3">3 - Good</option>
+                                <option value="4">4 - Very Good</option>
+                                <option value="5">5 - Excellent</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+                        </form>
+                    </div>
+
+                </div>
+
             </div>
-
-            <!-- Not yet reviewed -->
-            <div th:if="${!reviewMap.containsKey(reservation.id)}" class="flex items-center gap-3">
-              <span class="text-sm text-muted-foreground">Rate your stay:</span>
-              <form th:action="@{/my-booking/review}" method="post" class="flex items-center gap-2">
-                <input type="hidden" name="reservationId" th:value="${reservation.id}"/>
-                <select name="rating" required class="input">
-                  <option value="">Rate...</option>
-                  <option value="1">1 - Poor</option>
-                  <option value="2">2 - Fair</option>
-                  <option value="3">3 - Good</option>
-                  <option value="4">4 - Very Good</option>
-                  <option value="5">5 - Excellent</option>
-                </select>
-                <button type="submit" class="btn btn-primary btn-sm">Submit</button>
-              </form>
-            </div>
-
-          </div>
-
         </div>
-      </div>
 
     </section>
 
-  </main>
+</main>
 
-  <div th:replace="~{guest/layout :: footer}"></div>
+<div th:replace="~{guest/layout :: footer}"></div>
 
 </body>
 </html>
