@@ -103,7 +103,7 @@ public class ReceptionistReservationController {
             return "receptionist/reservation/create";
         }
 
-        return UriComponentsBuilder.fromPath("/receptionist/reservations/create/details")
+        return "redirect:" + UriComponentsBuilder.fromPath("/receptionist/reservations/create/details")
                 .queryParam("checkInAt",
                         form.checkInAt())
                 .queryParam("checkOutAt",
