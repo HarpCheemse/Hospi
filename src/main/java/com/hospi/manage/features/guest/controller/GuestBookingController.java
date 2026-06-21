@@ -16,6 +16,7 @@ import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.reservation.service.RoomAvailabilityService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,7 +30,10 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static com.hospi.manage.common.constant.Attributes.*;
+
 @Slf4j
+@RequiredArgsConstructor
 @Controller
 @RequestMapping("/book")
 public class GuestBookingController {
@@ -42,29 +46,11 @@ public class GuestBookingController {
     private final PaymentService paymentService;
     private final BookingDateValidator bookingDateValidator;
 
-    public GuestBookingController(
-            ReservationService reservationService,
-            RoomAvailabilityService roomAvailabilityService,
-            SystemConfigService systemConfigService,
-            OtpService otpService,
-            EmailService emailService,
-            PaymentService paymentService,
-            BookingDateValidator bookingDateValidator) {
-
-        this.reservationService = reservationService;
-        this.roomAvailabilityService = roomAvailabilityService;
-        this.systemConfigService = systemConfigService;
-        this.otpService = otpService;
-        this.emailService = emailService;
-        this.paymentService = paymentService;
-        this.bookingDateValidator = bookingDateValidator;
-    }
-
     private BookingDraft getDraft(HttpSession session) {
-        BookingDraft draft = (BookingDraft) session.getAttribute("bookingDraft");
+        BookingDraft draft = (BookingDraft) session.getAttribute(BOOKING_DRAFT);
         if (draft == null) {
             draft = new BookingDraft();
-            session.setAttribute("bookingDraft",
+            session.setAttribute(BOOKING_DRAFT,
                     draft);
         }
         return draft;
@@ -72,7 +58,7 @@ public class GuestBookingController {
 
     @GetMapping
     String showDateForm(Model model) {
-        model.addAttribute("form",
+        model.addAttribute(FORM,
                 new DateSearchForm(null, null));
         return "guest/booking/book";
     }
@@ -109,13 +95,13 @@ public class GuestBookingController {
                 .toList();
 
         var config = systemConfigService.getConfig();
-        model.addAttribute("availability",
+        model.addAttribute(AVAILABILITY,
                 availability);
-        model.addAttribute("maxRooms",
+        model.addAttribute(MAX_ROOMS,
                 config.getMaximumRoomPerBook());
-        model.addAttribute("depositPercentage",
+        model.addAttribute(DEPOSIT_PERCENTAGE,
                 config.getDefaultDepositPercentage());
-        model.addAttribute("draft",
+        model.addAttribute(DRAFT,
                 draft);
         return "guest/booking/rooms";
     }
@@ -138,7 +124,7 @@ public class GuestBookingController {
                 .toList();
 
         if (roomTypeIds == null || counts == null) {
-            redirect.addFlashAttribute("error",
+            redirect.addFlashAttribute(ERROR,
                     "Please select at least one room.");
             return "redirect:/book/rooms";
         }
@@ -162,7 +148,7 @@ public class GuestBookingController {
                 .toList();
 
         if (selections.isEmpty()) {
-            redirect.addFlashAttribute("error",
+            redirect.addFlashAttribute(ERROR,
                     "Please select at least one room.");
             return "redirect:/book/rooms";
         }
@@ -171,7 +157,7 @@ public class GuestBookingController {
         int maxRooms = config.getMaximumRoomPerBook() != null ? config.getMaximumRoomPerBook() : Integer.MAX_VALUE;
         int totalRooms = selections.stream().mapToInt(BookingDraft.RoomSelection::count).sum();
         if (totalRooms > maxRooms) {
-            redirect.addFlashAttribute("error",
+            redirect.addFlashAttribute(ERROR,
                     "Total rooms selected (" + totalRooms + ") exceeds the maximum of " + maxRooms + " per booking.");
             return "redirect:/book/rooms";
         }
@@ -201,23 +187,22 @@ public class GuestBookingController {
             return "redirect:/book/rooms";
         }
 
-        if (!model.containsAttribute("guestDetailForm")) {
-            GuestDetailForm form = new GuestDetailForm();
-            if (draft.getGuestName() != null) form.setGuestName(draft.getGuestName());
-            if (draft.getGuestEmail() != null) form.setGuestEmail(draft.getGuestEmail());
-            if (draft.getGuestPhone() != null) form.setGuestPhone(draft.getGuestPhone());
-            if (draft.getGuestDateOfBirth() != null) form.setGuestDateOfBirth(draft.getGuestDateOfBirth());
-            if (draft.getGuestNationality() != null) form.setGuestNationality(draft.getGuestNationality());
-            model.addAttribute("guestDetailForm",
-                    form);
+        if (!model.containsAttribute(GUEST_DETAIL_FORM)) {
+            model.addAttribute(GUEST_DETAIL_FORM, new GuestDetailForm(
+                    draft.getGuestName(),
+                    draft.getGuestEmail(),
+                    draft.getGuestPhone(),
+                    draft.getGuestDateOfBirth(),
+                    draft.getGuestNationality()
+            ));
         }
-        if (!model.containsAttribute("otpForm")) {
-            model.addAttribute("otpForm",
-                    new OtpForm());
+        if (!model.containsAttribute(OTP_FORM)) {
+            model.addAttribute(OTP_FORM,
+                    new OtpForm(null));
         }
-        model.addAttribute("otpSent",
+        model.addAttribute(OTP_SENT,
                 otpSent != null && otpSent);
-        model.addAttribute("draft",
+        model.addAttribute(DRAFT,
                 draft);
         return "guest/booking/verify";
     }
@@ -229,37 +214,37 @@ public class GuestBookingController {
                    Model model,
                    RedirectAttributes redirect) {
         if (binding.hasErrors()) {
-            model.addAttribute("otpForm",
-                    new OtpForm());
-            model.addAttribute("otpSent",
+            model.addAttribute(OTP_FORM,
+                    new OtpForm(null));
+            model.addAttribute(OTP_SENT,
                     false);
-            model.addAttribute("draft",
+            model.addAttribute(DRAFT,
                     getDraft(session));
             return "guest/booking/verify";
         }
 
         BookingDraft draft = getDraft(session);
-        draft.setGuestName(form.getGuestName());
-        draft.setGuestEmail(form.getGuestEmail());
-        draft.setGuestPhone(form.getGuestPhone());
-        draft.setGuestDateOfBirth(form.getGuestDateOfBirth());
-        draft.setGuestNationality(form.getGuestNationality());
+        draft.setGuestName(form.guestName());
+        draft.setGuestEmail(form.guestEmail());
+        draft.setGuestPhone(form.guestPhone());
+        draft.setGuestDateOfBirth(form.guestDateOfBirth());
+        draft.setGuestNationality(form.guestNationality());
 
         try {
-            String otp = otpService.createOtp(form.getGuestEmail(),
+            String otp = otpService.createOtp(form.guestEmail(),
                     OtpType.BOOKING_CONFIRM);
-            emailService.send(form.getGuestEmail(),
+            emailService.send(form.guestEmail(),
                     "Your Booking OTP Code",
                     "Your OTP code is: " + otp
                             + "\n\nThis code expires in 10 minutes.\n\nThank you for choosing Hospi!");
         } catch (Exception e) {
-            redirect.addFlashAttribute("error",
+            redirect.addFlashAttribute(ERROR,
                     "Failed to send OTP. Please try again.");
             return "redirect:/book/verify";
         }
 
-        redirect.addFlashAttribute("success",
-                "OTP sent to " + form.getGuestEmail());
+        redirect.addFlashAttribute(SUCCESS,
+                "OTP sent to " + form.guestEmail());
         return "redirect:/book/verify?otpSent=true";
     }
 
@@ -275,27 +260,28 @@ public class GuestBookingController {
         }
 
         if (binding.hasErrors()) {
-            GuestDetailForm gForm = new GuestDetailForm();
-            gForm.setGuestName(draft.getGuestName());
-            gForm.setGuestEmail(draft.getGuestEmail());
-            gForm.setGuestPhone(draft.getGuestPhone());
-            gForm.setGuestDateOfBirth(draft.getGuestDateOfBirth());
-            gForm.setGuestNationality(draft.getGuestNationality());
-            model.addAttribute("guestDetailForm",
+            GuestDetailForm gForm = new GuestDetailForm(
+                    draft.getGuestName(),
+                    draft.getGuestEmail(),
+                    draft.getGuestPhone(),
+                    draft.getGuestDateOfBirth(),
+                    draft.getGuestNationality()
+            );
+            model.addAttribute(GUEST_DETAIL_FORM,
                     gForm);
-            model.addAttribute("otpSent",
+            model.addAttribute(OTP_SENT,
                     true);
-            model.addAttribute("draft",
+            model.addAttribute(DRAFT,
                     draft);
             return "guest/booking/verify";
         }
 
         boolean verified = otpService.verifyOtp(draft.getGuestEmail(),
-                otpForm.getOtp(),
+                otpForm.otp(),
                 OtpType.BOOKING_CONFIRM);
 
         if (!verified) {
-            redirect.addFlashAttribute("error",
+            redirect.addFlashAttribute(ERROR,
                     "Invalid or expired OTP");
             return "redirect:/book/verify?otpSent=true";
         }
@@ -313,11 +299,11 @@ public class GuestBookingController {
         }
 
         if (cancelled != null && cancelled) {
-            model.addAttribute("error",
+            model.addAttribute(ERROR,
                     "Payment was cancelled. Please try again.");
         }
 
-        model.addAttribute("draft",
+        model.addAttribute(DRAFT,
                 draft);
         return "guest/booking/pay";
     }
@@ -350,7 +336,7 @@ public class GuestBookingController {
 
         } catch (Exception e) {
             redirect.addFlashAttribute(
-                    "error",
+                    ERROR,
                     "Failed to initiate payment. Please try again."
             );
 
@@ -371,12 +357,12 @@ public class GuestBookingController {
             boolean completed =
                     paymentService.captureOnlineBookingPayment(token);
             if (!completed) {
-                redirect.addFlashAttribute("error",
+                redirect.addFlashAttribute(ERROR,
                         "Payment was not completed. Please try again.");
                 return "redirect:/book/pay";
             }
         } catch (Exception e) {
-            redirect.addFlashAttribute("error",
+            redirect.addFlashAttribute(ERROR,
                     "Payment processing failed. Please contact support.");
             return "redirect:/book/pay";
         }
@@ -385,12 +371,12 @@ public class GuestBookingController {
         try {
             reservation = reservationService.createOnlineBooking(draft);
         } catch (Exception e) {
-            redirect.addFlashAttribute("error",
+            redirect.addFlashAttribute(ERROR,
                     "Failed to create booking. Please contact support.");
             return "redirect:/book/pay";
         }
 
-        session.removeAttribute("bookingDraft");
+        session.removeAttribute(BOOKING_DRAFT);
 
         try {
             emailService.send(reservation.getGuestEmail(),
@@ -415,7 +401,7 @@ public class GuestBookingController {
 
     @GetMapping("/confirmation")
     String showConfirmation(@RequestParam String code, Model model) {
-        model.addAttribute("bookingCode",
+        model.addAttribute(BOOKING_CODE,
                 code);
         return "guest/booking/confirmation";
     }

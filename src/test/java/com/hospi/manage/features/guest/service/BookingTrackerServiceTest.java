@@ -1,5 +1,6 @@
 package com.hospi.manage.features.guest.service;
 
+import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.Review;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
@@ -34,20 +35,17 @@ class BookingTrackerServiceTest {
         when(reservationRepository.findByGuestEmailAndConfirmationCode("a@b.com", "CODE"))
                 .thenReturn(Optional.of(reservation));
 
-        Optional<Reservation> result = service.lookupByEmailAndCode("a@b.com", "CODE");
+        Reservation result = service.lookupByEmailAndCode("a@b.com", "CODE");
 
-        assertTrue(result.isPresent());
-        assertSame(reservation, result.get());
+        assertSame(reservation, result);
     }
 
     @Test
-    void lookupByEmailAndCode_shouldReturnEmpty_whenNotFound() {
+    void lookupByEmailAndCode_shouldThrow_whenNotFound() {
         when(reservationRepository.findByGuestEmailAndConfirmationCode("a@b.com", "CODE"))
                 .thenReturn(Optional.empty());
 
-        Optional<Reservation> result = service.lookupByEmailAndCode("a@b.com", "CODE");
-
-        assertFalse(result.isPresent());
+        assertThrows(ResourceNotFoundException.class, () -> service.lookupByEmailAndCode("a@b.com", "CODE"));
     }
 
     @Test

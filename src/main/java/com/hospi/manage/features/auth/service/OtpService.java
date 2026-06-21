@@ -4,6 +4,7 @@ import com.hospi.manage.core.security.hash.Sha256HashingService;
 import com.hospi.manage.features.auth.entity.OtpChallenge;
 import com.hospi.manage.features.auth.enums.OtpType;
 import com.hospi.manage.features.auth.repository.OtpChallengeRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,14 +12,10 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class OtpService {
     private final OtpChallengeRepository otpChallengeRepository;
     private final Sha256HashingService hashingService;
-
-    public OtpService(OtpChallengeRepository otpChallengeRepository, Sha256HashingService hashingService) {
-        this.otpChallengeRepository = otpChallengeRepository;
-        this.hashingService = hashingService;
-    }
 
     private static int OTP_EXPIRED_MINUTES = 10;
 

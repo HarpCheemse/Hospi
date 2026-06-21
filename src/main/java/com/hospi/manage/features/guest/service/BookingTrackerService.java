@@ -6,6 +6,7 @@ import com.hospi.manage.features.reservation.entity.Review;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
 import com.hospi.manage.features.reservation.repository.ReviewRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,16 +16,11 @@ import java.util.stream.Collectors;
 import static com.hospi.manage.features.reservation.enums.ReservationStatus.*;
 
 @Service
+@RequiredArgsConstructor
 public class BookingTrackerService {
 
     private final ReservationRepository reservationRepository;
     private final ReviewRepository reviewRepository;
-
-    public BookingTrackerService(ReservationRepository reservationRepository,
-                                 ReviewRepository reviewRepository) {
-        this.reservationRepository = reservationRepository;
-        this.reviewRepository = reviewRepository;
-    }
 
     public Reservation lookupByEmailAndCode(String email, String code) {
         return reservationRepository.findByGuestEmailAndConfirmationCode(email, code)

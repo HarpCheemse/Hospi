@@ -23,9 +23,7 @@ class BookingTrackFormTest {
 
     @Test
     void shouldPass_whenValid() {
-        BookingTrackForm form = new BookingTrackForm();
-        form.setEmail("john@example.com");
-        form.setBookingCode("HSP-ABC123");
+        BookingTrackForm form = new BookingTrackForm("john@example.com", "HSP-ABC123");
 
         Set<ConstraintViolation<BookingTrackForm>> violations = validator.validate(form);
 
@@ -34,9 +32,7 @@ class BookingTrackFormTest {
 
     @Test
     void shouldFail_whenEmailBlank() {
-        BookingTrackForm form = new BookingTrackForm();
-        form.setEmail("");
-        form.setBookingCode("HSP-ABC123");
+        BookingTrackForm form = new BookingTrackForm("", "HSP-ABC123");
 
         Set<ConstraintViolation<BookingTrackForm>> violations = validator.validate(form);
 
@@ -46,9 +42,7 @@ class BookingTrackFormTest {
 
     @Test
     void shouldFail_whenEmailInvalid() {
-        BookingTrackForm form = new BookingTrackForm();
-        form.setEmail("not-an-email");
-        form.setBookingCode("HSP-ABC123");
+        BookingTrackForm form = new BookingTrackForm("not-an-email", "HSP-ABC123");
 
         Set<ConstraintViolation<BookingTrackForm>> violations = validator.validate(form);
 
@@ -58,9 +52,7 @@ class BookingTrackFormTest {
 
     @Test
     void shouldFail_whenBookingCodeBlank() {
-        BookingTrackForm form = new BookingTrackForm();
-        form.setEmail("john@example.com");
-        form.setBookingCode("");
+        BookingTrackForm form = new BookingTrackForm("john@example.com", "");
 
         Set<ConstraintViolation<BookingTrackForm>> violations = validator.validate(form);
 

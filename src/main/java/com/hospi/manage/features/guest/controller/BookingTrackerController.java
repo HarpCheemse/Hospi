@@ -10,6 +10,7 @@ import com.hospi.manage.features.guest.service.BookingTrackerService;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,7 +21,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.*;
 
+import static com.hospi.manage.common.constant.Attributes.*;
+
 @Slf4j
+@RequiredArgsConstructor
 @Controller
 @RequestMapping("/my-booking")
 public class BookingTrackerController {
@@ -29,20 +33,12 @@ public class BookingTrackerController {
     private final OtpService otpService;
     private final EmailService emailService;
 
-    public BookingTrackerController(BookingTrackerService bookingTrackerService,
-                                    OtpService otpService,
-                                    EmailService emailService) {
-        this.bookingTrackerService = bookingTrackerService;
-        this.otpService = otpService;
-        this.emailService = emailService;
-    }
-
     @SuppressWarnings("unchecked")
     private Set<String> getTrackedCodes(HttpSession session) {
-        Set<String> codes = (Set<String>) session.getAttribute("trackedBookingCodes");
+        Set<String> codes = (Set<String>) session.getAttribute(TRACKED_BOOKING_CODES);
         if (codes == null) {
             codes = new LinkedHashSet<>();
-            session.setAttribute("trackedBookingCodes", codes);
+            session.setAttribute(TRACKED_BOOKING_CODES, codes);
         }
         return codes;
     }
@@ -53,13 +49,13 @@ public class BookingTrackerController {
         Set<String> codes = getTrackedCodes(session);
 
         if (!codes.isEmpty()) {
-            List<Reservation> reservations = bookingTrackerService.resolveByCodes(codes);
-            model.addAttribute("reservations", reservations);
-            model.addAttribute("reviewMap", bookingTrackerService.buildReviewMap(reservations));
-            model.addAttribute("reviewForm", new ReviewForm());
-            model.addAttribute("pillClasses", bookingTrackerService.buildPillClasses(reservations));
-        } else {
-            model.addAttribute("form", new BookingTrackForm());
+                List<Reservation> reservations = bookingTrackerService.resolveByCodes(codes);
+                model.addAttribute(RESERVATIONS, reservations);
+                model.addAttribute(REVIEW_MAP, bookingTrackerService.buildReviewMap(reservations));
+            model.addAttribute(REVIEW_FORM, new ReviewForm(null, null));
+                model.addAttribute(PILL_CLASSES, bookingTrackerService.buildPillClasses(reservations));
+            } else {
+            model.addAttribute(FORM, new BookingTrackForm(null, null));
         }
 
         return "guest/my-booking";
@@ -69,15 +65,15 @@ public class BookingTrackerController {
     String verifyPage(@RequestParam(required = false) String email,
                       HttpSession session,
                       Model model) {
-        String trackedEmail = (String) session.getAttribute("trackedEmail");
-        String pendingCode = (String) session.getAttribute("pendingCode");
+        String trackedEmail = (String) session.getAttribute(TRACKED_EMAIL);
+        String pendingCode = (String) session.getAttribute(PENDING_CODE);
 
         if (trackedEmail == null || pendingCode == null) {
             return "redirect:/my-booking";
         }
 
-        model.addAttribute("verifyEmail", trackedEmail);
-        model.addAttribute("otpForm", new OtpForm());
+        model.addAttribute(VERIFY_EMAIL, trackedEmail);
+        model.addAttribute(OTP_FORM, new OtpForm(null));
         return "guest/my-booking-verify";
     }
 
@@ -91,27 +87,27 @@ public class BookingTrackerController {
         }
 
         try {
-            bookingTrackerService.lookupByEmailAndCode(form.getEmail(), form.getBookingCode());
+            bookingTrackerService.lookupByEmailAndCode(form.email(), form.bookingCode());
         } catch (Exception e) {
-            redirect.addFlashAttribute("error", "No booking found with that email and code.");
+            redirect.addFlashAttribute(ERROR, "No booking found with that email and code.");
             return "redirect:/my-booking";
         }
 
-        String rawOtp = otpService.createOtp(form.getEmail(), OtpType.BOOKING_TRACK);
+        String rawOtp = otpService.createOtp(form.email(), OtpType.BOOKING_TRACK);
 
         try {
-            emailService.send(form.getEmail(),
+            emailService.send(form.email(),
                     "Your Booking Tracking OTP",
                     "Your OTP code is: " + rawOtp + "\n\nThis code expires in 10 minutes.");
         } catch (Exception e) {
-            log.warn("Failed to send booking tracking OTP to {}", form.getEmail(), e);
+            log.warn("Failed to send booking tracking OTP to {}", form.email(), e);
         }
 
-        session.setAttribute("trackedEmail", form.getEmail());
-        session.setAttribute("pendingCode", form.getBookingCode());
+        session.setAttribute(TRACKED_EMAIL, form.email());
+        session.setAttribute(PENDING_CODE, form.bookingCode());
 
         return "redirect:" + UriComponentsBuilder.fromPath("/my-booking/verify")
-                .queryParam("email", form.getEmail())
+                .queryParam("email", form.email())
                 .build().toUriString();
     }
 
@@ -121,22 +117,22 @@ public class BookingTrackerController {
                   HttpSession session,
                   Model model,
                   RedirectAttributes redirect) {
-        String email = (String) session.getAttribute("trackedEmail");
-        String pendingCode = (String) session.getAttribute("pendingCode");
+        String email = (String) session.getAttribute(TRACKED_EMAIL);
+        String pendingCode = (String) session.getAttribute(PENDING_CODE);
 
         if (email == null || pendingCode == null) {
             return "redirect:/my-booking";
         }
 
         if (binding.hasErrors()) {
-            model.addAttribute("verifyEmail", email);
+            model.addAttribute(VERIFY_EMAIL, email);
             return "guest/my-booking-verify";
         }
 
-        boolean verified = otpService.verifyOtp(email, form.getOtp(), OtpType.BOOKING_TRACK);
+        boolean verified = otpService.verifyOtp(email, form.otp(), OtpType.BOOKING_TRACK);
 
         if (!verified) {
-            redirect.addFlashAttribute("error", "Invalid or expired OTP code.");
+            redirect.addFlashAttribute(ERROR, "Invalid or expired OTP code.");
             return "redirect:" + UriComponentsBuilder.fromPath("/my-booking/verify")
                     .queryParam("email", email)
                     .build().toUriString();
@@ -145,18 +141,18 @@ public class BookingTrackerController {
         Set<String> codes = getTrackedCodes(session);
         codes.add(pendingCode);
 
-        session.removeAttribute("pendingCode");
-        session.removeAttribute("trackedEmail");
+        session.removeAttribute(PENDING_CODE);
+        session.removeAttribute(TRACKED_EMAIL);
 
-        redirect.addFlashAttribute("success", "Booking verified successfully!");
+        redirect.addFlashAttribute(SUCCESS, "Booking verified successfully!");
         return "redirect:/my-booking";
     }
 
     @PostMapping("/clear")
     String clear(HttpSession session) {
-        session.removeAttribute("trackedBookingCodes");
-        session.removeAttribute("trackedEmail");
-        session.removeAttribute("pendingCode");
+        session.removeAttribute(TRACKED_BOOKING_CODES);
+        session.removeAttribute(TRACKED_EMAIL);
+        session.removeAttribute(PENDING_CODE);
         return "redirect:/my-booking";
     }
 
@@ -170,25 +166,25 @@ public class BookingTrackerController {
         if (binding.hasErrors() || codes.isEmpty()) {
             if (!codes.isEmpty()) {
                 List<Reservation> reservations = bookingTrackerService.resolveByCodes(codes);
-                model.addAttribute("reservations", reservations);
-                model.addAttribute("reviewMap", bookingTrackerService.buildReviewMap(reservations));
-                model.addAttribute("reviewForm", new ReviewForm());
-                model.addAttribute("pillClasses", bookingTrackerService.buildPillClasses(reservations));
+            model.addAttribute(RESERVATIONS, reservations);
+            model.addAttribute(REVIEW_MAP, bookingTrackerService.buildReviewMap(reservations));
+            model.addAttribute(REVIEW_FORM, new ReviewForm(null, null));
+            model.addAttribute(PILL_CLASSES, bookingTrackerService.buildPillClasses(reservations));
             } else {
-                model.addAttribute("form", new BookingTrackForm());
+            model.addAttribute(FORM, new BookingTrackForm(null, null));
             }
             return "guest/my-booking";
         }
 
         try {
-            bookingTrackerService.submitReview(form.getReservationId(), form.getRating());
+            bookingTrackerService.submitReview(form.reservationId(), form.rating());
         } catch (IllegalStateException e) {
             List<Reservation> reservations = bookingTrackerService.resolveByCodes(codes);
-            model.addAttribute("reservations", reservations);
-            model.addAttribute("reviewMap", bookingTrackerService.buildReviewMap(reservations));
-            model.addAttribute("reviewForm", new ReviewForm());
-            model.addAttribute("pillClasses", bookingTrackerService.buildPillClasses(reservations));
-            model.addAttribute("error", e.getMessage());
+            model.addAttribute(RESERVATIONS, reservations);
+            model.addAttribute(REVIEW_MAP, bookingTrackerService.buildReviewMap(reservations));
+            model.addAttribute(REVIEW_FORM, new ReviewForm(null, null));
+            model.addAttribute(PILL_CLASSES, bookingTrackerService.buildPillClasses(reservations));
+            model.addAttribute(ERROR, e.getMessage());
             return "guest/my-booking";
         }
 
