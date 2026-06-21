@@ -48,6 +48,7 @@ public class ReservationController {
     String list(@RequestParam(required = false) String status,
                 @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
                 @RequestParam(required = false) String search,
+                @RequestParam(name = "checkedInSearch", required = false) String checkedInSearch,
                 Model model) {
         List<ReservationStatus> statuses;
         if (status != null && !status.isBlank()) {
@@ -59,13 +60,14 @@ public class ReservationController {
 
         model.addAttribute(Attributes.VIEW,
                 ReservationMapper.toListView(
-                        reservationService.findByStatus(ReservationStatus.CHECKED_IN),
+                        reservationService.findCheckedInFiltered(checkedInSearch),
                         reservationService.findFiltered(statuses,
                                 search,
                                 date),
                         status,
                         date,
-                        search));
+                        search,
+                        checkedInSearch));
         return "receptionist/reservation/list";
     }
 

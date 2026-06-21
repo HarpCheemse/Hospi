@@ -39,13 +39,15 @@ public class ReservationMapper {
             List<Reservation> active,
             String filterStatus,
             LocalDate filterDate,
-            String filterSearch) {
+            String filterSearch,
+            String checkedInSearch) {
         return new ReservationListView(
                 toListItemViews(checkedIn),
                 toListItemViews(active),
                 filterStatus,
                 filterDate,
-                filterSearch);
+                filterSearch,
+                checkedInSearch);
     }
 
     public static List<ReservationListItemView> toListItemViews(List<Reservation> reservations) {

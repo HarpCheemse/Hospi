@@ -8,5 +8,6 @@ public record ReservationListView(
     List<ReservationListItemView> active,
     String filterStatus,
     LocalDate filterDate,
-    String filterSearch
+    String filterSearch,
+    String checkedInSearch
 ) {}

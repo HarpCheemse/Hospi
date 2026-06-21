@@ -57,6 +57,13 @@ public class ReservationService {
         return reservationRepository.findFiltered(statuses, searchPattern);
     }
 
+    public List<Reservation> findCheckedInFiltered(String search) {
+        if (search == null || search.isBlank()) {
+            return findByStatus(ReservationStatus.CHECKED_IN);
+        }
+        return reservationRepository.findCheckedInFiltered("%" + search.trim().toLowerCase() + "%");
+    }
+
     public Reservation findById(Long id) {
         return reservationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Reservation"));
     }

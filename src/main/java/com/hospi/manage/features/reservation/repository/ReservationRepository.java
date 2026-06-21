@@ -40,6 +40,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @Query("""
                 SELECT r FROM Reservation r
+                WHERE r.status = 'CHECKED_IN'
+                AND (LOWER(r.guestName) LIKE :search OR r.guestPhone LIKE :search)
+                ORDER BY r.checkInAt DESC
+            """)
+    List<Reservation> findCheckedInFiltered(@Param("search") String search);
+
+    @Query("""
+                SELECT r FROM Reservation r
                 WHERE r.status IN :statuses
                 AND LOWER(r.guestName) LIKE :guestName
                 ORDER BY r.checkInAt DESC

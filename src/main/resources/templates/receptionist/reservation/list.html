@@ -47,12 +47,20 @@
     <section class="card">
 
         <div class="border-b border-border px-6 py-5">
-            <div class="flex items-center gap-3">
-                <img th:src="@{/assets/icons/users.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
-                <div>
-                    <h2 class="text-xl font-semibold">Checked-In Guests</h2>
-                    <p class="mt-1 text-sm text-muted-foreground">Currently active stays</p>
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <img th:src="@{/assets/icons/users.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div>
+                        <h2 class="text-xl font-semibold">Checked-In Guests</h2>
+                        <p class="mt-1 text-sm text-muted-foreground">Currently active stays</p>
+                    </div>
                 </div>
+                <form th:action="@{/receptionist/reservations}" method="get" class="flex items-center gap-2">
+                    <input type="text" name="checkedInSearch" placeholder="Search by name or phone..."
+                           class="input" th:value="${view.checkedInSearch()}">
+                    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+                    <a th:href="@{/receptionist/reservations}" class="btn btn-secondary btn-sm">Clear</a>
+                </form>
             </div>
         </div>
 
@@ -184,10 +192,12 @@
             </div>
 
             <div class="flex items-center gap-3">
+                <button type="submit"
+                        class="btn btn-primary btn-sm">Filter
+                </button>
                 <a th:href="@{/receptionist/reservations}"
                    class="btn btn-secondary btn-sm">Clear</a>
-                <button type="submit"
-                        class="btn btn-primary btn-sm">Filter</button>
+
             </div>
 
         </form>
@@ -283,7 +293,6 @@
                     </td>
 
                 </tr>
-
 
 
                 </tbody>
