@@ -161,8 +161,8 @@ public class CheckoutService {
             discountItem.setItemType(InvoiceItemType.DISCOUNT);
             discountItem.setDescription("Deposit applied");
             discountItem.setQuantity(1);
-            discountItem.setUnitPrice(depositUsed.negate());
-            discountItem.setAmount(depositUsed.negate());
+            discountItem.setUnitPrice(depositUsed);
+            discountItem.setAmount(depositUsed);
             invoice.getItems().add(discountItem);
         }
 
