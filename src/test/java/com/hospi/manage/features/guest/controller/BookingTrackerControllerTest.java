@@ -3,228 +3,202 @@ package com.hospi.manage.features.guest.controller;
 import com.hospi.manage.features.auth.enums.OtpType;
 import com.hospi.manage.features.auth.service.OtpService;
 import com.hospi.manage.common.interfaces.EmailService;
-import com.hospi.manage.features.guest.dto.BookingTrackForm;
-import com.hospi.manage.features.guest.dto.OtpForm;
-import com.hospi.manage.features.guest.dto.ReviewForm;
 import com.hospi.manage.features.guest.service.BookingTrackerService;
 import com.hospi.manage.features.reservation.entity.Reservation;
-import jakarta.servlet.http.HttpSession;
+import com.hospi.manage.features.reservation.enums.BookingSource;
+import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.ui.Model;
-import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 import static com.hospi.manage.common.constant.Attributes.*;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(BookingTrackerController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class BookingTrackerControllerTest {
 
-    @Mock
-    private BookingTrackerService bookingTrackerService;
-    @Mock
-    private OtpService otpService;
-    @Mock
-    private EmailService emailService;
-    @Mock
-    private HttpSession session;
-    @Mock
-    private Model model;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @InjectMocks
-    private BookingTrackerController controller;
+    @MockitoBean
+    private BookingTrackerService bookingTrackerService;
+
+    @MockitoBean
+    private OtpService otpService;
+
+    @MockitoBean
+    private EmailService emailService;
 
     @Test
-    void myBooking_shouldShowTrackForm_whenNoTrackedCodes() {
-        when(session.getAttribute(TRACKED_BOOKING_CODES)).thenReturn(null);
-
-        String view = controller.myBooking(session, model);
-
-        assertEquals("guest/my-booking", view);
-        verify(model).addAttribute(eq(FORM), any(BookingTrackForm.class));
+    void myBooking_shouldShowTrackForm_whenNoTrackedCodes() throws Exception {
+        mockMvc.perform(get("/my-booking"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("guest/my-booking"))
+                .andExpect(model().attributeExists(FORM));
     }
 
     @Test
-    void myBooking_shouldShowReservations_whenTrackedCodesExist() {
-        when(session.getAttribute(TRACKED_BOOKING_CODES)).thenReturn(Set.of("CODE"));
-        when(bookingTrackerService.resolveByCodes(anySet())).thenReturn(List.of());
+    void myBooking_shouldShowReservations_whenTrackedCodesExist() throws Exception {
+        Reservation res = new Reservation();
+        res.setId(1L);
+        res.setGuestName("Guest");
+        res.setConfirmationCode("CODE");
+        res.setStatus(ReservationStatus.CONFIRMED);
+        res.setCheckInAt(java.time.LocalDate.now());
+        res.setCheckOutAt(java.time.LocalDate.now().plusDays(2));
+        res.setSource(BookingSource.ONLINE);
+        when(bookingTrackerService.resolveByCodes(anySet())).thenReturn(java.util.List.of(res));
         when(bookingTrackerService.buildReviewMap(anyList())).thenReturn(Map.of());
         when(bookingTrackerService.buildPillClasses(anyList())).thenReturn(Map.of());
 
-        String view = controller.myBooking(session, model);
-
-        assertEquals("guest/my-booking", view);
-        verify(model).addAttribute(eq(RESERVATIONS), anyList());
+        mockMvc.perform(get("/my-booking")
+                        .sessionAttr(TRACKED_BOOKING_CODES, Set.of("CODE")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("guest/my-booking"))
+                .andExpect(model().attributeExists(RESERVATIONS));
     }
 
     @Test
-    void verifyPage_shouldRender_whenSessionHasEmail() {
-        when(session.getAttribute(TRACKED_EMAIL)).thenReturn("a@b.com");
-        when(session.getAttribute(PENDING_CODE)).thenReturn("CODE");
-
-        String view = controller.verifyPage(null, session, model);
-
-        assertEquals("guest/my-booking-verify", view);
-        verify(model).addAttribute(VERIFY_EMAIL, "a@b.com");
-        verify(model).addAttribute(eq(OTP_FORM), any(OtpForm.class));
+    void verifyPage_shouldRender_whenSessionHasEmail() throws Exception {
+        mockMvc.perform(get("/my-booking/verify")
+                        .sessionAttr(TRACKED_EMAIL, "a@b.com")
+                        .sessionAttr(PENDING_CODE, "CODE"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("guest/my-booking-verify"))
+                .andExpect(model().attribute(VERIFY_EMAIL, "a@b.com"))
+                .andExpect(model().attributeExists(OTP_FORM));
     }
 
     @Test
-    void verifyPage_shouldRedirect_whenNoSession() {
-        when(session.getAttribute(TRACKED_EMAIL)).thenReturn(null);
-
-        String view = controller.verifyPage(null, session, model);
-
-        assertEquals("redirect:/my-booking", view);
+    void verifyPage_shouldRedirect_whenNoSession() throws Exception {
+        mockMvc.perform(get("/my-booking/verify"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/my-booking"));
     }
 
     @Test
-    void lookup_shouldReturnForm_whenBindingErrors() {
-        BookingTrackForm form = new BookingTrackForm("a@b.com", "CODE");
-        BindingResult binding = new BeanPropertyBindingResult(form, FORM);
-        binding.reject("error", "error");
-
-        String view = controller.lookup(form, binding, session, mock(RedirectAttributes.class));
-
-        assertEquals("guest/my-booking", view);
+    void lookup_shouldReturnForm_whenBindingErrors() throws Exception {
+        mockMvc.perform(post("/my-booking/lookup")
+                        .param("email", "")
+                        .param("bookingCode", ""))
+                .andExpect(status().isOk())
+                .andExpect(view().name("guest/my-booking"));
     }
 
     @Test
-    void lookup_shouldRedirectWithError_whenBookingNotFound() {
-        BookingTrackForm form = new BookingTrackForm("a@b.com", "CODE");
-        BindingResult binding = new BeanPropertyBindingResult(form, FORM);
-        RedirectAttributes redirect = new RedirectAttributesModelMap();
-
+    void lookup_shouldRedirectWithError_whenBookingNotFound() throws Exception {
         when(bookingTrackerService.lookupByEmailAndCode("a@b.com", "CODE"))
                 .thenThrow(new com.hospi.manage.common.exception.ResourceNotFoundException("Reservation"));
 
-        String view = controller.lookup(form, binding, session, redirect);
-
-        assertEquals("redirect:/my-booking", view);
-        assertNotNull(((RedirectAttributesModelMap) redirect).getFlashAttributes().get(ERROR));
+        mockMvc.perform(post("/my-booking/lookup")
+                        .param("email", "a@b.com")
+                        .param("bookingCode", "CODE"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/my-booking"))
+                .andExpect(flash().attributeExists(ERROR));
     }
 
     @Test
-    void lookup_shouldSendOtpAndRedirect_whenBookingFound() {
-        BookingTrackForm form = new BookingTrackForm("a@b.com", "CODE");
-        BindingResult binding = new BeanPropertyBindingResult(form, FORM);
-        RedirectAttributes redirect = new RedirectAttributesModelMap();
-
-        when(bookingTrackerService.lookupByEmailAndCode("a@b.com", "CODE"))
-                .thenReturn(new Reservation());
+    void lookup_shouldSendOtpAndRedirect_whenBookingFound() throws Exception {
+        when(bookingTrackerService.lookupByEmailAndCode("a@b.com", "CODE")).thenReturn(new Reservation());
         when(otpService.createOtp("a@b.com", OtpType.BOOKING_TRACK)).thenReturn("123456");
 
-        String view = controller.lookup(form, binding, session, redirect);
+        mockMvc.perform(post("/my-booking/lookup")
+                        .param("email", "a@b.com")
+                        .param("bookingCode", "CODE"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("/my-booking/verify?email=a@b.com"))
+                .andExpect(request().sessionAttribute(TRACKED_EMAIL, "a@b.com"))
+                .andExpect(request().sessionAttribute(PENDING_CODE, "CODE"));
 
-        assertTrue(view.startsWith("redirect:"));
-        assertTrue(view.contains("/my-booking/verify"));
-        assertTrue(view.contains("email=a@b.com"));
         verify(emailService).send(eq("a@b.com"), anyString(), anyString());
-        verify(session).setAttribute(TRACKED_EMAIL, "a@b.com");
-        verify(session).setAttribute(PENDING_CODE, "CODE");
     }
 
     @Test
-    void verify_shouldRedirect_whenSessionMissing() {
-        OtpForm form = new OtpForm("123456");
-        BindingResult binding = new BeanPropertyBindingResult(form, OTP_FORM);
-        when(session.getAttribute(TRACKED_EMAIL)).thenReturn(null);
-
-        String view = controller.verify(form, binding, session, model, mock(RedirectAttributes.class));
-
-        assertEquals("redirect:/my-booking", view);
+    void verify_shouldRedirect_whenSessionMissing() throws Exception {
+        mockMvc.perform(post("/my-booking/verify")
+                        .param("otp", "123456"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/my-booking"));
     }
 
     @Test
-    void verify_shouldReturnForm_whenOtpBlank() {
-        OtpForm form = new OtpForm("");
-        BindingResult binding = new BeanPropertyBindingResult(form, OTP_FORM);
-        binding.rejectValue("otp", "NotBlank", "OTP is required");
-        when(session.getAttribute(TRACKED_EMAIL)).thenReturn("a@b.com");
-        when(session.getAttribute(PENDING_CODE)).thenReturn("CODE");
-
-        String view = controller.verify(form, binding, session, model, mock(RedirectAttributes.class));
-
-        assertEquals("guest/my-booking-verify", view);
-        verify(model).addAttribute(VERIFY_EMAIL, "a@b.com");
+    void verify_shouldReturnForm_whenOtpBlank() throws Exception {
+        mockMvc.perform(post("/my-booking/verify")
+                        .sessionAttr(TRACKED_EMAIL, "a@b.com")
+                        .sessionAttr(PENDING_CODE, "CODE")
+                        .param("otp", ""))
+                .andExpect(status().isOk())
+                .andExpect(view().name("guest/my-booking-verify"))
+                .andExpect(model().attribute(VERIFY_EMAIL, "a@b.com"));
     }
 
     @Test
-    void verify_shouldRedirectWithError_whenOtpInvalid() {
-        OtpForm form = new OtpForm("wrong");
-        BindingResult binding = new BeanPropertyBindingResult(form, OTP_FORM);
-        when(session.getAttribute(TRACKED_EMAIL)).thenReturn("a@b.com");
-        when(session.getAttribute(PENDING_CODE)).thenReturn("CODE");
+    void verify_shouldRedirectWithError_whenOtpInvalid() throws Exception {
         when(otpService.verifyOtp("a@b.com", "wrong", OtpType.BOOKING_TRACK)).thenReturn(false);
-        RedirectAttributes redirect = new RedirectAttributesModelMap();
 
-        String view = controller.verify(form, binding, session, model, redirect);
-
-        assertTrue(view.startsWith("redirect:"));
-        assertTrue(view.contains("/my-booking/verify"));
-        assertTrue(view.contains("email=a@b.com"));
-        assertNotNull(((RedirectAttributesModelMap) redirect).getFlashAttributes().get(ERROR));
+        mockMvc.perform(post("/my-booking/verify")
+                        .sessionAttr(TRACKED_EMAIL, "a@b.com")
+                        .sessionAttr(PENDING_CODE, "CODE")
+                        .param("otp", "wrong"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("/my-booking/verify?email=a@b.com"))
+                .andExpect(flash().attributeExists(ERROR));
     }
 
     @Test
-    void verify_shouldAddCodeToSession_whenOtpValid() {
-        OtpForm form = new OtpForm("123456");
-        BindingResult binding = new BeanPropertyBindingResult(form, OTP_FORM);
-        when(session.getAttribute(TRACKED_EMAIL)).thenReturn("a@b.com");
-        when(session.getAttribute(PENDING_CODE)).thenReturn("CODE");
+    void verify_shouldAddCodeToSession_whenOtpValid() throws Exception {
         when(otpService.verifyOtp("a@b.com", "123456", OtpType.BOOKING_TRACK)).thenReturn(true);
-        Set<String> trackedCodes = new LinkedHashSet<>();
-        when(session.getAttribute(TRACKED_BOOKING_CODES)).thenReturn(trackedCodes);
-        RedirectAttributes redirect = new RedirectAttributesModelMap();
 
-        String view = controller.verify(form, binding, session, model, redirect);
-
-        assertEquals("redirect:/my-booking", view);
-        assertTrue(trackedCodes.contains("CODE"));
-        assertNotNull(((RedirectAttributesModelMap) redirect).getFlashAttributes().get(SUCCESS));
+        mockMvc.perform(post("/my-booking/verify")
+                        .sessionAttr(TRACKED_EMAIL, "a@b.com")
+                        .sessionAttr(PENDING_CODE, "CODE")
+                        .sessionAttr(TRACKED_BOOKING_CODES, new LinkedHashSet<>())
+                        .param("otp", "123456"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/my-booking"))
+                .andExpect(flash().attributeExists(SUCCESS));
     }
 
     @Test
-    void clear_shouldRemoveSessionAttributes() {
-        String view = controller.clear(session);
-
-        assertEquals("redirect:/my-booking", view);
-        verify(session).removeAttribute(TRACKED_BOOKING_CODES);
-        verify(session).removeAttribute(TRACKED_EMAIL);
-        verify(session).removeAttribute(PENDING_CODE);
+    void clear_shouldRemoveSessionAttributes() throws Exception {
+        mockMvc.perform(post("/my-booking/clear"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/my-booking"));
     }
 
     @Test
-    void submitReview_shouldRedirect_whenSessionEmpty() {
-        ReviewForm form = new ReviewForm(null, null);
-        BindingResult binding = new BeanPropertyBindingResult(form, "review");
-        when(session.getAttribute(TRACKED_BOOKING_CODES)).thenReturn(new LinkedHashSet<>());
-
-        String view = controller.submitReview(form, binding, session, model);
-
-        assertEquals("guest/my-booking", view);
+    void submitReview_shouldRenderForm_whenSessionEmpty() throws Exception {
+        mockMvc.perform(post("/my-booking/review"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("guest/my-booking"))
+                .andExpect(model().attributeExists(FORM));
     }
 
     @Test
-    void submitReview_shouldSaveAndRedirect_whenValid() {
-        ReviewForm form = new ReviewForm(4, 1L);
-        BindingResult binding = new BeanPropertyBindingResult(form, "review");
-        Set<String> trackedCodes = new LinkedHashSet<>(Set.of("CODE"));
-        when(session.getAttribute(TRACKED_BOOKING_CODES)).thenReturn(trackedCodes);
+    void submitReview_shouldSaveAndRedirect_whenValid() throws Exception {
+        when(bookingTrackerService.resolveByCodes(anySet())).thenReturn(java.util.List.of());
+        when(bookingTrackerService.buildReviewMap(anyList())).thenReturn(Map.of());
+        when(bookingTrackerService.buildPillClasses(anyList())).thenReturn(Map.of());
 
-        String view = controller.submitReview(form, binding, session, model);
+        mockMvc.perform(post("/my-booking/review")
+                        .sessionAttr(TRACKED_BOOKING_CODES, Set.of("CODE"))
+                        .param("rating", "4")
+                        .param("reservationId", "1"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/my-booking"));
 
-        assertEquals("redirect:/my-booking", view);
         verify(bookingTrackerService).submitReview(1L, 4);
     }
 }
