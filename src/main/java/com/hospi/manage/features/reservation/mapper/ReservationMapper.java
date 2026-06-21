@@ -1,8 +1,9 @@
 package com.hospi.manage.features.reservation.mapper;
 
+import com.hospi.manage.features.reservation.dto.ActiveBookingsView;
+import com.hospi.manage.features.reservation.dto.CurrentStaysView;
 import com.hospi.manage.features.reservation.dto.ManageReservationView;
 import com.hospi.manage.features.reservation.dto.ReservationListItemView;
-import com.hospi.manage.features.reservation.dto.ReservationListView;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.RoomAssignment;
 import com.hospi.manage.features.reservation.entity.StayingGuest;
@@ -35,43 +36,30 @@ public class ReservationMapper {
                 reservation, guests, assignedRooms, availableRooms, assignedCounts);
     }
 
-    public static ReservationListView toListView(
-            List<Reservation> checkedIn,
-            List<Reservation> active,
+    public static ActiveBookingsView toActiveBookingsView(
+            Page<Reservation> bookings,
             String filterStatus,
             LocalDate filterDate,
-            String filterSearch,
-            String checkedInSearch) {
-        return new ReservationListView(
-                toListItemViews(checkedIn),
-                toListItemViews(active),
+            String filterSearch) {
+        return new ActiveBookingsView(
+                toListItemViews(bookings.getContent()),
                 filterStatus,
                 filterDate,
                 filterSearch,
-                checkedInSearch,
-                0, 0, 0, 0, 0, 0);
+                bookings.getNumber(),
+                bookings.getTotalPages(),
+                bookings.getTotalElements());
     }
 
-    public static ReservationListView toListView(
-            Page<Reservation> checkedIn,
-            Page<Reservation> active,
-            String filterStatus,
-            LocalDate filterDate,
-            String filterSearch,
+    public static CurrentStaysView toCurrentStaysView(
+            Page<Reservation> guests,
             String checkedInSearch) {
-        return new ReservationListView(
-                toListItemViews(checkedIn.getContent()),
-                toListItemViews(active.getContent()),
-                filterStatus,
-                filterDate,
-                filterSearch,
+        return new CurrentStaysView(
+                toListItemViews(guests.getContent()),
                 checkedInSearch,
-                checkedIn.getNumber(),
-                checkedIn.getTotalPages(),
-                checkedIn.getTotalElements(),
-                active.getNumber(),
-                active.getTotalPages(),
-                active.getTotalElements());
+                guests.getNumber(),
+                guests.getTotalPages(),
+                guests.getTotalElements());
     }
 
     public static List<ReservationListItemView> toListItemViews(List<Reservation> reservations) {

@@ -39,20 +39,13 @@ public class ReceptionistReservationController {
     private final StayingGuestService stayingGuestService;
     private final RoomAssignmentService roomAssignmentService;
 
-    @ModelAttribute
-    void addCommonAttributes(Model model) {
-        model.addAttribute(Attributes.ACTIVE_SIDEBAR,
-                "RESERVATIONS");
-    }
-
     @GetMapping
-    String list(@RequestParam(required = false) String status,
-                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-                @RequestParam(required = false) String search,
-                @RequestParam(name = "checkedInSearch", required = false) String checkedInSearch,
-                @RequestParam(name = "checkedInPage", defaultValue = "0") int checkedInPage,
-                @RequestParam(name = "activePage", defaultValue = "0") int activePage,
-                Model model) {
+    String activeBookings(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(required = false) String search,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            Model model) {
         List<ReservationStatus> statuses;
         if (status != null && !status.isBlank()) {
             statuses = List.of(ReservationStatus.valueOf(status));
@@ -61,19 +54,33 @@ public class ReceptionistReservationController {
                     ReservationStatus.CONFIRMED);
         }
 
+        model.addAttribute(Attributes.ACTIVE_SIDEBAR,
+                Attributes.ACTIVE_BOOKINGS);
         model.addAttribute(Attributes.VIEW,
-                ReservationMapper.toListView(
-                        reservationService.findCheckedInFiltered(checkedInSearch,
-                                PageRequest.of(checkedInPage, 10)),
+                ReservationMapper.toActiveBookingsView(
                         reservationService.findFiltered(statuses,
                                 search,
                                 date,
-                                PageRequest.of(activePage, 20)),
+                                PageRequest.of(page, 20)),
                         status,
                         date,
-                        search,
-                        checkedInSearch));
-        return "receptionist/reservation/list";
+                        search));
+        return "receptionist/reservation/active";
+    }
+
+    @GetMapping("/stays")
+    String currentStays(
+            @RequestParam(name = "search", required = false) String search,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            Model model) {
+        model.addAttribute(Attributes.ACTIVE_SIDEBAR,
+                Attributes.CURRENT_STAYS);
+        model.addAttribute(Attributes.VIEW,
+                ReservationMapper.toCurrentStaysView(
+                        reservationService.findCheckedInFiltered(search,
+                                PageRequest.of(page, 10)),
+                        search));
+        return "receptionist/reservation/stays";
     }
 
     @GetMapping("/create")
@@ -81,6 +88,8 @@ public class ReceptionistReservationController {
         model.addAttribute(Attributes.FORM,
                 new DateSearchForm(null,
                         null));
+        model.addAttribute(Attributes.ACTIVE_SIDEBAR,
+                Attributes.ACTIVE_BOOKINGS);
         return "receptionist/reservation/create";
     }
 
@@ -129,6 +138,8 @@ public class ReceptionistReservationController {
                 null,
                 roomSelections);
 
+        model.addAttribute(Attributes.ACTIVE_SIDEBAR,
+                Attributes.ACTIVE_BOOKINGS);
         model.addAttribute(Attributes.VIEW,
                 new CreateDetailsView(availabilityView,
                         nights));
@@ -161,6 +172,8 @@ public class ReceptionistReservationController {
             model.addAttribute(Attributes.VIEW,
                     new CreateDetailsView(availabilityView,
                             nights));
+            model.addAttribute(Attributes.ACTIVE_SIDEBAR,
+                    Attributes.ACTIVE_BOOKINGS);
 
             return "receptionist/reservation/details";
         }
@@ -181,9 +194,11 @@ public class ReceptionistReservationController {
                   Model model) {
         var reservation = reservationService.findById(id);
         if (reservation.getStatus() != ReservationStatus.CHECKED_IN) {
-            return "redirect:/receptionist/reservations";
+            return "redirect:/receptionist/reservations/stays";
         }
 
+        model.addAttribute(Attributes.ACTIVE_SIDEBAR,
+                Attributes.CURRENT_STAYS);
         model.addAttribute(Attributes.VIEW,
                 buildManageView(id,
                         reservation));
@@ -217,6 +232,8 @@ public class ReceptionistReservationController {
             model.addAttribute(Attributes.VIEW,
                     buildManageView(id,
                             reservationService.findById(id)));
+            model.addAttribute(Attributes.ACTIVE_SIDEBAR,
+                    Attributes.CURRENT_STAYS);
             return "receptionist/reservation/manage";
         }
         stayingGuestService.addGuest(id,
@@ -237,6 +254,8 @@ public class ReceptionistReservationController {
                             reservationService.findById(id)));
             model.addAttribute("editGuestId",
                     guestId);
+            model.addAttribute(Attributes.ACTIVE_SIDEBAR,
+                    Attributes.CURRENT_STAYS);
             return "receptionist/reservation/manage";
         }
         stayingGuestService.updateGuest(id,
