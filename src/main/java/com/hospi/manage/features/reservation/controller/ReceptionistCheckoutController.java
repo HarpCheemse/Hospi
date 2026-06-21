@@ -12,6 +12,7 @@ import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.reservation.service.StayingGuestService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/receptionist/reservations")
+@RequiredArgsConstructor
 public class ReceptionistCheckoutController {
 
     private final ReservationService reservationService;
@@ -31,18 +33,6 @@ public class ReceptionistCheckoutController {
     private final StayingGuestService stayingGuestService;
     private final SystemConfigService systemConfigService;
     private final PaymentRepository paymentRepository;
-
-    public ReceptionistCheckoutController(ReservationService reservationService,
-                                          CheckoutService checkoutService,
-                                          StayingGuestService stayingGuestService,
-                                          SystemConfigService systemConfigService,
-                                          PaymentRepository paymentRepository) {
-        this.reservationService = reservationService;
-        this.checkoutService = checkoutService;
-        this.stayingGuestService = stayingGuestService;
-        this.systemConfigService = systemConfigService;
-        this.paymentRepository = paymentRepository;
-    }
 
     @ModelAttribute
     void addCommonAttributes(Model model) {
@@ -64,7 +54,7 @@ public class ReceptionistCheckoutController {
         model.addAttribute("calc", calc);
         model.addAttribute("config", systemConfigService.getConfig());
         model.addAttribute("adultGuests", adultGuests);
-        model.addAttribute("form", new CheckoutForm());
+        model.addAttribute("form", new CheckoutForm(null, null, null));
 
         return "receptionist/reservation/checkout";
     }
@@ -78,20 +68,21 @@ public class ReceptionistCheckoutController {
             Reservation reservation = reservationService.findById(id);
             int adultGuests = stayingGuestService.getAdultGuestCount(id, reservation.getCheckInAt());
 
-            LocalDateTime actualTime = form.isApplyLateFee() ? form.getActualCheckoutTime() : null;
+            boolean applyLateFee = Boolean.TRUE.equals(form.applyLateFee());
+            LocalDateTime actualTime = applyLateFee ? form.actualCheckoutTime() : null;
             CheckoutCalculation calc = checkoutService.calculate(reservation, actualTime, adultGuests);
 
-            PaymentMethod method = PaymentMethod.valueOf(form.getPaymentMethod());
+            PaymentMethod method = PaymentMethod.valueOf(form.paymentMethod());
 
             checkoutService.complete(id, calc, method,
-                    principal.getName(), form.getActualCheckoutTime(),
-                    form.isApplyLateFee());
+                    principal.getName(), form.actualCheckoutTime(),
+                    applyLateFee);
 
-            redirect.addFlashAttribute("success", "Checkout completed successfully.");
+            redirect.addFlashAttribute(Attributes.SUCCESS, "Checkout completed successfully.");
             return "redirect:/receptionist/reservations/" + id + "/receipt";
 
-        } catch (Exception e) {
-            redirect.addFlashAttribute("error", e.getMessage());
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            redirect.addFlashAttribute(Attributes.ERROR, e.getMessage());
             return "redirect:/receptionist/reservations/" + id + "/checkout";
         }
     }
