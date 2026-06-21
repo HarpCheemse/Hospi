@@ -7,6 +7,7 @@ import com.hospi.manage.features.room.dto.response.RoomTypeAvailability;
 import com.hospi.manage.features.room.entity.RoomType;
 import com.hospi.manage.features.room.repository.RoomRepository;
 import com.hospi.manage.features.room.repository.RoomTypeRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -15,19 +16,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class AvailabilityEngine {
 
     private final ReservationRepository reservationRepository;
     private final RoomRepository roomRepository;
     private final RoomTypeRepository roomTypeRepository;
-
-    public AvailabilityEngine(ReservationRepository reservationRepository,
-                              RoomRepository roomRepository,
-                              RoomTypeRepository roomTypeRepository) {
-        this.reservationRepository = reservationRepository;
-        this.roomRepository = roomRepository;
-        this.roomTypeRepository = roomTypeRepository;
-    }
 
     /**
      * Computes room availability for a date range.

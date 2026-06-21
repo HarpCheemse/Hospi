@@ -9,6 +9,7 @@ import com.hospi.manage.features.reservation.repository.RoomAssignmentRepository
 import com.hospi.manage.features.room.entity.Room;
 import com.hospi.manage.features.room.enums.OccupancyStatus;
 import com.hospi.manage.features.room.repository.RoomRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,19 +20,12 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class RoomAssignmentService {
 
     private final RoomAssignmentRepository roomAssignmentRepository;
     private final ReservationRepository reservationRepository;
     private final RoomRepository roomRepository;
-
-    public RoomAssignmentService(RoomAssignmentRepository roomAssignmentRepository,
-                                 ReservationRepository reservationRepository,
-                                 RoomRepository roomRepository) {
-        this.roomAssignmentRepository = roomAssignmentRepository;
-        this.reservationRepository = reservationRepository;
-        this.roomRepository = roomRepository;
-    }
 
     public List<RoomAssignment> getAssignedRooms(Long reservationId) {
         return roomAssignmentRepository.findByReservationIdOrderByAssignedAtAsc(reservationId);

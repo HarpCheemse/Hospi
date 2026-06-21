@@ -5,23 +5,21 @@ import com.hospi.manage.core.security.session.AccountPrincipal;
 import com.hospi.manage.features.reservation.dto.CheckInView;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.service.ReservationService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-
-import java.time.LocalDate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
+
 @Controller
 @RequestMapping("/receptionist/reservations")
+@RequiredArgsConstructor
 public class CheckInController {
 
     private final ReservationService reservationService;
-
-    public CheckInController(ReservationService reservationService) {
-        this.reservationService = reservationService;
-    }
 
     @ModelAttribute
     void addCommonAttributes(Model model) {

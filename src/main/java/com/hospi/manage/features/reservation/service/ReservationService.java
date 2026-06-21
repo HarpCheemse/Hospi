@@ -14,6 +14,7 @@ import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.room.dto.response.RoomSelection;
 import com.hospi.manage.features.room.entity.RoomType;
 import com.hospi.manage.features.room.repository.RoomTypeRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,22 +28,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final RoomTypeRepository roomTypeRepository;
     private final PaymentRepository paymentRepository;
     private final RoomAvailabilityService roomAvailabilityService;
     private final AvailabilityEngine availabilityEngine;
-
-    public ReservationService(ReservationRepository reservationRepository, RoomTypeRepository roomTypeRepository,
-                              PaymentRepository paymentRepository, RoomAvailabilityService roomAvailabilityService,
-                              AvailabilityEngine engine) {
-        this.reservationRepository = reservationRepository;
-        this.roomTypeRepository = roomTypeRepository;
-        this.paymentRepository = paymentRepository;
-        this.roomAvailabilityService = roomAvailabilityService;
-        this.availabilityEngine = engine;
-    }
 
     public List<Reservation> findByStatus(ReservationStatus status) {
         return reservationRepository.findByStatusOrderByCheckInAtDesc(status);

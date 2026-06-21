@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @Component
 public class OfflineBookingValidator {
 
-    public void validateCreate(OfflineBookingForm form, BindingResult bindingResult) {
+    public void validate(OfflineBookingForm form, BindingResult bindingResult) {
         validateCheckInAt(form, bindingResult);
         validateCheckOutAt(form, bindingResult);
         validateDateOfBirth(form, bindingResult);

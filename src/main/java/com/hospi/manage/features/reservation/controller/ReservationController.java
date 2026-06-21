@@ -17,7 +17,9 @@ import com.hospi.manage.features.reservation.validation.DateSearchValidator;
 import com.hospi.manage.features.reservation.validation.OfflineBookingValidator;
 import com.hospi.manage.features.room.dto.response.RoomSelection;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -29,6 +31,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/receptionist/reservations")
+@RequiredArgsConstructor
 public class ReservationController {
 
     private final ReservationService reservationService;
@@ -37,20 +40,6 @@ public class ReservationController {
     private final RoomAvailabilityService roomAvailabilityService;
     private final StayingGuestService stayingGuestService;
     private final RoomAssignmentService roomAssignmentService;
-
-    public ReservationController(ReservationService reservationService,
-                                 OfflineBookingValidator offlineBookingValidator,
-                                 DateSearchValidator dateSearchValidator,
-                                 RoomAvailabilityService roomAvailabilityService,
-                                 StayingGuestService stayingGuestService,
-                                 RoomAssignmentService roomAssignmentService) {
-        this.reservationService = reservationService;
-        this.offlineBookingValidator = offlineBookingValidator;
-        this.dateSearchValidator = dateSearchValidator;
-        this.roomAvailabilityService = roomAvailabilityService;
-        this.stayingGuestService = stayingGuestService;
-        this.roomAssignmentService = roomAssignmentService;
-    }
 
     @ModelAttribute
     void addCommonAttributes(Model model) {
@@ -103,7 +92,10 @@ public class ReservationController {
             return "receptionist/reservation/create";
         }
 
-        return "redirect:/receptionist/reservations/create/details" + "?checkInAt=" + form.getCheckInAt() + "&checkOutAt=" + form.getCheckOutAt();
+        return UriComponentsBuilder.fromPath("/receptionist/reservations/create/details")
+                .queryParam("checkInAt", form.getCheckInAt())
+                .queryParam("checkOutAt", form.getCheckOutAt())
+                .build().toUriString();
     }
 
     @GetMapping("/create/details")
@@ -149,7 +141,7 @@ public class ReservationController {
             Model model
     ) {
 
-        offlineBookingValidator.validateCreate(
+        offlineBookingValidator.validate(
                 form,
                 bindingResult
         );

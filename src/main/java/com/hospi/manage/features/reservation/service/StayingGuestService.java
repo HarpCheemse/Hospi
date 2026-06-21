@@ -5,6 +5,7 @@ import com.hospi.manage.features.reservation.dto.StayingGuestForm;
 import com.hospi.manage.features.reservation.entity.StayingGuest;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
 import com.hospi.manage.features.reservation.repository.StayingGuestRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,16 +13,11 @@ import java.util.List;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class StayingGuestService {
 
     private final StayingGuestRepository stayingGuestRepository;
     private final ReservationRepository reservationRepository;
-
-    public StayingGuestService(StayingGuestRepository stayingGuestRepository,
-                               ReservationRepository reservationRepository) {
-        this.stayingGuestRepository = stayingGuestRepository;
-        this.reservationRepository = reservationRepository;
-    }
 
     public List<StayingGuest> getGuests(Long reservationId) {
         return stayingGuestRepository.findByReservationIdOrderByCreatedAtAsc(reservationId);

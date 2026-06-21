@@ -34,7 +34,7 @@ class OfflineBookingValidatorTest {
 
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
 
-        validator.validateCreate(form, errors);
+        validator.validate(form, errors);
 
         assertFalse(errors.hasErrors());
     }
@@ -50,7 +50,7 @@ class OfflineBookingValidatorTest {
 
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
 
-        validator.validateCreate(form, errors);
+        validator.validate(form, errors);
 
         assertTrue(errors.hasFieldErrors("checkInAt"));
         assertEquals("Check-in date must be today or later",
@@ -68,7 +68,7 @@ class OfflineBookingValidatorTest {
 
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
 
-        validator.validateCreate(form, errors);
+        validator.validate(form, errors);
 
         assertTrue(errors.hasFieldErrors("checkOutAt"));
         assertEquals("Check-out must be after check-in",
@@ -86,7 +86,7 @@ class OfflineBookingValidatorTest {
 
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
 
-        validator.validateCreate(form, errors);
+        validator.validate(form, errors);
 
         assertTrue(errors.hasFieldErrors("guestDateOfBirth"));
         assertEquals("Date of birth must be in the past",
@@ -104,7 +104,7 @@ class OfflineBookingValidatorTest {
 
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
 
-        validator.validateCreate(form, errors);
+        validator.validate(form, errors);
 
         assertTrue(errors.hasGlobalErrors());
         assertEquals("At least one room type must be selected",
@@ -122,7 +122,7 @@ class OfflineBookingValidatorTest {
 
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
 
-        validator.validateCreate(form, errors);
+        validator.validate(form, errors);
 
         assertTrue(errors.hasGlobalErrors());
         assertEquals("At least one room type must have a count greater than 0",
@@ -140,7 +140,7 @@ class OfflineBookingValidatorTest {
 
         BindingResult errors = new BeanPropertyBindingResult(form, "form");
 
-        validator.validateCreate(form, errors);
+        validator.validate(form, errors);
 
         assertTrue(errors.hasGlobalErrors());
         assertEquals("At least one room type must be selected",
