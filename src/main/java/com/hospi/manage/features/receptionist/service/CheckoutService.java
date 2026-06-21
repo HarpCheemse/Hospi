@@ -14,6 +14,7 @@ import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -24,22 +25,14 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class CheckoutService {
 
     private final ReservationRepository reservationRepository;
     private final PaymentRepository paymentRepository;
     private final SystemConfigService systemConfigService;
     private final InvoiceRepository invoiceRepository;
-
-    public CheckoutService(ReservationRepository reservationRepository,
-                           PaymentRepository paymentRepository,
-                           SystemConfigService systemConfigService,
-                           InvoiceRepository invoiceRepository) {
-        this.reservationRepository = reservationRepository;
-        this.paymentRepository = paymentRepository;
-        this.systemConfigService = systemConfigService;
-        this.invoiceRepository = invoiceRepository;
-    }
+
 
     public CheckoutCalculation calculate(Reservation reservation, LocalDateTime actualCheckoutTime, int adultGuestCount) {
         var config = systemConfigService.getConfig();
