@@ -1,7 +1,7 @@
 package com.hospi.manage.features.reservation.service;
 
+import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.reservation.dto.StayingGuestForm;
-import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.StayingGuest;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
 import com.hospi.manage.features.reservation.repository.StayingGuestRepository;
@@ -28,8 +28,8 @@ public class StayingGuestService {
     }
 
     public StayingGuest addGuest(Long reservationId, StayingGuestForm form) {
-        Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+        var reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
 
         StayingGuest guest = new StayingGuest();
         guest.setReservation(reservation);
@@ -40,9 +40,13 @@ public class StayingGuestService {
         return stayingGuestRepository.save(guest);
     }
 
-    public StayingGuest updateGuest(Long guestId, StayingGuestForm form) {
+    public StayingGuest updateGuest(Long reservationId, Long guestId, StayingGuestForm form) {
         StayingGuest guest = stayingGuestRepository.findById(guestId)
-                .orElseThrow(() -> new IllegalArgumentException("Staying guest not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Staying guest"));
+
+        if (!guest.getReservation().getId().equals(reservationId)) {
+            throw new IllegalArgumentException("Guest does not belong to this reservation");
+        }
 
         guest.setGuestName(form.getGuestName());
         guest.setDateOfBirth(form.getDateOfBirth());
@@ -51,12 +55,25 @@ public class StayingGuestService {
         return stayingGuestRepository.save(guest);
     }
 
-    public StayingGuest getGuest(Long guestId) {
-        return stayingGuestRepository.findById(guestId)
-                .orElseThrow(() -> new IllegalArgumentException("Staying guest not found"));
+    public StayingGuest getGuest(Long reservationId, Long guestId) {
+        StayingGuest guest = stayingGuestRepository.findById(guestId)
+                .orElseThrow(() -> new ResourceNotFoundException("Staying guest"));
+
+        if (!guest.getReservation().getId().equals(reservationId)) {
+            throw new IllegalArgumentException("Guest does not belong to this reservation");
+        }
+
+        return guest;
     }
 
-    public void deleteGuest(Long guestId) {
-        stayingGuestRepository.deleteById(guestId);
+    public void deleteGuest(Long reservationId, Long guestId) {
+        StayingGuest guest = stayingGuestRepository.findById(guestId)
+                .orElseThrow(() -> new ResourceNotFoundException("Staying guest"));
+
+        if (!guest.getReservation().getId().equals(reservationId)) {
+            throw new IllegalArgumentException("Guest does not belong to this reservation");
+        }
+
+        stayingGuestRepository.delete(guest);
     }
 }
