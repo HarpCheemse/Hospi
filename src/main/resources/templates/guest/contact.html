@@ -58,7 +58,7 @@
                 <span class="text-2xl text-accent">✉️</span>
                 <div>
                   <h4 class="font-bold text-text mb-1">Email Address</h4>
-                  <p th:text="${hotel != null and hotel.email != null ? hotel.email : 'contact@hospihotel.com'}">
+                  <p class="truncate" th:text="${hotel != null and hotel.email != null ? hotel.email : 'contact@hospihotel.com'}">
                     contact@hospihotel.com
                   </p>
                 </div>
