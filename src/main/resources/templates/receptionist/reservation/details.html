@@ -43,7 +43,8 @@
     <form th:action="@{/receptionist/reservations/create/details}"
           th:object="${form}"
           method="post"
-          class="flex flex-col gap-6">
+          class="flex flex-col gap-6"
+          novalidate>
 
         <!-- HIDDEN DATE FIELDS -->
         <input type="hidden" th:field="*{checkInAt}">
@@ -234,7 +235,7 @@
             <div class="grid grid-cols-2 gap-5 p-6">
 
                 <div class="flex flex-col gap-2 col-span-2">
-                    <label class="text-sm font-medium">Full Name</label>
+                    <label class="text-sm font-medium">Full Name <span class="text-danger">*</span></label>
                     <div th:replace="~{fragments/form-error :: error('guestName')}"></div>
                     <input type="text"
                            th:field="*{guestName}"
@@ -252,7 +253,7 @@
                 </div>
 
                 <div class="flex flex-col gap-2">
-                    <label class="text-sm font-medium">Phone</label>
+                    <label class="text-sm font-medium">Phone <span class="text-danger">*</span></label>
                     <div th:replace="~{fragments/form-error :: error('guestPhone')}"></div>
                     <input type="text"
                            th:field="*{guestPhone}"
@@ -261,7 +262,7 @@
                 </div>
 
                 <div class="flex flex-col gap-2">
-                    <label class="text-sm font-medium">Date of Birth *</label>
+                    <label class="text-sm font-medium">Date of Birth <span class="text-danger">*</span></label>
                     <div th:replace="~{fragments/form-error :: error('guestDateOfBirth')}"></div>
                     <input type="date"
                            th:field="*{guestDateOfBirth}"

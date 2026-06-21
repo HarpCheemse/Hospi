@@ -49,7 +49,8 @@
         <form th:action="@{'/admin/accounts/' + ${accountId} + '/edit'}"
               th:object="${form}"
               method="post"
-              class="flex flex-col gap-6">
+              class="flex flex-col gap-6"
+              novalidate>
 
             <section class="card">
 
@@ -67,9 +68,8 @@
                     <div>
 
                         <label class="mb-2 block text-sm font-medium">
-                            Full Name
+                            Full Name <span class="text-danger">*</span>
                         </label>
-
                         <input type="text"
                                th:field="*{fullName}"
                                class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
@@ -85,9 +85,8 @@
                     <div>
 
                         <label class="mb-2 block text-sm font-medium">
-                            Email Address
+                            Email Address <span class="text-danger">*</span>
                         </label>
-
                         <input type="email"
                                th:field="*{email}"
                                class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
@@ -121,9 +120,8 @@
                     <div>
 
                         <label class="mb-2 block text-sm font-medium">
-                            Role
+                            Role <span class="text-danger">*</span>
                         </label>
-
                         <select th:field="*{role}"
                                 class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
 
@@ -147,9 +145,8 @@
                     <div>
 
                         <label class="mb-2 block text-sm font-medium">
-                            Status
+                            Status <span class="text-danger">*</span>
                         </label>
-
                         <select th:field="*{status}"
                                 class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
 

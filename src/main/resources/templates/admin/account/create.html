@@ -47,14 +47,14 @@
             <form th:action="@{/admin/accounts/create}"
                   th:object="${form}"
                   method="post"
-                  class="flex flex-col gap-5 p-5">
+                  class="flex flex-col gap-5 p-5"
+                  novalidate>
 
                 <!-- FULL NAME -->
                 <div>
                     <label class="mb-2 block text-sm font-medium">
-                        Full Name
+                        Full Name <span class="text-danger">*</span>
                     </label>
-
                     <input type="text"
                            th:field="*{fullName}"
                            placeholder="e.g. John Smith"
@@ -69,9 +69,8 @@
                 <!-- EMAIL -->
                 <div>
                     <label class="mb-2 block text-sm font-medium">
-                        Email
+                        Email <span class="text-danger">*</span>
                     </label>
-
                     <input type="email"
                            th:field="*{email}"
                            placeholder="e.g. john@hospi.com"
@@ -103,9 +102,8 @@
                 <!-- ROLE -->
                 <div>
                     <label class="mb-2 block text-sm font-medium">
-                        Role
+                        Role <span class="text-danger">*</span>
                     </label>
-
                     <select th:field="*{role}"
                             class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
 
@@ -128,9 +126,8 @@
                 <!-- PASSWORD -->
                 <div>
                     <label class="mb-2 block text-sm font-medium">
-                        Password
+                        Password <span class="text-danger">*</span>
                     </label>
-
                     <input type="password"
                            th:field="*{password}"
                            placeholder="••••••••"

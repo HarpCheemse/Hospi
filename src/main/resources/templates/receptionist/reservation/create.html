@@ -61,7 +61,7 @@
             <div class="flex items-end gap-5 p-6">
 
                 <div class="flex flex-col gap-2 flex-1">
-                    <label class="text-sm font-medium">Check-In Date</label>
+                    <label class="text-sm font-medium">Check-In Date <span class="text-danger">*</span></label>
                     <div th:replace="~{fragments/form-error :: error('checkInAt')}"></div>
                     <input type="date"
                            th:field="*{checkInAt}"
@@ -69,7 +69,7 @@
                 </div>
 
                 <div class="flex flex-col gap-2 flex-1">
-                    <label class="text-sm font-medium">Check-Out Date</label>
+                    <label class="text-sm font-medium">Check-Out Date <span class="text-danger">*</span></label>
                     <div th:replace="~{fragments/form-error :: error('checkOutAt')}"></div>
                     <input type="date"
                            th:field="*{checkOutAt}"

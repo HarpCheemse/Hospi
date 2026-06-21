@@ -40,7 +40,8 @@
 
     <form th:action="@{/receptionist/reservations/{id}/checkin(id=${view.id})}"
           method="post"
-          class="flex flex-col gap-6">
+          class="flex flex-col gap-6"
+          novalidate>
 
         <!-- BOOKING SUMMARY -->
         <section class="card">

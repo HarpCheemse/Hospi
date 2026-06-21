@@ -50,7 +50,7 @@
                 </div>
             </div>
 
-            <form th:action="@{/my-booking/lookup}" th:object="${form}" method="post" class="flex flex-col gap-5 p-6">
+            <form th:action="@{/my-booking/lookup}" th:object="${form}" method="post" class="flex flex-col gap-5 p-6" novalidate>
 
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium" for="email">Email Address <span
@@ -90,7 +90,7 @@
 
         <div class="flex items-center justify-between mb-8">
             <h2 class="text-2xl font-bold font-display text-text">Your Bookings</h2>
-            <form th:action="@{/my-booking/clear}" method="post" class="inline">
+            <form th:action="@{/my-booking/clear}" method="post" class="inline" novalidate>
                 <button type="submit" class="btn btn-ghost btn-sm">+ Track Another Booking</button>
             </form>
         </div>
@@ -158,9 +158,10 @@
                     <!-- Not yet reviewed -->
                     <div th:if="${!reviewMap.containsKey(reservation.id)}" class="flex items-center gap-3">
                         <span class="text-sm text-muted-foreground">Rate your stay:</span>
-                        <form th:action="@{/my-booking/review}" method="post" class="flex items-center gap-2">
+                        <form th:action="@{/my-booking/review}" method="post" class="flex items-center gap-2" novalidate>
                             <input type="hidden" name="reservationId" th:value="${reservation.id}"/>
-                            <select name="rating" required class="input">
+                            <label class="text-sm font-medium" for="rating">Rating <span class="text-danger">*</span></label>
+                            <select name="rating" id="rating" required class="input">
                                 <option value="">Rate...</option>
                                 <option value="1">1 - Poor</option>
                                 <option value="2">2 - Fair</option>

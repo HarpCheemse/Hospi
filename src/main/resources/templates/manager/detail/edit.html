@@ -43,7 +43,8 @@
               th:object="${hotelForm}"
               method="post"
               class="flex flex-col gap-6"
-              enctype="multipart/form-data">
+              enctype="multipart/form-data"
+              novalidate>
 
             <section
                     x-data="{ preview: null }"
@@ -133,7 +134,7 @@
                     <div class="col-span-2">
 
                         <label class="mb-2 block text-sm font-medium">
-                            Hotel Name
+                            Hotel Name <span class="text-danger">*</span>
                         </label>
 
                         <input type="text"
@@ -147,9 +148,8 @@
                     <div>
 
                         <label class="mb-2 block text-sm font-medium">
-                            Status
+                            Status <span class="text-danger">*</span>
                         </label>
-
                         <select th:field="*{status}"
                                 class="input w-full">
 
@@ -209,7 +209,7 @@
                     <div class="col-span-2">
 
                         <label class="mb-2 block text-sm font-medium">
-                            Address
+                            Address <span class="text-danger">*</span>
                         </label>
 
                         <input type="text"
@@ -222,9 +222,8 @@
                     <div>
 
                         <label class="mb-2 block text-sm font-medium">
-                            Phone
+                            Phone <span class="text-danger">*</span>
                         </label>
-
                         <input type="text"
                                th:field="*{phone}"
                                class="input w-full">
@@ -267,7 +266,7 @@
                     <div>
 
                         <label class="mb-2 block text-sm font-medium">
-                            Check-In Time
+                            Check-In Time <span class="text-danger">*</span>
                         </label>
 
                         <input type="time"
@@ -280,7 +279,7 @@
                     <div>
 
                         <label class="mb-2 block text-sm font-medium">
-                            Check-Out Time
+                            Check-Out Time <span class="text-danger">*</span>
                         </label>
 
                         <input type="time"
@@ -336,6 +335,9 @@
 
                 <div class="p-5">
 
+                    <label class="mb-2 block text-sm font-medium">
+                        Term of Service <span class="text-danger">*</span>
+                    </label>
                     <textarea rows="8"
                               th:field="*{termOfService}"
                               class="input w-full"

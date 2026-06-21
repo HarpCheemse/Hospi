@@ -88,6 +88,7 @@
                                 <form th:action="@{/receptionist/reservations/{id}/manage/guests/{gid}/delete(id=${view.reservation().id}, gid=${guest.id})}"
                                       method="post"
                                       class="inline"
+                                      novalidate
                                       onsubmit="return confirm('Remove this guest record?')">
                                     <button type="submit" class="text-sm text-danger hover:opacity-80">
                                         Remove
@@ -109,12 +110,13 @@
                         : @{/receptionist/reservations/{id}/manage/guests(id=${view.reservation().id})}"
                       th:object="${form}"
                       method="post"
-                      class="p-6">
+                      class="p-6"
+                      novalidate>
 
                     <div class="grid grid-cols-3 gap-4">
 
                         <div class="flex flex-col gap-2">
-                            <label class="text-sm font-medium" for="guestName">Guest Name *</label>
+                            <label class="text-sm font-medium" for="guestName">Guest Name <span class="text-danger">*</span></label>
                             <div th:replace="~{fragments/form-error :: error('guestName')}"></div>
                             <input type="text"
                                    id="guestName"
@@ -124,7 +126,7 @@
                         </div>
 
                         <div class="flex flex-col gap-2">
-                            <label class="text-sm font-medium" for="dateOfBirth">Date of Birth *</label>
+                            <label class="text-sm font-medium" for="dateOfBirth">Date of Birth <span class="text-danger">*</span></label>
                             <div th:replace="~{fragments/form-error :: error('dateOfBirth')}"></div>
                             <input type="date"
                                    id="dateOfBirth"
@@ -208,6 +210,7 @@
                                     <form th:action="@{/receptionist/reservations/{id}/manage/rooms/{aid}/remove(id=${view.reservation().id}, aid=${a.id})}"
                                           method="post"
                                           class="inline"
+                                          novalidate
                                           onsubmit="return confirm('Remove this room assignment?')">
                                         <button type="submit" class="text-sm text-danger hover:opacity-80">
                                             Remove
@@ -227,9 +230,10 @@
                     <div th:if="${!#lists.isEmpty(view.availableRooms())}" class="mt-4">
                         <form th:action="@{/receptionist/reservations/{id}/manage/rooms(id=${view.reservation().id})}"
                               method="post"
-                              class="flex items-end gap-3">
+                              class="flex items-end gap-3"
+                              novalidate>
                             <div class="flex flex-col gap-2 flex-1">
-                                <label class="text-sm font-medium" for="roomId">Assign Room</label>
+                                <label class="text-sm font-medium" for="roomId">Assign Room <span class="text-danger">*</span></label>
                                 <select id="roomId" name="roomId" required class="input">
                                     <option value="">Select a room...</option>
                                     <option th:each="r : ${view.availableRooms()}"
@@ -350,7 +354,8 @@
 
                     <form th:action="@{/receptionist/reservations/{id}/manage/extend(id=${view.reservation().id})}"
                           method="post"
-                          class="flex items-end gap-4">
+                          class="flex items-end gap-4"
+                          novalidate>
 
                         <div class="flex flex-col gap-2 flex-1">
                             <label class="text-sm font-medium" for="extraDays">Extra Nights</label>
