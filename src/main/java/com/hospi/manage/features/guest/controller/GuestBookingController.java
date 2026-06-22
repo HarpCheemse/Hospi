@@ -180,8 +180,7 @@ public class GuestBookingController {
     }
 
     @GetMapping("/verify")
-    String showVerify(HttpSession session, Model model,
-                      @RequestParam(required = false) Boolean otpSent) {
+    String showVerify(HttpSession session, Model model) {
         BookingDraft draft = getDraft(session);
         if (draft.getRoomSelections() == null || draft.getRoomSelections().isEmpty()) {
             return "redirect:/book/rooms";
@@ -196,12 +195,6 @@ public class GuestBookingController {
                     draft.getGuestNationality()
             ));
         }
-        if (!model.containsAttribute(OTP_FORM)) {
-            model.addAttribute(OTP_FORM,
-                    new OtpForm(null));
-        }
-        model.addAttribute(OTP_SENT,
-                otpSent != null && otpSent);
         model.addAttribute(DRAFT,
                 draft);
         return "guest/booking/verify";
@@ -211,15 +204,8 @@ public class GuestBookingController {
     String sendOtp(@Valid @ModelAttribute("guestDetailForm") GuestDetailForm form,
                    BindingResult binding,
                    HttpSession session,
-                   Model model,
                    RedirectAttributes redirect) {
         if (binding.hasErrors()) {
-            model.addAttribute(OTP_FORM,
-                    new OtpForm(null));
-            model.addAttribute(OTP_SENT,
-                    false);
-            model.addAttribute(DRAFT,
-                    getDraft(session));
             return "guest/booking/verify";
         }
 
@@ -243,12 +229,26 @@ public class GuestBookingController {
             return "redirect:/book/verify";
         }
 
-        redirect.addFlashAttribute(SUCCESS,
-                "OTP sent to " + form.guestEmail());
-        return "redirect:/book/verify?otpSent=true";
+        return "redirect:/book/verify-otp";
     }
 
-    @PostMapping("/verify")
+    @GetMapping("/verify-otp")
+    String showVerifyOtp(HttpSession session, Model model) {
+        BookingDraft draft = getDraft(session);
+        if (draft.getGuestEmail() == null) {
+            return "redirect:/book/verify";
+        }
+
+        if (!model.containsAttribute(OTP_FORM)) {
+            model.addAttribute(OTP_FORM,
+                    new OtpForm(null));
+        }
+        model.addAttribute("email",
+                draft.getGuestEmail());
+        return "guest/booking/verify-otp";
+    }
+
+    @PostMapping("/verify-otp")
     String verifyOtp(@Valid @ModelAttribute("otpForm") OtpForm otpForm,
                      BindingResult binding,
                      HttpSession session,
@@ -260,20 +260,11 @@ public class GuestBookingController {
         }
 
         if (binding.hasErrors()) {
-            GuestDetailForm gForm = new GuestDetailForm(
-                    draft.getGuestName(),
-                    draft.getGuestEmail(),
-                    draft.getGuestPhone(),
-                    draft.getGuestDateOfBirth(),
-                    draft.getGuestNationality()
-            );
-            model.addAttribute(GUEST_DETAIL_FORM,
-                    gForm);
-            model.addAttribute(OTP_SENT,
-                    true);
-            model.addAttribute(DRAFT,
-                    draft);
-            return "guest/booking/verify";
+            model.addAttribute(OTP_FORM,
+                    otpForm);
+            model.addAttribute("email",
+                    draft.getGuestEmail());
+            return "guest/booking/verify-otp";
         }
 
         boolean verified = otpService.verifyOtp(draft.getGuestEmail(),
@@ -283,19 +274,30 @@ public class GuestBookingController {
         if (!verified) {
             redirect.addFlashAttribute(ERROR,
                     "Invalid or expired OTP");
-            return "redirect:/book/verify?otpSent=true";
+            return "redirect:/book/verify-otp";
         }
 
-        draft.setEmailVerified(true);
-        return "redirect:/book/pay";
+        String token = otpService.issueToken(draft.getGuestEmail(),
+                OtpType.BOOKING_CONFIRM);
+        draft.setPaypalOrderId(token);
+
+        return "redirect:/book/pay?token=" + token;
     }
 
     @GetMapping("/pay")
-    String showPay(HttpSession session, Model model,
+    String showPay(@RequestParam String token,
+                   HttpSession session, Model model,
                    @RequestParam(required = false) Boolean cancelled) {
-        BookingDraft draft = getDraft(session);
-        if (!draft.isEmailVerified()) {
+        if (!otpService.isValidToken(token)) {
             return "redirect:/book/verify";
+        }
+
+        BookingDraft draft = getDraft(session);
+        if (draft.getCheckInAt() == null || draft.getCheckOutAt() == null) {
+            return "redirect:/book";
+        }
+        if (draft.getRoomSelections() == null || draft.getRoomSelections().isEmpty()) {
+            return "redirect:/book/rooms";
         }
 
         if (cancelled != null && cancelled) {
@@ -305,24 +307,28 @@ public class GuestBookingController {
 
         model.addAttribute(DRAFT,
                 draft);
+        model.addAttribute("token",
+                token);
         return "guest/booking/pay";
     }
 
     @PostMapping("/pay")
-    String processPay(HttpSession session,
+    String processPay(@RequestParam String token,
+                      HttpSession session,
                       RedirectAttributes redirect) {
-
-        BookingDraft draft = getDraft(session);
-
-        if (!draft.isEmailVerified()) {
+        if (!otpService.isValidToken(token)) {
             return "redirect:/book/verify";
         }
 
+        BookingDraft draft = getDraft(session);
+
         try {
             String returnUrl = UriComponentsBuilder.fromPath("/book/pay/capture")
+                    .queryParam("state", token)
                     .build().toUriString();
 
             String cancelUrl = UriComponentsBuilder.fromPath("/book/pay")
+                    .queryParam("token", token)
                     .queryParam("cancelled", "true")
                     .build().toUriString();
 
@@ -340,31 +346,33 @@ public class GuestBookingController {
                     "Failed to initiate payment. Please try again."
             );
 
-            return "redirect:/book/pay";
+            return "redirect:/book/pay?token=" + token;
         }
     }
 
     @GetMapping("/pay/capture")
-    String capturePay(@RequestParam("token") String token,
+    String capturePay(@RequestParam("token") String paypalOrderId,
+                      @RequestParam("state") String otpToken,
                       HttpSession session,
                       RedirectAttributes redirect) {
-        BookingDraft draft = getDraft(session);
-        if (!draft.isEmailVerified()) {
+        if (!otpService.isValidToken(otpToken)) {
             return "redirect:/book/verify";
         }
 
+        BookingDraft draft = getDraft(session);
+
         try {
             boolean completed =
-                    paymentService.captureOnlineBookingPayment(token);
+                    paymentService.captureOnlineBookingPayment(paypalOrderId);
             if (!completed) {
                 redirect.addFlashAttribute(ERROR,
                         "Payment was not completed. Please try again.");
-                return "redirect:/book/pay";
+                return "redirect:/book/pay?token=" + otpToken;
             }
         } catch (Exception e) {
             redirect.addFlashAttribute(ERROR,
                     "Payment processing failed. Please contact support.");
-            return "redirect:/book/pay";
+            return "redirect:/book/pay?token=" + otpToken;
         }
 
         Reservation reservation;
@@ -373,9 +381,10 @@ public class GuestBookingController {
         } catch (Exception e) {
             redirect.addFlashAttribute(ERROR,
                     "Failed to create booking. Please contact support.");
-            return "redirect:/book/pay";
+            return "redirect:/book/pay?token=" + otpToken;
         }
 
+        otpService.invalidateToken(otpToken);
         session.removeAttribute(BOOKING_DRAFT);
 
         try {
