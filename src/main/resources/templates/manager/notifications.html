@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications | Hospi</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<body class="staff-layout">
+
+<!-- SIDEBAR -->
+<aside th:replace="~{fragments/manager-sidebar :: sidebar}"></aside>
+
+<!-- MAIN -->
+<main class="staff-page">
+
+    <!-- HEADER -->
+    <header class="staff-page-header">
+        <section>
+            <h1 class="staff-page-title">Notifications</h1>
+            <p class="page-description">System notifications for managers</p>
+        </section>
+    </header>
+
+    <section class="card-panel">
+        <div th:replace="~{fragments/notification-list :: list}"></div>
+    </section>
+
+</main>
+
+<script th:src="@{/js/notification-poller.js}"></script>
+<script>startNotificationPolling(30000);</script>
+
+</body>
+</html>

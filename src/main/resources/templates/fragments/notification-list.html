@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="list">
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold">Notifications</h2>
+        <button onclick="markAllRead()" class="btn btn-sm btn-outline">Mark all as read</button>
+    </div>
+
+    <div th:if="${notifications.hasContent()}" class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+            <tr class="border-b border-border">
+                <th class="text-left p-3 font-medium">Title</th>
+                <th class="text-left p-3 font-medium">Message</th>
+                <th class="text-left p-3 font-medium">Module</th>
+                <th class="text-left p-3 font-medium">Time</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="notif : ${notifications.content}" class="border-b border-border/50 hover:bg-muted/50">
+                <td class="p-3 font-medium" th:text="${notif.title}"></td>
+                <td class="p-3 text-foreground/80" th:text="${notif.body}"></td>
+                <td class="p-3 text-foreground/60">
+                    <span th:if="${notif.relatedModule}" class="pill" th:text="${notif.relatedModule} + ': ' + ${notif.relatedId}"></span>
+                    <span th:unless="${notif.relatedModule}" class="text-foreground/40">-</span>
+                </td>
+                <td class="p-3 text-foreground/60" th:text="${#temporals.format(notif.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:unless="${notifications.hasContent()}" class="py-8 text-center text-foreground/60">
+        No notifications
+    </div>
+
+    <!-- Pagination -->
+    <div th:if="${notifications.totalPages > 1}" class="mt-4 flex items-center justify-center gap-2">
+        <a th:if="${notifications.number > 0}"
+           th:href="@{/api/notifications(page=${notifications.number-1}, size=${notifications.size})}"
+           class="btn btn-sm btn-outline">Previous</a>
+
+        <span class="text-sm text-foreground/60"
+              th:text="'Page ' + (${notifications.number} + 1) + ' of ' + ${notifications.totalPages}"></span>
+
+        <a th:if="${notifications.number + 1 < notifications.totalPages}"
+           th:href="@{/api/notifications(page=${notifications.number+1}, size=${notifications.size})}"
+           class="btn btn-sm btn-outline">Next</a>
+    </div>
+</div>
+
+</body>
+</html>
