@@ -97,16 +97,16 @@ public class PasswordResetController {
             return "auth/verify-otp";
         }
 
-        String resetToken = otpService.issueResetToken(form.email(),
+        String token = otpService.issueToken(form.email(),
                 OtpType.PASSWORD_RESET);
         redirectAttributes.addAttribute("token",
-                resetToken);
+                token);
         return "redirect:/auth/password/reset";
     }
 
     @GetMapping("/reset")
     public String showResetPassword(@RequestParam String token, Model model) {
-        if (!otpService.isValidResetToken(token)) {
+        if (!otpService.isValidToken(token)) {
             return "redirect:/auth/password/forgot";
         }
 
@@ -121,7 +121,7 @@ public class PasswordResetController {
     @PostMapping("/reset")
     public String resetPassword(@RequestParam String token, @Valid @ModelAttribute("form") ResetPasswordForm form,
                                 BindingResult bindingResult, RedirectAttributes redirectAttributes) {
-        if (!otpService.isValidResetToken(token)) {
+        if (!otpService.isValidToken(token)) {
             return "redirect:/auth/password/forgot";
         }
 
@@ -131,13 +131,13 @@ public class PasswordResetController {
             return "auth/password-reset";
         }
 
-        String email = otpService.getEmailByResetToken(token);
+        String email = otpService.getEmailByToken(token);
         Account account = accountRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("Account"));
 
         account.setPasswordHash(encoder.encode(form.newPassword()));
         accountRepository.save(account);
 
-        otpService.invalidateResetToken(token);
+        otpService.invalidateToken(token);
 
         redirectAttributes.addFlashAttribute("success",
                 "Password reset successfully");

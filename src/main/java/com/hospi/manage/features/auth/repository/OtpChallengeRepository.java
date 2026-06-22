@@ -15,7 +15,7 @@ public interface OtpChallengeRepository extends JpaRepository<OtpChallenge, Long
 
     Optional<OtpChallenge> findTopByEmailAndTypeAndVerifiedTrueOrderByCreatedAtDesc(String email, OtpType type);
 
-    Optional<OtpChallenge> findByResetToken(String token);
+    Optional<OtpChallenge> findByToken(String token);
 
     void deleteByEmail(String email);
 }

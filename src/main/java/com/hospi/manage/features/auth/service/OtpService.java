@@ -51,37 +51,37 @@ public class OtpService {
     }
 
     @Transactional
-    public String issueResetToken(String email, OtpType type) {
+    public String issueToken(String email, OtpType type) {
         OtpChallenge challenge = otpChallengeRepository
                 .findTopByEmailAndTypeAndVerifiedTrueOrderByCreatedAtDesc(email,
                         type)
                 .orElseThrow(() -> new IllegalStateException("No verified OTP found"));
 
         String token = UUID.randomUUID().toString();
-        challenge.setResetToken(token);
-        challenge.setResetTokenExpiresAt(LocalDateTime.now().plusMinutes(15));
-        challenge.setResetTokenUsed(false);
+        challenge.setToken(token);
+        challenge.setTokenExpiresAt(LocalDateTime.now().plusMinutes(15));
+        challenge.setTokenUsed(false);
         otpChallengeRepository.save(challenge);
         return token;
     }
 
-    public boolean isValidResetToken(String token) {
-        return otpChallengeRepository.findByResetToken(token)
-                .map(OtpChallenge::isResetTokenValid)
+    public boolean isValidToken(String token) {
+        return otpChallengeRepository.findByToken(token)
+                .map(OtpChallenge::isTokenValid)
                 .orElse(false);
     }
 
-    public String getEmailByResetToken(String token) {
-        return otpChallengeRepository.findByResetToken(token)
-                .filter(OtpChallenge::isResetTokenValid)
+    public String getEmailByToken(String token) {
+        return otpChallengeRepository.findByToken(token)
+                .filter(OtpChallenge::isTokenValid)
                 .map(OtpChallenge::getEmail)
                 .orElseThrow(() -> new IllegalStateException("Invalid or expired reset token"));
     }
 
     @Transactional
-    public void invalidateResetToken(String token) {
-        otpChallengeRepository.findByResetToken(token).ifPresent(challenge -> {
-            challenge.setResetTokenUsed(true);
+    public void invalidateToken(String token) {
+        otpChallengeRepository.findByToken(token).ifPresent(challenge -> {
+            challenge.setTokenUsed(true);
             otpChallengeRepository.save(challenge);
         });
     }
