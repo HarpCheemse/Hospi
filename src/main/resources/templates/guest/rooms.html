@@ -36,10 +36,10 @@
         <article th:each="roomType : ${roomTypes}" class="overflow-hidden rounded-2xl bg-surface border border-border/80 shadow-card hover:shadow-soft transition-shadow flex flex-col h-full">
           <!-- Room Type Image -->
           <div class="relative h-64 w-full bg-surface-muted overflow-hidden">
-            <img th:if="${#lists.isEmpty(roomType.pictures)}" class="h-full w-full object-cover hover:scale-105 transition-transform duration-slow"
+            <img th:if="${roomType.coverPictureId == null}" class="h-full w-full object-cover hover:scale-105 transition-transform duration-slow"
                  th:src="@{/images/hotel2.jpg}" alt="Room template picture"/>
-            <img th:if="${not #lists.isEmpty(roomType.pictures)}" class="h-full w-full object-cover hover:scale-105 transition-transform duration-slow"
-                 th:src="@{'/room-type-picture/' + ${roomType.pictures[0].id}}" alt="Room Type Image"/>
+            <img th:if="${roomType.coverPictureId != null}" class="h-full w-full object-cover hover:scale-105 transition-transform duration-slow"
+                 th:src="@{'/room-type-picture/' + ${roomType.coverPictureId}}" alt="Room Type Image"/>
             <span class="absolute top-4 right-4 bg-primary text-white font-sans text-xs font-semibold px-3 py-1.5 rounded-full shadow-md"
                   th:text="'$' + ${roomType.basePrice} + ' / night'">$89 / night</span>
           </div>
@@ -77,7 +77,7 @@
               </span>
             </div>
 
-            <a th:href="@{/#booking}" class="mt-auto block text-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-card hover:opacity-90 transition-opacity">
+            <a th:href="@{/book}" class="mt-auto block text-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-card hover:opacity-90 transition-opacity">
               Reserve Room
             </a>
           </div>

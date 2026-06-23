@@ -57,7 +57,7 @@
           <div class="grid grid-cols-2 gap-5">
             <div class="flex flex-col gap-2">
               <label class="text-sm font-medium" for="guestName">Full Name <span class="text-danger">*</span></label>
-              <div th:replace="fragments/form-error :: error('guestName')"></div>
+              <div th:replace="~{fragments/form-error :: error('guestName')}"></div>
               <input type="text" id="guestName" th:field="*{guestName}"
                      class="input"
                      th:classappend="${#fields.hasErrors('guestName')} ? 'input-error' : ''"
@@ -66,7 +66,7 @@
 
             <div class="flex flex-col gap-2">
               <label class="text-sm font-medium" for="guestEmail">Email <span class="text-danger">*</span></label>
-              <div th:replace="fragments/form-error :: error('guestEmail')"></div>
+              <div th:replace="~{fragments/form-error :: error('guestEmail')}"></div>
               <input type="email" id="guestEmail" th:field="*{guestEmail}"
                      class="input"
                      th:classappend="${#fields.hasErrors('guestEmail')} ? 'input-error' : ''"
@@ -75,7 +75,7 @@
 
             <div class="flex flex-col gap-2">
               <label class="text-sm font-medium" for="guestPhone">Phone <span class="text-danger">*</span></label>
-              <div th:replace="fragments/form-error :: error('guestPhone')"></div>
+              <div th:replace="~{fragments/form-error :: error('guestPhone')}"></div>
               <input type="tel" id="guestPhone" th:field="*{guestPhone}"
                      class="input"
                      th:classappend="${#fields.hasErrors('guestPhone')} ? 'input-error' : ''"
@@ -84,7 +84,7 @@
 
             <div class="flex flex-col gap-2">
               <label class="text-sm font-medium" for="guestDateOfBirth">Date of Birth <span class="text-danger">*</span></label>
-              <div th:replace="fragments/form-error :: error('guestDateOfBirth')"></div>
+              <div th:replace="~{fragments/form-error :: error('guestDateOfBirth')}"></div>
               <input type="date" id="guestDateOfBirth" th:field="*{guestDateOfBirth}"
                      class="input"
                      th:classappend="${#fields.hasErrors('guestDateOfBirth')} ? 'input-error' : ''"
@@ -94,7 +94,7 @@
 
           <div class="flex flex-col gap-2">
             <label class="text-sm font-medium" for="guestNationality">Nationality</label>
-            <div th:replace="fragments/form-error :: error('guestNationality')"></div>
+            <div th:replace="~{fragments/form-error :: error('guestNationality')}"></div>
             <input type="text" id="guestNationality" th:field="*{guestNationality}"
                    class="input">
           </div>

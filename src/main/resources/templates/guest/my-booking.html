@@ -55,7 +55,7 @@
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium" for="email">Email Address <span
                             class="text-danger">*</span></label>
-                    <div th:replace="fragments/form-error :: error('email')"></div>
+                    <div th:replace="~{fragments/form-error :: error('email')}"></div>
                     <input type="email" id="email" th:field="*{email}"
                            placeholder="example@email.com"
                            class="input"
@@ -65,7 +65,7 @@
 
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium" for="bookingCode">Booking Code <span class="text-danger">*</span></label>
-                    <div th:replace="fragments/form-error :: error('bookingCode')"></div>
+                    <div th:replace="~{fragments/form-error :: error('bookingCode')}"></div>
                     <input type="text" id="bookingCode" th:field="*{bookingCode}"
                            placeholder="HSP-XXXXXX"
                            class="input"
@@ -142,7 +142,7 @@
                 </div>
 
                 <!-- Review Section (only for CHECKED_OUT) -->
-                <div th:if="${reservation.status.name() == 'CHECKED_OUT'}" class="mt-6 pt-4 border-t border-border/60">
+                <div th:if="${checkedOut.get(reservation.id)}" class="mt-6 pt-4 border-t border-border/60">
 
                     <!-- Already reviewed -->
                     <div th:if="${reviewMap.containsKey(reservation.id)}" class="flex items-center gap-2">
