@@ -1,11 +1,11 @@
 package com.hospi.manage.features.guest.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
 
 public record OtpForm(
         @NotBlank(message = "OTP is required")
-        @Size(max = 6, message = "OTP must not exceed 6 characters")
+        @Pattern(regexp = "\\d{6}", message = "OTP must be exactly 6 digits")
         String otp
 ) {
 }

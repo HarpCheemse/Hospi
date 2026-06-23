@@ -22,41 +22,42 @@ public class BookingTrackerService {
     private final ReservationRepository reservationRepository;
     private final ReviewRepository reviewRepository;
 
+    @Transactional(readOnly = true)
     public Reservation lookupByEmailAndCode(String email, String code) {
         return reservationRepository.findByGuestEmailAndConfirmationCode(email, code)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
     }
 
+    @Transactional(readOnly = true)
     public List<Reservation> resolveByCodes(Set<String> codes) {
-        return codes.stream()
-                .map(code -> reservationRepository.findByConfirmationCode(code).orElse(null))
-                .filter(Objects::nonNull)
-                .toList();
+        return reservationRepository.findByConfirmationCodeIn(codes);
     }
 
+    @Transactional(readOnly = true)
     public Map<Long, Review> buildReviewMap(List<Reservation> reservations) {
-        return reservations.stream()
-                .map(r -> reviewRepository.findByReservationId(r.getId()).orElse(null))
-                .filter(Objects::nonNull)
+        List<Long> ids = reservations.stream().map(Reservation::getId).toList();
+        return reviewRepository.findByReservationIdIn(ids).stream()
                 .collect(Collectors.toMap(r -> r.getReservation().getId(), r -> r));
     }
 
     public Map<Long, String> buildPillClasses(List<Reservation> reservations) {
-        Map<Long, String> map = new HashMap<>();
-        for (Reservation r : reservations) {
-            map.put(r.getId(), pillClass(r.getStatus()));
-        }
-        return map;
+        return reservations.stream().collect(Collectors.toMap(
+                Reservation::getId,
+                r -> pillClass(r.getStatus())
+        ));
     }
 
     @Transactional
-    public Review submitReview(Long reservationId, Integer rating) {
+    public Review submitReview(Long reservationId, Integer rating, Set<String> trackedCodes) {
+        List<Reservation> trackedReservations = resolveByCodes(trackedCodes);
+        Reservation reservation = trackedReservations.stream()
+                .filter(r -> r.getId().equals(reservationId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("You can only review your own bookings."));
+
         if (reviewRepository.existsByReservationId(reservationId)) {
             throw new IllegalStateException("You have already reviewed this booking.");
         }
-
-        Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
 
         if (reservation.getStatus() != ReservationStatus.CHECKED_OUT) {
             throw new IllegalStateException("Reviews are only available for completed stays.");

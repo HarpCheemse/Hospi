@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -17,10 +16,21 @@ public class OtpService {
     private final OtpChallengeRepository otpChallengeRepository;
     private final Sha256HashingService hashingService;
 
-    private static int OTP_EXPIRED_MINUTES = 10;
+    private static final int OTP_EXPIRED_MINUTES = 10;
+    private static final int OTP_COOLDOWN_SECONDS = 60;
+    private static final int MAX_ATTEMPTS = 5;
 
     @Transactional
     public String createOtp(String email, OtpType type) {
+        boolean recentOtp = otpChallengeRepository
+                .findTopByEmailAndTypeAndVerifiedFalseOrderByCreatedAtDesc(email, type)
+                .filter(ch -> ch.getCreatedAt().isAfter(LocalDateTime.now().minusSeconds(OTP_COOLDOWN_SECONDS)))
+                .isPresent();
+
+        if (recentOtp) {
+            return null;
+        }
+
         String rawOtp = OtpGenerator.generate6DigitOtp();
 
         OtpChallenge challenge = new OtpChallenge();
@@ -36,14 +46,18 @@ public class OtpService {
     @Transactional
     public boolean verifyOtp(String email, String inputOtp, OtpType type) {
         var challenge = otpChallengeRepository
-                .findTopByEmailAndTypeAndVerifiedFalseOrderByCreatedAtDesc(email,
-                        type)
+                .findTopByEmailAndTypeAndVerifiedFalseOrderByCreatedAtDesc(email, type)
                 .orElse(null);
 
         if (challenge == null || challenge.isOtpExpired()) return false;
 
-        if (!hashingService.matches(inputOtp,
-                challenge.getOtpHash())) return false;
+        if (challenge.getAttempts() >= MAX_ATTEMPTS) return false;
+
+        if (!hashingService.matches(inputOtp, challenge.getOtpHash())) {
+            challenge.setAttempts(challenge.getAttempts() + 1);
+            otpChallengeRepository.save(challenge);
+            return false;
+        }
 
         challenge.setVerified(true);
         otpChallengeRepository.save(challenge);
@@ -51,13 +65,22 @@ public class OtpService {
     }
 
     @Transactional
+    public void invalidateOtp(String email, OtpType type) {
+        otpChallengeRepository
+                .findTopByEmailAndTypeAndVerifiedFalseOrderByCreatedAtDesc(email, type)
+                .ifPresent(challenge -> {
+                    challenge.setExpiresAt(LocalDateTime.now());
+                    otpChallengeRepository.save(challenge);
+                });
+    }
+
+    @Transactional
     public String issueToken(String email, OtpType type) {
         OtpChallenge challenge = otpChallengeRepository
-                .findTopByEmailAndTypeAndVerifiedTrueOrderByCreatedAtDesc(email,
-                        type)
+                .findTopByEmailAndTypeAndVerifiedTrueOrderByCreatedAtDesc(email, type)
                 .orElseThrow(() -> new IllegalStateException("No verified OTP found"));
 
-        String token = UUID.randomUUID().toString();
+        String token = java.util.UUID.randomUUID().toString();
         challenge.setToken(token);
         challenge.setTokenExpiresAt(LocalDateTime.now().plusMinutes(15));
         challenge.setTokenUsed(false);

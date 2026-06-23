@@ -11,7 +11,7 @@ public record BookingTrackForm(
         String email,
 
         @NotBlank(message = "Booking code is required")
-        @Size(max = 10, message = "Booking code must not exceed 10 characters")
+        @Size(max = 50, message = "Booking code must not exceed 50 characters")
         String bookingCode
 ) {
 }
