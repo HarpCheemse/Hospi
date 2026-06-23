@@ -58,6 +58,9 @@ public class Reservation {
     @Column(name = "total_price")
     private BigDecimal totalPrice;
 
+    @Column(name = "payment_idempotency_key", length = 100)
+    private String paymentIdempotencyKey;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

@@ -71,13 +71,13 @@
           <div class="flex items-center justify-between py-3 border-b border-border/50">
             <span class="text-sm text-muted-foreground-foreground">Nights</span>
             <span class="text-sm font-medium text-foreground"
-      th:text="${draft.checkOutAt != null and draft.checkInAt != null ? draft.checkOutAt.toEpochDay() - draft.checkInAt.toEpochDay() : ''}">3</span>
+      th:text="${draft.numberOfNights}">3</span>
           </div>
 
           <div th:each="room : ${draft.roomSelections}"
                class="flex items-center justify-between py-3 border-b border-border/50">
             <span class="text-sm text-muted-foreground-foreground" th:text="${room.roomTypeName} + ' x' + ${room.count} + ' @ $' + ${#numbers.formatDecimal(room.basePrice, 0, 2)} + '/night'">Deluxe x2 @ $240/night</span>
-            <span class="text-sm font-medium text-foreground" th:text="'$' + ${#numbers.formatDecimal(room.basePrice * room.count, 0, 2)}">$480.00</span>
+            <span class="text-sm font-medium text-foreground" th:text="'$' + ${#numbers.formatDecimal(room.basePrice * room.count * draft.numberOfNights, 0, 2)}">$480.00</span>
           </div>
 
           <div class="flex items-center justify-between py-3">
@@ -106,7 +106,6 @@
 
       <!-- PayPal Button -->
       <form th:action="@{/book/pay}" method="post" class="mt-6" novalidate>
-        <input type="hidden" name="token" th:value="${token}">
         <div class="card">
           <div class="flex items-center justify-end gap-3 p-5">
             <button type="submit" class="btn btn-primary btn-lg">
@@ -117,7 +116,7 @@
       </form>
 
       <div class="mt-4 text-center">
-        <a th:if="${token != null}" th:href="@{'/book/verify-otp?token=' + ${token}}"
+        <a th:if="${token != null}" th:href="@{/book/verify-otp(token=${token})}"
            class="btn btn-ghost btn-lg">
           &larr; Back to Verification
         </a>

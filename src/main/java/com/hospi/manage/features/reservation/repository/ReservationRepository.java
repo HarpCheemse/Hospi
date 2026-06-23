@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -41,6 +42,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                                LocalDate end);
 
     Optional<Reservation> findByConfirmationCode(String confirmationCode);
+
+    List<Reservation> findByConfirmationCodeIn(Set<String> confirmationCodes);
 
     @Query("""
                 SELECT r FROM Reservation r
@@ -121,4 +124,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                            Pageable pageable);
 
     Optional<Reservation> findByGuestEmailAndConfirmationCode(String guestEmail, String confirmationCode);
+
+    Optional<Reservation> findByPaymentIdempotencyKey(String paymentIdempotencyKey);
 }

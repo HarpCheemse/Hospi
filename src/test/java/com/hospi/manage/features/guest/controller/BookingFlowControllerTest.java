@@ -25,9 +25,9 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(GuestBookingController.class)
+@WebMvcTest(BookingFlowController.class)
 @AutoConfigureMockMvc(addFilters = false)
-class GuestBookingControllerTest {
+class BookingFlowControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -48,10 +48,10 @@ class GuestBookingControllerTest {
     private EmailService emailService;
 
     @MockitoBean
-    private PaymentService paymentService;
+    private BookingDateValidator bookingDateValidator;
 
     @MockitoBean
-    private BookingDateValidator bookingDateValidator;
+    private PaymentService paymentService;
 
     @Test
     void submitRooms_shouldRedirectToBook_whenDraftDatesNull() throws Exception {

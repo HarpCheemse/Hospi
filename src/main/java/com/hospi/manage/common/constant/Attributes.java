@@ -33,5 +33,6 @@ public class Attributes {
     public static final String TRACKED_EMAIL = "trackedEmail";
     public static final String PENDING_CODE = "pendingCode";
     public static final String BOOKING_DRAFT = "bookingDraft";
+    public static final String CHECKED_OUT = "checkedOut";
 
 }
