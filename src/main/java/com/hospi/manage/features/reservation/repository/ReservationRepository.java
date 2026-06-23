@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -126,4 +127,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     Optional<Reservation> findByGuestEmailAndConfirmationCode(String guestEmail, String confirmationCode);
 
     Optional<Reservation> findByPaymentIdempotencyKey(String paymentIdempotencyKey);
+
+    List<Reservation> findByStatusAndCreatedAtBefore(ReservationStatus status, LocalDateTime before);
 }

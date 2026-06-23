@@ -245,10 +245,11 @@ public class ReservationService {
     }
 
     @Transactional
-    public void confirmAndAddPayment(Long reservationId, BigDecimal amount, String confirmedBy) {
+    public void confirmAndAddPayment(Long reservationId, BigDecimal amount, String confirmedBy, String paymentIdempotencyKey) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
         reservation.setStatus(ReservationStatus.CONFIRMED);
+        reservation.setPaymentIdempotencyKey(paymentIdempotencyKey);
 
         Payment payment = new Payment();
         payment.setReservation(reservation);
@@ -258,6 +259,16 @@ public class ReservationService {
         payment.setConfirmedBy(confirmedBy);
 
         paymentRepository.save(payment);
+    }
+
+    @Transactional
+    public void cancelPendingReservation(Long id) {
+        Reservation reservation = findById(id);
+        if (reservation.getStatus() != ReservationStatus.PENDING) {
+            throw new IllegalStateException("Only PENDING reservations can be cancelled");
+        }
+        reservation.setStatus(ReservationStatus.CANCELLED);
+        reservationRepository.save(reservation);
     }
 
     @Transactional
