@@ -4,6 +4,7 @@ import com.hospi.manage.common.interfaces.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.mail.MailProperties;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
@@ -15,9 +16,7 @@ import org.springframework.stereotype.Service;
 public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
-
-    @Value("${spring.mail.username}")
-    private String from;
+    private final MailProperties mailProperties;
 
     @Value("${app.mail.console:false}")
     private boolean consoleMode;
@@ -38,7 +37,7 @@ public class EmailServiceImpl implements EmailService {
 
     private void viaEmail(String to, String subject, String content) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(from);
+        message.setFrom(mailProperties.getUsername());
         message.setTo(to);
         message.setSubject(subject);
         message.setText(content);

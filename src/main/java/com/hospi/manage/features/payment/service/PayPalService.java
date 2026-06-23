@@ -1,6 +1,6 @@
 package com.hospi.manage.features.payment.service;
 
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -12,19 +12,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 @Service
+@RequiredArgsConstructor
 public class PayPalService {
 
-    @Value("${paypal.client.id}")
-    private String clientId;
-
-    @Value("${paypal.client.secret}")
-    private String clientSecret;
-
-    @Value("${paypal.mode:sandbox}")
-    private String mode;
+    private final PayPalProperties payPalProperties;
 
     private String getBaseUrl() {
-        return "sandbox".equalsIgnoreCase(mode)
+        return "sandbox".equalsIgnoreCase(payPalProperties.mode())
                 ? "https://api-m.sandbox.paypal.com"
                 : "https://api-m.paypal.com";
     }
@@ -36,7 +30,7 @@ public class PayPalService {
         conn.setRequestMethod("POST");
         conn.setDoOutput(true);
 
-        String credentials = clientId + ":" + clientSecret;
+        String credentials = payPalProperties.clientId() + ":" + payPalProperties.clientSecret();
         String encoded = Base64.getEncoder()
                 .encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
 
