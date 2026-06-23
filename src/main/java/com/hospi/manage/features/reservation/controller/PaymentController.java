@@ -22,6 +22,7 @@ public class PaymentController {
     private final ReservationService reservationService;
     private final PaymentService paymentService;
 
+
     @ModelAttribute
     void addCommonAttributes(Model model) {
         model.addAttribute(Attributes.ACTIVE_SIDEBAR,

@@ -43,6 +43,9 @@ class ReservationServiceTest {
     @Mock
     private AvailabilityService availabilityService;
 
+    @Mock
+    private com.hospi.manage.features.notification.service.NotificationService notificationService;
+
     @InjectMocks
     private ReservationService reservationService;
 

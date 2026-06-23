@@ -1,6 +1,8 @@
 package com.hospi.manage.features.reservation.service;
 
+import com.hospi.manage.features.admin.account.enums.Role;
 import com.hospi.manage.features.guest.dto.BookingDraft;
+import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.payment.entity.Payment;
 import com.hospi.manage.features.payment.enums.PaymentMethod;
 import com.hospi.manage.features.payment.repository.PaymentRepository;
@@ -38,6 +40,7 @@ public class ReservationService {
     private final PaymentRepository paymentRepository;
     private final RoomAvailabilityService roomAvailabilityService;
     private final AvailabilityService availabilityService;
+    private final NotificationService notificationService;
 
     public List<Reservation> findByStatus(ReservationStatus status) {
         return reservationRepository.findByStatusOrderByCheckInAtDesc(status);
@@ -144,7 +147,18 @@ public class ReservationService {
         reservation.setDetails(details);
         reservation.setTotalPrice(totalPrice);
 
-        return reservationRepository.save(reservation);
+        Reservation saved = reservationRepository.save(reservation);
+
+        // Notify receptionists of new reservation
+        notificationService.notifyRole(
+                Role.RECEPTIONIST,
+                "New Reservation",
+                "Booking for " + saved.getGuestName() + " (" + saved.getCheckInAt() + " to " + saved.getCheckOutAt() + ")",
+                "RESERVATION",
+                String.valueOf(saved.getId())
+        );
+
+        return saved;
     }
 
     @Transactional

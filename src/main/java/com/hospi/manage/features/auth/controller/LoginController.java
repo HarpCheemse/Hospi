@@ -22,7 +22,7 @@ public class LoginController {
             @RequestParam(value = "logout", required = false) String logout,
             Model model
     ) {
-//        accountService.rehashAllPasswords("123");
+        accountService.rehashAllPasswords("123");
 
         if (error != null) {
             model.addAttribute("error",

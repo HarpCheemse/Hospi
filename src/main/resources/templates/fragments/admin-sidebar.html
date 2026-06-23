@@ -60,7 +60,7 @@
         </a>
 
         <!-- NOTIFICATIONS -->
-        <a th:href="@{/admin/notifications}"
+        <a th:href="@{/notifications}"
            class="flex items-center justify-between rounded-lg p-2"
            th:classappend="${activeSidebar == 'NOTIFICATIONS'}
            ? ' bg-primary/10 text-primary font-medium'
@@ -74,9 +74,7 @@
 
             </div>
 
-            <span class="pill-warning">
-                7
-            </span>
+            <span class="pill-notification" th:if="${unreadNotificationCount > 0}" th:text="${unreadNotificationCount}">0</span>
 
         </a>
 

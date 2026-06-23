@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="list">
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold">Notifications</h2>
+        <form th:action="@{/notifications/mark-all-read}" method="post">
+            <button type="submit" class="btn btn-sm btn-outline">Mark all as read</button>
+        </form>
+    </div>
+
+    <div th:if="${notifications.hasContent()}" class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+            <tr class="border-b border-border">
+                <th class="text-left p-3 font-medium">Title</th>
+                <th class="text-left p-3 font-medium">Message</th>
+                <th class="text-left p-3 font-medium">Module</th>
+                <th class="text-left p-3 font-medium">Time</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="notif : ${notifications.content}" class="border-b border-border/50 hover:bg-muted/50">
+                <td class="p-3 font-medium" th:text="${notif.title}"></td>
+                <td class="p-3 text-foreground/80" th:text="${notif.body}"></td>
+                <td class="p-3 text-foreground/60">
+                    <span th:if="${notif.relatedModule}" class="pill" th:text="${notif.relatedModule} + ': ' + ${notif.relatedId}"></span>
+                    <span th:unless="${notif.relatedModule}" class="text-foreground/40">-</span>
+                </td>
+                <td class="p-3 text-foreground/60" th:text="${#temporals.format(notif.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+            </tr>
+            </tbody>
+            <tfoot th:if="${notifications.totalPages > 1}">
+                <tr>
+                    <td colspan="4" class="px-5 py-3">
+                        <div class="flex items-center justify-between border-t border-border pt-4">
+                            <span class="text-sm text-muted-foreground">
+                                Page <span th:text="${notifications.number + 1}">1</span>
+                                of <span th:text="${notifications.totalPages}">1</span>
+                            </span>
+                            <div class="flex items-center gap-2">
+                                <a th:href="@{/notifications(page=${notifications.number - 1}, size=${notifications.size})}"
+                                   th:classappend="${notifications.number == 0} ? 'pointer-events-none opacity-50' : ''"
+                                   class="btn btn-ghost btn-sm">Prev</a>
+                                <input type="number" x-data
+                                       @keydown.enter="const p = new URLSearchParams(window.location.search); p.set('page', Math.max(0, (parseInt($event.target.value) || 1) - 1)); window.location.href = '?' + p.toString();"
+                                       min="1" th:max="${notifications.totalPages}"
+                                       class="input w-16 text-center" placeholder="#">
+                                <a th:href="@{/notifications(page=${notifications.number + 1}, size=${notifications.size})}"
+                                   th:classappend="${notifications.number >= notifications.totalPages - 1} ? 'pointer-events-none opacity-50' : ''"
+                                   class="btn btn-ghost btn-sm">Next</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div th:unless="${notifications.hasContent()}" class="py-8 text-center text-foreground/60">
+        No notifications
+    </div>
+
+</div>
+
+</body>
+</html>

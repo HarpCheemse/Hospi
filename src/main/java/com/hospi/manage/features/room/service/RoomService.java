@@ -1,7 +1,8 @@
 package com.hospi.manage.features.room.service;
 
 import com.hospi.manage.common.exception.ResourceNotFoundException;
-import com.hospi.manage.features.manager.detail.repository.HotelRepository;
+import com.hospi.manage.features.admin.account.enums.Role;
+import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.RoomAssignment;
 import com.hospi.manage.features.reservation.entity.StayingGuest;
@@ -32,18 +33,18 @@ import java.util.stream.Collectors;
 public class RoomService {
     private final RoomRepository roomRepository;
     private final RoomTypeRepository roomTypeRepository;
-    private final HotelRepository hotelRepository;
+    private final NotificationService notificationService;
     private final RoomAssignmentRepository roomAssignmentRepository;
     private final StayingGuestRepository stayingGuestRepository;
 
     RoomService(RoomRepository roomRepository,
                 RoomTypeRepository roomTypeRepository,
-                HotelRepository hotelRepository,
+                NotificationService notificationService,
                 RoomAssignmentRepository roomAssignmentRepository,
                 StayingGuestRepository stayingGuestRepository) {
         this.roomRepository = roomRepository;
         this.roomTypeRepository = roomTypeRepository;
-        this.hotelRepository = hotelRepository;
+        this.notificationService = notificationService;
         this.roomAssignmentRepository = roomAssignmentRepository;
         this.stayingGuestRepository = stayingGuestRepository;
     }
@@ -86,8 +87,7 @@ public class RoomService {
 
 
     private FloorView buildFloorView(int floorNumber, List<Room> rooms) {
-        return RoomMapper.toFloorView(floorNumber,
-                rooms);
+        return RoomMapper.toFloorView(floorNumber, rooms);
     }
 
     public List<FloorView> getFloorViews() {
@@ -116,15 +116,27 @@ public class RoomService {
     public void updateRoom(Long id, RoomEditForm form) {
         Room room = findById(id);
 
+        ConditionStatus oldCondition = room.getConditionStatus();
+
         RoomType roomType = roomTypeRepository.findById(form.roomTypeId())
                 .filter(RoomType::getActive)
-                .orElseThrow(() -> new ResourceNotFoundException("Room type"));
+                .orElseThrow(() -> new ResourceNotFoundException("Room type not found"));
 
         room.setRoomType(roomType);
         room.setConditionStatus(form.conditionStatus());
         room.setRoomNumber(form.roomNumber());
 
         roomRepository.save(room);
+
+        if (oldCondition != ConditionStatus.CLEAN && form.conditionStatus() == ConditionStatus.CLEAN) {
+            notificationService.notifyRole(
+                    Role.RECEPTIONIST,
+                    "Room Ready",
+                    "Room " + room.getRoomNumber() + " is now clean and available",
+                    "ROOM",
+                    String.valueOf(room.getId())
+            );
+        }
     }
 
     public List<FloorView> getFloorViews(Integer floor) {
@@ -138,8 +150,7 @@ public class RoomService {
                 .collect(Collectors.groupingBy(r -> (int) r.getFloorNumber()));
 
         return roomsByFloor.entrySet().stream()
-                .map(e -> buildFloorView(e.getKey(),
-                        e.getValue()))
+                .map(e -> buildFloorView(e.getKey(), e.getValue()))
                 .toList();
     }
 
@@ -179,8 +190,7 @@ public class RoomService {
         }
 
         List<RoomAssignment> assignments = roomAssignmentRepository
-                .findByRoomIdAndReservation_StatusIn(id,
-                        List.of(ReservationStatus.CHECKED_IN));
+                .findByRoomIdAndReservation_StatusIn(id, List.of(ReservationStatus.CHECKED_IN));
 
         if (assignments.isEmpty()) {
             return RoomOccupancyView.vacant(room);
@@ -202,4 +212,6 @@ public class RoomService {
                 stayingGuests.stream().map(GuestView::from).toList()
         );
     }
+
+
 }

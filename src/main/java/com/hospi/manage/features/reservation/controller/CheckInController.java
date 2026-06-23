@@ -22,6 +22,7 @@ public class CheckInController {
 
     private final ReservationService reservationService;
 
+
     @ModelAttribute
     void addCommonAttributes(Model model) {
         model.addAttribute(Attributes.ACTIVE_SIDEBAR,

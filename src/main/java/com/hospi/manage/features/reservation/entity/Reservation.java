@@ -23,6 +23,9 @@ public class Reservation {
     @Column(name = "id")
     private Long id;
 
+    @Column(name = "hotel_id")
+    private Long hotelId;
+
     @Column(name = "guest_name", nullable = false)
     private String guestName;
 
@@ -72,6 +75,18 @@ public class Reservation {
 
     @Column(name = "checked_in_by")
     private String checkedInBy;
+
+    @Column(name = "checked_out_at")
+    private LocalDateTime checkedOutAt;
+
+    @Column(name = "checked_out_by")
+    private String checkedOutBy;
+
+    @Column(name = "late_checkout_fee_applied", precision = 10, scale = 2)
+    private BigDecimal lateCheckoutFeeApplied;
+
+    @Column(name = "extra_guest_fee_applied", precision = 10, scale = 2)
+    private BigDecimal extraGuestFeeApplied;
 
     @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReservationDetail> details = new ArrayList<>();

@@ -39,6 +39,9 @@ class BookingTrackerControllerTest {
     private OtpService otpService;
 
     @MockitoBean
+    private com.hospi.manage.features.notification.service.NotificationService notificationService;
+
+    @MockitoBean
     private EmailService emailService;
 
     @Test
