@@ -17,7 +17,7 @@ public class RoomPageController {
     @GetMapping
     public String rooms(Model model) {
         model.addAttribute(ROOM_TYPES,
-                roomTypeService.findAll());
+                roomTypeService.findAllViews());
         return "guest/rooms";
     }
 }
