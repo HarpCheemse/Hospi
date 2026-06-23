@@ -229,19 +229,15 @@ public class BookingFlowController {
         draft.setGuestDateOfBirth(form.guestDateOfBirth());
         draft.setGuestNationality(form.guestNationality());
 
-        try {
-            String otp = otpService.createOtp(form.guestEmail(),
-                    OtpType.BOOKING_CONFIRM);
-            emailService.send(form.guestEmail(),
-                    "Your Booking OTP Code",
-                    "Your OTP code is: " + otp
-                            + "\n\nThis code expires in 10 minutes.\n\nThank you for choosing Hospi!");
-        } catch (Exception e) {
-            redirect.addFlashAttribute(ERROR,
-                    "Failed to send OTP. Please try again.");
-            return "redirect:/book/verify";
-        }
+        String otp = otpService.createOtp(form.guestEmail(),
+                OtpType.BOOKING_CONFIRM);
+        emailService.send(form.guestEmail(),
+                "Your Booking OTP Code",
+                "Your OTP code is: " + otp
+                        + "\n\nThis code expires in 10 minutes.\n\nThank you for choosing Hospi!");
 
+        redirect.addFlashAttribute(SUCCESS,
+                "Email sent successfully to " + emailService.maskEmail(form.guestEmail()));
         return "redirect:/book/verify-otp";
     }
 

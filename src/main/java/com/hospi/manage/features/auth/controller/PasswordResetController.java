@@ -18,6 +18,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import static com.hospi.manage.common.constant.Attributes.SUCCESS;
+
 @Controller
 @RequestMapping("/auth/password")
 public class PasswordResetController {
@@ -61,11 +63,12 @@ public class PasswordResetController {
         String otp = otpService.createOtp(form.email(),
                 OtpType.PASSWORD_RESET);
 
-        System.out.println("OTP CODE: " + otp);
         emailService.send(form.email(),
                 "Password Reset",
                 "Your OTP code is: " + otp);
 
+        redirectAttributes.addFlashAttribute(SUCCESS,
+                "Email sent successfully to " + emailService.maskEmail(form.email()));
         redirectAttributes.addAttribute("email",
                 form.email());
         return "redirect:/auth/password/verify-otp";

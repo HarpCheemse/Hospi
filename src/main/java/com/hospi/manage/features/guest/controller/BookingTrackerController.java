@@ -15,7 +15,6 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.mail.MailException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -128,22 +127,16 @@ public class BookingTrackerController {
         String rawOtp = otpService.createOtp(form.email(), OtpType.BOOKING_TRACK);
 
         if (rawOtp != null) {
-            try {
-                emailService.send(form.email(),
-                        "Your Booking Tracking OTP",
-                        "Your OTP code is: " + rawOtp + "\n\nThis code expires in 10 minutes.");
-            } catch (MailException e) {
-                otpService.invalidateOtp(form.email(), OtpType.BOOKING_TRACK);
-                log.warn("Failed to send booking tracking OTP to {}",
-                        emailService.maskEmail(form.email()), e);
-                redirect.addFlashAttribute(ERROR, "Failed to send verification email. Please try again.");
-                return "redirect:/my-booking";
-            }
+            emailService.send(form.email(),
+                    "Your Booking Tracking OTP",
+                    "Your OTP code is: " + rawOtp + "\n\nThis code expires in 10 minutes.");
         }
 
         session.setAttribute(TRACKED_EMAIL, form.email());
         session.setAttribute(PENDING_CODE, form.bookingCode());
 
+        redirect.addFlashAttribute(SUCCESS,
+                "Email sent successfully to " + emailService.maskEmail(form.email()));
         return "redirect:/my-booking/verify";
     }
 
