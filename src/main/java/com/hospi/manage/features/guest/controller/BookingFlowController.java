@@ -13,6 +13,8 @@ import com.hospi.manage.features.payment.service.PaymentService;
 import com.hospi.manage.features.reservation.dto.request.DateSearchForm;
 import com.hospi.manage.features.reservation.dto.response.RoomTypeAvailabilityView;
 import com.hospi.manage.features.reservation.entity.Reservation;
+import com.hospi.manage.features.reservation.enums.ReservationStatus;
+import com.hospi.manage.features.reservation.service.AvailabilityService;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.reservation.service.RoomAvailabilityService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,6 +34,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -50,6 +53,7 @@ public class BookingFlowController {
     private final EmailService emailService;
     private final BookingDateValidator bookingDateValidator;
     private final PaymentService paymentService;
+    private final AvailabilityService availabilityService;
 
     @GetMapping
     String showDateForm(Model model) {
@@ -314,6 +318,27 @@ public class BookingFlowController {
             return "redirect:/book/verify";
         }
 
+        if (session.getAttribute("pendingReservationId") != null) {
+            redirect.addFlashAttribute(ERROR, "A payment is already in progress.");
+            return "redirect:/book/pay";
+        }
+
+        Map<Long, Integer> required = draft.getRoomSelections().stream()
+                .collect(Collectors.toMap(
+                        BookingDraft.RoomSelection::roomTypeId,
+                        BookingDraft.RoomSelection::count
+                ));
+        if (!availabilityService.canFulfil(required, draft.getCheckInAt(),
+                draft.getCheckOutAt(), null)) {
+            redirect.addFlashAttribute(ERROR,
+                    "Sorry, some of the rooms you selected are no longer available. Please revise your selection.");
+            return "redirect:/book/rooms";
+        }
+
+        String tempKey = "TEMP-" + UUID.randomUUID().toString();
+        Reservation reservation = reservationService.createOnlineBookingPending(draft, tempKey);
+        session.setAttribute("pendingReservationId", reservation.getId());
+
         String returnUrl = ServletUriComponentsBuilder.fromRequest(request)
                 .replacePath("/book/pay/success")
                 .build().toUriString();
@@ -337,16 +362,25 @@ public class BookingFlowController {
             return "redirect:/book/pay";
         }
 
-        BookingDraft draft = BookingSession.getDraft(session);
-        if (draft.getGuestEmail() == null) {
+        Long reservationId = (Long) session.getAttribute("pendingReservationId");
+        if (reservationId == null) {
+            redirect.addFlashAttribute(ERROR, "Session expired. Please start your booking again.");
             return "redirect:/book";
         }
 
-        Reservation reservation = reservationService.createOnlineBookingPending(draft, orderId);
-        reservationService.confirmAndAddPayment(reservation.getId(), draft.getDepositAmount(), "ONLINE_BOOKING");
+        Reservation reservation = reservationService.findById(reservationId);
+        if (reservation.getStatus() != ReservationStatus.PENDING) {
+            redirect.addFlashAttribute(ERROR,
+                    "This booking is no longer available. The rooms may have been released.");
+            return "redirect:/book";
+        }
+
+        reservationService.confirmAndAddPayment(reservationId,
+                reservation.getTotalPrice(), "ONLINE_BOOKING", orderId);
 
         String confirmationCode = reservation.getConfirmationCode();
 
+        session.removeAttribute("pendingReservationId");
         session.removeAttribute(BOOKING_DRAFT);
         session.removeAttribute("otpToken");
 
@@ -355,6 +389,11 @@ public class BookingFlowController {
 
     @GetMapping("/pay/cancel")
     String payPalCancel(HttpSession session) {
+        Long reservationId = (Long) session.getAttribute("pendingReservationId");
+        if (reservationId != null) {
+            reservationService.cancelPendingReservation(reservationId);
+            session.removeAttribute("pendingReservationId");
+        }
         return "redirect:/book/pay";
     }
 
