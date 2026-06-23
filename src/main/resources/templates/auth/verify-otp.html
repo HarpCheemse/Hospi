@@ -34,7 +34,7 @@
                    placeholder="123456"
                    required>
             <input type="hidden" th:field="*{email}">
-            <div th:replace="fragments/form-error :: error('otp')"></div>
+            <div th:replace="~{fragments/form-error :: error('otp')"></div>
         </div>
 
         <!-- Buttons -->

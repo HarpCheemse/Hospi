@@ -8,14 +8,14 @@ import com.hospi.manage.features.room.entity.RoomType;
 import com.hospi.manage.features.room.repository.RoomRepository;
 import com.hospi.manage.features.room.repository.RoomTypeRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Component
+@Service
 @RequiredArgsConstructor
 public class AvailabilityService {
 

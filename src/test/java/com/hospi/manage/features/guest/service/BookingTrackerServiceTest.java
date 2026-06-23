@@ -1,5 +1,6 @@
 package com.hospi.manage.features.guest.service;
 
+import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.Review;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
@@ -34,46 +35,33 @@ class BookingTrackerServiceTest {
         when(reservationRepository.findByGuestEmailAndConfirmationCode("a@b.com", "CODE"))
                 .thenReturn(Optional.of(reservation));
 
-        Optional<Reservation> result = service.lookupByEmailAndCode("a@b.com", "CODE");
+        Reservation result = service.lookupByEmailAndCode("a@b.com", "CODE");
 
-        assertTrue(result.isPresent());
-        assertSame(reservation, result.get());
+        assertSame(reservation, result);
     }
 
     @Test
-    void lookupByEmailAndCode_shouldReturnEmpty_whenNotFound() {
+    void lookupByEmailAndCode_shouldThrow_whenNotFound() {
         when(reservationRepository.findByGuestEmailAndConfirmationCode("a@b.com", "CODE"))
                 .thenReturn(Optional.empty());
 
-        Optional<Reservation> result = service.lookupByEmailAndCode("a@b.com", "CODE");
-
-        assertFalse(result.isPresent());
+        assertThrows(ResourceNotFoundException.class, () -> service.lookupByEmailAndCode("a@b.com", "CODE"));
     }
 
     @Test
     void resolveByCodes_shouldReturnMatchingReservations() {
         Reservation r1 = new Reservation();
         r1.setConfirmationCode("C1");
+        r1.setId(1L);
         Reservation r2 = new Reservation();
         r2.setConfirmationCode("C2");
-        when(reservationRepository.findByConfirmationCode("C1")).thenReturn(Optional.of(r1));
-        when(reservationRepository.findByConfirmationCode("C2")).thenReturn(Optional.of(r2));
+        r2.setId(2L);
+        when(reservationRepository.findByConfirmationCodeIn(Set.of("C1", "C2")))
+                .thenReturn(List.of(r1, r2));
 
         List<Reservation> result = service.resolveByCodes(Set.of("C1", "C2"));
 
         assertEquals(2, result.size());
-    }
-
-    @Test
-    void resolveByCodes_shouldSkipMissingCodes() {
-        Reservation r1 = new Reservation();
-        r1.setConfirmationCode("C1");
-        when(reservationRepository.findByConfirmationCode("C1")).thenReturn(Optional.of(r1));
-        when(reservationRepository.findByConfirmationCode("MISSING")).thenReturn(Optional.empty());
-
-        List<Reservation> result = service.resolveByCodes(Set.of("C1", "MISSING"));
-
-        assertEquals(1, result.size());
     }
 
     @Test
@@ -136,19 +124,24 @@ class BookingTrackerServiceTest {
         Reservation reservation = new Reservation();
         reservation.setId(1L);
         reservation.setStatus(ReservationStatus.CHECKED_OUT);
+        when(reservationRepository.findByConfirmationCodeIn(Set.of("CODE")))
+                .thenReturn(List.of(reservation));
         when(reviewRepository.existsByReservationId(1L)).thenReturn(false);
-        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
 
-        service.submitReview(1L, 4);
+        service.submitReview(1L, 4, Set.of("CODE"));
 
         verify(reviewRepository).save(any(Review.class));
     }
 
     @Test
     void submitReview_shouldThrow_whenAlreadyReviewed() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        when(reservationRepository.findByConfirmationCodeIn(Set.of("CODE")))
+                .thenReturn(List.of(reservation));
         when(reviewRepository.existsByReservationId(1L)).thenReturn(true);
 
-        assertThrows(IllegalStateException.class, () -> service.submitReview(1L, 4));
+        assertThrows(IllegalStateException.class, () -> service.submitReview(1L, 4, Set.of("CODE")));
     }
 
     @Test
@@ -156,9 +149,20 @@ class BookingTrackerServiceTest {
         Reservation reservation = new Reservation();
         reservation.setId(1L);
         reservation.setStatus(ReservationStatus.CONFIRMED);
+        when(reservationRepository.findByConfirmationCodeIn(Set.of("CODE")))
+                .thenReturn(List.of(reservation));
         when(reviewRepository.existsByReservationId(1L)).thenReturn(false);
-        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
 
-        assertThrows(IllegalStateException.class, () -> service.submitReview(1L, 4));
+        assertThrows(IllegalStateException.class, () -> service.submitReview(1L, 4, Set.of("CODE")));
+    }
+
+    @Test
+    void submitReview_shouldThrow_whenNotOwned() {
+        Reservation reservation = new Reservation();
+        reservation.setId(2L);
+        when(reservationRepository.findByConfirmationCodeIn(Set.of("CODE")))
+                .thenReturn(List.of(reservation));
+
+        assertThrows(IllegalStateException.class, () -> service.submitReview(1L, 4, Set.of("CODE")));
     }
 }

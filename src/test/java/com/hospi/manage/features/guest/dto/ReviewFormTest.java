@@ -23,9 +23,7 @@ class ReviewFormTest {
 
     @Test
     void shouldPass_whenValid() {
-        ReviewForm form = new ReviewForm();
-        form.setRating(4);
-        form.setReservationId(1L);
+        ReviewForm form = new ReviewForm(4, 1L);
 
         Set<ConstraintViolation<ReviewForm>> violations = validator.validate(form);
 
@@ -34,8 +32,7 @@ class ReviewFormTest {
 
     @Test
     void shouldFail_whenRatingNull() {
-        ReviewForm form = new ReviewForm();
-        form.setReservationId(1L);
+        ReviewForm form = new ReviewForm(null, 1L);
 
         Set<ConstraintViolation<ReviewForm>> violations = validator.validate(form);
 
@@ -45,9 +42,7 @@ class ReviewFormTest {
 
     @Test
     void shouldFail_whenRatingBelowMin() {
-        ReviewForm form = new ReviewForm();
-        form.setRating(0);
-        form.setReservationId(1L);
+        ReviewForm form = new ReviewForm(0, 1L);
 
         Set<ConstraintViolation<ReviewForm>> violations = validator.validate(form);
 
@@ -57,9 +52,7 @@ class ReviewFormTest {
 
     @Test
     void shouldFail_whenRatingAboveMax() {
-        ReviewForm form = new ReviewForm();
-        form.setRating(6);
-        form.setReservationId(1L);
+        ReviewForm form = new ReviewForm(6, 1L);
 
         Set<ConstraintViolation<ReviewForm>> violations = validator.validate(form);
 
@@ -69,8 +62,7 @@ class ReviewFormTest {
 
     @Test
     void shouldFail_whenReservationIdNull() {
-        ReviewForm form = new ReviewForm();
-        form.setRating(4);
+        ReviewForm form = new ReviewForm(4, null);
 
         Set<ConstraintViolation<ReviewForm>> violations = validator.validate(form);
 
@@ -80,9 +72,7 @@ class ReviewFormTest {
 
     @Test
     void shouldFail_whenReservationIdZero() {
-        ReviewForm form = new ReviewForm();
-        form.setRating(4);
-        form.setReservationId(0L);
+        ReviewForm form = new ReviewForm(4, 0L);
 
         Set<ConstraintViolation<ReviewForm>> violations = validator.validate(form);
 

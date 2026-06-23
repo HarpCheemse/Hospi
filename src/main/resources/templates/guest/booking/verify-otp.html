@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Verify Your Booking | Hospi Hotel</title>
+  <title>Verify Email | Hospi Hotel</title>
   <link rel="stylesheet" th:href="@{/css/app.css}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,7 +11,7 @@
 </head>
 <body class="bg-background text-text flex flex-col min-h-screen pt-24">
 
-  <div th:replace="~{guest/layout :: header('my-booking')}"></div>
+  <div th:replace="~{guest/layout :: header('book')}"></div>
 
   <main class="flex-grow">
 
@@ -19,19 +19,20 @@
 
     <section class="bg-surface-muted py-16 border-b border-border/30">
       <div class="mx-auto max-w-7xl px-6 text-center">
+        <p class="text-xs font-semibold uppercase tracking-widest text-accent mb-2 font-sans">STEP 4 OF 5</p>
         <div class="flex items-center justify-center gap-4 mb-4">
           <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             <img th:src="@{/assets/icons/shield-check.svg}" alt="">
           </div>
           <div class="text-left">
-            <h1 class="text-4xl md:text-5xl font-bold font-display text-text">Verify Your Booking</h1>
-            <p class="mt-1 text-sm text-muted-foreground">Enter the code sent to your email to view your booking.</p>
+            <h1 class="text-4xl md:text-5xl font-bold font-display text-text">Verify Your Email</h1>
+            <p class="mt-1 text-sm text-muted-foreground">Enter the 6-digit code sent to <strong th:text="${email}">email@example.com</strong>.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="mx-auto max-w-lg px-6 py-20">
+    <section class="mx-auto max-w-2xl px-6 py-20">
 
       <section class="card">
 
@@ -39,21 +40,22 @@
           <div class="flex items-center gap-3">
             <img th:src="@{/assets/icons/shield-check.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
             <div>
-              <h2 class="text-xl font-semibold">Verify Your Email</h2>
-              <p class="mt-1 text-sm text-muted-foreground">
-                Enter the 6-digit code sent to <strong th:text="${verifyEmail}">email@example.com</strong>.
-              </p>
+              <h2 class="text-xl font-semibold">Enter OTP Code</h2>
+              <p class="mt-1 text-sm text-muted-foreground">Check your inbox for a 6-digit code.</p>
             </div>
           </div>
         </div>
 
-        <form th:action="@{/my-booking/verify}" th:object="${otpForm}" method="post" class="flex flex-col gap-5 p-6" novalidate>
+        <form th:action="@{/book/verify-otp}" th:object="${otpForm}" method="post" class="flex flex-col gap-5 p-6" novalidate>
 
           <div class="flex flex-col gap-2">
             <label class="text-sm font-medium" for="otp">OTP Code <span class="text-danger">*</span></label>
             <div th:replace="~{fragments/form-error :: error('otp')}"></div>
             <input type="text" id="otp" th:field="*{otp}"
-                   placeholder="000000" maxlength="6" inputmode="numeric" pattern="[0-9]{6}"
+                   placeholder="000000"
+                   maxlength="6"
+                   inputmode="numeric"
+                   pattern="[0-9]{6}"
                    class="input text-center text-2xl tracking-widest"
                    th:classappend="${#fields.hasErrors('otp')} ? 'input-error' : ''"
                    required>
@@ -61,7 +63,7 @@
 
           <div class="flex items-center justify-end gap-3 pt-2">
             <button type="submit" class="btn btn-primary btn-lg">
-              Verify &amp; View Booking
+              Verify &amp; Continue
             </button>
           </div>
         </form>
@@ -69,11 +71,17 @@
         <div class="px-6 pb-6">
           <p class="text-center text-xs text-muted-foreground">
             Didn't receive the code?
-            <a th:href="@{/my-booking}" class="text-primary hover:underline">Try again</a>
+            <a th:href="@{/book/verify}" class="text-primary hover:underline">Resend OTP</a>
           </p>
         </div>
 
       </section>
+
+      <div class="mt-4 text-center">
+        <a th:href="@{/book/verify}" class="btn btn-ghost btn-lg">
+          &larr; Back to Details
+        </a>
+      </div>
 
     </section>
 

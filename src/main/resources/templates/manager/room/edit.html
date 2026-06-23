@@ -81,7 +81,7 @@
 
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium">Room Number <span class="text-danger">*</span></label>
-                    <div th:replace="fragments/form-error :: error('roomNumber')"></div>
+                    <div th:replace="~{fragments/form-error :: error('roomNumber')}"></div>
                     <input th:field="*{roomNumber}"
                            type="text" maxlength="3" inputmode="numeric"
                            placeholder="101" class="input"
@@ -91,7 +91,7 @@
 
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium">Room Type <span class="text-danger">*</span></label>
-                    <div th:replace="fragments/form-error :: error('roomTypeId')"></div>
+                    <div th:replace="~{fragments/form-error :: error('roomTypeId')"></div>
                     <select th:field="*{roomTypeId}" class="input"
                             th:classappend="${#fields.hasErrors('roomTypeId')} ? 'input-error' : ''">
                         <option th:each="roomType : ${roomTypes}"
@@ -130,7 +130,7 @@
 
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium">Condition Status <span class="text-danger">*</span></label>
-                    <div th:replace="fragments/form-error :: error('conditionStatus')"></div>
+                    <div th:replace="~{fragments/form-error :: error('conditionStatus')"></div>
                     <select th:field="*{conditionStatus}" class="input"
                             th:classappend="${#fields.hasErrors('conditionStatus')} ? 'input-error' : ''">
                         <option th:each="cs : ${conditionStatuses}"

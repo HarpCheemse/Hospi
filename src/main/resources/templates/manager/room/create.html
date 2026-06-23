@@ -70,7 +70,7 @@
 
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium">Floor <span class="text-danger">*</span></label>
-                    <div th:replace="fragments/form-error :: error('floor')"></div>
+                    <div th:replace="~{fragments/form-error :: error('floor')"></div>
                     <select th:field="*{floor}" class="input"
                             th:classappend="${#fields.hasErrors('floor')} ? 'input-error' : ''">
                         <option value="">Select Floor</option>
@@ -82,7 +82,7 @@
 
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium">Number of Rooms <span class="text-danger">*</span></label>
-                    <div th:replace="fragments/form-error :: error('numberOfRooms')"></div>
+                    <div th:replace="~{fragments/form-error :: error('numberOfRooms')"></div>
                     <input type="number" min="1" max="99"
                            th:field="*{numberOfRooms}"
                            class="input"
@@ -92,7 +92,7 @@
 
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium">Default Room Type <span class="text-danger">*</span></label>
-                    <div th:replace="fragments/form-error :: error('roomTypeId')"></div>
+                    <div th:replace="~{fragments/form-error :: error('roomTypeId')"></div>
                     <select th:field="*{roomTypeId}" class="input"
                             th:classappend="${#fields.hasErrors('roomTypeId')} ? 'input-error' : ''">
                         <option value="">No Room Type</option>

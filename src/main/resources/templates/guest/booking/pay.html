@@ -19,7 +19,7 @@
 
     <section class="bg-surface-muted py-16 border-b border-border/30">
       <div class="mx-auto max-w-7xl px-6 text-center">
-        <p class="text-xs font-semibold uppercase tracking-widest text-accent mb-2 font-sans">STEP 4 OF 5</p>
+        <p class="text-xs font-semibold uppercase tracking-widest text-accent mb-2 font-sans">STEP 5 OF 5</p>
         <div class="flex items-center justify-center gap-4 mb-4">
           <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             <img th:src="@{/assets/icons/credit-card.svg}" alt="">
@@ -70,13 +70,14 @@
 
           <div class="flex items-center justify-between py-3 border-b border-border/50">
             <span class="text-sm text-muted-foreground-foreground">Nights</span>
-            <span class="text-sm font-medium text-foreground" th:text="${draft.checkOutAt.toEpochDay() - draft.checkInAt.toEpochDay()}">3</span>
+            <span class="text-sm font-medium text-foreground"
+      th:text="${draft.numberOfNights}">3</span>
           </div>
 
           <div th:each="room : ${draft.roomSelections}"
                class="flex items-center justify-between py-3 border-b border-border/50">
             <span class="text-sm text-muted-foreground-foreground" th:text="${room.roomTypeName} + ' x' + ${room.count} + ' @ $' + ${#numbers.formatDecimal(room.basePrice, 0, 2)} + '/night'">Deluxe x2 @ $240/night</span>
-            <span class="text-sm font-medium text-foreground" th:text="'$' + ${#numbers.formatDecimal(room.basePrice * room.count, 0, 2)}">$480.00</span>
+            <span class="text-sm font-medium text-foreground" th:text="'$' + ${#numbers.formatDecimal(room.basePrice * room.count * draft.numberOfNights, 0, 2)}">$480.00</span>
           </div>
 
           <div class="flex items-center justify-between py-3">
@@ -115,7 +116,7 @@
       </form>
 
       <div class="mt-4 text-center">
-        <a th:href="@{/book/verify}"
+        <a th:if="${token != null}" th:href="@{/book/verify-otp(token=${token})}"
            class="btn btn-ghost btn-lg">
           &larr; Back to Verification
         </a>

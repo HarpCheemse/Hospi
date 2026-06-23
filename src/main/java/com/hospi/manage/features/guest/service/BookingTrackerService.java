@@ -1,11 +1,14 @@
 package com.hospi.manage.features.guest.service;
 
+import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.Review;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
 import com.hospi.manage.features.reservation.repository.ReviewRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -13,51 +16,50 @@ import java.util.stream.Collectors;
 import static com.hospi.manage.features.reservation.enums.ReservationStatus.*;
 
 @Service
+@RequiredArgsConstructor
 public class BookingTrackerService {
 
     private final ReservationRepository reservationRepository;
     private final ReviewRepository reviewRepository;
 
-    public BookingTrackerService(ReservationRepository reservationRepository,
-                                 ReviewRepository reviewRepository) {
-        this.reservationRepository = reservationRepository;
-        this.reviewRepository = reviewRepository;
+    @Transactional(readOnly = true)
+    public Reservation lookupByEmailAndCode(String email, String code) {
+        return reservationRepository.findByGuestEmailAndConfirmationCode(email, code)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
     }
 
-    public Optional<Reservation> lookupByEmailAndCode(String email, String code) {
-        return reservationRepository.findByGuestEmailAndConfirmationCode(email, code);
-    }
-
+    @Transactional(readOnly = true)
     public List<Reservation> resolveByCodes(Set<String> codes) {
-        return codes.stream()
-                .map(code -> reservationRepository.findByConfirmationCode(code).orElse(null))
-                .filter(Objects::nonNull)
-                .toList();
+        return reservationRepository.findByConfirmationCodeIn(codes);
     }
 
+    @Transactional(readOnly = true)
     public Map<Long, Review> buildReviewMap(List<Reservation> reservations) {
-        return reservations.stream()
-                .map(r -> reviewRepository.findByReservationId(r.getId()).orElse(null))
-                .filter(Objects::nonNull)
+        List<Long> ids = reservations.stream().map(Reservation::getId).toList();
+        return reviewRepository.findByReservationIdIn(ids).stream()
                 .collect(Collectors.toMap(r -> r.getReservation().getId(), r -> r));
     }
 
     public Map<Long, String> buildPillClasses(List<Reservation> reservations) {
-        Map<Long, String> map = new HashMap<>();
-        for (Reservation r : reservations) {
-            map.put(r.getId(), pillClass(r.getStatus()));
-        }
-        return map;
+        return reservations.stream().collect(Collectors.toMap(
+                Reservation::getId,
+                r -> pillClass(r.getStatus())
+        ));
     }
 
-    public Review submitReview(Long reservationId, Integer rating) {
+    @Transactional
+    public Review submitReview(Long reservationId, Integer rating, Set<String> trackedCodes) {
+        List<Reservation> trackedReservations = resolveByCodes(trackedCodes);
+        Reservation reservation = trackedReservations.stream()
+                .filter(r -> r.getId().equals(reservationId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("You can only review your own bookings."));
+
         if (reviewRepository.existsByReservationId(reservationId)) {
             throw new IllegalStateException("You have already reviewed this booking.");
         }
 
-        Reservation reservation = reservationRepository.findById(reservationId).orElse(null);
-
-        if (reservation == null || reservation.getStatus() != ReservationStatus.CHECKED_OUT) {
+        if (reservation.getStatus() != ReservationStatus.CHECKED_OUT) {
             throw new IllegalStateException("Reviews are only available for completed stays.");
         }
 

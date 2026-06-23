@@ -465,4 +465,59 @@ class ReservationServiceTest {
         assertThrows(ResourceNotFoundException.class,
                 () -> reservationService.findById(999L));
     }
+
+    // --- cancelPendingReservation ---
+
+    @Test
+    void cancelPendingReservation_shouldCancel_whenPending() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setStatus(ReservationStatus.PENDING);
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+
+        reservationService.cancelPendingReservation(1L);
+
+        assertEquals(ReservationStatus.CANCELLED, reservation.getStatus());
+        verify(reservationRepository).save(reservation);
+    }
+
+    @Test
+    void cancelPendingReservation_shouldThrow_whenNotPending() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setStatus(ReservationStatus.CONFIRMED);
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+
+        assertThrows(IllegalStateException.class,
+                () -> reservationService.cancelPendingReservation(1L));
+
+        verify(reservationRepository, never()).save(any());
+    }
+
+    // --- confirmAndAddPayment ---
+
+    @Test
+    void confirmAndAddPayment_shouldConfirmAndCreatePayment() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setTotalPrice(BigDecimal.valueOf(200));
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+
+        reservationService.confirmAndAddPayment(1L, BigDecimal.valueOf(100), "ONLINE_BOOKING", "ORDER-123");
+
+        assertEquals(ReservationStatus.CONFIRMED, reservation.getStatus());
+        assertEquals("ORDER-123", reservation.getPaymentIdempotencyKey());
+        verify(paymentRepository).save(any());
+    }
+
+    @Test
+    void confirmAndAddPayment_shouldThrow_whenNotFound() {
+        when(reservationRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> reservationService.confirmAndAddPayment(999L, BigDecimal.valueOf(100), "ONLINE_BOOKING", "ORDER-123"));
+    }
 }

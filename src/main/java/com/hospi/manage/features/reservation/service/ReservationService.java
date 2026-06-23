@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -89,6 +90,10 @@ public class ReservationService {
 
     public Reservation findById(Long id) {
         return reservationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Reservation"));
+    }
+
+    public java.util.Optional<Reservation> findByPaymentIdempotencyKey(String paymentIdempotencyKey) {
+        return reservationRepository.findByPaymentIdempotencyKey(paymentIdempotencyKey);
     }
 
     /// This function return RoomTypeId and amount of reservations for a given day range
@@ -186,7 +191,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation createOnlineBooking(BookingDraft draft) {
+    public Reservation createOnlineBookingPending(BookingDraft draft, String paymentIdempotencyKey) {
         Reservation reservation = new Reservation();
         reservation.setGuestName(draft.getGuestName());
         reservation.setGuestEmail(draft.getGuestEmail());
@@ -195,9 +200,18 @@ public class ReservationService {
         reservation.setGuestNationality(draft.getGuestNationality());
         reservation.setCheckInAt(draft.getCheckInAt());
         reservation.setCheckOutAt(draft.getCheckOutAt());
-        reservation.setStatus(ReservationStatus.CONFIRMED);
+        reservation.setStatus(ReservationStatus.PENDING);
         reservation.setSource(BookingSource.ONLINE);
         reservation.setConfirmationCode(generateConfirmationCode());
+        reservation.setPaymentIdempotencyKey(paymentIdempotencyKey);
+
+        long nights = nightsBetween(draft.getCheckInAt(), draft.getCheckOutAt());
+
+        List<Long> roomTypeIds = draft.getRoomSelections().stream()
+                .map(BookingDraft.RoomSelection::roomTypeId)
+                .toList();
+        Map<Long, RoomType> roomTypeMap = roomTypeRepository.findAllById(roomTypeIds).stream()
+                .collect(Collectors.toMap(RoomType::getId, rt -> rt));
 
         BigDecimal totalPrice = BigDecimal.ZERO;
         List<ReservationDetail> details = new ArrayList<>();
@@ -208,7 +222,7 @@ public class ReservationService {
 
             if (count == null || count <= 0) continue;
 
-            RoomType roomType = roomTypeRepository.findById(roomTypeId).orElse(null);
+            RoomType roomType = roomTypeMap.get(roomTypeId);
             if (roomType == null) continue;
 
             ReservationDetail detail = new ReservationDetail();
@@ -217,7 +231,7 @@ public class ReservationService {
             detail.setRoomCount(count);
             detail.setBasePrice(roomType.getBasePrice());
 
-            BigDecimal lineTotal = roomType.getBasePrice().multiply(BigDecimal.valueOf(count));
+            BigDecimal lineTotal = roomType.getBasePrice().multiply(BigDecimal.valueOf(count)).multiply(BigDecimal.valueOf(nights));
             detail.setTotalPrice(lineTotal);
             totalPrice = totalPrice.add(lineTotal);
 
@@ -227,18 +241,34 @@ public class ReservationService {
         reservation.setDetails(details);
         reservation.setTotalPrice(totalPrice);
 
-        reservation = reservationRepository.save(reservation);
+        return reservationRepository.save(reservation);
+    }
+
+    @Transactional
+    public void confirmAndAddPayment(Long reservationId, BigDecimal amount, String confirmedBy, String paymentIdempotencyKey) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
+        reservation.setStatus(ReservationStatus.CONFIRMED);
+        reservation.setPaymentIdempotencyKey(paymentIdempotencyKey);
 
         Payment payment = new Payment();
         payment.setReservation(reservation);
-        payment.setAmount(draft.getDepositAmount());
+        payment.setAmount(amount);
         payment.setPaymentMethod(PaymentMethod.PAYPAL);
         payment.setConfirmedAt(LocalDateTime.now());
-        payment.setConfirmedBy(draft.getGuestEmail());
+        payment.setConfirmedBy(confirmedBy);
 
         paymentRepository.save(payment);
+    }
 
-        return reservation;
+    @Transactional
+    public void cancelPendingReservation(Long id) {
+        Reservation reservation = findById(id);
+        if (reservation.getStatus() != ReservationStatus.PENDING) {
+            throw new IllegalStateException("Only PENDING reservations can be cancelled");
+        }
+        reservation.setStatus(ReservationStatus.CANCELLED);
+        reservationRepository.save(reservation);
     }
 
     @Transactional
@@ -279,5 +309,9 @@ public class ReservationService {
                 BigDecimal::add);
 
         return totalPerNight.multiply(BigDecimal.valueOf(extraDays));
+    }
+
+    private long nightsBetween(LocalDate checkIn, LocalDate checkOut) {
+        return ChronoUnit.DAYS.between(checkIn, checkOut);
     }
 }

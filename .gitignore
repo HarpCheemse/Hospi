@@ -28,9 +28,9 @@ Thumbs.db
 
 src/main/webapp/WEB-INF/lib
 src/main/webapp/assets/icons
-src/main/resources/application-dev.properties
-src/main/resources/application.properties
-src/main/resources/application-prod.properties
+src/main/resources/application.yml
+src/main/resources/application-dev.yml
+src/main/resources/application-prod.yml
 
 node_modules
 

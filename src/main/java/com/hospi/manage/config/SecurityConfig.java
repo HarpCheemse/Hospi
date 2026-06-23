@@ -2,12 +2,14 @@ package com.hospi.manage.config;
 
 import com.hospi.manage.core.security.session.AccountUserDetailsService;
 import com.hospi.manage.core.security.session.RoleBasedAuthenticationSuccessHandler;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -18,6 +20,9 @@ public class SecurityConfig {
     private final AccountUserDetailsService userDetailsService;
     private final CustomAuthEntryPoint customAuthEntryPoint;
     private final RoleBasedAuthenticationSuccessHandler successHandler;
+
+    @Value("${app.security.remember-me-key}")
+    private String rememberMeKey;
 
     public SecurityConfig(AccountUserDetailsService userDetailsService, CustomAuthEntryPoint customAuthEntryPoint,
                           RoleBasedAuthenticationSuccessHandler successHandler) {
@@ -69,12 +74,12 @@ public class SecurityConfig {
                                 "/assets/**",
                                 "/error/**").permitAll()
 
-                        .requestMatchers("/admin/**").hasRole("ADMIN").requestMatchers("/manager/**").hasRole("MANAGER").requestMatchers("/receptionist/**").hasAnyRole("RECEPTIONIST",
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/manager/**").hasRole("MANAGER")
+                        .requestMatchers("/receptionist/**").hasAnyRole("RECEPTIONIST",
                                 "ADMIN")
 
                         .anyRequest().authenticated())
-
-                .formLogin(form -> form.loginPage("/login").usernameParameter("email").passwordParameter("password").successHandler(successHandler).failureUrl("/login?error").permitAll())
 
                 .logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/login?logout=true"))
 
@@ -87,7 +92,7 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .rememberMe(remember -> remember
-                        .key("hospi-remember-key")
+                        .key(rememberMeKey)
                         //30 days
                         .tokenValiditySeconds(60 * 60 * 24 * 30)
                 )

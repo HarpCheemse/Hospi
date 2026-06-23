@@ -10,7 +10,8 @@ import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.BookingSource;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
-import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 @Service
+@RequiredArgsConstructor
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
@@ -27,15 +29,7 @@ public class PaymentService {
     private final SystemConfigService systemConfigService;
     private final PayPalService payPalService;
 
-    public PaymentService(PaymentRepository paymentRepository, ReservationRepository reservationRepository,
-                          SystemConfigService systemConfigService, PayPalService payPalService) {
-
-        this.paymentRepository = paymentRepository;
-        this.reservationRepository = reservationRepository;
-        this.systemConfigService = systemConfigService;
-        this.payPalService = payPalService;
-    }
-
+    @Transactional
     public String createOnlineBookingPayment(BigDecimal amount, String returnUrl, String cancelUrl) throws IOException {
 
         return payPalService.createOrder(amount.setScale(2,
@@ -44,6 +38,7 @@ public class PaymentService {
                 cancelUrl);
     }
 
+    @Transactional
     public boolean captureOnlineBookingPayment(String orderId)
             throws IOException {
 

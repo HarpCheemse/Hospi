@@ -39,14 +39,14 @@ public class OtpChallenge {
     @Column(length = 30, nullable = false)
     private OtpType type;
 
-    @Column(name = "reset_token", length = 36)
-    private String resetToken;
+    @Column(name = "token", length = 36)
+    private String token;
 
-    @Column(name = "reset_token_expires_at")
-    private LocalDateTime resetTokenExpiresAt;
+    @Column(name = "token_expires_at")
+    private LocalDateTime tokenExpiresAt;
 
-    @Column(name = "reset_token_used", nullable = false)
-    private Boolean resetTokenUsed = false;
+    @Column(name = "token_used", nullable = false)
+    private Boolean tokenUsed = false;
 
     @PrePersist
     public void prePersist() {
@@ -57,11 +57,11 @@ public class OtpChallenge {
         return LocalDateTime.now().isAfter(expiresAt);
     }
 
-    public boolean isResetTokenExpired() {
-        return resetTokenExpiresAt == null || LocalDateTime.now().isAfter(resetTokenExpiresAt);
+    public boolean isTokenExpired() {
+        return tokenExpiresAt == null || LocalDateTime.now().isAfter(tokenExpiresAt);
     }
 
-    public boolean isResetTokenValid() {
-        return resetToken != null && !resetTokenUsed && !isResetTokenExpired();
+    public boolean isTokenValid() {
+        return token != null && !tokenUsed && !isTokenExpired();
     }
 }

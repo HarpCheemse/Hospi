@@ -32,6 +32,7 @@
     ];
     var MAX_ROOMS = /*[[${maxRooms}]]*/ 10;
     var DEPOSIT_PCT = /*[[${depositPercentage}]]*/ 20;
+    var NIGHTS = /*[[${draft.numberOfNights}]]*/ 1;
 </script>
 
 <main class="flex-grow">
@@ -82,7 +83,7 @@
                       return this.selectedRooms.reduce((a, r) => a + r.count, 0);
                   },
                   get totalPrice() {
-                      return this.selectedRooms.reduce((a, r) => a + r.count * r.price, 0);
+                      return this.selectedRooms.reduce((a, r) => a + r.count * r.price, 0) * NIGHTS;
                   },
                   get depositAmount() {
                       return this.totalPrice * this.depositPct / 100;
@@ -152,7 +153,7 @@
 
                             <!-- Hidden inputs for form submission -->
                             <input type="hidden" name="roomTypeIds" x-bind:value="room.id"/>
-                            <input type="hidden" name="counts" x-bind:value="selections[room.id]"/>
+                            <input type="hidden" name="counts" x-show="selections[room.id] > 0" x-bind:value="selections[room.id]"/>
                         </article>
                     </template>
                 </div>
