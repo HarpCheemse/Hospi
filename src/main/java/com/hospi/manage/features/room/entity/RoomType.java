@@ -38,6 +38,9 @@ public class RoomType {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "hotel_id")
+    private Long hotelId;
+
     private String name;
 
     @Column(name = "max_occupancy")

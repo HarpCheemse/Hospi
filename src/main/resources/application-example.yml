@@ -21,9 +21,8 @@ spring:
     show-sql:
 
 paypal:
-  client:
-    id:
-    secret:
+  client-id:
+  client-secret:
   mode:
 
 app:

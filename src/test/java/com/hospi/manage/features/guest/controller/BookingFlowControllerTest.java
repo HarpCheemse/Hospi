@@ -43,6 +43,9 @@ class BookingFlowControllerTest {
     private RoomAvailabilityService roomAvailabilityService;
 
     @MockitoBean
+    private com.hospi.manage.features.notification.service.NotificationService notificationService;
+
+    @MockitoBean
     private SystemConfigService systemConfigService;
 
     @MockitoBean
