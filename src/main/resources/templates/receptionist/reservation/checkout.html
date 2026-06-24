@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
@@ -107,8 +107,8 @@
                         <span class="text-sm font-medium">Extra Guest Fee</span>
                         <div class="flex items-center gap-2">
                             <span class="text-sm text-muted-foreground" th:if="${view.calc.extraGuestCount > 0}"
-                                  th:text="${view.calc.extraGuestCount} + ' guest(s) Ã— $' + ${#numbers.formatDecimal(config.extraGuestFee, 0, 2)} + ' = $' + ${#numbers.formatDecimal(view.calc.extraGuestFee, 0, 2)}">
-                                1 guest(s) Ã— $25.00 = $25.00
+                                  th:text="${view.calc.extraGuestCount} + ' guest(s) &times; $' + ${#numbers.formatDecimal(config.extraGuestFee, 0, 2)} + ' = $' + ${#numbers.formatDecimal(view.calc.extraGuestFee, 0, 2)}">
+                                1 guest(s) &times; $25.00 = $25.00
                             </span>
                             <span class="text-sm text-muted-foreground" th:unless="${view.calc.extraGuestCount > 0}">
                                 No extra guests
@@ -139,7 +139,7 @@
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary btn-lg">
-                        Complete Check-Out â€” <span th:text="|$${#numbers.formatDecimal(view.calc.totalDue, 0, 2)}|">$800.00</span>
+                        Complete Check-Out &mdash; <span th:text="|$${#numbers.formatDecimal(view.calc.totalDue, 0, 2)}|">$800.00</span>
                     </button>
                 </div>
             </form>
