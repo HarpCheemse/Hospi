@@ -273,6 +273,14 @@ public class ReservationService {
         payment.setConfirmedBy(confirmedBy);
 
         paymentRepository.save(payment);
+
+        notificationService.notifyRole(
+                Role.RECEPTIONIST,
+                "New Online Booking",
+                "Online booking confirmed for " + reservation.getGuestName() + " (" + reservation.getCheckInAt() + " to " + reservation.getCheckOutAt() + ")",
+                "RESERVATION",
+                String.valueOf(reservation.getId())
+        );
     }
 
     @Transactional
