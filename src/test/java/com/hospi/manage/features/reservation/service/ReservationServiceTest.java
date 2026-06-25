@@ -40,9 +40,6 @@ class ReservationServiceTest {
     @Mock
     private RoomAvailabilityService roomAvailabilityService;
 
-    @Mock
-    private AvailabilityService availabilityService;
-
     @InjectMocks
     private ReservationService reservationService;
 
@@ -65,6 +62,7 @@ class ReservationServiceTest {
                 List.of(new RoomSelection(1L, 2))
         );
 
+        when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(true);
         when(roomTypeRepository.findById(1L)).thenReturn(Optional.of(roomType));
         when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
@@ -97,6 +95,7 @@ class ReservationServiceTest {
                 List.of(new RoomSelection(1L, null), new RoomSelection(1L, 2))
         );
 
+        when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(true);
         when(roomTypeRepository.findById(1L)).thenReturn(Optional.of(roomType));
         when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
@@ -119,6 +118,7 @@ class ReservationServiceTest {
                 List.of(new RoomSelection(1L, 0))
         );
 
+        when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(true);
         when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         Reservation result = reservationService.createReservation(form);
@@ -129,7 +129,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    void createReservation_shouldSkip_whenRoomTypeNotFound() {
+    void createReservation_shouldThrow_whenRoomTypeNotFound() {
         OfflineBookingForm form = new OfflineBookingForm(
                 futureCheckIn, futureCheckOut,
                 "John Doe", null, "+1234567890",
@@ -137,13 +137,11 @@ class ReservationServiceTest {
                 List.of(new RoomSelection(999L, 2))
         );
 
+        when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(true);
         when(roomTypeRepository.findById(999L)).thenReturn(Optional.empty());
-        when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        Reservation result = reservationService.createReservation(form);
-
-        assertTrue(result.getDetails().isEmpty());
-        assertEquals(BigDecimal.ZERO, result.getTotalPrice());
+        assertThrows(ResourceNotFoundException.class,
+                () -> reservationService.createReservation(form));
     }
 
     @Test
@@ -155,6 +153,7 @@ class ReservationServiceTest {
                 List.of()
         );
 
+        when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(true);
         when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         Reservation result = reservationService.createReservation(form);
@@ -183,6 +182,7 @@ class ReservationServiceTest {
                 List.of(new RoomSelection(1L, 2), new RoomSelection(2L, 1))
         );
 
+        when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(true);
         when(roomTypeRepository.findById(1L)).thenReturn(Optional.of(rt1));
         when(roomTypeRepository.findById(2L)).thenReturn(Optional.of(rt2));
         when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
@@ -314,14 +314,14 @@ class ReservationServiceTest {
         reservation.setDetails(List.of(detail));
 
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
-        when(availabilityService.canFulfil(any(), any(), any(), any())).thenReturn(true);
+        when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(true);
         when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         Reservation result = reservationService.extendStay(1L, 2);
 
         assertEquals(LocalDate.now().plusDays(5), result.getCheckOutAt());
         assertEquals(new BigDecimal("1600.00"), result.getTotalPrice());
-        verify(availabilityService).canFulfil(any(), eq(originalCheckOut),
+        verify(roomAvailabilityService).canFulfil(any(), eq(originalCheckOut),
                 eq(LocalDate.now().plusDays(5)), eq(1L));
     }
 
@@ -370,7 +370,7 @@ class ReservationServiceTest {
         reservation.setDetails(List.of(detail));
 
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
-        when(availabilityService.canFulfil(any(), any(), any(), any())).thenReturn(false);
+        when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(false);
 
         assertThrows(IllegalStateException.class,
                 () -> reservationService.extendStay(1L, 3));
@@ -502,6 +502,7 @@ class ReservationServiceTest {
     void confirmAndAddPayment_shouldConfirmAndCreatePayment() {
         Reservation reservation = new Reservation();
         reservation.setId(1L);
+        reservation.setStatus(ReservationStatus.PENDING);
         reservation.setTotalPrice(BigDecimal.valueOf(200));
 
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
@@ -510,6 +511,7 @@ class ReservationServiceTest {
 
         assertEquals(ReservationStatus.CONFIRMED, reservation.getStatus());
         assertEquals("ORDER-123", reservation.getPaymentIdempotencyKey());
+        verify(reservationRepository).save(reservation);
         verify(paymentRepository).save(any());
     }
 
