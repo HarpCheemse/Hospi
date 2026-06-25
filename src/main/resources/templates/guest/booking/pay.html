@@ -50,39 +50,39 @@
         <div class="p-6">
           <div class="flex items-center justify-between py-3 border-b border-border/50">
             <span class="text-sm text-muted-foreground-foreground">Guest</span>
-            <span class="text-sm font-medium text-foreground" th:text="${draft.guestName}">John Smith</span>
+            <span class="text-sm font-medium text-foreground" th:text="${draft.guest.name}">John Smith</span>
           </div>
 
           <div class="flex items-center justify-between py-3 border-b border-border/50">
             <span class="text-sm text-muted-foreground-foreground">Email</span>
-            <span class="text-sm font-medium text-foreground max-w-[200px] truncate" th:text="${draft.guestEmail}">john@email.com</span>
+            <span class="text-sm font-medium text-foreground max-w-[200px] truncate" th:text="${draft.guest.email}">john@email.com</span>
           </div>
 
           <div class="flex items-center justify-between py-3 border-b border-border/50">
             <span class="text-sm text-muted-foreground-foreground">Check-In</span>
-            <span class="text-sm font-medium text-foreground" th:text="${draft.checkInAt}">15 Jun 2026</span>
+            <span class="text-sm font-medium text-foreground" th:text="${draft.dates.checkInAt}">15 Jun 2026</span>
           </div>
 
           <div class="flex items-center justify-between py-3 border-b border-border/50">
             <span class="text-sm text-muted-foreground-foreground">Check-Out</span>
-            <span class="text-sm font-medium text-foreground" th:text="${draft.checkOutAt}">18 Jun 2026</span>
+            <span class="text-sm font-medium text-foreground" th:text="${draft.dates.checkOutAt}">18 Jun 2026</span>
           </div>
 
           <div class="flex items-center justify-between py-3 border-b border-border/50">
             <span class="text-sm text-muted-foreground-foreground">Nights</span>
             <span class="text-sm font-medium text-foreground"
-      th:text="${draft.numberOfNights}">3</span>
+      th:text="${draft.rooms.numberOfNights}">3</span>
           </div>
 
-          <div th:each="room : ${draft.roomSelections}"
+          <div th:each="room : ${draft.rooms.selections}"
                class="flex items-center justify-between py-3 border-b border-border/50">
             <span class="text-sm text-muted-foreground-foreground" th:text="${room.roomTypeName} + ' x' + ${room.count} + ' @ $' + ${#numbers.formatDecimal(room.basePrice, 0, 2)} + '/night'">Deluxe x2 @ $240/night</span>
-            <span class="text-sm font-medium text-foreground" th:text="'$' + ${#numbers.formatDecimal(room.basePrice * room.count * draft.numberOfNights, 0, 2)}">$480.00</span>
+            <span class="text-sm font-medium text-foreground" th:text="'$' + ${#numbers.formatDecimal(room.basePrice * room.count * draft.rooms.numberOfNights, 0, 2)}">$480.00</span>
           </div>
 
           <div class="flex items-center justify-between py-3">
             <span class="text-base font-semibold text-foreground">Total</span>
-            <span class="text-base font-bold text-foreground" th:text="'$' + ${#numbers.formatDecimal(draft.totalPrice, 0, 2)}">$960.00</span>
+            <span class="text-base font-bold text-foreground" th:text="'$' + ${#numbers.formatDecimal(draft.rooms.totalPrice, 0, 2)}">$960.00</span>
           </div>
         </div>
 
@@ -94,11 +94,11 @@
         <div class="p-8 text-center">
           <p class="text-sm text-muted-foreground-foreground mb-1">Deposit Due Now</p>
           <p class="text-4xl font-bold text-primary"
-             th:text="'$' + ${#numbers.formatDecimal(draft.depositAmount, 0, 2)}">
+             th:text="'$' + ${#numbers.formatDecimal(draft.rooms.depositAmount, 0, 2)}">
             $96.00
           </p>
           <p class="mt-1 text-xs text-muted-foreground">
-            Remaining balance of <strong th:text="'$' + ${#numbers.formatDecimal(draft.totalPrice - draft.depositAmount, 0, 2)}">$864.00</strong> payable at check-out
+             Remaining balance of <strong th:text="'$' + ${#numbers.formatDecimal(#objects.nullSafe(draft.rooms.totalPrice, 0) - #objects.nullSafe(draft.rooms.depositAmount, 0), 0, 2)}">$864.00</strong> payable at check-out
           </p>
         </div>
 
@@ -108,6 +108,9 @@
       <form th:action="@{/book/pay}" method="post" class="mt-6" novalidate>
         <div class="card">
           <div class="flex items-center justify-end gap-3 p-5">
+            <a th:href="@{/book(reset=true)}" class="btn btn-ghost btn-lg">
+              Start Over
+            </a>
             <button type="submit" class="btn btn-primary btn-lg">
               Pay with PayPal
             </button>
