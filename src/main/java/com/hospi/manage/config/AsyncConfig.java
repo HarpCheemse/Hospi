@@ -11,12 +11,18 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
 
+/** Async and scheduled task configuration with a dedicated executor for email tasks. */
 @Slf4j
 @Configuration
 @EnableAsync
 @EnableScheduling
 public class AsyncConfig implements AsyncConfigurer {
 
+    /**
+     * Provide a thread-pool executor for asynchronous email sending.
+     *
+     * @return the configured {@link ThreadPoolTaskExecutor}
+     */
     @Bean(name = "emailTaskExecutor")
     public Executor emailTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -28,6 +34,11 @@ public class AsyncConfig implements AsyncConfigurer {
         return executor;
     }
 
+    /**
+     * Return a handler that logs uncaught exceptions thrown by async methods.
+     *
+     * @return an {@link AsyncUncaughtExceptionHandler}
+     */
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return (ex, method, params) ->

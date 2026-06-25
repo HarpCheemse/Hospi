@@ -8,6 +8,7 @@ import com.hospi.manage.features.room.enums.RoomTier;
 import java.math.BigDecimal;
 import java.util.List;
 
+/** View model for displaying room type details. */
 public record RoomTypeView(Long id, String name, RoomCategory category, RoomTier tier, BedType bedType, Integer area,
                            Integer maxOccupancy, BigDecimal basePrice, int roomCount, Long coverPictureId,
                            String description, String features, List<Long> additionalPictureId,
@@ -15,6 +16,7 @@ public record RoomTypeView(Long id, String name, RoomCategory category, RoomTier
                            RoomTier[] tiers,
                            BedType[] bedTypes) {
 
+    /** Create a room type view from a room type entity. */
     public static RoomTypeView from(RoomType roomType) {
 
         return new RoomTypeView(roomType.getId(),

@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+/**
+ * Controller for viewing and changing the current user's credentials.
+ */
 @Controller
 @RequestMapping("/credentials")
 public class CredentialController {
@@ -26,6 +29,9 @@ public class CredentialController {
     private final AccountValidator accountValidator;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Construct the controller with required services.
+     */
     public CredentialController(CredentialService credentialService, AccountValidator accountValidator,
                                 PasswordEncoder passwordEncoder) {
         this.credentialService = credentialService;
@@ -33,6 +39,9 @@ public class CredentialController {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * Set the active sidebar highlight for this feature.
+     */
     @ModelAttribute
     void addCommonAttributes(Model model) {
         model.addAttribute("activeSidebar",
@@ -48,6 +57,9 @@ public class CredentialController {
         };
     }
 
+    /**
+     * Show the credential details page for the currently authenticated user.
+     */
     @GetMapping
     public String credentials(@AuthenticationPrincipal AccountPrincipal principal, Model model) {
         CredentialView view = credentialService.getCredentialView(principal.getAccount().getId());
@@ -58,6 +70,9 @@ public class CredentialController {
         return credentialViewPath(principal.getAccount().getRole());
     }
 
+    /**
+     * Show the change-password form.
+     */
     @GetMapping("/change-password")
     public String changePasswordPage(Model model) {
         model.addAttribute(Attributes.FORM,
@@ -67,6 +82,10 @@ public class CredentialController {
         return "auth/change-password";
     }
 
+    /**
+     * Process a password change request. Validates the current password and updates
+     * to the new password, then redirects to credentials page.
+     */
     @PostMapping("/change-password")
     public String changePassword(@AuthenticationPrincipal AccountPrincipal principal,
                                  @Valid @ModelAttribute(Attributes.FORM) ChangePasswordForm form,

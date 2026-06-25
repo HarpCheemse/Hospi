@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 
+/** Form for creating an offline walk-in booking at the front desk. */
 public record OfflineBookingForm(
 
         @NotNull(message = "Check-in date is required") LocalDate checkInAt,

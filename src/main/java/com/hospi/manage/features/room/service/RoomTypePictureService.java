@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
+/** Business logic for managing room type cover and gallery images. */
 @Service
 public class RoomTypePictureService {
     private final ImageCompressionService imageCompressionService;
@@ -30,10 +31,12 @@ public class RoomTypePictureService {
         this.roomTypePictureRepository = roomTypePictureRepository;
     }
 
+    /** Find a room type picture by ID. */
     public RoomTypePicture findById(Long id) {
         return roomTypePictureRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Room Type Picture"));
     }
 
+    /** Replace the cover image of a room type. */
     @Transactional
     public void replaceCover(RoomType roomType, MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) return;
@@ -52,6 +55,7 @@ public class RoomTypePictureService {
         roomType.getPictures().add(picture);
     }
 
+    /** Add new gallery images to a room type. */
     @Transactional
     public void addNewImages(RoomType roomType, List<MultipartFile> files) throws IOException {
 
@@ -74,6 +78,7 @@ public class RoomTypePictureService {
         }
     }
 
+    /** Remove specific gallery images from a room type. */
     @Transactional
     public void removeImages(RoomType roomType, List<Long> ids) {
 

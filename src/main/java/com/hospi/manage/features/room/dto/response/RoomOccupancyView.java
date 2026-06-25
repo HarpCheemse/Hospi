@@ -7,6 +7,7 @@ import com.hospi.manage.features.room.enums.OccupancyStatus;
 import java.time.LocalDate;
 import java.util.List;
 
+/** View model for room occupancy details. */
 public record RoomOccupancyView(
         Long roomId,
         String roomNumber,
@@ -18,6 +19,7 @@ public record RoomOccupancyView(
         LocalDate checkOutAt,
         List<GuestView> stayingGuests
 ) {
+    /** Create a room occupancy view for a vacant room. */
     public static RoomOccupancyView vacant(Room room) {
         return new RoomOccupancyView(
                 room.getId(),

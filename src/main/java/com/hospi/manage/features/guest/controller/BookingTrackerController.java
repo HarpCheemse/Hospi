@@ -44,6 +44,10 @@ import static com.hospi.manage.common.constant.Attributes.TRACKED_BOOKING_CODES;
 import static com.hospi.manage.common.constant.Attributes.TRACKED_EMAIL;
 import static com.hospi.manage.common.constant.Attributes.VERIFY_EMAIL;
 
+/**
+ * Controller for the guest booking tracker flow (lookup by email/code, verify
+ * via OTP, review submissions).
+ */
 @Slf4j
 @RequiredArgsConstructor
 @Controller
@@ -77,6 +81,10 @@ public class BookingTrackerController {
         return result;
     }
 
+    /**
+     * Show the my-booking page with tracked bookings or the lookup form if none
+     * are tracked.
+     */
     @GetMapping
     String myBooking(HttpSession session,
                      Model model) {
@@ -93,6 +101,9 @@ public class BookingTrackerController {
         return "guest/my-booking";
     }
 
+    /**
+     * Show the OTP verification page for booking tracking.
+     */
     @GetMapping("/verify")
     String verifyPage(HttpSession session,
                       Model model) {
@@ -108,6 +119,10 @@ public class BookingTrackerController {
         return "guest/my-booking-verify";
     }
 
+    /**
+     * Look up a booking by email and confirmation code. On success, send an OTP
+     * email and redirect to verification.
+     */
     @PostMapping("/lookup")
     String lookup(@Valid @ModelAttribute(FORM) BookingTrackForm form,
                   BindingResult binding,
@@ -140,6 +155,10 @@ public class BookingTrackerController {
         return "redirect:/my-booking/verify";
     }
 
+    /**
+     * Verify the OTP for booking tracking. On success, add the booking code to
+     * the session's tracked set and redirect to my-booking.
+     */
     @PostMapping("/verify")
     String verify(@Valid @ModelAttribute(OTP_FORM) OtpForm form,
                   BindingResult binding,
@@ -183,6 +202,10 @@ public class BookingTrackerController {
         return "redirect:/my-booking";
     }
 
+    /**
+     * Clear all tracked booking codes from the session and redirect to
+     * my-booking.
+     */
     @PostMapping("/clear")
     String clear(HttpSession session) {
         session.removeAttribute(TRACKED_BOOKING_CODES);
@@ -191,6 +214,10 @@ public class BookingTrackerController {
         return "redirect:/my-booking";
     }
 
+    /**
+     * Submit a review for a tracked reservation. Re-renders the page with an error
+     * if validation or business rules fail.
+     */
     @PostMapping("/review")
     String submitReview(@Valid @ModelAttribute(REVIEW_FORM) ReviewForm form,
                         BindingResult binding,

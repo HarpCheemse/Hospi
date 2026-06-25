@@ -10,9 +10,19 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+/** Authentication entry point that redirects unauthenticated requests to the 401 error page. */
 @Component
 public class CustomAuthEntryPoint implements AuthenticationEntryPoint {
 
+    /**
+     * Redirect the client to the 401 error page on authentication failure.
+     *
+     * @param request       the HTTP request
+     * @param response      the HTTP response
+     * @param authException the authentication exception that triggered the entry point
+     * @throws IOException      if an I/O error occurs during the redirect
+     * @throws ServletException if the redirect fails
+     */
     @Override
     public void commence(
             HttpServletRequest request,

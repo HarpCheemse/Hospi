@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 
+/** Form for creating a new room type. */
 public record RoomTypeCreateForm(
         @NotNull(message = "Room category is required")
         RoomCategory category,
@@ -43,6 +44,7 @@ public record RoomTypeCreateForm(
         @NotNull(message = "Cover image is required")
         MultipartFile coverImage
 ) {
+    /** Return an empty form with all fields set to defaults. */
     public static RoomTypeCreateForm empty() {
         return new RoomTypeCreateForm(
                 null,

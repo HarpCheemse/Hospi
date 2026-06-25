@@ -1,22 +1,18 @@
 package com.hospi.manage.features.guest.controller;
 
-import com.hospi.manage.common.interfaces.EmailService;
-import com.hospi.manage.features.admin.config.service.SystemConfigService;
-import com.hospi.manage.features.auth.enums.OtpType;
+import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.auth.service.OtpService;
 import com.hospi.manage.features.guest.dto.BookingDraft;
 import com.hospi.manage.features.guest.dto.GuestDetailForm;
-import com.hospi.manage.features.guest.mapper.BookingSession;
-import com.hospi.manage.features.guest.validation.BookingDateValidator;
 import com.hospi.manage.features.guest.dto.OtpForm;
+import com.hospi.manage.features.guest.mapper.BookingSession;
+import com.hospi.manage.features.guest.service.BookingFlowService;
+import com.hospi.manage.features.guest.validation.BookingDateValidator;
 import com.hospi.manage.features.payment.service.PaymentService;
 import com.hospi.manage.features.reservation.dto.request.DateSearchForm;
-import com.hospi.manage.features.reservation.dto.response.RoomTypeAvailabilityView;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
-import com.hospi.manage.features.reservation.service.AvailabilityService;
 import com.hospi.manage.features.reservation.service.ReservationService;
-import com.hospi.manage.features.reservation.service.RoomAvailabilityService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -30,16 +26,15 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static com.hospi.manage.common.constant.Attributes.*;
 
+/**
+ * 7-step guest booking wizard: dates → rooms → guest details → OTP → payment → confirmation.
+ * Session-scoped {@link BookingDraft} carries state; PayPal callbacks use tempKey in URL.
+ */
 @Slf4j
 @RequiredArgsConstructor
 @Controller
@@ -47,176 +42,141 @@ import static com.hospi.manage.common.constant.Attributes.*;
 public class BookingFlowController {
 
     private final ReservationService reservationService;
-    private final RoomAvailabilityService roomAvailabilityService;
-    private final SystemConfigService systemConfigService;
+    private final BookingFlowService bookingFlowService;
     private final OtpService otpService;
-    private final EmailService emailService;
     private final BookingDateValidator bookingDateValidator;
     private final PaymentService paymentService;
-    private final AvailabilityService availabilityService;
 
+    /** Step 1 — show date form. Resume check: skip to /book/pay if OTP verified + draft complete.
+     *  Pending cleanup: cancel abandoned PENDING reservation. Otherwise: full reset. */
     @GetMapping
-    String showDateForm(Model model) {
+    String showDateForm(Model model, HttpSession session,
+                        @RequestParam(name = "reset", required = false) String reset) {
+        // Resume: skip to pay if already past OTP
+        if (reset == null) {
+            String otpToken = (String) session.getAttribute(OTP_TOKEN);
+            BookingDraft draft = BookingSession.getDraft(session);
+            if (otpToken != null && otpService.isValidToken(otpToken)
+                    && draft.getGuest() != null
+                    && draft.getDates() != null
+                    && draft.getRooms() != null) {
+                return "redirect:/book/pay";
+            }
+        }
+
+        // Clean up abandoned PENDING reservation
+        String tempKey = (String) session.getAttribute(PENDING_PAYMENT_KEY);
+        if (tempKey != null) {
+            try {
+                Reservation r = reservationService.findByPaymentIdempotencyKey(tempKey);
+                if (r.getStatus() == ReservationStatus.PENDING) {
+                    reservationService.cancelPendingReservation(r.getId());
+                }
+            } catch (ResourceNotFoundException e) {
+                // key doesn't match any reservation, nothing to cancel
+            }
+        }
+
+        // Full reset
+        session.removeAttribute(BOOKING_DRAFT);
+        session.removeAttribute(OTP_TOKEN);
+        session.removeAttribute(PENDING_PAYMENT_KEY);
         model.addAttribute(FORM,
-                new DateSearchForm(null, null));
+                new DateSearchForm(null,
+                        null));
         return "guest/booking/book";
     }
 
+    /** Step 1 POST — validate dates, save to draft, redirect to /book/rooms. */
     @PostMapping
     String submitDates(@Valid @ModelAttribute("form") DateSearchForm form,
                        BindingResult binding,
                        HttpSession session) {
-        bookingDateValidator.validate(form, binding);
+        bookingDateValidator.validate(form,
+                binding);
 
         if (binding.hasErrors()) {
             return "guest/booking/book";
         }
 
         BookingDraft draft = BookingSession.getDraft(session);
-        draft.setCheckInAt(form.checkInAt());
-        draft.setCheckOutAt(form.checkOutAt());
+        draft.setDates(new BookingDraft.BookingDates(form.checkInAt(),
+                form.checkOutAt()));
 
         return "redirect:/book/rooms";
     }
 
+    /** Step 2 GET — show room availability. Guard: dates must be set. */
     @GetMapping("/rooms")
     String showRooms(HttpSession session, Model model) {
         BookingDraft draft = BookingSession.getDraft(session);
-        if (draft.getCheckInAt() == null || draft.getCheckOutAt() == null) {
+        if (draft.getDates() == null) {
             return "redirect:/book";
         }
 
-        List<RoomTypeAvailabilityView> availability = roomAvailabilityService.getAvailability(
-                        draft.getCheckInAt(),
-                        draft.getCheckOutAt())
-                .stream()
-                .map(RoomTypeAvailabilityView::new)
-                .toList();
-
-        var config = systemConfigService.getConfig();
+        var view = bookingFlowService.buildAvailabilityView(draft);
         model.addAttribute(AVAILABILITY,
-                availability);
+                view.availability());
         model.addAttribute(MAX_ROOMS,
-                config.getMaximumRoomPerBook());
+                view.maxRooms());
         model.addAttribute(DEPOSIT_PERCENTAGE,
-                config.getDefaultDepositPercentage());
+                view.depositPercentage());
+        model.addAttribute(NIGHTS,
+                view.nights());
         model.addAttribute(DRAFT,
                 draft);
         return "guest/booking/rooms";
     }
 
+    /** Step 2 POST — validate room selections, save to draft. */
     @PostMapping("/rooms")
     String submitRooms(@RequestParam(required = false) List<Long> roomTypeIds,
                        @RequestParam(required = false) List<Integer> counts,
                        HttpSession session,
                        RedirectAttributes redirect) {
         BookingDraft draft = BookingSession.getDraft(session);
-        if (draft.getCheckInAt() == null || draft.getCheckOutAt() == null) {
+        if (draft.getDates() == null) {
             return "redirect:/book";
         }
 
-        List<RoomTypeAvailabilityView> availabilityList = roomAvailabilityService.getAvailability(
-                        draft.getCheckInAt(),
-                        draft.getCheckOutAt())
-                .stream()
-                .map(RoomTypeAvailabilityView::new)
-                .toList();
-
-        Map<Long, RoomTypeAvailabilityView> availabilityMap = availabilityList.stream()
-                .collect(Collectors.toMap(RoomTypeAvailabilityView::roomTypeId, a -> a));
-
-        if (roomTypeIds == null || counts == null) {
+        try {
+            bookingFlowService.processRoomSelections(draft,
+                    roomTypeIds,
+                    counts);
+        } catch (IllegalArgumentException e) {
             redirect.addFlashAttribute(ERROR,
-                    "Please select at least one room.");
+                    e.getMessage());
             return "redirect:/book/rooms";
         }
-
-        if (roomTypeIds.size() != counts.size()) {
-            redirect.addFlashAttribute(ERROR,
-                    "Invalid room selection data");
-            return "redirect:/book/rooms";
-        }
-
-        List<BookingDraft.RoomSelection> selections = IntStream.range(0,
-                        roomTypeIds.size())
-                .filter(i -> counts.get(i) != null && counts.get(i) > 0)
-                .mapToObj(i -> {
-                    RoomTypeAvailabilityView rt = availabilityMap.get(roomTypeIds.get(i));
-                    if (rt == null) return null;
-                    return new BookingDraft.RoomSelection(
-                            rt.roomTypeId(),
-                            rt.name(),
-                            counts.get(i),
-                            rt.basePrice()
-                    );
-                })
-                .filter(s -> s != null)
-                .toList();
-
-        if (selections.isEmpty()) {
-            redirect.addFlashAttribute(ERROR,
-                    "Please select at least one room.");
-            return "redirect:/book/rooms";
-        }
-
-        for (BookingDraft.RoomSelection s : selections) {
-            RoomTypeAvailabilityView rt = availabilityMap.get(s.roomTypeId());
-            if (rt != null && s.count() > rt.availableRooms()) {
-                redirect.addFlashAttribute(ERROR,
-                        "Room type '" + s.roomTypeName() + "' only has " + rt.availableRooms() + " rooms available.");
-                return "redirect:/book/rooms";
-            }
-        }
-
-        var config = systemConfigService.getConfig();
-        int maxRooms = config.getMaximumRoomPerBook() != null ? config.getMaximumRoomPerBook() : Integer.MAX_VALUE;
-        int totalRooms = selections.stream().mapToInt(BookingDraft.RoomSelection::count).sum();
-        if (totalRooms > maxRooms) {
-            redirect.addFlashAttribute(ERROR,
-                    "Total rooms selected (" + totalRooms + ") exceeds the maximum of " + maxRooms + " per booking.");
-            return "redirect:/book/rooms";
-        }
-
-        long nights = draft.getCheckOutAt().toEpochDay() - draft.getCheckInAt().toEpochDay();
-        BigDecimal totalPrice = BigDecimal.ZERO;
-        for (BookingDraft.RoomSelection s : selections) {
-            totalPrice = totalPrice.add(s.basePrice().multiply(BigDecimal.valueOf(s.count()).multiply(BigDecimal.valueOf(nights))));
-        }
-
-        BigDecimal depositPercentage = config.getDefaultDepositPercentage();
-        BigDecimal depositAmount = totalPrice.multiply(depositPercentage)
-                .divide(BigDecimal.valueOf(100),
-                        RoundingMode.HALF_UP);
-
-        draft.setRoomSelections(selections);
-        draft.setTotalPrice(totalPrice);
-        draft.setDepositAmount(depositAmount);
-        draft.setNumberOfNights(nights);
 
         return "redirect:/book/verify";
     }
 
+    /** Step 3 GET — show guest detail form. Guard: rooms must be selected. */
     @GetMapping("/verify")
     String showVerify(HttpSession session, Model model) {
         BookingDraft draft = BookingSession.getDraft(session);
-        if (draft.getRoomSelections() == null || draft.getRoomSelections().isEmpty()) {
+        if (draft.getRooms() == null || draft.getRooms().selections() == null || draft.getRooms().selections().isEmpty()) {
             return "redirect:/book/rooms";
         }
 
         if (!model.containsAttribute(GUEST_DETAIL_FORM)) {
-            model.addAttribute(GUEST_DETAIL_FORM, new GuestDetailForm(
-                    draft.getGuestName(),
-                    draft.getGuestEmail(),
-                    draft.getGuestPhone(),
-                    draft.getGuestDateOfBirth(),
-                    draft.getGuestNationality()
-            ));
+            var guest = draft.getGuest();
+            model.addAttribute(GUEST_DETAIL_FORM,
+                    new GuestDetailForm(
+                            guest != null ? guest.name() : null,
+                            guest != null ? guest.email() : null,
+                            guest != null ? guest.phone() : null,
+                            guest != null ? guest.dateOfBirth() : null,
+                            guest != null ? guest.nationality() : null
+                    ));
         }
         model.addAttribute(DRAFT,
                 draft);
         return "guest/booking/verify";
     }
 
+    /** Step 3 POST — validate guest details, save, send OTP email. */
     @PostMapping("/verify/send-otp")
     String sendOtp(@Valid @ModelAttribute("guestDetailForm") GuestDetailForm form,
                    BindingResult binding,
@@ -227,28 +187,30 @@ public class BookingFlowController {
         }
 
         BookingDraft draft = BookingSession.getDraft(session);
-        draft.setGuestName(form.guestName());
-        draft.setGuestEmail(form.guestEmail());
-        draft.setGuestPhone(form.guestPhone());
-        draft.setGuestDateOfBirth(form.guestDateOfBirth());
-        draft.setGuestNationality(form.guestNationality());
+        draft.setGuest(new BookingDraft.BookingGuest(
+                form.guestName(),
+                form.guestEmail(),
+                form.guestPhone(),
+                form.guestDateOfBirth(),
+                form.guestNationality()));
 
-        String otp = otpService.createOtp(form.guestEmail(),
-                OtpType.BOOKING_CONFIRM);
-        emailService.send(form.guestEmail(),
-                "Your Booking OTP Code",
-                "Your OTP code is: " + otp
-                        + "\n\nThis code expires in 10 minutes.\n\nThank you for choosing Hospi!");
+        String maskedEmail = bookingFlowService.initiateBookingOtp(draft);
+        if (maskedEmail == null) {
+            redirect.addFlashAttribute(ERROR,
+                    "Please wait before requesting a new OTP.");
+            return "redirect:/book/verify";
+        }
 
         redirect.addFlashAttribute(SUCCESS,
-                "Email sent successfully to " + emailService.maskEmail(form.guestEmail()));
+                "Email sent successfully to " + maskedEmail);
         return "redirect:/book/verify-otp";
     }
 
+    /** Step 4 GET — show OTP entry form. Guard: guest must be set. */
     @GetMapping("/verify-otp")
     String showVerifyOtp(HttpSession session, Model model) {
         BookingDraft draft = BookingSession.getDraft(session);
-        if (draft.getGuestEmail() == null) {
+        if (draft.getGuest() == null) {
             return "redirect:/book/verify";
         }
 
@@ -256,11 +218,12 @@ public class BookingFlowController {
             model.addAttribute(OTP_FORM,
                     new OtpForm(null));
         }
-        model.addAttribute("email",
-                draft.getGuestEmail());
+        model.addAttribute(EMAIL,
+                draft.getGuest().email());
         return "guest/booking/verify-otp";
     }
 
+    /** Step 4 POST — verify OTP, issue token on success, redirect to /book/pay. */
     @PostMapping("/verify-otp")
     String verifyOtp(@Valid @ModelAttribute("otpForm") OtpForm otpForm,
                      BindingResult binding,
@@ -268,92 +231,99 @@ public class BookingFlowController {
                      Model model,
                      RedirectAttributes redirect) {
         BookingDraft draft = BookingSession.getDraft(session);
-        if (draft.getGuestEmail() == null) {
+        if (draft.getGuest() == null) {
             return "redirect:/book/verify";
         }
 
         if (binding.hasErrors()) {
             model.addAttribute(OTP_FORM,
                     otpForm);
-            model.addAttribute("email",
-                    draft.getGuestEmail());
+            model.addAttribute(EMAIL,
+                    draft.getGuest().email());
             return "guest/booking/verify-otp";
         }
 
-        boolean verified = otpService.verifyOtp(draft.getGuestEmail(),
-                otpForm.otp(),
-                OtpType.BOOKING_CONFIRM);
+        String token = bookingFlowService.verifyBookingOtp(draft.getGuest().email(),
+                otpForm.otp());
 
-        if (!verified) {
+        if (token == null) {
             redirect.addFlashAttribute(ERROR,
                     "Invalid or expired OTP");
             return "redirect:/book/verify-otp";
         }
 
-        String token = otpService.issueToken(draft.getGuestEmail(),
-                OtpType.BOOKING_CONFIRM);
-        session.setAttribute("otpToken", token);
+        session.setAttribute(OTP_TOKEN,
+                token);
 
         return "redirect:/book/pay";
     }
 
+    /** Step 5 GET — show payment summary. Guard: guest + valid OTP token. */
     @GetMapping("/pay")
     String showPay(HttpSession session, Model model) {
         BookingDraft draft = BookingSession.getDraft(session);
-        if (draft.getGuestEmail() == null) {
+        if (draft.getGuest() == null) {
             return "redirect:/book/verify";
         }
-        model.addAttribute(DRAFT, draft);
-        String otpToken = (String) session.getAttribute("otpToken");
-        model.addAttribute("token", otpToken);
+        String otpToken = (String) session.getAttribute(OTP_TOKEN);
+        if (otpToken == null || !otpService.isValidToken(otpToken)) {
+            return "redirect:/book/verify-otp";
+        }
+        model.addAttribute(DRAFT,
+                draft);
+        model.addAttribute(TOKEN,
+                otpToken);
         return "guest/booking/pay";
     }
 
+    /** Step 5 POST — create PayPal order. Guards OTP, creates PENDING reservation, redirects to PayPal. */
     @PostMapping("/pay")
     String createPayPalOrder(HttpSession session,
                              HttpServletRequest request,
                              RedirectAttributes redirect) throws IOException {
         BookingDraft draft = BookingSession.getDraft(session);
-        if (draft.getGuestEmail() == null) {
+        if (draft.getGuest() == null) {
             return "redirect:/book/verify";
         }
 
-        if (session.getAttribute("pendingReservationId") != null) {
-            redirect.addFlashAttribute(ERROR, "A payment is already in progress.");
-            return "redirect:/book/pay";
+        String otpToken = (String) session.getAttribute(OTP_TOKEN);
+        if (otpToken == null || !otpService.isValidToken(otpToken)) {
+            redirect.addFlashAttribute(ERROR,
+                    "Your session has expired. Please verify your email again.");
+            return "redirect:/book/verify-otp";
         }
 
-        Map<Long, Integer> required = draft.getRoomSelections().stream()
-                .collect(Collectors.toMap(
-                        BookingDraft.RoomSelection::roomTypeId,
-                        BookingDraft.RoomSelection::count
-                ));
-        if (!availabilityService.canFulfil(required, draft.getCheckInAt(),
-                draft.getCheckOutAt(), null)) {
-            redirect.addFlashAttribute(ERROR,
-                    "Sorry, some of the rooms you selected are no longer available. Please revise your selection.");
+        String tempKey = "TEMP-" + UUID.randomUUID();
+        Reservation reservation;
+        try {
+            reservation = bookingFlowService.createPendingReservation(draft, tempKey);
+        } catch (IllegalStateException e) {
+            redirect.addFlashAttribute(ERROR, e.getMessage());
             return "redirect:/book/rooms";
         }
-
-        String tempKey = "TEMP-" + UUID.randomUUID().toString();
-        Reservation reservation = reservationService.createOnlineBookingPending(draft, tempKey);
-        session.setAttribute("pendingReservationId", reservation.getId());
+        session.setAttribute(PENDING_PAYMENT_KEY, tempKey);
 
         String returnUrl = ServletUriComponentsBuilder.fromRequest(request)
                 .replacePath("/book/pay/success")
+                .queryParam("key", tempKey)
                 .build().toUriString();
         String cancelUrl = ServletUriComponentsBuilder.fromRequest(request)
                 .replacePath("/book/pay/cancel")
+                .queryParam("key", tempKey)
                 .build().toUriString();
 
         String approvalUrl = paymentService.createOnlineBookingPayment(
-                draft.getDepositAmount(), returnUrl, cancelUrl);
+                draft.getRooms().depositAmount(),
+                returnUrl,
+                cancelUrl);
 
         return "redirect:" + approvalUrl;
     }
 
+    /** Step 6a — Handle PayPal success callback. Capture payment, confirm reservation, and redirect to confirmation page. */
     @GetMapping("/pay/success")
     String payPalSuccess(@RequestParam("token") String orderId,
+                         @RequestParam("key") String tempKey,
                          HttpSession session,
                          RedirectAttributes redirect) throws IOException {
         boolean captured = paymentService.captureOnlineBookingPayment(orderId);
@@ -362,41 +332,66 @@ public class BookingFlowController {
             return "redirect:/book/pay";
         }
 
-        Long reservationId = (Long) session.getAttribute("pendingReservationId");
-        if (reservationId == null) {
+        Reservation reservation;
+        try {
+            reservation = reservationService.findByPaymentIdempotencyKey(tempKey);
+        } catch (ResourceNotFoundException e) {
             redirect.addFlashAttribute(ERROR, "Session expired. Please start your booking again.");
             return "redirect:/book";
         }
 
-        Reservation reservation = reservationService.findById(reservationId);
+        // Reservation was cancelled by cleanup scheduler while user was on PayPal
+        if (reservation.getStatus() == ReservationStatus.CANCELLED) {
+            boolean refunded = paymentService.refundOnlineBookingPayment(orderId);
+            session.removeAttribute(BOOKING_DRAFT);
+            session.removeAttribute(OTP_TOKEN);
+            session.removeAttribute(PENDING_PAYMENT_KEY);
+            if (refunded) {
+                redirect.addFlashAttribute(ERROR,
+                        "Your reservation has expired. The payment has been refunded. Please start a new booking.");
+            } else {
+                redirect.addFlashAttribute(ERROR,
+                        "Your reservation has expired and the refund could not be processed. Please contact support.");
+            }
+            return "redirect:/book";
+        }
+
         if (reservation.getStatus() != ReservationStatus.PENDING) {
             redirect.addFlashAttribute(ERROR,
                     "This booking is no longer available. The rooms may have been released.");
             return "redirect:/book";
         }
 
-        reservationService.confirmAndAddPayment(reservationId,
-                reservation.getTotalPrice(), "ONLINE_BOOKING", orderId);
+        BookingDraft draft = BookingSession.getDraft(session);
+        reservationService.confirmAndAddPayment(reservation.getId(),
+                draft.getRooms().depositAmount(), ONLINE_BOOKING, orderId);
 
         String confirmationCode = reservation.getConfirmationCode();
 
-        session.removeAttribute("pendingReservationId");
         session.removeAttribute(BOOKING_DRAFT);
-        session.removeAttribute("otpToken");
+        session.removeAttribute(OTP_TOKEN);
+        session.removeAttribute(PENDING_PAYMENT_KEY);
 
         return "redirect:/book/confirmation?code=" + confirmationCode;
     }
 
+    /** Step 6b — Handle PayPal cancel callback. Cancel PENDING reservation if found. */
     @GetMapping("/pay/cancel")
-    String payPalCancel(HttpSession session) {
-        Long reservationId = (Long) session.getAttribute("pendingReservationId");
-        if (reservationId != null) {
-            reservationService.cancelPendingReservation(reservationId);
-            session.removeAttribute("pendingReservationId");
+    String payPalCancel(@RequestParam(name = "key", required = false) String tempKey) {
+        if (tempKey != null) {
+            try {
+                Reservation r = reservationService.findByPaymentIdempotencyKey(tempKey);
+                if (r.getStatus() == ReservationStatus.PENDING) {
+                    reservationService.cancelPendingReservation(r.getId());
+                }
+            } catch (ResourceNotFoundException e) {
+                // key doesn't match any reservation, nothing to cancel
+            }
         }
         return "redirect:/book/pay";
     }
 
+    /** Step 7 — show booking confirmation page. */
     @GetMapping("/confirmation")
     String showConfirmation(@RequestParam String code, Model model) {
         model.addAttribute(BOOKING_CODE,

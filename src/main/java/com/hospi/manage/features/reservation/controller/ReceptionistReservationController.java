@@ -28,6 +28,10 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+/**
+ * Controller for receptionist reservation management (listing, creating,
+ * managing stays, guest and room assignment).
+ */
 @Controller
 @RequestMapping("/receptionist/reservations")
 @RequiredArgsConstructor
@@ -42,6 +46,10 @@ public class ReceptionistReservationController {
 
     private final static int pageSize = 10;
 
+    /**
+     * Show the active bookings list with optional filtering by status, date, and
+     * search term. Paginated with a default page size of 10.
+     */
     @GetMapping
     String activeBookings(@RequestParam(required = false) String status,
                           @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
@@ -69,6 +77,10 @@ public class ReceptionistReservationController {
         return "receptionist/reservation/active";
     }
 
+    /**
+     * Show the current stays (checked-in reservations) list with optional search.
+     * Paginated.
+     */
     @GetMapping("/stays")
     String currentStays(@RequestParam(name = "search", required = false) String search,
                         @RequestParam(name = "page", defaultValue = "0") int page, Model model) {
@@ -82,6 +94,9 @@ public class ReceptionistReservationController {
         return "receptionist/reservation/stays";
     }
 
+    /**
+     * Show the date selection form for creating a new offline booking.
+     */
     @GetMapping("/create")
     String create(Model model) {
         model.addAttribute(Attributes.FORM,
@@ -92,6 +107,10 @@ public class ReceptionistReservationController {
         return "receptionist/reservation/create";
     }
 
+    /**
+     * Validate the date search and redirect to the details page with check-in and
+     * check-out dates as query parameters.
+     */
     @PostMapping("/create")
     String searchDates(@Valid @ModelAttribute(Attributes.FORM) DateSearchForm form, BindingResult binding,
                        Model model) {
@@ -107,6 +126,10 @@ public class ReceptionistReservationController {
                 form.checkOutAt()).build().toUriString();
     }
 
+    /**
+     * Show the booking details form with room availability and selection for the
+     * given dates.
+     */
     @GetMapping("/create/details")
     String createDetails(@RequestParam(required = false) LocalDate checkInAt,
                          @RequestParam(required = false) LocalDate checkOutAt, Model model) {
@@ -143,6 +166,10 @@ public class ReceptionistReservationController {
         return "receptionist/reservation/details";
     }
 
+    /**
+     * Create an offline booking from the details form. Validates, persists the
+     * reservation, and redirects to the active bookings list.
+     */
     @PostMapping("/create/details")
     String createBooking(@Valid @ModelAttribute(Attributes.FORM) OfflineBookingForm form, BindingResult bindingResult,
                          RedirectAttributes redirect, Model model) {
@@ -172,6 +199,11 @@ public class ReceptionistReservationController {
         return "redirect:/receptionist/reservations";
     }
 
+    /**
+     * Show the manage-stay page for a checked-in reservation. Supports an optional
+     * {@code edit} parameter to pre-populate the guest edit form for a specific
+     * guest.
+     */
     @GetMapping("/{id}/manage")
     String manage(@PathVariable Long id, @RequestParam(required = false) Long edit, Model model) {
         var reservation = reservationService.findById(id);
@@ -209,6 +241,10 @@ public class ReceptionistReservationController {
         return "receptionist/reservation/manage";
     }
 
+    /**
+     * Add a guest to a checked-in reservation. Re-renders the manage page on
+     * validation failure; redirects on success.
+     */
     @PostMapping("/{id}/manage/guests")
     String addGuest(@PathVariable Long id, @Valid @ModelAttribute(Attributes.FORM) StayingGuestForm form,
                     BindingResult binding, Model model, RedirectAttributes redirect) {
@@ -231,6 +267,10 @@ public class ReceptionistReservationController {
         return "redirect:/receptionist/reservations/" + id + "/manage";
     }
 
+    /**
+     * Update a guest's details in a checked-in reservation. Re-renders the manage
+     * page on validation failure; redirects on success.
+     */
     @PostMapping("/{id}/manage/guests/{guestId}")
     String editGuest(@PathVariable Long id, @PathVariable Long guestId,
                      @Valid @ModelAttribute(Attributes.FORM) StayingGuestForm form, BindingResult binding, Model model,
@@ -257,6 +297,10 @@ public class ReceptionistReservationController {
         return "redirect:/receptionist/reservations/" + id + "/manage";
     }
 
+    /**
+     * Remove a guest from a checked-in reservation. Redirects to the manage page
+     * on success.
+     */
     @PostMapping("/{id}/manage/guests/{guestId}/delete")
     String deleteGuest(@PathVariable Long id, @PathVariable Long guestId, RedirectAttributes redirect) {
         stayingGuestService.deleteGuest(id,
@@ -266,6 +310,10 @@ public class ReceptionistReservationController {
         return "redirect:/receptionist/reservations/" + id + "/manage";
     }
 
+    /**
+     * Assign a room to a checked-in reservation. Redirects to the manage page with
+     * success or error flash.
+     */
     @PostMapping("/{id}/manage/rooms")
     String assignRoom(@PathVariable Long id, @Valid @ModelAttribute("roomForm") AssignRoomForm form,
                       BindingResult binding, Model model, RedirectAttributes redirect) {
@@ -293,6 +341,10 @@ public class ReceptionistReservationController {
         return "redirect:/receptionist/reservations/" + id + "/manage";
     }
 
+    /**
+     * Remove a room assignment from a checked-in reservation. Redirects to the
+     * manage page on success.
+     */
     @PostMapping("/{id}/manage/rooms/{assignmentId}/remove")
     String removeRoom(@PathVariable Long id, @PathVariable Long assignmentId, RedirectAttributes redirect) {
         roomAssignmentService.removeAssignment(id,
@@ -314,6 +366,10 @@ public class ReceptionistReservationController {
                 checkOutAt).stream().map(RoomTypeAvailabilityView::new).toList();
     }
 
+    /**
+     * Extend a checked-in reservation by the specified number of extra days.
+     * Redirects to the manage page with success or error flash.
+     */
     @PostMapping("/{id}/manage/extend")
     public String extendStay(@PathVariable Long id, @Valid @ModelAttribute("extendForm") ExtendStayForm form,
                              BindingResult binding, Model model, RedirectAttributes redirect) {

@@ -14,20 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Represents a category of room (e.g. Deluxe, Suite).
- *
- * <p>Fields:
- * <ul>
- *   <li>{@code name} — display name of the room type</li>
- *   <li>{@code maxOccupancy} — maximum number of guests allowed</li>
- *   <li>{@code basePrice} — nightly rate before taxes/fees</li>
- *   <li>{@code bedType} — e.g. "King", "Twin", "Queen"</li>
- *   <li>{@code area} — room size in square meters</li>
- *   <li>{@code features} — free-text description of amenities</li>
- *   <li>{@code active} — whether this type is bookable</li>
- *   <li>{@code pictures} — associated images</li>
- *   <li>{@code rooms} — physical rooms of this type</li>
- * </ul>
+ * JPA entity representing a bookable room category (e.g. Deluxe, Suite) with pricing and amenity details.
  */
 @Entity
 @Table(name = "room_types")
@@ -48,10 +35,6 @@ public class RoomType {
 
     private String description;
 
-    /**
-     * Free-text list of amenities, stored as a comma-separated string.
-     * Example: "WiFi, Minibar, Balcony"
-     */
     @Column(columnDefinition = "TEXT")
     private String features;
 
@@ -85,6 +68,9 @@ public class RoomType {
     @OneToMany(mappedBy = "roomType")
     private List<Room> rooms = new ArrayList<>();
 
+    /**
+     * Set the creation and update timestamps before persisting.
+     */
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();
@@ -92,19 +78,31 @@ public class RoomType {
     }
 
 
+    /**
+     * Update the modification timestamp before updating.
+     */
     @PreUpdate
     public void preUpdate() {
         updatedAt = LocalDateTime.now();
     }
 
+    /**
+     * Return the picture with sort order 1 (the cover image), or {@code null} if none exists.
+     */
     public RoomTypePicture getCoverPicture() {
         return pictures.stream().filter(p -> Integer.valueOf(1).equals(p.getSortOrder())).findFirst().orElse(null);
     }
 
+    /**
+     * Return the ID of the cover picture, or {@code null} if no cover is set.
+     */
     public Long getCoverPictureId() {
         return Optional.ofNullable(getCoverPicture()).map(RoomTypePicture::getId).orElse(null);
     }
 
+    /**
+     * Return the list of picture IDs excluding the cover image.
+     */
     public List<Long> getPicturesExcludeCover() {
         return pictures.stream().filter(p -> !Integer.valueOf(1).equals(p.getSortOrder())).map(RoomTypePicture::getId).toList();
     }

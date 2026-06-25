@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/** Business logic for assigning and removing physical rooms to and from reservations. */
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -27,10 +28,12 @@ public class RoomAssignmentService {
     private final ReservationRepository reservationRepository;
     private final RoomRepository roomRepository;
 
+    /** Return all room assignments for a reservation. */
     public List<RoomAssignment> getAssignedRooms(Long reservationId) {
         return roomAssignmentRepository.findByReservationIdOrderByAssignedAtAsc(reservationId);
     }
 
+    /** Return all vacant rooms matching the reservation's room types. */
     public List<Room> getAvailableRooms(Long reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
@@ -59,6 +62,7 @@ public class RoomAssignmentService {
         return available;
     }
 
+    /** Assign a physical room to a reservation and mark it occupied. */
     public RoomAssignment assignRoom(Long reservationId, Long roomId) {
         if (roomAssignmentRepository.existsByReservationIdAndRoomId(reservationId, roomId)) {
             throw new IllegalStateException("Room is already assigned to this reservation");
@@ -83,6 +87,7 @@ public class RoomAssignmentService {
         return roomAssignmentRepository.save(assignment);
     }
 
+    /** Remove a room assignment and mark the room vacant. */
     public void removeAssignment(Long reservationId, Long assignmentId) {
         RoomAssignment assignment = roomAssignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Assignment"));

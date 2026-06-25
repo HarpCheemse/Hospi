@@ -6,6 +6,9 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+/**
+ * JPA entity representing a guest review (rating) for a completed reservation.
+ */
 @Entity
 @Table(name = "reviews")
 @Getter
@@ -26,6 +29,9 @@ public class Review {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    /**
+     * Set the creation timestamp before persisting.
+     */
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();

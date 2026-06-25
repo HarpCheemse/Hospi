@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.List;
 
+/** Business logic for room type CRUD and image management. */
 @Service
 public class RoomTypeService {
     private final RoomTypeRepository roomTypeRepository;
@@ -33,6 +34,7 @@ public class RoomTypeService {
         this.roomRepository = roomRepository;
     }
 
+    /** Create a new room type with a cover image. */
     @Transactional
     public RoomType createRoomType(RoomTypeCreateForm form) throws IOException {
 
@@ -58,10 +60,12 @@ public class RoomTypeService {
         return tier.name() + " " + category.name();
     }
 
+    /** Return all active room types. */
     public List<RoomType> findAll() {
         return roomTypeRepository.findByActiveTrue();
     }
 
+    /** Find an active room type by ID. */
     public RoomType findById(Long id) {
         RoomType roomType = roomTypeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Room type"));
@@ -71,6 +75,7 @@ public class RoomTypeService {
         return roomType;
     }
 
+    /** Update a room type's details and manage its images. */
     @Transactional
     public void update(Long id, RoomTypeEditForm form) throws IOException {
 
@@ -97,6 +102,7 @@ public class RoomTypeService {
         roomTypeRepository.save(roomType);
     }
 
+    /** Soft-delete a room type by marking it inactive. */
     @Transactional
     public void delete(Long id) {
         RoomType roomType = findById(id);
@@ -110,10 +116,12 @@ public class RoomTypeService {
         roomTypeRepository.save(roomType);
     }
 
+    /** Return all room types as view models with relations eagerly loaded. */
     public List<RoomTypeView> findAllViews() {
         return roomTypeRepository.findAllWithRelations().stream().map(RoomTypeView::from).toList();
     }
 
+    /** Return a room type view model by ID. */
     public RoomTypeView findViewById(Long id) {
 
         return roomTypeRepository.findById(id).map(RoomTypeView::from).orElseThrow(() -> new ResourceNotFoundException("Room type"));
