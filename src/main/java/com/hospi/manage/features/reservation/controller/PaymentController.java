@@ -14,6 +14,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * Controller for confirming payments on PENDING reservations (receptionist-facing).
+ */
 @Controller
 @RequestMapping("/receptionist/reservations")
 @RequiredArgsConstructor
@@ -22,12 +25,19 @@ public class PaymentController {
     private final ReservationService reservationService;
     private final PaymentService paymentService;
 
+    /**
+     * Set the active sidebar highlight for this feature.
+     */
     @ModelAttribute
     void addCommonAttributes(Model model) {
         model.addAttribute(Attributes.ACTIVE_SIDEBAR,
                 "RESERVATIONS");
     }
 
+    /**
+     * Show the payment confirmation form for a PENDING reservation. Redirect to
+     * the reservation list if the status is not PENDING.
+     */
     @GetMapping("/{id}/payment")
     String paymentForm(@PathVariable Long id, Model model) {
         var reservation = reservationService.findById(id);
@@ -41,6 +51,10 @@ public class PaymentController {
         return "receptionist/reservation/confirm-payment";
     }
 
+    /**
+     * Confirm payment for a PENDING reservation. Updates the reservation status to
+     * CONFIRMED and redirects to the reservation list.
+     */
     @PostMapping("/{id}/payment")
     String confirmPayment(@PathVariable Long id,
                           @RequestParam PaymentMethod paymentMethod,

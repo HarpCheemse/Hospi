@@ -7,6 +7,7 @@ import com.hospi.manage.features.credential.dto.CredentialView;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/** Business logic for credential viewing and password changes. */
 @Service
 public class CredentialService {
     private final AccountRepository accountRepository;
@@ -19,6 +20,7 @@ public class CredentialService {
         this.encoder = encoder;
     }
 
+    /** Return the credential view model for the given account ID. */
     public CredentialView getCredentialView(Long id) {
         Account account = accountRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Credentials")
@@ -34,6 +36,7 @@ public class CredentialService {
         return view;
     }
 
+    /** Hash and persist a new password for the given account. */
     public void changePassword(Account account, String newPassword) {
         account.setPasswordHash(encoder.encode(newPassword));
 

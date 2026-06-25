@@ -7,6 +7,9 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+/**
+ * JPA entity representing the assignment of a specific room to a reservation.
+ */
 @Entity
 @Table(name = "room_assignments")
 @Getter
@@ -28,6 +31,9 @@ public class RoomAssignment {
     @Column(name = "assigned_at")
     private LocalDateTime assignedAt;
 
+    /**
+     * Set the assignment timestamp before persisting.
+     */
     @PrePersist
     public void prePersist() {
         assignedAt = LocalDateTime.now();

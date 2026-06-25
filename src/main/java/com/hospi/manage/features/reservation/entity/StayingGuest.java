@@ -7,6 +7,9 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * JPA entity representing a guest physically staying at the hotel under a reservation.
+ */
 @Entity
 @Table(name = "staying_guests")
 @Getter
@@ -33,6 +36,9 @@ public class StayingGuest {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    /**
+     * Set the creation timestamp before persisting.
+     */
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();

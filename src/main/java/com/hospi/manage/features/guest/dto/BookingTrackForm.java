@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+/** Form for tracking a booking by email and booking code. */
 public record BookingTrackForm(
         @NotBlank(message = "Email is required")
         @Email(message = "Invalid email format")

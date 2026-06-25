@@ -20,6 +20,7 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
+/** Orchestrates PayPal operations and payment record persistence. */
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
@@ -29,25 +30,27 @@ public class PaymentService {
     private final SystemConfigService systemConfigService;
     private final PayPalService payPalService;
 
+    /** Create a PayPal order for the deposit amount. */
     @Transactional
     public String createOnlineBookingPayment(BigDecimal amount, String returnUrl, String cancelUrl) throws IOException {
-
         return payPalService.createOrder(amount.setScale(2,
                         RoundingMode.HALF_UP).toString(),
                 returnUrl,
                 cancelUrl);
     }
 
+    /** Capture a PayPal order. Returns true if COMPLETED. */
     @Transactional
     public boolean captureOnlineBookingPayment(String orderId)
             throws IOException {
-
         return payPalService.captureOrder(orderId);
     }
 
+    /** Confirm an offline reservation and record staff-processed payment. */
     @Transactional
     public Payment confirmPayment(Long reservationId, PaymentMethod method, String confirmedBy) {
-        Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(() -> new ResourceNotFoundException("Reservation"));
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
 
         if (reservation.getStatus() != ReservationStatus.PENDING) {
             throw new IllegalStateException("Booking is not in PENDING status");
@@ -74,6 +77,14 @@ public class PaymentService {
         return payment;
     }
 
+    /** Refund a captured PayPal order by order ID. Used when payment captured but reservation expired. */
+    @Transactional
+    public boolean refundOnlineBookingPayment(String orderId)
+            throws IOException {
+        return payPalService.refundOrder(orderId);
+    }
+
+    /** Calculate refund amount based on system config (full vs partial refund window). */
     public BigDecimal calculateRefund(Reservation reservation) {
         SystemConfig config = systemConfigService.getConfig();
         long hoursSinceCreation = ChronoUnit.HOURS.between(reservation.getCreatedAt(),

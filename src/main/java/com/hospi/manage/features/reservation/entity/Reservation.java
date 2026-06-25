@@ -1,6 +1,7 @@
 package com.hospi.manage.features.reservation.entity;
 
 import com.hospi.manage.features.reservation.enums.BookingSource;
+import com.hospi.manage.features.reservation.enums.CancellationReason;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -12,8 +13,16 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * JPA entity representing a hotel booking with guest details, dates, status, and associated line items.
+ */
 @Entity
-@Table(name = "reservations")
+@Table(
+        name = "reservations",
+        indexes = {
+                @Index(name = "idx_reservation_status_created_at", columnList = "status, created_at")
+        }
+)
 @Getter
 @Setter
 public class Reservation {
@@ -76,12 +85,25 @@ public class Reservation {
     @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReservationDetail> details = new ArrayList<>();
 
+    /**
+     * Set the creation and update timestamps before persisting.
+     */
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 
+    @Column(name = "cancelled_at")
+    private LocalDateTime cancelledAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "cancellation_reason", length = 30)
+    private CancellationReason cancellationReason;
+
+    /**
+     * Update the modification timestamp before updating.
+     */
     @PreUpdate
     public void preUpdate() {
         updatedAt = LocalDateTime.now();

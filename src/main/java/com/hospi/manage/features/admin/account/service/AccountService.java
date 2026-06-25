@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/** Business logic for staff account management (create, update, list). */
 @Service
 public class AccountService {
     private final AccountRepository accountRepository;
@@ -23,14 +24,17 @@ public class AccountService {
         this.accountRepository = accountRepository;
     }
 
+    /** Find an account by ID. */
     public Account findById(Long id) {
         return accountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Account"));
     }
 
+    /** Find an account by email address. */
     public Account findByEmail(String email) {
         return accountRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("Email"));
     }
 
+    /** Return all accounts as view models. */
     public List<AccountView> findAllViews() {
         return accountRepository.findAll().stream().map(account -> new AccountView(account.getId(),
                 account.getFullName(),
@@ -40,6 +44,7 @@ public class AccountService {
                 account.getStatus())).toList();
     }
 
+    /** Create a new staff account with a hashed password. */
     @Transactional
     public void createAccount(AccountCreateForm form) {
         Account account = new Account();
@@ -58,6 +63,7 @@ public class AccountService {
         accountRepository.save(account);
     }
 
+    /** Return the account view model for the given ID. */
     public AccountView getAccountView(Long id) {
         Account account = findById(id);
         return new AccountView(account.getId(),
@@ -68,6 +74,7 @@ public class AccountService {
                 account.getStatus());
     }
 
+    /** Return the edit form populated with existing account data. */
     public AccountEditForm getEditForm(Long id) {
         Account account = findById(id);
 
@@ -78,6 +85,7 @@ public class AccountService {
                 account.getStatus());
     }
 
+    /** Update an existing account's personal details, role, and status. */
     @Transactional
     public void updateAccount(Long id, AccountEditForm form) {
 
@@ -92,6 +100,7 @@ public class AccountService {
         accountRepository.save(account);
     }
 
+    /** Re-hash all account passwords with the given raw password value. */
     @Transactional
     public void rehashAllPasswords(String defaultRawPassword) {
 

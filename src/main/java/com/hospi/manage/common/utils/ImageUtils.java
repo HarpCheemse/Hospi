@@ -13,8 +13,22 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
 
+/** Static utility for resizing and compressing images to WebP format. */
 public class ImageUtils {
 
+    private ImageUtils() {}
+
+    /**
+     * Resize an uploaded image to the given width (preserving aspect ratio) and compress it to WebP.
+     *
+     * @param file        the uploaded image file
+     * @param targetWidth desired width in pixels
+     * @param quality     compression quality (0.0 – 1.0)
+     * @return the compressed image as a byte array
+     * @throws IOException              if the image cannot be read or written
+     * @throws IllegalArgumentException if the image format is unsupported or the file is not a valid image
+     * @throws IllegalStateException    if no WebP image writer is available in the runtime
+     */
     public static byte[] compressWebP(
             MultipartFile file,
             int targetWidth,

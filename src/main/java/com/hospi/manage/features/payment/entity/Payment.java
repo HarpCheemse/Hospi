@@ -9,6 +9,9 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * JPA entity representing a payment made against a reservation.
+ */
 @Entity
 @Table(name = "payments")
 @Getter

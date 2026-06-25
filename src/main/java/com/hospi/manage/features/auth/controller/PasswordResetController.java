@@ -20,6 +20,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import static com.hospi.manage.common.constant.Attributes.SUCCESS;
 
+/**
+ * Controller for the password reset flow (forgot → verify OTP → reset).
+ */
 @Controller
 @RequestMapping("/auth/password")
 public class PasswordResetController {
@@ -29,6 +32,9 @@ public class PasswordResetController {
     private final PasswordEncoder encoder;
     private final EmailService emailService;
 
+    /**
+     * Construct the controller with required services.
+     */
     public PasswordResetController(AccountRepository accountRepository, OtpService otpService,
                                    AccountValidator accountValidator, PasswordEncoder encoder,
                                    EmailService emailService) {
@@ -39,6 +45,9 @@ public class PasswordResetController {
         this.emailService = emailService;
     }
 
+    /**
+     * Show the forgot-password form where the user enters their email.
+     */
     @GetMapping("/forgot")
     public String forgot(Model model) {
         model.addAttribute("form",
@@ -46,6 +55,10 @@ public class PasswordResetController {
         return "auth/forgot-password";
     }
 
+    /**
+     * Process the forgot-password request. Validate the email, create an OTP, send
+     * it via email, and redirect to the OTP verification page.
+     */
     @PostMapping("/forgot")
     public String handleForgotPassword(@Valid @ModelAttribute("form") ForgotPasswordForm form,
                                        BindingResult bindingResult, RedirectAttributes redirectAttributes) {
@@ -74,6 +87,9 @@ public class PasswordResetController {
         return "redirect:/auth/password/verify-otp";
     }
 
+    /**
+     * Show the OTP verification page for a given email.
+     */
     @GetMapping("/verify-otp")
     public String verifyOtpPage(@RequestParam String email, Model model) {
         model.addAttribute("form",
@@ -82,6 +98,10 @@ public class PasswordResetController {
         return "auth/verify-otp";
     }
 
+    /**
+     * Verify the OTP submitted by the user. On success, issue a reset token and
+     * redirect to the password reset page.
+     */
     @PostMapping("/verify-otp")
     public String verifyOtp(@Valid @ModelAttribute("form") VerifyOtpForm form, BindingResult bindingResult,
                             RedirectAttributes redirectAttributes) {
@@ -107,6 +127,10 @@ public class PasswordResetController {
         return "redirect:/auth/password/reset";
     }
 
+    /**
+     * Show the password reset form. Redirect to forgot-password if the token is
+     * invalid or expired.
+     */
     @GetMapping("/reset")
     public String showResetPassword(@RequestParam String token, Model model) {
         if (!otpService.isValidToken(token)) {
@@ -121,6 +145,10 @@ public class PasswordResetController {
         return "auth/password-reset";
     }
 
+    /**
+     * Process the password reset. Validate the new password, update the account,
+     * invalidate the token, and redirect to login.
+     */
     @PostMapping("/reset")
     public String resetPassword(@RequestParam String token, @Valid @ModelAttribute("form") ResetPasswordForm form,
                                 BindingResult bindingResult, RedirectAttributes redirectAttributes) {

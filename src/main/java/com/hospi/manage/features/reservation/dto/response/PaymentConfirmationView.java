@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+/** View model for the payment confirmation page. */
 public record PaymentConfirmationView(
         Long id,
         String guestName,
@@ -18,6 +19,7 @@ public record PaymentConfirmationView(
         List<RoomDetailView> rooms,
         PaymentMethod[] paymentMethods
 ) {
+    /** Create a payment confirmation view from a reservation entity. */
     public static PaymentConfirmationView from(Reservation reservation) {
         List<RoomDetailView> rooms = reservation.getDetails().stream()
                 .map(d -> new RoomDetailView(

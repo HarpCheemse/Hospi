@@ -11,14 +11,23 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 
+/** Validator for account create, edit, and password-change forms. */
 @Component
 public class AccountValidator {
     private final AccountRepository accountRepository;
 
-    AccountValidator(AccountRepository accountRepository) {
+    public AccountValidator(AccountRepository accountRepository) {
         this.accountRepository = accountRepository;
     }
 
+    /**
+     * Validate a change-password request.
+     *
+     * @param account the authenticated account
+     * @param form    the change-password form data
+     * @param br      binding result to populate with validation failures
+     * @param encoder password encoder for verifying current password
+     */
     public void validateChangePassword(Account account, ChangePasswordForm form, BindingResult br,
                                        PasswordEncoder encoder) {
 
@@ -45,6 +54,12 @@ public class AccountValidator {
                 br);
     }
 
+    /**
+     * Validate a reset-password form.
+     *
+     * @param form          the reset-password form data
+     * @param bindingResult binding result to populate with validation failures
+     */
     public void validateResetPassword(ResetPasswordForm form, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) return;
 
@@ -92,6 +107,12 @@ public class AccountValidator {
         }
     }
 
+    /**
+     * Validate a new-account creation form.
+     *
+     * @param form          the account creation form data
+     * @param bindingResult binding result to populate with validation failures
+     */
     public void validateCreate(AccountCreateForm form, BindingResult bindingResult) {
         validateEmail(form.email(),
                 bindingResult);
@@ -104,6 +125,13 @@ public class AccountValidator {
                 bindingResult);
     }
 
+    /**
+     * Validate an account-edit form.
+     *
+     * @param id            the account id being updated
+     * @param form          the edit form data
+     * @param bindingResult binding result to populate with validation failures
+     */
     public void validateUpdate(Long id, AccountEditForm form, BindingResult bindingResult) {
         validateRole(form.role(),
                 bindingResult);

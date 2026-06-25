@@ -18,6 +18,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 
+/**
+ * Controller for room type management (CRUD with image upload).
+ */
 @Controller
 @RequestMapping("/manager/room-types")
 public class RoomTypeController {
@@ -25,6 +28,9 @@ public class RoomTypeController {
     private final CreateRoomTypeValidator createRoomTypeValidator;
     private final EditRoomTypeValidator editRoomTypeValidator;
 
+    /**
+     * Construct the controller with required services.
+     */
     public RoomTypeController(RoomTypeService roomTypeService, CreateRoomTypeValidator createRoomTypeValidator,
                               EditRoomTypeValidator editRoomTypeValidator) {
         this.roomTypeService = roomTypeService;
@@ -32,6 +38,9 @@ public class RoomTypeController {
         this.editRoomTypeValidator = editRoomTypeValidator;
     }
 
+    /**
+     * Set the active sidebar highlight for this feature.
+     */
     @ModelAttribute
     public void addCommonAttributes(Model model) {
         model.addAttribute(Attributes.ACTIVE_SIDEBAR,
@@ -39,6 +48,9 @@ public class RoomTypeController {
     }
 
 
+    /**
+     * Show the room type listing page.
+     */
     @GetMapping
     public String list(Model model) {
         model.addAttribute(Attributes.VIEW,
@@ -46,6 +58,9 @@ public class RoomTypeController {
         return "manager/room-type/list";
     }
 
+    /**
+     * Show the room type creation form.
+     */
     @GetMapping("/create")
     public String createForm(Model model) {
         model.addAttribute(Attributes.FORM,
@@ -57,6 +72,10 @@ public class RoomTypeController {
         return "manager/room-type/create";
     }
 
+    /**
+     * Create a new room type with optional cover and gallery images. Redirects to
+     * the room type list on success.
+     */
     @PostMapping("/create")
     public String create(@Valid @ModelAttribute(Attributes.FORM) RoomTypeCreateForm form, BindingResult errors,
                          Model model) throws IOException {
@@ -78,6 +97,9 @@ public class RoomTypeController {
         return "redirect:/manager/room-types";
     }
 
+    /**
+     * Show details for a single room type.
+     */
     @GetMapping("/{id}")
     public String detail(@PathVariable Long id, Model model) {
         model.addAttribute(Attributes.VIEW,
@@ -86,6 +108,9 @@ public class RoomTypeController {
         return "manager/room-type/detail";
     }
 
+    /**
+     * Show the room type edit form pre-populated with current values.
+     */
     @GetMapping("/{id}/edit")
     public String edit(@PathVariable Long id, Model model) {
         var roomType = roomTypeService.findById(id);
@@ -99,6 +124,10 @@ public class RoomTypeController {
         return "manager/room-type/edit";
     }
 
+    /**
+     * Update an existing room type with optional image changes. Redirects to the
+     * room type detail page on success.
+     */
     @PostMapping("/{id}/edit")
     public String updateRoomType(@PathVariable Long id, @Valid @ModelAttribute(Attributes.FORM) RoomTypeEditForm form,
                                  BindingResult errors, Model model) throws IOException {
@@ -125,6 +154,10 @@ public class RoomTypeController {
         return "redirect:/manager/room-types/" + id;
     }
 
+    /**
+     * Delete a room type by ID. Redirects to the list, or back to edit with an
+     * error flash if deletion is not allowed.
+     */
     @PostMapping("/delete/{id}")
     public String deleteRoomType(@PathVariable Long id,
                                  RedirectAttributes redirectAttributes) {

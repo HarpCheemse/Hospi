@@ -6,9 +6,16 @@ import org.springframework.validation.BindingResult;
 
 import java.time.LocalDate;
 
+/** Validator for the staff-facing date-search form ({@link DateSearchForm}). */
 @Component
 public class DateSearchValidator {
 
+    /**
+     * Validate check-in and check-out dates.
+     *
+     * @param form          the date search form data
+     * @param bindingResult binding result to populate with validation failures
+     */
     public void validate(DateSearchForm form, BindingResult bindingResult) {
         validateCheckInAt(form, bindingResult);
         validateCheckOutAt(form, bindingResult);

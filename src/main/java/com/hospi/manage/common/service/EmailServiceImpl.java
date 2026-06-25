@@ -10,6 +10,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+/** Implementation of {@link EmailService} that sends via SMTP or logs to console in dev mode. */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -21,6 +22,7 @@ public class EmailServiceImpl implements EmailService {
     @Value("${app.mail.console:false}")
     private boolean consoleMode;
 
+    /** Send an email asynchronously via SMTP or log it to the console when in console mode. */
     @Override
     @Async("emailTaskExecutor")
     public void send(String to, String subject, String content) {

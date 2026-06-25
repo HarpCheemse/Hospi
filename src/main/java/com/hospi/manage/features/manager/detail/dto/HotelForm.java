@@ -14,6 +14,7 @@ import java.util.List;
 
 @Getter
 @Setter
+/** Form for updating hotel details and settings. */
 public class HotelForm {
 
     @NotBlank(message = "Hotel name is required")

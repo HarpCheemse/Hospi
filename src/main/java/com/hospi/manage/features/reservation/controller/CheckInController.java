@@ -15,6 +15,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 
+/**
+ * Controller for guest check-in flow (receptionist-facing).
+ */
 @Controller
 @RequestMapping("/receptionist/reservations")
 @RequiredArgsConstructor
@@ -22,12 +25,19 @@ public class CheckInController {
 
     private final ReservationService reservationService;
 
+    /**
+     * Set the active sidebar highlight for this feature.
+     */
     @ModelAttribute
     void addCommonAttributes(Model model) {
         model.addAttribute(Attributes.ACTIVE_SIDEBAR,
                 "RESERVATIONS");
     }
 
+    /**
+     * Show the check-in form for a confirmed reservation. Redirect to the
+     * reservation list if the reservation is not in CONFIRMED status.
+     */
     @GetMapping("/{id}/checkin")
     String checkInForm(@PathVariable Long id, Model model) {
         var reservation = reservationService.findById(id);
@@ -43,6 +53,10 @@ public class CheckInController {
         return "receptionist/reservation/checkin";
     }
 
+    /**
+     * Process the check-in. Validate the booking code, update the reservation
+     * status to CHECKED_IN, and redirect to the reservation list.
+     */
     @PostMapping("/{id}/checkin")
     String confirmCheckIn(@PathVariable Long id,
                           @ModelAttribute(Attributes.FORM) CheckInForm form,

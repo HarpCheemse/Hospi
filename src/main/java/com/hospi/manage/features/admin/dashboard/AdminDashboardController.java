@@ -6,9 +6,15 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+/**
+ * Controller for the admin dashboard landing page.
+ */
 @Controller
 @RequestMapping("/admin")
 public class AdminDashboardController {
+    /**
+     * Show the admin dashboard page.
+     */
     @GetMapping
     public String dashboard(Model model) {
         model.addAttribute(Attributes.ACTIVE_SIDEBAR,

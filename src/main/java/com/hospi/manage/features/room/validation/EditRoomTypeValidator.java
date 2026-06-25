@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/** Validator for the room-type edit form ({@link RoomTypeEditForm}). */
 @Component
 public class EditRoomTypeValidator {
 
@@ -24,6 +25,14 @@ public class EditRoomTypeValidator {
         this.roomTypeRepository = roomTypeRepository;
     }
 
+    /**
+     * Validate the room-type edit form for duplicates, cover image, gallery images, features, and price.
+     *
+     * @param roomTypeId        the id of the room type being edited
+     * @param form              the edit form data
+     * @param existingImageCount number of images already attached to the room type
+     * @param errors            binding result to populate with validation failures
+     */
     public void validate(Long roomTypeId, RoomTypeEditForm form, int existingImageCount, Errors errors) {
         validateDuplicateRoomType(roomTypeId,
                 form,

@@ -8,6 +8,9 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+/**
+ * JPA entity representing a staff account with authentication and role information.
+ */
 @Entity
 @Table(name = "staffs")
 @Getter
@@ -41,6 +44,9 @@ public class Account {
     @Column(name = "status", length = 50)
     private AccountStatus status;
 
+    /**
+     * Set the creation timestamp before persisting.
+     */
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();

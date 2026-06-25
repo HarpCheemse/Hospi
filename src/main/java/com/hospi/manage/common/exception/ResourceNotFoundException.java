@@ -1,5 +1,6 @@
 package com.hospi.manage.common.exception;
 
+/** Thrown when a requested resource (entity) cannot be found by its identifier. */
 public class ResourceNotFoundException extends RuntimeException {
     private final String resource;
 

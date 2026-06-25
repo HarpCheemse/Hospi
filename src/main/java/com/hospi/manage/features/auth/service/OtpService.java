@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+/** Business logic for OTP creation, verification, and token issuance for email-based authentication. */
 @Service
 @RequiredArgsConstructor
 public class OtpService {
@@ -20,6 +21,7 @@ public class OtpService {
     private static final int OTP_COOLDOWN_SECONDS = 60;
     private static final int MAX_ATTEMPTS = 5;
 
+    /** Create and persist a new OTP challenge for the given email. Returns null if the cooldown period is still active. */
     @Transactional
     public String createOtp(String email, OtpType type) {
         boolean recentOtp = otpChallengeRepository
@@ -43,6 +45,7 @@ public class OtpService {
         return rawOtp;
     }
 
+    /** Verify an OTP against the most recent challenge. */
     @Transactional
     public boolean verifyOtp(String email, String inputOtp, OtpType type) {
         var challenge = otpChallengeRepository
@@ -64,6 +67,7 @@ public class OtpService {
         return true;
     }
 
+    /** Invalidate the most recent unverified OTP for the given email. */
     @Transactional
     public void invalidateOtp(String email, OtpType type) {
         otpChallengeRepository
@@ -74,6 +78,7 @@ public class OtpService {
                 });
     }
 
+    /** Issue a bearer token tied to a verified OTP. */
     @Transactional
     public String issueToken(String email, OtpType type) {
         OtpChallenge challenge = otpChallengeRepository
@@ -88,12 +93,14 @@ public class OtpService {
         return token;
     }
 
+    /** Check whether the given token is valid and not expired. */
     public boolean isValidToken(String token) {
         return otpChallengeRepository.findByToken(token)
                 .map(OtpChallenge::isTokenValid)
                 .orElse(false);
     }
 
+    /** Return the email associated with a valid token. */
     public String getEmailByToken(String token) {
         return otpChallengeRepository.findByToken(token)
                 .filter(OtpChallenge::isTokenValid)
@@ -101,6 +108,7 @@ public class OtpService {
                 .orElseThrow(() -> new IllegalStateException("Invalid or expired reset token"));
     }
 
+    /** Mark the given token as used. */
     @Transactional
     public void invalidateToken(String token) {
         otpChallengeRepository.findByToken(token).ifPresent(challenge -> {

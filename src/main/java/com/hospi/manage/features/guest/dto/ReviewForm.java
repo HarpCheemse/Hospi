@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
+/** Form for submitting a rating review for a reservation. */
 public record ReviewForm(
         @NotNull(message = "Rating is required")
         @Min(value = 1, message = "Rating must be at least 1")

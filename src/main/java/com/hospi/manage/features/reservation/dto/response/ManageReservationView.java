@@ -9,6 +9,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 
+/** View model for the reservation management page with guests, assignments, and available rooms. */
 public record ManageReservationView(
         Reservation reservation,
         List<StayingGuest> guests,

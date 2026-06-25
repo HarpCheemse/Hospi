@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/** Business logic for room CRUD, floor views, occupancy tracking, and soft-deletion. */
 @Service
 public class RoomService {
     private final RoomRepository roomRepository;
@@ -48,10 +49,12 @@ public class RoomService {
         this.stayingGuestRepository = stayingGuestRepository;
     }
 
+    /** Return all active rooms ordered by floor and room number. */
     public List<Room> findAll() {
         return roomRepository.findByActiveTrueOrderByFloorNumberAscRoomNumberAsc();
     }
 
+    /** Create one or more rooms on a floor with auto-generated room numbers. */
     @Transactional
     public void createRoom(RoomCreateForm form) {
         Integer highest =
@@ -90,6 +93,7 @@ public class RoomService {
                 rooms);
     }
 
+    /** Return floor-by-floor room views for all active rooms. */
     public List<FloorView> getFloorViews() {
 
         List<Room> allRooms = roomRepository.findByActiveTrueOrderByFloorNumberAscRoomNumberAsc();
@@ -103,6 +107,7 @@ public class RoomService {
                 .toList();
     }
 
+    /** Find an active room by ID. */
     public Room findById(Long id) {
         Room room = roomRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Room")
@@ -113,6 +118,7 @@ public class RoomService {
         return room;
     }
 
+    /** Update a room's type, number, and condition status. */
     public void updateRoom(Long id, RoomEditForm form) {
         Room room = findById(id);
 
@@ -127,6 +133,7 @@ public class RoomService {
         roomRepository.save(room);
     }
 
+    /** Return floor views optionally filtered by a specific floor number. */
     public List<FloorView> getFloorViews(Integer floor) {
         List<Room> allRooms = roomRepository.findByActiveTrueOrderByFloorNumberAscRoomNumberAsc();
         if (floor != null) {
@@ -143,6 +150,7 @@ public class RoomService {
                 .toList();
     }
 
+    /** Update a room's condition status (clean, dirty, or maintenance). */
     @Transactional
     public void updateConditionStatus(Long id, ConditionStatus status) {
         Room room = findById(id);
@@ -150,6 +158,7 @@ public class RoomService {
         roomRepository.save(room);
     }
 
+    /** Soft-delete a room by marking it inactive. */
     @Transactional
     public void delete(Long id) {
         Room room = findById(id);
@@ -171,6 +180,7 @@ public class RoomService {
         roomRepository.save(room);
     }
 
+    /** Return occupancy details for a room, including current guests if occupied. */
     public RoomOccupancyView getRoomOccupancy(Long id) {
         Room room = findById(id);
 

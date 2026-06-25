@@ -10,6 +10,9 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Repository for {@link Room} entity — provides room lookup, availability checks, and inventory queries.
+ */
 public interface RoomRepository extends JpaRepository<Room, Long> {
     List<Room> findByActiveTrueOrderByFloorNumberAscRoomNumberAsc();
 
@@ -21,6 +24,9 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
 
     long countByRoomTypeIdAndActiveTrue(Long roomTypeId);
 
+    /**
+     * Find the highest room number on the given floor for auto-numbering.
+     */
     @Query("""
             SELECT MAX(CAST(r.roomNumber AS integer))
             FROM Room r
@@ -28,6 +34,9 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             """)
     Integer findHighestRoomNumberByFloor(short floor);
 
+    /**
+     * Return the count of active rooms grouped by room type.
+     */
     @Query("""
             SELECT r.roomType, COUNT(r)
             FROM Room r
@@ -36,6 +45,9 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             """)
     List<Object[]> countActiveRoomsByType();
 
+    /**
+     * Return a list of {@link RoomInventory} for all active room types.
+     */
     default List<RoomInventory> getRoomInventory() {
         return countActiveRoomsByType()
                 .stream()

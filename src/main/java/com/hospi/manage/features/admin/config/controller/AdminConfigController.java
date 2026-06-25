@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * Controller for managing system-wide configuration settings.
+ */
 @Controller
 @RequestMapping("/admin/configs")
 public class AdminConfigController {
@@ -22,11 +25,17 @@ public class AdminConfigController {
         this.systemConfigService = systemConfigService;
     }
 
+    /**
+     * Set the active sidebar highlight for this feature.
+     */
     @ModelAttribute
     void addCommonAttributues(Model model) {
         model.addAttribute(Attributes.ACTIVE_SIDEBAR, "SYSTEM_CONFIGS");
     }
 
+    /**
+     * Show the system configuration listing page.
+     */
     @GetMapping
     public String config(Model model) {
 
@@ -39,6 +48,9 @@ public class AdminConfigController {
         return "admin/config/list";
     }
 
+    /**
+     * Show the configuration edit form pre-populated with current values.
+     */
     @GetMapping("/edit")
     public String edit(Model model) {
         model.addAttribute(Attributes.FORM, systemConfigService.getForm());
@@ -46,6 +58,10 @@ public class AdminConfigController {
         return "admin/config/edit";
     }
 
+    /**
+     * Update system configuration values. Validates input, persists changes, then
+     * redirects to the config listing.
+     */
     @PostMapping("/edit")
     public String updateConfigs(@Valid @ModelAttribute(Attributes.FORM) SystemConfigForm form,
                                 BindingResult bindingResult,

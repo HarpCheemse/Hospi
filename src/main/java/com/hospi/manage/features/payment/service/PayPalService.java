@@ -11,6 +11,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
+/** Raw HTTP client for PayPal REST API v2 — create, capture, and refund orders. */
 @Service
 @RequiredArgsConstructor
 public class PayPalService {
@@ -23,6 +24,7 @@ public class PayPalService {
                 : "https://api-m.paypal.com";
     }
 
+    /** Fetch OAuth2 access token via Basic Auth. */
     private String getAccessToken() throws IOException {
         URL url = new URL(getBaseUrl() + "/v1/oauth2/token");
 
@@ -50,6 +52,7 @@ public class PayPalService {
                 "access_token");
     }
 
+    /** Create a PayPal order with intent CAPTURE. Returns approval URL for user redirect. */
     public String createOrder(String amount,
                               String returnUrl,
                               String cancelUrl) throws IOException {
@@ -93,6 +96,7 @@ public class PayPalService {
         return extractApprovalUrl(response);
     }
 
+    /** Capture an approved PayPal order. Returns true if status is COMPLETED. */
     public boolean captureOrder(String orderId) throws IOException {
         String accessToken = getAccessToken();
 
@@ -137,6 +141,7 @@ public class PayPalService {
         );
     }
 
+    /** Naive JSON string value extractor by key. */
     private String extractJson(String json,
                                String key) {
 
@@ -158,6 +163,7 @@ public class PayPalService {
                 end);
     }
 
+    /** Extract PayPal approval URL from create-order response. */
     private String extractApprovalUrl(String response) {
         String[] parts = response.split("\\{");
 
@@ -187,5 +193,42 @@ public class PayPalService {
         throw new RuntimeException(
                 "Approval URL not found. Response: " + response
         );
+    }
+
+    /** Refund a captured PayPal order. Two steps: GET order to extract capture ID, then POST refund. */
+    public boolean refundOrder(String orderId) throws IOException {
+        String accessToken = getAccessToken();
+
+        URL orderUrl = new URL(getBaseUrl() + "/v2/checkout/orders/" + orderId);
+        HttpURLConnection orderConn = (HttpURLConnection) orderUrl.openConnection();
+        orderConn.setRequestMethod("GET");
+        orderConn.setRequestProperty("Authorization", "Bearer " + accessToken);
+        String orderResponse = readResponse(orderConn);
+
+        String captureId = extractCaptureId(orderResponse);
+
+        URL refundUrl = new URL(getBaseUrl() + "/v2/payments/captures/" + captureId + "/refund");
+        HttpURLConnection refundConn = (HttpURLConnection) refundUrl.openConnection();
+        refundConn.setRequestMethod("POST");
+        refundConn.setDoOutput(true);
+        refundConn.setRequestProperty("Authorization", "Bearer " + accessToken);
+        refundConn.setRequestProperty("Content-Type", "application/json");
+        refundConn.setRequestProperty("Content-Length", "0");
+        refundConn.getOutputStream().close();
+
+        String refundResponse = readResponse(refundConn);
+        return refundResponse.contains("\"status\":\"COMPLETED\"");
+    }
+
+    /** Extract first capture ID from order response JSON. */
+    private String extractCaptureId(String orderResponse) {
+        String marker = "\"captures\":[{\"id\":\"";
+        int start = orderResponse.indexOf(marker);
+        if (start < 0) {
+            throw new RuntimeException("Capture ID not found in order response");
+        }
+        start += marker.length();
+        int end = orderResponse.indexOf("\"", start);
+        return orderResponse.substring(start, end);
     }
 }
