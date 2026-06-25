@@ -510,25 +510,139 @@ template receives it implicitly through the view rendering chain.
 
 ## 10. Testing Conventions
 
-- Service tests: `@ExtendWith(MockitoExtension.class)`, mock repositories,
-  no Spring context unless the test specifically needs transactional
-  behavior — in that case use a slice test, not a full `@SpringBootTest`.
-- Controller tests: `@WebMvcTest(SomeController.class)` with mocked
-  services, asserting view name, model attributes, and redirect/flash
-  behavior — not hitting the database.
-- DTO unit tests: plain JUnit 5, no mocking, test validation annotation
-  behavior directly (e.g. `ValidatorFactory validator =
-  Validation.buildDefaultValidatorFactory()`).
-- Test class dependencies: `@RequiredArgsConstructor` is fine for test
-  classes that need constructor injection (MockitoExtension handles it).
-  Manual construction with `new` and mocks is also fine.
-- Naming: `should_doX_when_conditionY` or `methodName_condition_expected` —
-  pick one and stay consistent within a test class; don't mix styles in the
-  same file.
-- A new ownership-check branch (§3) must have a test asserting the
-  mismatched-parent case throws — this is the exact bug class this doc
-  exists to prevent, so it's the one piece of behavior that's non-negotiable
-  to cover.
+### 10.1 Test layers
+
+Three layers, no exceptions. Do not mix them.
+
+| Layer | Scope | Framework | Db |
+|---|---|---|---|
+| **Service unit tests** | One service class + mocked repos | `@ExtendWith(MockitoExtension.class)`, `@Mock` + `@InjectMocks` | No |
+| **Controller slice tests** | One controller class + mocked services | `@WebMvcTest(Controller.class)` + `@AutoConfigureMockMvc(addFilters = false)` + `@MockitoBean` | No |
+| **DTO validation tests** | One form/record class | Plain JUnit 5, `ValidatorFactory validator = Validation.buildDefaultValidatorFactory()` | No |
+
+- **Never use `@SpringBootTest`.** It is not present anywhere in the codebase and must not be introduced.
+- Existing tests using `@ExtendWith(SpringExtension.class)` (e.g. `ReservationServiceTest`) are legacy; prefer `@ExtendWith(MockitoExtension.class)` for new tests.
+
+### 10.2 Controller test requirements
+
+Every controller handler that renders a page must have tests covering **all five paths**:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  GET handler                                               │
+│  ├── Render success → assert: 200 + view name + content    │
+│  └── Redirect guard → assert: 302 + redirect URL           │
+│                                                             │
+│  POST handler                                              │
+│  ├── Success → assert: 302 + redirect URL + flash attr    │
+│  ├── Validation failure → assert: view name re-rendered    │
+│  ├── Business rule failure → assert: 302 + ERROR flash    │
+│  └── Guard → assert: 302 + redirect URL                   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### GET handler render test
+
+Every `@GetMapping` that returns a Thymeleaf template must have a test that verifies the page actually renders and contains the expected content. This catches TemplateInputException (null field access crashes) at build time instead of at runtime.
+
+```java
+@Test
+void showX_shouldRender() throws Exception {
+    // setup session state if needed
+    var draft = new BookingDraft();
+    draft.setDates(new BookingDraft.BookingDates(checkIn, checkOut));
+    when(bookingFlowService.buildAvailabilityView(any()))
+            .thenReturn(new AvailabilityView(List.of(), 5, BigDecimal.valueOf(20), 5));
+
+    mockMvc.perform(get("/book/rooms")
+                    .sessionAttr(BOOKING_DRAFT, draft))
+            .andExpect(status().isOk())
+            .andExpect(view().name("guest/booking/rooms"))
+            .andExpect(model().attributeExists("attributeKey"))
+            .andExpect(content().string(containsString("Expected page text")));
+}
+```
+
+**Content assertions are mandatory for GET render tests.** Every test must verify at least one distinct string from the rendered HTML output — a page heading, a data value bound from the model, or a key label. Use `content().string(containsString("..."))` from Hamcrest (NOT `xpath()` — HTML5 boolean attributes like `defer` / `crossorigin` cause XML parse failures).
+
+#### GET handler redirect guard test
+
+If a handler guards on null/missing session state (e.g. wizard flow step out of order), the test must assert the redirect.
+
+```java
+@Test
+void showPay_shouldRedirect_whenOtpTokenMissing() throws Exception {
+    var draft = new BookingDraft();
+    draft.setGuest(new BookingDraft.BookingGuest("Jane", "jane@test.com", null, null, null));
+
+    mockMvc.perform(get("/book/pay")
+                    .sessionAttr(BOOKING_DRAFT, draft))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/book/verify-otp"));
+}
+```
+
+#### POST handler tests
+
+Every `@PostMapping` must cover three outcomes:
+
+```java
+// 1. Success: redirect + flash attribute
+mockMvc.perform(post("/book/rooms")
+        .sessionAttr(BOOKING_DRAFT, draft)
+        .param("roomTypeIds", "1").param("counts", "2"))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/book/verify"));
+
+// 2. Validation failure: re-renders form (NO redirect)
+mockMvc.perform(post("/book/rooms")
+        .sessionAttr(BOOKING_DRAFT, draft))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/book/rooms"))
+        .andExpect(flash().attributeExists(ERROR));
+
+// 3. Business-rule failure: redirect + ERROR flash
+doThrow(new IllegalStateException("Not available"))
+        .when(bookingFlowService).createPendingReservation(any());
+mockMvc.perform(post("/book/pay")
+        .sessionAttr(BOOKING_DRAFT, draft)
+        .sessionAttr("otpToken", "valid-token"))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/book/rooms"))
+        .andExpect(flash().attributeExists(ERROR));
+```
+
+### 10.3 Wizard-flow controllers (multi-step session state)
+
+Controllers that orchestrate multi-step flows (e.g. `BookingFlowController`) have additional requirements:
+
+- **Every step's GET handler** must have a render test with proper session state (dates → rooms → guest → OTP) and content assertion.
+- **Every step's redirect guard** must have a test proving it redirects when state is missing (e.g. accessing `/book/pay` without an OTP token redirects to `/book/verify-otp`).
+- **POST handlers** must test the full error path: mock the service to throw `IllegalArgumentException` / `IllegalStateException` and assert the controller catches it and redirects with the proper `ERROR` flash.
+
+### 10.4 Test naming
+
+`should_doX_when_conditionY` — pick one and stay consistent within a test class.
+
+```java
+shouldRender_whenDatesSet
+shouldRedirect_whenNoRooms
+shouldRedirectToRooms_whenNotAvailable
+```
+
+### 10.5 What NOT to test in controller tests
+
+- Do not test service internals — services are mocked via `@MockitoBean`.
+- Do not test database queries — repositories are not loaded in `@WebMvcTest`.
+- Do not test Spring Security filters — they are disabled with `addFilters = false`.
+- Do not test CSS / layout / visual appearance — content assertions should verify semantic content (text, data values), not CSS classes or DOM structure.
+
+### 10.6 Service test conventions
+
+- `@ExtendWith(MockitoExtension.class)`, mock repositories with `@Mock`, inject with `@InjectMocks`.
+- `@RequiredArgsConstructor` is fine for test classes that need constructor injection (MockitoExtension handles it). Manual construction with `new` and mocks is also fine.
+- Test business logic branches: success path, each failure path (validation, not-found, business-rule violation).
+- A new ownership-check branch (§3) must have a test asserting the mismatched-parent case throws — this is the exact bug class this doc exists to prevent.
 
 ---
 
@@ -545,7 +659,98 @@ template receives it implicitly through the view rendering chain.
 
 ---
 
-## 12. Dependency Injection
+## 12. Code Documentation (Javadoc) Conventions
+
+### 12.1 Scope
+
+Every `public` class and `public` method in all source files (controllers,
+services, entities, mappers, validators, DTOs, utility classes) must have a
+Javadoc summary line. The following are exempt:
+
+- **Getters and setters** — their purpose is obvious from the field name.
+  Document the field itself instead.
+- **Simple `@Override` methods** that only delegate to a superclass method
+  (e.g. Spring Data JPA repository methods). If the override adds behavior,
+  constraints, or side effects, it needs its own Javadoc.
+- **Lombok-generated methods** — Lombok annotations (`@Getter`, `@Setter`,
+  `@RequiredArgsConstructor`, etc.) generate bytecode directly; Javadoc on
+  the annotation site is meaningless.
+
+### 12.2 Verb form
+
+Use the **imperative** mood for summary lines:
+
+| Correct | Incorrect |
+|---------|-----------|
+| "Create a new reservation." | "Creates a new reservation." |
+| "Validate the booking dates." | "Validates the booking dates." |
+| "Find a room type by ID." | "This method finds a room type." |
+| "Return the available rooms." | "Returns the available rooms." |
+
+### 12.3 Tag conventions
+
+- `@param` — lowercase start, no leading "the". Describe the role, not the type.
+  - "reservation id to fetch"
+  - "check-in date (inclusive)"
+  - "errors – binding result to populate with validation failures"
+- `@return` — starts with "the" or "a" for values, "true"/"false" for booleans.
+  - "the created reservation"
+  - "true if the room is available for the given dates"
+  - "a map of room type id to booked count"
+- `@throws` — describe the condition, do not repeat the exception class.
+  - "if the reservation does not exist"
+  - "if the dates overlap an existing booking"
+  - "if check-out is before or equal to check-in"
+- **Omit a tag when its content adds nothing.** A `@return` for `void` methods
+  is always omitted. A `@param` for a single, obvious parameter like
+  `Long id` can be omitted if the summary line already explains it.
+
+### 12.4 Formatting
+
+- Use `{@code}` for inline code references (field names, method names,
+  literal values). Never HTML `<code>` tags.
+- Use `{@link}` to reference other classes or methods.
+- Use `{@inheritDoc}` on overrides that do exactly what the parent documents.
+- Do not use HTML tags (`<p>`, `<br>`, etc.) — Javadoc standard doc-comment
+  syntax is sufficient. Separate paragraphs with a blank line in the source.
+- Keep summary lines to **one sentence** (120 characters max). If the method
+  needs more explanation, add a blank line after the summary, then a longer
+  description paragraph.
+
+### 12.5 What to document
+
+| Document | Don't document |
+|----------|---------------|
+| What the method does (intent) | How it does it (implementation) |
+| Side effects: DB writes, API calls, session mutations | Internal helper calls |
+| Parameters' valid ranges or nullability | Parameter types (they're in the signature) |
+| Thread-safety notes if non-trivial | Security implications (those belong in the method body) |
+
+### 12.6 Class-level Javadoc
+
+Every public class must have a class-level Javadoc that states the class's
+single responsibility. Use a single sentence:
+
+```java
+/** Controller for the booking wizard flow (guest-facing). */
+/** Business logic for room type availability checks. */
+/** JPA entity representing a room assignment to a reservation. */
+```
+
+Do not repeat the class name, do not list fields, do not include `@author`
+tags or version markers.
+
+### 12.7 Enforcement
+
+New code that does not conform to these conventions is a lint-worthy defect
+on review. Existing code that is touched (modified for any reason) must be
+brought into compliance as part of the same change — this includes adding
+class-level Javadoc if missing, and updating any existing Javadoc that
+contradicts the rules above.
+
+---
+
+## 13. Dependency Injection
 
 - `@RequiredArgsConstructor` **everywhere** — controllers, services,
   validators, any Spring-managed bean. This is the project standard.
