@@ -11,6 +11,9 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * JPA entity representing the hotel with its profile, operating hours, and associated pictures.
+ */
 @Entity
 @Table(name = "hotels")
 @Getter
@@ -67,12 +70,18 @@ public class Hotel {
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HotelPicture> pictures = new ArrayList<>();
 
+    /**
+     * Set the creation and update timestamps before persisting.
+     */
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 
+    /**
+     * Update the modification timestamp before updating.
+     */
     @PreUpdate
     public void preUpdate() {
         updatedAt = LocalDateTime.now();

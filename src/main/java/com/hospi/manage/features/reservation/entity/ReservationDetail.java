@@ -7,6 +7,9 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 
+/**
+ * JPA entity representing a line item on a reservation, linking a room type with a quantity and price.
+ */
 @Entity
 @Table(name = "reservation_details")
 @Getter

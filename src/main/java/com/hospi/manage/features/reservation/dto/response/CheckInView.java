@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+/** View model for the check-in confirmation page. */
 public record CheckInView(
         Long id,
         String guestName,
@@ -18,6 +19,7 @@ public record CheckInView(
         List<RoomDetailView> rooms,
         boolean onlineBooking
 ) {
+    /** Create a check-in view from a reservation entity. */
     public static CheckInView from(Reservation reservation) {
         List<RoomDetailView> rooms = reservation.getDetails().stream()
                 .map(d -> new RoomDetailView(

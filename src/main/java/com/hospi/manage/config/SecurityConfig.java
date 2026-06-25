@@ -31,12 +31,22 @@ public class SecurityConfig {
         this.successHandler = successHandler;
     }
 
+    /**
+     * Provide the application-wide password encoder (Argon2).
+     *
+     * @return an {@link Argon2PasswordEncoder}
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
 
     }
 
+    /**
+     * Provide a DAO authentication provider wired with the user details service and password encoder.
+     *
+     * @return a configured {@link DaoAuthenticationProvider}
+     */
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -47,11 +57,23 @@ public class SecurityConfig {
         return provider;
     }
 
+    /**
+     * Provide the authentication manager backed by the DAO provider.
+     *
+     * @return a {@link ProviderManager}
+     */
     @Bean
     public AuthenticationManager authenticationManager() {
         return new ProviderManager(authenticationProvider());
     }
 
+    /**
+     * Build the security filter chain with URL-based authorization, form login, remember-me, and exception handling.
+     *
+     * @param http the {@link HttpSecurity} to configure
+     * @return the built {@link SecurityFilterChain}
+     * @throws Exception if the filter chain cannot be built
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 

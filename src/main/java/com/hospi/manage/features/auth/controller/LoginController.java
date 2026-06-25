@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+/**
+ * Controller for the staff login page.
+ */
 @Controller
 @RequestMapping("/login")
 public class LoginController {
@@ -16,6 +19,10 @@ public class LoginController {
         this.accountService = accountService;
     }
 
+    /**
+     * Show the login page. Display error or logout message if present in request
+     * params.
+     */
     @GetMapping
     public String login(
             @RequestParam(value = "error", required = false) String error,

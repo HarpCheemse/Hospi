@@ -9,6 +9,9 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 
+/**
+ * JPA entity representing hotel-level configuration settings (financial, booking rules, refunds).
+ */
 @Entity
 @Table(name = "system_configs")
 @Getter

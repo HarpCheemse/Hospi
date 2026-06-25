@@ -13,6 +13,7 @@ public class HotelPictureService {
         this.hotelPictureRepository = hotelPictureRepository;
     }
 
+    /** Find a hotel picture by ID. */
     public HotelPicture findById(Long id) {
         return hotelPictureRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Hotel picture"));

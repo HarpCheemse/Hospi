@@ -4,6 +4,7 @@ import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 
+/** Form for updating system-wide hotel configuration. */
 public record SystemConfigForm(
 
         // Financial

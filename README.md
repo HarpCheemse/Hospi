@@ -27,13 +27,21 @@ Hotel management web application built with Spring Boot 3.5, Thymeleaf, and Post
 `application.yml`, `application-dev.yml`, `application-prod.yml` are in `.gitignore` — they exist locally but are NOT committed. Use `application-example.yml` as a template for new properties. Do not rely on these files being in git.
 
 ## Testing conventions
-- Unit tests: `@ExtendWith(MockitoExtension.class)`, mock repos, no Spring context
-- Controller slice tests: `@WebMvcTest(SomeController.class)` with mocked services
-- **No `@SpringBootTest`** in the codebase — do not introduce it
-- Some older tests use `@ExtendWith(SpringExtension.class)`; prefer `MockitoExtension` for new tests
-- Test naming: `should_doX_when_conditionY`
-- Ownership-check branches must test the mismatched-parent → throws case
-- See `docs/project-structure.md` §10 for full testing conventions
+- **No `@SpringBootTest`** — all tests use mock-based approaches
+- **Service tests:** `@ExtendWith(MockitoExtension.class)`, mock repositories only, no Spring context
+- **Controller slice tests:** `@WebMvcTest(SomeController.class)` + `@AutoConfigureMockMvc(addFilters = false)` with `@MockitoBean` services
+- **DTO tests:** plain JUnit 5, test Jakarta Validation constraint annotations
+- **Test naming:** `should_doX_when_conditionY` 
+- See `docs/project-structure.md` §10 for the full authoritative testing strategy
+
+### Controller test requirements
+Every controller handler must have tests covering:
+- **GET handlers:** verify page renders (HTTP 200 + correct view name + rendered HTML contains expected text via `content().string(containsString("..."))`)
+- **POST success:** verify redirect URL + flash attribute
+- **POST validation failure:** verify re-render (view returned without redirect) + correct binding/message
+- **POST business-rule failure:** verify redirect + `ERROR` flash
+- **Redirect guards:** null/missing session state → appropriate redirect
+- See `BookingFlowControllerTest.java` for the canonical example
 
 ## Code conventions (`docs/project-structure.md` is authoritative)
 - Feature modules under `features/{feature}/` with substructure: `controller/`, `service/`, `entity/`, `dto/`, `repository/`, `mapper/`, `validation/`, `enums/`

@@ -7,6 +7,9 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+/**
+ * JPA entity representing a one-time password challenge for email verification and password reset flows.
+ */
 @Entity
 @Table(name = "otp_challenges")
 @Getter
@@ -48,19 +51,31 @@ public class OtpChallenge {
     @Column(name = "token_used", nullable = false)
     private Boolean tokenUsed = false;
 
+    /**
+     * Set the creation timestamp before persisting.
+     */
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();
     }
 
+    /**
+     * Return {@code true} if the OTP has passed its expiration time.
+     */
     public boolean isOtpExpired() {
         return LocalDateTime.now().isAfter(expiresAt);
     }
 
+    /**
+     * Return {@code true} if the verification token has passed its expiration time.
+     */
     public boolean isTokenExpired() {
         return tokenExpiresAt == null || LocalDateTime.now().isAfter(tokenExpiresAt);
     }
 
+    /**
+     * Return {@code true} if the token exists, has not been used, and has not expired.
+     */
     public boolean isTokenValid() {
         return token != null && !tokenUsed && !isTokenExpired();
     }

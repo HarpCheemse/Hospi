@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import static com.hospi.manage.common.constant.Attributes.*;
 
+/**
+ * Controller for static guest-facing pages (home, policies, contact).
+ */
 @Slf4j
 @RequiredArgsConstructor
 @Controller
@@ -18,18 +21,27 @@ public class PageController {
 
     private final HotelService hotelService;
 
+    /**
+     * Show the home page with hotel details and banners.
+     */
     @GetMapping("/")
     public String home(Model model) {
         getHotelOrDefault(model);
         return "guest/home";
     }
 
+    /**
+     * Show the hotel policies page.
+     */
     @GetMapping("/policies")
     public String policies(Model model) {
         getHotelOrDefault(model);
         return "guest/policies";
     }
 
+    /**
+     * Show the contact page with hotel details.
+     */
     @GetMapping("/contact")
     public String contact(Model model) {
         getHotelOrDefault(model);
