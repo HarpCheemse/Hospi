@@ -97,153 +97,63 @@ VALUES        ('BASIC DOUBLE', 2, 'Comfortable room with essential amenities',
 -- 5. Rooms (120 total — 24 per room type)
 -- ────────────────────────────────────────────────────────────────────────────
 
--- Standard Rooms (24)
+-- BASIC DOUBLE (24)
 INSERT INTO rooms (room_number, floor_number, is_active, occupancy_status, condition_status, room_type_id)
 SELECT n, floor_num, true, 'VACANT', 'CLEAN', rt.id
-FROM (VALUES ('S201', 2),
-             ('S202', 2),
-             ('S203', 2),
-             ('S204', 2),
-             ('S205', 2),
-             ('S206', 2),
-             ('S207', 2),
-             ('S208', 3),
-             ('S209', 3),
-             ('S210', 3),
-             ('S211', 3),
-             ('S212', 5),
-             ('S213', 5),
-             ('S214', 5),
-             ('S215', 5),
-             ('S216', 6),
-             ('S217', 6),
-             ('S218', 6),
-             ('S219', 6),
-             ('S220', 8),
-             ('S221', 8),
-             ('S222', 8),
-             ('S223', 8),
-             ('S224', 8)) AS nums(n, floor_num),
+FROM (VALUES ('101', 1), ('102', 1), ('103', 1), ('104', 1),
+             ('105', 1), ('106', 1), ('107', 1), ('108', 1),
+             ('109', 1), ('110', 1), ('111', 1), ('112', 1),
+             ('113', 1), ('114', 1), ('115', 1), ('116', 1),
+             ('117', 1), ('118', 1), ('119', 1), ('120', 1),
+             ('121', 1), ('122', 1), ('123', 1), ('124', 1)) AS nums(n, floor_num),
      room_types rt
 WHERE rt.name = 'BASIC DOUBLE';
 
--- Deluxe Rooms (24)
+-- DELUXE DOUBLE (24)
 INSERT INTO rooms (room_number, floor_number, is_active, occupancy_status, condition_status, room_type_id)
 SELECT n, floor_num, true, 'VACANT', 'CLEAN', rt.id
-FROM (VALUES ('D401', 4),
-             ('D402', 4),
-             ('D403', 4),
-             ('D404', 4),
-             ('D405', 4),
-             ('D406', 4),
-             ('D407', 4),
-             ('D408', 5),
-             ('D409', 5),
-             ('D410', 5),
-             ('D411', 5),
-             ('D412', 6),
-             ('D413', 6),
-             ('D414', 6),
-             ('D415', 6),
-             ('D416', 7),
-             ('D417', 7),
-             ('D418', 7),
-             ('D419', 7),
-             ('D420', 8),
-             ('D421', 8),
-             ('D422', 8),
-             ('D423', 8),
-             ('D424', 8)) AS nums(n, floor_num),
+FROM (VALUES ('201', 2), ('202', 2), ('203', 2), ('204', 2),
+             ('205', 2), ('206', 2), ('207', 2), ('208', 2),
+             ('209', 2), ('210', 2), ('211', 2), ('212', 2),
+             ('213', 2), ('214', 2), ('215', 2), ('216', 2),
+             ('217', 2), ('218', 2), ('219', 2), ('220', 2),
+             ('221', 2), ('222', 2), ('223', 2), ('224', 2)) AS nums(n, floor_num),
      room_types rt
 WHERE rt.name = 'DELUXE DOUBLE';
 
--- Executive Suites (24)
+-- SUPERIOR DOUBLE (24)
 INSERT INTO rooms (room_number, floor_number, is_active, occupancy_status, condition_status, room_type_id)
 SELECT n, floor_num, true, 'VACANT', 'CLEAN', rt.id
-FROM (VALUES ('E701', 7),
-             ('E702', 7),
-             ('E703', 7),
-             ('E704', 7),
-             ('E705', 7),
-             ('E706', 7),
-             ('E707', 7),
-             ('E708', 8),
-             ('E709', 8),
-             ('E710', 8),
-             ('E711', 8),
-             ('E712', 9),
-             ('E713', 9),
-             ('E714', 9),
-             ('E715', 9),
-             ('E716', 10),
-             ('E717', 10),
-             ('E718', 10),
-             ('E719', 10),
-             ('E720', 5),
-             ('E721', 6),
-             ('E722', 7),
-             ('E723', 8),
-             ('E724', 9)) AS nums(n, floor_num),
+FROM (VALUES ('301', 3), ('302', 3), ('303', 3), ('304', 3),
+             ('305', 3), ('306', 3), ('307', 3), ('308', 3),
+             ('309', 3), ('310', 3), ('311', 3), ('312', 3),
+             ('313', 3), ('314', 3), ('315', 3), ('316', 3),
+             ('317', 3), ('318', 3), ('319', 3), ('320', 3),
+             ('321', 3), ('322', 3), ('323', 3), ('324', 3)) AS nums(n, floor_num),
      room_types rt
 WHERE rt.name = 'SUPERIOR DOUBLE';
 
--- Family Rooms (24)
+-- BASIC FAMILY (24)
 INSERT INTO rooms (room_number, floor_number, is_active, occupancy_status, condition_status, room_type_id)
 SELECT n, floor_num, true, 'VACANT', 'CLEAN', rt.id
-FROM (VALUES ('F301', 3),
-             ('F302', 3),
-             ('F303', 3),
-             ('F304', 3),
-             ('F305', 3),
-             ('F306', 3),
-             ('F307', 3),
-             ('F308', 4),
-             ('F309', 4),
-             ('F310', 4),
-             ('F311', 4),
-             ('F312', 5),
-             ('F313', 5),
-             ('F314', 5),
-             ('F315', 5),
-             ('F316', 6),
-             ('F317', 6),
-             ('F318', 6),
-             ('F319', 6),
-             ('F320', 7),
-             ('F321', 7),
-             ('F322', 7),
-             ('F323', 7),
-             ('F324', 7)) AS nums(n, floor_num),
+FROM (VALUES ('401', 4), ('402', 4), ('403', 4), ('404', 4),
+             ('405', 4), ('406', 4), ('407', 4), ('408', 4),
+             ('409', 4), ('410', 4), ('411', 4), ('412', 4),
+             ('413', 4), ('414', 4), ('415', 4), ('416', 4),
+             ('417', 4), ('418', 4), ('419', 4), ('420', 4),
+             ('421', 4), ('422', 4), ('423', 4), ('424', 4)) AS nums(n, floor_num),
      room_types rt
 WHERE rt.name = 'BASIC FAMILY';
 
--- Premium Suites (24)
+-- DELUXE SUITE (24)
 INSERT INTO rooms (room_number, floor_number, is_active, occupancy_status, condition_status, room_type_id)
 SELECT n, floor_num, true, 'VACANT', 'CLEAN', rt.id
-FROM (VALUES ('P801', 8),
-             ('P802', 8),
-             ('P803', 8),
-             ('P804', 8),
-             ('P805', 8),
-             ('P806', 8),
-             ('P807', 8),
-             ('P808', 9),
-             ('P809', 9),
-             ('P810', 9),
-             ('P811', 9),
-             ('P812', 9),
-             ('P813', 10),
-             ('P814', 10),
-             ('P815', 10),
-             ('P816', 10),
-             ('P817', 10),
-             ('P818', 7),
-             ('P819', 7),
-             ('P820', 7),
-             ('P821', 7),
-             ('P822', 9),
-             ('P823', 10),
-             ('P824', 8)) AS nums(n, floor_num),
+FROM (VALUES ('501', 5), ('502', 5), ('503', 5), ('504', 5),
+             ('505', 5), ('506', 5), ('507', 5), ('508', 5),
+             ('509', 5), ('510', 5), ('511', 5), ('512', 5),
+             ('513', 5), ('514', 5), ('515', 5), ('516', 5),
+             ('517', 5), ('518', 5), ('519', 5), ('520', 5),
+             ('521', 5), ('522', 5), ('523', 5), ('524', 5)) AS nums(n, floor_num),
      room_types rt
 WHERE rt.name = 'DELUXE SUITE';
 
@@ -252,20 +162,20 @@ WHERE rt.name = 'DELUXE SUITE';
 -- ────────────────────────────────────────────────────────────────────────────
 UPDATE rooms
 SET occupancy_status = 'OCCUPIED'
-WHERE room_number IN ('S208', 'S212', 'D409', 'D413', 'E708', 'E712', 'F309', 'F313', 'P802', 'P806');
+WHERE room_number IN ('108', '112', '209', '213', '308', '312', '409', '413', '502', '506');
 
 UPDATE rooms
 SET condition_status = 'DIRTY'
-WHERE room_number IN ('S211', 'S216', 'D411', 'D416', 'E711', 'E716', 'F311', 'F316', 'P805', 'P810');
+WHERE room_number IN ('111', '116', '211', '216', '311', '316', '411', '416', '505', '510');
 
 UPDATE rooms
 SET condition_status = 'MAINTENANCE',
     is_active        = false
-WHERE room_number IN ('S214', 'S220', 'D414', 'D420', 'E714', 'E720', 'F314', 'F320', 'P809', 'P815');
+WHERE room_number IN ('114', '120', '214', '220', '314', '320', '414', '420', '509', '515');
 
 UPDATE rooms
 SET occupancy_status = 'VACANT'
-WHERE room_number IN ('S207', 'S215', 'D407', 'D415', 'E707', 'E715', 'F307', 'F315', 'P801', 'P812');
+WHERE room_number IN ('107', '115', '207', '215', '307', '315', '407', '415', '501', '512');
 
 -- ────────────────────────────────────────────────────────────────────────────
 -- 7. Reservations (50 total)
