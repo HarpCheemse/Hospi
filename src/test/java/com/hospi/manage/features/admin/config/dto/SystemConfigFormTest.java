@@ -22,72 +22,75 @@ public class SystemConfigFormTest {
     }
 
     @Test
-    void shouldPass_whenValidForm() {
-
+    void shouldPass_whenAllFieldsValid() {
         SystemConfigForm form = new SystemConfigForm(
-                new BigDecimal("10.00"),
-                new BigDecimal("20.00"),
-                new BigDecimal("50.00"),
-                new BigDecimal("15.00"),
-                30,
-                24,
-                30,
-                5,
-                new BigDecimal("50.00"),
-                24
-        );
+                new BigDecimal("10.00"), new BigDecimal("20.00"), new BigDecimal("50.00"),
+                new BigDecimal("15.00"), 30, 24, 30, 5,
+                new BigDecimal("50.00"), 24);
 
-        Set<ConstraintViolation<SystemConfigForm>> violations =
-                validator.validate(form);
+        Set<ConstraintViolation<SystemConfigForm>> violations = validator.validate(form);
 
         assertTrue(violations.isEmpty());
     }
 
     @Test
-    void shouldFail_whenAllFieldsAreInvalid() {
-
+    void shouldFail_whenTaxRateNull() {
         SystemConfigForm form = new SystemConfigForm(
-                new BigDecimal("-1"),
-                new BigDecimal("200"),   // >100 invalid
-                new BigDecimal("-10"),
-                new BigDecimal("-5"),
-                0,
-                -1,
-                0,
-                0,
-                new BigDecimal("200"),   // >100 invalid
-                -1
-        );
+                null, new BigDecimal("20.00"), new BigDecimal("50.00"),
+                new BigDecimal("15.00"), 30, 24, 30, 5,
+                new BigDecimal("50.00"), 24);
 
-        Set<ConstraintViolation<SystemConfigForm>> violations =
-                validator.validate(form);
+        Set<ConstraintViolation<SystemConfigForm>> violations = validator.validate(form);
 
-        assertFalse(violations.isEmpty());
-
-        violations.forEach(v ->
-                System.out.println(v.getPropertyPath() + " -> " + v.getMessage())
-        );
+        assertEquals(1, violations.size());
+        assertEquals("taxRate", violations.iterator().next().getPropertyPath().toString());
     }
 
     @Test
-    void shouldFail_whenNullValues() {
-
+    void shouldFail_whenDefaultDepositPercentageNegative() {
         SystemConfigForm form = new SystemConfigForm(
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
-        );
+                new BigDecimal("10.00"), new BigDecimal("-1.00"), new BigDecimal("50.00"),
+                new BigDecimal("15.00"), 30, 24, 30, 5,
+                new BigDecimal("50.00"), 24);
 
-        Set<ConstraintViolation<SystemConfigForm>> violations =
-                validator.validate(form);
+        Set<ConstraintViolation<SystemConfigForm>> violations = validator.validate(form);
 
-        assertEquals(10, violations.size());
+        assertFalse(violations.isEmpty());
+    }
+
+    @Test
+    void shouldFail_whenDefaultDepositPercentageOver100() {
+        SystemConfigForm form = new SystemConfigForm(
+                new BigDecimal("10.00"), new BigDecimal("101.00"), new BigDecimal("50.00"),
+                new BigDecimal("15.00"), 30, 24, 30, 5,
+                new BigDecimal("50.00"), 24);
+
+        Set<ConstraintViolation<SystemConfigForm>> violations = validator.validate(form);
+
+        assertFalse(violations.isEmpty());
+    }
+
+    @Test
+    void shouldFail_whenMaxBookingDaysNull() {
+        SystemConfigForm form = new SystemConfigForm(
+                new BigDecimal("10.00"), new BigDecimal("20.00"), new BigDecimal("50.00"),
+                new BigDecimal("15.00"), null, 24, null, 5,
+                new BigDecimal("50.00"), 24);
+
+        Set<ConstraintViolation<SystemConfigForm>> violations = validator.validate(form);
+
+        assertEquals(2, violations.size());
+    }
+
+    @Test
+    void shouldFail_whenMaxRoomPerBookLessThan1() {
+        SystemConfigForm form = new SystemConfigForm(
+                new BigDecimal("10.00"), new BigDecimal("20.00"), new BigDecimal("50.00"),
+                new BigDecimal("15.00"), 30, 24, 30, 0,
+                new BigDecimal("50.00"), 24);
+
+        Set<ConstraintViolation<SystemConfigForm>> violations = validator.validate(form);
+
+        assertFalse(violations.isEmpty());
     }
 }
