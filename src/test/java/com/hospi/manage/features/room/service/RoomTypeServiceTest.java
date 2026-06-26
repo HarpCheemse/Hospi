@@ -2,6 +2,7 @@ package com.hospi.manage.features.room.service;
 
 import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.room.dto.request.RoomTypeCreateForm;
+import com.hospi.manage.features.room.dto.response.RoomTypeView;
 import com.hospi.manage.features.room.dto.request.RoomTypeEditForm;
 import com.hospi.manage.features.room.entity.RoomType;
 import com.hospi.manage.features.room.enums.RoomCategory;
@@ -12,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class RoomTypeServiceTest {
 
     @Mock
@@ -38,7 +39,7 @@ class RoomTypeServiceTest {
     private RoomTypeService service;
 
     @Test
-    void createRoomType_shouldSaveRoomType() throws Exception {
+    void shouldSave_whenValidForm() throws Exception {
         RoomTypeCreateForm form = mock(RoomTypeCreateForm.class);
 
         when(form.category()).thenReturn(RoomCategory.FAMILY);
@@ -59,8 +60,7 @@ class RoomTypeServiceTest {
 
         RoomType result = service.createRoomType(form);
 
-        assertEquals(1L,
-                result.getId());
+        assertEquals(1L, result.getId());
 
         verify(roomTypePictureService).replaceCover(any(RoomType.class),
                 eq(null));
@@ -68,7 +68,7 @@ class RoomTypeServiceTest {
     }
 
     @Test
-    void findById_shouldReturnActiveRoomType() {
+    void shouldReturn_whenActiveAndFound() {
         RoomType rt = new RoomType();
         rt.setId(1L);
         rt.setActive(true);
@@ -78,12 +78,11 @@ class RoomTypeServiceTest {
 
         RoomType result = service.findById(1L);
 
-        assertEquals(1L,
-                result.getId());
+        assertEquals(1L, result.getId());
     }
 
     @Test
-    void findById_shouldThrow_whenNotFound() {
+    void shouldThrow_whenNotFound() {
         when(roomTypeRepository.findById(1L))
                 .thenReturn(Optional.empty());
 
@@ -92,7 +91,7 @@ class RoomTypeServiceTest {
     }
 
     @Test
-    void findById_shouldThrow_whenInactive() {
+    void shouldThrow_whenInactive() {
         RoomType rt = new RoomType();
         rt.setId(1L);
         rt.setActive(false);
@@ -105,7 +104,7 @@ class RoomTypeServiceTest {
     }
 
     @Test
-    void findAll_shouldReturnActiveOnly() {
+    void shouldReturnActiveOnly_whenFindAll() {
         RoomType rt = new RoomType();
         rt.setId(1L);
 
@@ -114,13 +113,12 @@ class RoomTypeServiceTest {
 
         List<RoomType> result = service.findAll();
 
-        assertEquals(1,
-                result.size());
+        assertEquals(1, result.size());
         verify(roomTypeRepository).findByActiveTrue();
     }
 
     @Test
-    void update_shouldCallAllPictureOperations() throws Exception {
+    void shouldUpdate_whenValidForm() throws Exception {
         RoomType rt = new RoomType();
         rt.setPictures(new ArrayList<>());
         rt.setActive(true);
@@ -142,20 +140,16 @@ class RoomTypeServiceTest {
         when(form.newImages()).thenReturn(null);
         when(form.removeImageIds()).thenReturn(null);
 
-        service.update(1L,
-                form);
+        service.update(1L, form);
 
-        verify(roomTypePictureService).replaceCover(rt,
-                null);
-        verify(roomTypePictureService).addNewImages(rt,
-                null);
-        verify(roomTypePictureService).removeImages(rt,
-                null);
+        verify(roomTypePictureService).replaceCover(rt, null);
+        verify(roomTypePictureService).addNewImages(rt, null);
+        verify(roomTypePictureService).removeImages(rt, null);
         verify(roomTypeRepository).save(rt);
     }
 
     @Test
-    void delete_shouldSoftDelete() {
+    void shouldSoftDelete_whenNoActiveRooms() {
         RoomType rt = new RoomType();
         rt.setActive(true);
 
@@ -171,7 +165,7 @@ class RoomTypeServiceTest {
     }
 
     @Test
-    void delete_shouldThrow_whenActiveRoomsExist() {
+    void shouldThrow_whenActiveRoomsExist() {
         RoomType rt = new RoomType();
         rt.setActive(true);
 
@@ -187,7 +181,7 @@ class RoomTypeServiceTest {
     }
 
     @Test
-    void findAllViews_shouldMap() {
+    void shouldReturnViews_whenFindAllWithRelations() {
         RoomType rt = new RoomType();
         rt.setId(1L);
 
@@ -196,7 +190,21 @@ class RoomTypeServiceTest {
 
         var result = service.findAllViews();
 
-        assertEquals(1,
-                result.size());
+        assertEquals(1, result.size());
+        verify(roomTypeRepository).findAllWithRelations();
+    }
+
+    @Test
+    void shouldReturnView_whenFindViewById() {
+        RoomType rt = new RoomType();
+        rt.setId(1L);
+        rt.setActive(true);
+        rt.setName("SUPERIOR FAMILY");
+
+        when(roomTypeRepository.findById(1L)).thenReturn(Optional.of(rt));
+
+        RoomTypeView result = service.findViewById(1L);
+
+        assertEquals(1L, result.id());
     }
 }
