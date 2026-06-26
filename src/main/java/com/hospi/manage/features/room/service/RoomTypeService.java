@@ -42,6 +42,8 @@ public class RoomTypeService {
 
         roomType.setName(generateRoomTypeName(form.category(),
                 form.tier()));
+        roomType.setCategory(form.category());
+        roomType.setTier(form.tier());
         roomType.setMaxOccupancy(form.maxOccupancy());
         roomType.setDescription(form.description());
         roomType.setFeatures(form.features());
