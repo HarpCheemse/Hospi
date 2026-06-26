@@ -36,5 +36,5 @@ node_modules
 
 .vscode
 src/main/resources/static/css/app.css
-
-docs
+docs/SDS.md
+docs/tables.sql
