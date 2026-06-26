@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.hospi.manage.common.constant.Attributes.*;
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -49,7 +50,8 @@ class BookingTrackerControllerTest {
         mockMvc.perform(get("/my-booking"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("guest/my-booking"))
-                .andExpect(model().attributeExists(FORM));
+                .andExpect(model().attributeExists(FORM))
+                .andExpect(content().string(containsString("Track Your Booking")));
     }
 
     @Test
@@ -70,7 +72,8 @@ class BookingTrackerControllerTest {
                         .sessionAttr(TRACKED_BOOKING_CODES, Set.of("CODE")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("guest/my-booking"))
-                .andExpect(model().attributeExists(RESERVATIONS));
+                .andExpect(model().attributeExists(RESERVATIONS))
+                .andExpect(content().string(containsString("Guest")));
     }
 
     @Test
@@ -81,7 +84,8 @@ class BookingTrackerControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("guest/my-booking-verify"))
                 .andExpect(model().attribute(VERIFY_EMAIL, "a@b.com"))
-                .andExpect(model().attributeExists(OTP_FORM));
+                .andExpect(model().attributeExists(OTP_FORM))
+                .andExpect(content().string(containsString("a@b.com")));
     }
 
     @Test
@@ -206,5 +210,54 @@ class BookingTrackerControllerTest {
                 .andExpect(redirectedUrl("/my-booking"));
 
         verify(bookingTrackerService).submitReview(1L, 4, Set.of("CODE"));
+    }
+
+    // --- Review POST missing branches ---
+
+    @Test
+    void submitReview_shouldReRender_whenBindingErrors() throws Exception {
+        Reservation res = new Reservation();
+        res.setId(1L);
+        res.setGuestName("Guest");
+        res.setConfirmationCode("CODE");
+        res.setStatus(ReservationStatus.CONFIRMED);
+        res.setCheckInAt(java.time.LocalDate.now());
+        res.setCheckOutAt(java.time.LocalDate.now().plusDays(2));
+        res.setSource(BookingSource.ONLINE);
+        when(bookingTrackerService.resolveByCodes(anySet())).thenReturn(java.util.List.of(res));
+        when(bookingTrackerService.buildReviewMap(anyList())).thenReturn(Map.of());
+        when(bookingTrackerService.buildPillClasses(anyList())).thenReturn(Map.of());
+
+        mockMvc.perform(post("/my-booking/review").with(csrf())
+                        .sessionAttr(TRACKED_BOOKING_CODES, Set.of("CODE"))
+                        .param("rating", "")
+                        .param("reservationId", ""))
+                .andExpect(status().isOk())
+                .andExpect(view().name("guest/my-booking"));
+    }
+
+    @Test
+    void submitReview_shouldReRenderWithError_whenBusinessRuleFails() throws Exception {
+        Reservation res = new Reservation();
+        res.setId(1L);
+        res.setGuestName("Guest");
+        res.setConfirmationCode("CODE");
+        res.setStatus(ReservationStatus.CONFIRMED);
+        res.setCheckInAt(java.time.LocalDate.now());
+        res.setCheckOutAt(java.time.LocalDate.now().plusDays(2));
+        res.setSource(BookingSource.ONLINE);
+        when(bookingTrackerService.resolveByCodes(anySet())).thenReturn(java.util.List.of(res));
+        when(bookingTrackerService.buildReviewMap(anyList())).thenReturn(Map.of());
+        when(bookingTrackerService.buildPillClasses(anyList())).thenReturn(Map.of());
+        doThrow(new IllegalStateException("Already reviewed"))
+                .when(bookingTrackerService).submitReview(1L, 4, Set.of("CODE"));
+
+        mockMvc.perform(post("/my-booking/review").with(csrf())
+                        .sessionAttr(TRACKED_BOOKING_CODES, Set.of("CODE"))
+                        .param("rating", "4")
+                        .param("reservationId", "1"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("guest/my-booking"))
+                .andExpect(model().attributeExists(ERROR));
     }
 }

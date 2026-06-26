@@ -1,17 +1,18 @@
 package com.hospi.manage.features.room.service;
 
+import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.common.service.ImageCompressionService;
 import com.hospi.manage.features.room.entity.RoomType;
 import com.hospi.manage.features.room.entity.RoomTypePicture;
 import com.hospi.manage.features.room.repository.RoomTypePictureRepository;
-import com.hospi.manage.features.room.service.RoomTypePictureService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class RoomTypePictureServiceTest {
 
     @Mock
@@ -41,7 +42,7 @@ class RoomTypePictureServiceTest {
     }
 
     @Test
-    void findById_shouldReturnPicture() {
+    void shouldReturn_whenFound() {
         RoomTypePicture picture = new RoomTypePicture();
         picture.setId(1L);
 
@@ -50,8 +51,7 @@ class RoomTypePictureServiceTest {
 
         RoomTypePicture result = service.findById(1L);
 
-        assertEquals(1L,
-                result.getId());
+        assertEquals(1L, result.getId());
         verify(roomTypePictureRepository).findById(1L);
     }
 
@@ -75,17 +75,13 @@ class RoomTypePictureServiceTest {
                 anyFloat()))
                 .thenReturn("compressed".getBytes());
 
-        service.replaceCover(roomType,
-                file);
+        service.replaceCover(roomType, file);
 
-        assertEquals(1,
-                roomType.getPictures().size());
+        assertEquals(1, roomType.getPictures().size());
 
         RoomTypePicture newCover = roomType.getPictures().get(0);
-        assertEquals(1,
-                newCover.getSortOrder());
-        assertArrayEquals("compressed".getBytes(),
-                newCover.getImageData());
+        assertEquals(1, newCover.getSortOrder());
+        assertArrayEquals("compressed".getBytes(), newCover.getImageData());
 
         verify(imageCompressionService).toWebp(any(),
                 anyInt(),
@@ -94,8 +90,7 @@ class RoomTypePictureServiceTest {
 
     @Test
     void replaceCover_shouldDoNothing_whenFileEmpty() throws Exception {
-        service.replaceCover(roomType,
-                null);
+        service.replaceCover(roomType, null);
         assertTrue(roomType.getPictures().isEmpty());
 
         service.replaceCover(roomType,
@@ -107,8 +102,8 @@ class RoomTypePictureServiceTest {
     }
 
     @Test
-    void addNewImages_shouldAddGalleryImages() throws Exception {
-        List<MockMultipartFile> files = List.of(
+    void shouldAdd_whenFilesProvided() throws Exception {
+        List<MultipartFile> files = List.of(
                 new MockMultipartFile("f1",
                         "a.jpg",
                         "image/jpeg",
@@ -124,38 +119,37 @@ class RoomTypePictureServiceTest {
                 anyFloat()))
                 .thenReturn("compressed".getBytes());
 
-        service.addNewImages(roomType,
-                (List) files);
+        service.addNewImages(roomType, files);
 
-        assertEquals(2,
-                roomType.getPictures().size());
+        assertEquals(2, roomType.getPictures().size());
         assertTrue(roomType.getPictures().stream()
                 .allMatch(p -> p.getSortOrder() == 2));
 
-        verify(imageCompressionService,
-                times(2))
-                .toWebp(any(),
-                        anyInt(),
-                        anyFloat());
+        verify(imageCompressionService, times(2))
+                .toWebp(any(), anyInt(), anyFloat());
     }
 
     @Test
-    void removeImages_shouldRemoveById() {
+    void shouldRemoveById_whenIdsProvided() {
         RoomTypePicture p1 = new RoomTypePicture();
         p1.setId(1L);
 
         RoomTypePicture p2 = new RoomTypePicture();
         p2.setId(2L);
 
-        roomType.getPictures().addAll(List.of(p1,
-                p2));
+        roomType.getPictures().addAll(List.of(p1, p2));
 
-        service.removeImages(roomType,
-                List.of(1L));
+        service.removeImages(roomType, List.of(1L));
 
-        assertEquals(1,
-                roomType.getPictures().size());
-        assertEquals(2L,
-                roomType.getPictures().get(0).getId());
+        assertEquals(1, roomType.getPictures().size());
+        assertEquals(2L, roomType.getPictures().get(0).getId());
+    }
+
+    @Test
+    void shouldThrow_whenNotFound() {
+        when(roomTypePictureRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> service.findById(99L));
     }
 }

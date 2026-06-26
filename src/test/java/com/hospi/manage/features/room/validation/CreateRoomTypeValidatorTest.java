@@ -4,14 +4,13 @@ import com.hospi.manage.features.room.dto.request.RoomTypeCreateForm;
 import com.hospi.manage.features.room.enums.RoomCategory;
 import com.hospi.manage.features.room.enums.RoomTier;
 import com.hospi.manage.features.room.repository.RoomTypeRepository;
-import com.hospi.manage.features.room.validation.CreateRoomTypeValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 
@@ -21,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class CreateRoomTypeValidatorTest {
 
     @Mock
@@ -36,8 +35,7 @@ class CreateRoomTypeValidatorTest {
     @BeforeEach
     void setup() {
         form = mock(RoomTypeCreateForm.class);
-        errors = new BeanPropertyBindingResult(form,
-                "form");
+        errors = new BeanPropertyBindingResult(form, "form");
     }
 
     @Test
@@ -58,8 +56,7 @@ class CreateRoomTypeValidatorTest {
                 any()))
                 .thenReturn(false);
 
-        validator.validate(form,
-                errors);
+        validator.validate(form, errors);
 
         assertFalse(errors.hasErrors());
     }
@@ -75,8 +72,7 @@ class CreateRoomTypeValidatorTest {
                 any()))
                 .thenReturn(true);
 
-        validator.validate(form,
-                errors);
+        validator.validate(form, errors);
 
         assertTrue(errors.hasFieldErrors("tier"));
     }
@@ -91,7 +87,7 @@ class CreateRoomTypeValidatorTest {
                 "coverImage",
                 "test.jpg",
                 "image/jpeg",
-                new byte[6 * 1024 * 1024] // 6MB
+                new byte[6 * 1024 * 1024]
         );
         when(form.coverImage()).thenReturn(file);
 
@@ -99,8 +95,7 @@ class CreateRoomTypeValidatorTest {
                 any()))
                 .thenReturn(false);
 
-        validator.validate(form,
-                errors);
+        validator.validate(form, errors);
 
         assertTrue(errors.hasFieldErrors("coverImage"));
     }
@@ -123,8 +118,7 @@ class CreateRoomTypeValidatorTest {
                 any()))
                 .thenReturn(false);
 
-        validator.validate(form,
-                errors);
+        validator.validate(form, errors);
 
         assertTrue(errors.hasFieldErrors("coverImage"));
     }
