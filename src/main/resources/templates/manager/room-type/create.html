@@ -78,7 +78,7 @@
             <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-2 xl:grid-cols-3">
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium">Room Category <span class="text-danger">*</span></label>
-                    <div th:replace="~{fragments/form-error :: error('category')"></div>
+                    <div th:replace="~{fragments/form-error :: error('category')}"></div>
                     <select th:field="*{category}"
                              th:classappend="${#fields.hasErrors('category')} ? 'input-error' : ''"
                              class="input">
@@ -90,7 +90,7 @@
 
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium">Room Tier <span class="text-danger">*</span></label>
-                    <div th:replace="~{fragments/form-error :: error('tier')"></div>
+                    <div th:replace="~{fragments/form-error :: error('tier')}"></div>
                     <select th:field="*{tier}"
                             th:classappend="${#fields.hasErrors('tier')} ? 'input-error' : ''"
                             class="input">
@@ -102,7 +102,7 @@
 
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium">Bed Type <span class="text-danger">*</span></label>
-                    <div th:replace="~{fragments/form-error :: error('bedType')"></div>
+                    <div th:replace="~{fragments/form-error :: error('bedType')}"></div>
                     <select th:field="*{bedType}"
                             th:classappend="${#fields.hasErrors('bedType')} ? 'input-error' : ''"
                             class="input">
@@ -127,7 +127,7 @@
             <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-3">
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium">Base Price <span class="text-danger">*</span></label>
-                    <div th:replace="~{fragments/form-error :: error('basePrice')"></div>
+                    <div th:replace="~{fragments/form-error :: error('basePrice')}"></div>
                     <input type="number" min="0" step="0.01"
                            th:field="*{basePrice}" placeholder="320"
                            th:classappend="${#fields.hasErrors('basePrice')} ? 'input-error' : ''"
@@ -135,7 +135,7 @@
                 </div>
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium">Area (m²) <span class="text-danger">*</span></label>
-                    <div th:replace="~{fragments/form-error :: error('area')"></div>
+                    <div th:replace="~{fragments/form-error :: error('area')}"></div>
                     <input type="number" min="0"
                            th:field="*{area}" placeholder="48"
                            th:classappend="${#fields.hasErrors('area')} ? 'input-error' : ''"
@@ -143,7 +143,7 @@
                 </div>
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium">Max Occupancy <span class="text-danger">*</span></label>
-                    <div th:replace="~{fragments/form-error :: error('maxOccupancy')"></div>
+                    <div th:replace="~{fragments/form-error :: error('maxOccupancy')}"></div>
                     <input type="number" min="1"
                            th:field="*{maxOccupancy}" placeholder="2"
                            th:classappend="${#fields.hasErrors('maxOccupancy')} ? 'input-error' : ''"
@@ -165,7 +165,7 @@
             <div class="flex flex-col gap-6 p-6">
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium">Description <span class="text-danger">*</span></label>
-                    <div th:replace="~{fragments/form-error :: error('description')"></div>
+                    <div th:replace="~{fragments/form-error :: error('description')}"></div>
                     <textarea th:field="*{description}" rows="4"
                               placeholder="Spacious luxury suite with private balcony and premium amenities..."
                               th:classappend="${#fields.hasErrors('description')} ? 'input-error' : ''"
@@ -174,7 +174,7 @@
 
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium">Features <span class="text-danger">*</span></label>
-                    <div th:replace="~{fragments/form-error :: error('features')"></div>
+                    <div th:replace="~{fragments/form-error :: error('features')}"></div>
                     <textarea th:field="*{features}" rows="4"
                               placeholder="WiFi, Smart TV, Balcony, Mini Bar, Bathtub..."
                               th:classappend="${#fields.hasErrors('features')} ? 'input-error' : ''"
@@ -198,7 +198,7 @@
 
             <div class="p-5">
 
-                <div th:replace="~{fragments/form-error :: error('coverImage')"></div>
+                <div th:replace="~{fragments/form-error :: error('coverImage')}"></div>
 
                 <div x-data="imageUploader()"
                      class="space-y-4">
