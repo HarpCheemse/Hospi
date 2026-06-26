@@ -9,9 +9,9 @@ import com.hospi.manage.features.room.enums.RoomCategory;
 import com.hospi.manage.features.room.enums.RoomTier;
 import com.hospi.manage.features.room.repository.RoomRepository;
 import com.hospi.manage.features.room.repository.RoomTypeRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -30,13 +30,16 @@ class RoomTypeServiceTest {
     private RoomTypeRepository roomTypeRepository;
 
     @Mock
-    private RoomTypePictureService roomTypePictureService;
-
-    @Mock
     private RoomRepository roomRepository;
 
-    @InjectMocks
+    private RoomTypePictureService roomTypePictureService;
     private RoomTypeService service;
+
+    @BeforeEach
+    void setUp() {
+        roomTypePictureService = mock(RoomTypePictureService.class);
+        service = new RoomTypeService(roomTypeRepository, roomTypePictureService, roomRepository);
+    }
 
     @Test
     void shouldSave_whenValidForm() throws Exception {
