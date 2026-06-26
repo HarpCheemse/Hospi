@@ -169,6 +169,9 @@ public class EditRoomTypeValidator {
     }
 
     private void validatePrice(RoomTypeEditForm form, Errors errors) {
+        if (form.basePrice() == null || errors.hasFieldErrors("basePrice")) {
+            return;
+        }
         if (form.basePrice().scale() > 2) {
             errors.rejectValue("basePrice",
                     "invalid",
