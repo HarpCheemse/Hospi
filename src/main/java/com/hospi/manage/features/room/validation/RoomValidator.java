@@ -49,6 +49,11 @@ public class RoomValidator {
      * @param errors binding result to populate with validation failures
      */
     public void validateCreate(RoomCreateForm form, Errors errors) {
+        if (form.floor() == null || errors.hasFieldErrors("floor")
+                || form.numberOfRooms() == null || errors.hasFieldErrors("numberOfRooms")) {
+            return;
+        }
+
         Integer highest =
                 roomRepository.findHighestRoomNumberByFloor(form.floor());
 
