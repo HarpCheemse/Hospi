@@ -58,9 +58,6 @@ public class Hotel {
     @Enumerated(EnumType.STRING)
     private HotelStatus status;
 
-    @Column(name = "term_of_service", columnDefinition = "TEXT")
-    private String termOfService;
-
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

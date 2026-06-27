@@ -48,9 +48,5 @@ public class HotelForm {
     @NotNull(message = "Status is required")
     private HotelStatus status;
 
-    @NotNull(message = "Term of service is required")
-    @Size(max = 5000, message = "Terms of service must not exceed 5000 characters")
-    private String termOfService;
-
     private List<HotelPicture> pictures;
 }

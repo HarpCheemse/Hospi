@@ -52,17 +52,13 @@
           <h3 class="text-xl font-bold font-display text-primary flex items-center gap-2 mb-4">
             <span>📝</span> Terms of Service
           </h3>
-          <div class="prose max-w-none text-sm text-muted-foreground leading-relaxed space-y-4">
-            <!-- Render dynamic terms if present -->
-            <p th:if="${hotel != null and hotel.termOfService != null and !#strings.isEmpty(hotel.termOfService)}"
-               th:text="${hotel.termOfService}"></p>
-               
-            <!-- Fallback terms of service -->
-            <div th:if="${hotel == null or hotel.termOfService == null or #strings.isEmpty(hotel.termOfService)}" class="space-y-3">
-              <p>Guests must present a valid government-issued ID and verification details at the time of check-in.</p>
-              <p>All reservations are subject to verification. System reserves the right to cancel bookings if details cannot be verified.</p>
-              <p>Guests are responsible for any damage caused to hotel property during their stay.</p>
-            </div>
+          <div class="text-sm text-muted-foreground leading-relaxed space-y-3">
+            <p>Guests must present a valid government-issued ID and credit card at check-in.</p>
+            <p>All reservations are subject to verification. The hotel reserves the right to cancel bookings if guest details cannot be verified.</p>
+            <p>Guests are responsible for any damage caused to hotel property during their stay.</p>
+            <p>Smoking is prohibited in all guest rooms. A cleaning fee will be charged for violations.</p>
+            <p>Pets are not allowed on hotel premises unless otherwise specified in the booking.</p>
+            <p>The hotel is not liable for lost or stolen personal belongings.</p>
           </div>
         </div>
 

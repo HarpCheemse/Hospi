@@ -7,8 +7,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Controller for managing hotel details (name, address, images).
@@ -54,15 +56,17 @@ public class HotelDetailController {
     }
 
     /**
-     * Update hotel details and optionally replace banner images, then redirect to
-     * the details page.
+     * Update hotel details and manage images (cover, gallery additions, removals).
      */
     @PostMapping("/edit")
     public String updateDetail(@ModelAttribute HotelForm form,
-                               @RequestParam(value = "images", required = false) MultipartFile images)
+                               @RequestParam(value = "coverImage", required = false) MultipartFile coverImage,
+                               @RequestParam(value = "newImages", required = false) MultipartFile[] newImages,
+                               @RequestParam(value = "removeImageIds", required = false) List<Long> removeImageIds,
+                               RedirectAttributes redirect)
             throws IOException {
-        hotelService.update(form,
-                images);
+        hotelService.update(form, coverImage, newImages, removeImageIds);
+        redirect.addFlashAttribute(Attributes.SUCCESS, "Hotel details updated.");
         return "redirect:/manager/details";
     }
 }

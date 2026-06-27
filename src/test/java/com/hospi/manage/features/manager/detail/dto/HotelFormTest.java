@@ -35,7 +35,6 @@ class HotelFormTest {
         form.setCheckOutTime(LocalTime.of(11, 0));
         form.setFeatures("Pool, Gym, Spa");
         form.setStatus(HotelStatus.ACTIVE);
-        form.setTermOfService("Standard terms apply");
         return form;
     }
 
@@ -116,12 +115,4 @@ class HotelFormTest {
         assertEquals("status", violations.iterator().next().getPropertyPath().toString());
     }
 
-    @Test
-    void shouldFail_whenTermOfServiceNull() {
-        var form = validForm();
-        form.setTermOfService(null);
-        Set<ConstraintViolation<HotelForm>> violations = validator.validate(form);
-        assertFalse(violations.isEmpty());
-        assertEquals("termOfService", violations.iterator().next().getPropertyPath().toString());
-    }
 }
