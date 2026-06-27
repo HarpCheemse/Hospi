@@ -64,7 +64,6 @@ class HotelServiceTest {
         hotel.setCheckOutTime(LocalTime.of(11, 0));
         hotel.setFeatures("WiFi, Pool");
         hotel.setStatus(HotelStatus.ACTIVE);
-        hotel.setTermOfService("Terms here");
         when(hotelRepository.findById(HotelConstants.HOTEL_ID)).thenReturn(Optional.of(hotel));
 
         HotelService service = new HotelService(hotelRepository);
@@ -79,7 +78,6 @@ class HotelServiceTest {
         assertEquals(LocalTime.of(11, 0), form.getCheckOutTime());
         assertEquals("WiFi, Pool", form.getFeatures());
         assertEquals(HotelStatus.ACTIVE, form.getStatus());
-        assertEquals("Terms here", form.getTermOfService());
     }
 
     @Test
@@ -99,7 +97,6 @@ class HotelServiceTest {
         form.setCheckOutTime(LocalTime.of(12, 0));
         form.setFeatures("Updated features");
         form.setStatus(HotelStatus.CLOSED);
-        form.setTermOfService("Updated terms");
 
         HotelService service = new HotelService(hotelRepository);
         service.update(form, null);
@@ -114,7 +111,6 @@ class HotelServiceTest {
         assertEquals(LocalTime.of(12, 0), hotel.getCheckOutTime());
         assertEquals("Updated features", hotel.getFeatures());
         assertEquals(HotelStatus.CLOSED, hotel.getStatus());
-        assertEquals("Updated terms", hotel.getTermOfService());
     }
 
     @Test

@@ -42,7 +42,6 @@ public class HotelService {
         form.setCheckOutTime(hotel.getCheckOutTime());
         form.setFeatures(hotel.getFeatures());
         form.setStatus(hotel.getStatus());
-        form.setTermOfService(hotel.getTermOfService());
 
         return form;
     }
@@ -62,7 +61,6 @@ public class HotelService {
         hotel.setCheckOutTime(form.getCheckOutTime());
         hotel.setFeatures(form.getFeatures());
         hotel.setStatus(form.getStatus());
-        hotel.setTermOfService(form.getTermOfService());
 
         if (images != null && !images.isEmpty()) {
             byte[] compressed = ImageUtils.compressWebP(images,

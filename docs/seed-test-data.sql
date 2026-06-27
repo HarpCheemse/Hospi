@@ -50,7 +50,7 @@ VALUES ('Alice Admin', 'admin@gmail.com', '123', '+84 901 000 001', 'ADMIN', 'AC
 -- ────────────────────────────────────────────────────────────────────────────
 INSERT INTO hotels (name, description, address, phone, email,
                     average_rating, review_count, features, check_in_time, check_out_time,
-                    floor_count, status, term_of_service, created_at, updated_at)
+                    floor_count, status, created_at, updated_at)
 VALUES ('Hospi Grand Hotel',
         'A modern boutique hotel in the heart of the city, offering luxurious rooms and exceptional service.',
         '123 Nguyen Hue Street, District 1, Ho Chi Minh City',
@@ -60,7 +60,6 @@ VALUES ('Hospi Grand Hotel',
         'Free WiFi, Pool, Gym, Restaurant, Bar, 24/7 Room Service, Parking, Airport Shuttle',
         '14:00', '12:00',
         10, 'ACTIVE',
-        'Check-in from 14:00. Check-out before 12:00. Photo ID required upon check-in.',
         NOW(), NOW());
 
 -- ────────────────────────────────────────────────────────────────────────────
