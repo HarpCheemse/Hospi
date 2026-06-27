@@ -10,12 +10,13 @@ public record SystemConfigForm(
         // Financial
         @NotNull(message = "Tax rate is required")
         @DecimalMin(value = "0.00", message = "Tax rate cannot be negative")
+        @DecimalMax(value = "100.00", message = "Tax rate cannot exceed 100%")
         @Digits(integer = 3, fraction = 2,
                 message = "Tax rate must have up to 3 digits and 2 decimal places")
         BigDecimal taxRate,
 
         @NotNull(message = "Default deposit percentage is required")
-        @DecimalMin(value = "0.00", message = "Default deposit percentage cannot be negative")
+        @DecimalMin(value = "0.01", message = "Default deposit percentage must be greater than 0")
         @DecimalMax(value = "100.00", message = "Default deposit percentage cannot be larger than 100%")
         @Digits(integer = 3, fraction = 2,
                 message = "Default deposit percentage must have up to 3 digits and 2 decimal places")
@@ -44,10 +45,12 @@ public record SystemConfigForm(
 
         @NotNull(message = "Maximum booking days is required")
         @Min(value = 1, message = "Maximum booking days must be at least 1")
+        @Max(value = 30, message = "Maximum booking days cannot exceed 30")
         Integer maximumBookingDays,
 
         @NotNull(message = "Maximum rooms per booking is required")
         @Min(value = 1, message = "Maximum rooms per booking must be at least 1")
+        @Max(value = 20, message = "Maximum rooms per booking cannot exceed 20")
         Integer maximumRoomPerBook,
 
         // Refund Settings
