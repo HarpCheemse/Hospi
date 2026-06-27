@@ -1,7 +1,7 @@
 package com.hospi.manage.features.receptionist.service;
 
-import com.hospi.manage.features.admin.config.entity.SystemConfig;
-import com.hospi.manage.features.admin.config.service.SystemConfigService;
+import com.hospi.manage.features.config.entity.SystemConfig;
+import com.hospi.manage.features.config.service.SystemConfigService;
 import com.hospi.manage.features.payment.entity.Payment;
 import com.hospi.manage.features.payment.enums.PaymentMethod;
 import com.hospi.manage.features.payment.repository.PaymentRepository;
@@ -11,6 +11,7 @@ import com.hospi.manage.features.reservation.entity.ReservationDetail;
 import com.hospi.manage.features.reservation.enums.BookingSource;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
+import com.hospi.manage.features.reservation.service.CheckoutService;
 import com.hospi.manage.features.room.entity.RoomType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,7 +46,9 @@ class CheckoutServiceTest {
 
     @BeforeEach
     void setUp() {
-        checkoutService = new CheckoutService(reservationRepository, paymentRepository, systemConfigService);
+        checkoutService = new CheckoutService(reservationRepository,
+                paymentRepository,
+                systemConfigService);
 
         config = new SystemConfig();
         config.setDefaultDepositPercentage(BigDecimal.valueOf(20));
@@ -66,8 +69,12 @@ class CheckoutServiceTest {
         r.setId(1L);
         r.setSource(BookingSource.OFFLINE);
         r.setTotalPrice(BigDecimal.valueOf(1000));
-        r.setCheckInAt(LocalDate.of(2026, 6, 15));
-        r.setCheckOutAt(LocalDate.of(2026, 6, 18));
+        r.setCheckInAt(LocalDate.of(2026,
+                6,
+                15));
+        r.setCheckOutAt(LocalDate.of(2026,
+                6,
+                18));
         r.setStatus(ReservationStatus.CHECKED_IN);
 
         ReservationDetail detail = new ReservationDetail();
@@ -79,16 +86,25 @@ class CheckoutServiceTest {
 
         when(paymentRepository.findAllByReservationId(1L)).thenReturn(List.of());
 
-        CheckoutCalculation calc = checkoutService.calculate(r, null, 2);
+        CheckoutCalculation calc = checkoutService.calculate(r,
+                null,
+                2);
 
-        assertEquals(BigDecimal.valueOf(1000), calc.totalPrice());
-        assertEquals(BigDecimal.ZERO, calc.depositPaid());
-        assertEquals(BigDecimal.valueOf(1000), calc.remainingBalance());
-        assertEquals(BigDecimal.ZERO, calc.lateCheckoutFee());
-        assertEquals(BigDecimal.ZERO, calc.extraGuestFee());
-        assertEquals(BigDecimal.valueOf(1000), calc.totalDue());
+        assertEquals(BigDecimal.valueOf(1000),
+                calc.totalPrice());
+        assertEquals(BigDecimal.ZERO,
+                calc.depositPaid());
+        assertEquals(BigDecimal.valueOf(1000),
+                calc.remainingBalance());
+        assertEquals(BigDecimal.ZERO,
+                calc.lateCheckoutFee());
+        assertEquals(BigDecimal.ZERO,
+                calc.extraGuestFee());
+        assertEquals(BigDecimal.valueOf(1000),
+                calc.totalDue());
         assertFalse(calc.isLate());
-        assertEquals(0, calc.extraGuestCount());
+        assertEquals(0,
+                calc.extraGuestCount());
     }
 
     @Test
@@ -99,8 +115,12 @@ class CheckoutServiceTest {
         r.setId(2L);
         r.setSource(BookingSource.OFFLINE);
         r.setTotalPrice(BigDecimal.valueOf(1000));
-        r.setCheckInAt(LocalDate.of(2026, 6, 15));
-        r.setCheckOutAt(LocalDate.of(2026, 6, 18));
+        r.setCheckInAt(LocalDate.of(2026,
+                6,
+                15));
+        r.setCheckOutAt(LocalDate.of(2026,
+                6,
+                18));
         r.setStatus(ReservationStatus.CHECKED_IN);
 
         ReservationDetail detail = new ReservationDetail();
@@ -112,16 +132,27 @@ class CheckoutServiceTest {
 
         when(paymentRepository.findAllByReservationId(2L)).thenReturn(List.of());
 
-        LocalDateTime lateTime = LocalDateTime.of(LocalDate.of(2026, 6, 18), LocalTime.of(14, 0));
+        LocalDateTime lateTime = LocalDateTime.of(LocalDate.of(2026,
+                        6,
+                        18),
+                LocalTime.of(14,
+                        0));
 
-        CheckoutCalculation calc = checkoutService.calculate(r, lateTime, 4);
+        CheckoutCalculation calc = checkoutService.calculate(r,
+                lateTime,
+                4);
 
-        assertEquals(BigDecimal.ZERO, calc.depositPaid());
+        assertEquals(BigDecimal.ZERO,
+                calc.depositPaid());
         assertTrue(calc.isLate());
-        assertEquals(BigDecimal.valueOf(50), calc.lateCheckoutFee());
-        assertEquals(2, calc.extraGuestCount());
-        assertEquals(BigDecimal.valueOf(50), calc.extraGuestFee());
-        assertEquals(BigDecimal.valueOf(1100), calc.totalDue());
+        assertEquals(BigDecimal.valueOf(50),
+                calc.lateCheckoutFee());
+        assertEquals(2,
+                calc.extraGuestCount());
+        assertEquals(BigDecimal.valueOf(50),
+                calc.extraGuestFee());
+        assertEquals(BigDecimal.valueOf(1100),
+                calc.totalDue());
     }
 
     @Test
@@ -132,8 +163,12 @@ class CheckoutServiceTest {
         r.setId(3L);
         r.setSource(BookingSource.ONLINE);
         r.setTotalPrice(BigDecimal.valueOf(1000));
-        r.setCheckInAt(LocalDate.of(2026, 6, 15));
-        r.setCheckOutAt(LocalDate.of(2026, 6, 18));
+        r.setCheckInAt(LocalDate.of(2026,
+                6,
+                15));
+        r.setCheckOutAt(LocalDate.of(2026,
+                6,
+                18));
         r.setStatus(ReservationStatus.CHECKED_IN);
 
         ReservationDetail detail = new ReservationDetail();
@@ -147,12 +182,18 @@ class CheckoutServiceTest {
         depositPayment.setAmount(BigDecimal.valueOf(200));
         when(paymentRepository.findAllByReservationId(3L)).thenReturn(List.of(depositPayment));
 
-        CheckoutCalculation calc = checkoutService.calculate(r, null, 2);
+        CheckoutCalculation calc = checkoutService.calculate(r,
+                null,
+                2);
 
-        assertEquals(BigDecimal.valueOf(200), calc.depositPaid());
-        assertEquals(BigDecimal.valueOf(800), calc.remainingBalance());
-        assertEquals(0, calc.extraGuestCount());
-        assertEquals(BigDecimal.valueOf(800), calc.totalDue());
+        assertEquals(BigDecimal.valueOf(200),
+                calc.depositPaid());
+        assertEquals(BigDecimal.valueOf(800),
+                calc.remainingBalance());
+        assertEquals(0,
+                calc.extraGuestCount());
+        assertEquals(BigDecimal.valueOf(800),
+                calc.totalDue());
     }
 
     @Test
@@ -167,19 +208,34 @@ class CheckoutServiceTest {
         when(reservationRepository.save(any())).thenReturn(r);
 
         CheckoutCalculation calc = new CheckoutCalculation(
-                BigDecimal.valueOf(1000), BigDecimal.ZERO, BigDecimal.valueOf(1000),
-                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.valueOf(1000),
-                false, 0
+                BigDecimal.valueOf(1000),
+                BigDecimal.ZERO,
+                BigDecimal.valueOf(1000),
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.valueOf(1000),
+                false,
+                0
         );
 
-        Reservation result = checkoutService.complete(1L, calc, BigDecimal.valueOf(1000),
-                PaymentMethod.CASH, "receptionist", null, false, null);
+        Reservation result = checkoutService.complete(1L,
+                calc,
+                BigDecimal.valueOf(1000),
+                PaymentMethod.CASH,
+                "receptionist",
+                null,
+                false,
+                null);
 
-        assertEquals(ReservationStatus.CHECKED_OUT, result.getStatus());
+        assertEquals(ReservationStatus.CHECKED_OUT,
+                result.getStatus());
         assertNotNull(result.getCheckedOutAt());
-        assertEquals("receptionist", result.getCheckedOutBy());
-        assertEquals(BigDecimal.ZERO, result.getLateCheckoutFeeApplied());
-        assertEquals(BigDecimal.ZERO, result.getExtraGuestFeeApplied());
+        assertEquals("receptionist",
+                result.getCheckedOutBy());
+        assertEquals(BigDecimal.ZERO,
+                result.getLateCheckoutFeeApplied());
+        assertEquals(BigDecimal.ZERO,
+                result.getExtraGuestFeeApplied());
         verify(paymentRepository).save(any());
     }
 
@@ -194,14 +250,25 @@ class CheckoutServiceTest {
         when(reservationRepository.findById(2L)).thenReturn(Optional.of(r));
 
         CheckoutCalculation calc = new CheckoutCalculation(
-                BigDecimal.valueOf(1000), BigDecimal.ZERO, BigDecimal.valueOf(1000),
-                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.valueOf(1000),
-                false, 0
+                BigDecimal.valueOf(1000),
+                BigDecimal.ZERO,
+                BigDecimal.valueOf(1000),
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.valueOf(1000),
+                false,
+                0
         );
 
         assertThrows(IllegalArgumentException.class,
-                () -> checkoutService.complete(2L, calc, BigDecimal.valueOf(500),
-                        PaymentMethod.CASH, "receptionist", null, false, null));
+                () -> checkoutService.complete(2L,
+                        calc,
+                        BigDecimal.valueOf(500),
+                        PaymentMethod.CASH,
+                        "receptionist",
+                        null,
+                        false,
+                        null));
     }
 
     @Test
@@ -216,16 +283,29 @@ class CheckoutServiceTest {
         when(reservationRepository.save(any())).thenReturn(r);
 
         CheckoutCalculation calc = new CheckoutCalculation(
-                BigDecimal.valueOf(1000), BigDecimal.valueOf(200), BigDecimal.valueOf(800),
-                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.valueOf(800),
-                false, 0
+                BigDecimal.valueOf(1000),
+                BigDecimal.valueOf(200),
+                BigDecimal.valueOf(800),
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.valueOf(800),
+                false,
+                0
         );
 
-        Reservation result = checkoutService.complete(3L, calc, BigDecimal.valueOf(800),
-                PaymentMethod.CARD, "receptionist", null, false, null);
+        Reservation result = checkoutService.complete(3L,
+                calc,
+                BigDecimal.valueOf(800),
+                PaymentMethod.CARD,
+                "receptionist",
+                null,
+                false,
+                null);
 
-        assertEquals(ReservationStatus.CHECKED_OUT, result.getStatus());
+        assertEquals(ReservationStatus.CHECKED_OUT,
+                result.getStatus());
         assertNotNull(result.getCheckedInAt());
-        assertEquals("receptionist", result.getCheckedInBy());
+        assertEquals("receptionist",
+                result.getCheckedInBy());
     }
 }

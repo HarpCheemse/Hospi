@@ -1,6 +1,6 @@
-package com.hospi.manage.features.receptionist.service;
+package com.hospi.manage.features.reservation.service;
 
-import com.hospi.manage.features.admin.config.service.SystemConfigService;
+import com.hospi.manage.features.config.service.SystemConfigService;
 import com.hospi.manage.features.payment.entity.Payment;
 import com.hospi.manage.features.payment.enums.PaymentMethod;
 import com.hospi.manage.features.payment.repository.PaymentRepository;
@@ -31,7 +31,8 @@ public class CheckoutService {
         this.systemConfigService = systemConfigService;
     }
 
-    public CheckoutCalculation calculate(Reservation reservation, LocalDateTime actualCheckoutTime, int registeredGuestCount) {
+    public CheckoutCalculation calculate(Reservation reservation, LocalDateTime actualCheckoutTime,
+                                         int registeredGuestCount) {
         var config = systemConfigService.getConfig();
         BigDecimal totalPrice = reservation.getTotalPrice();
 
@@ -40,7 +41,8 @@ public class CheckoutService {
         if (existingPayments != null && !existingPayments.isEmpty()) {
             depositPaid = existingPayments.stream()
                     .map(Payment::getAmount)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+                    .reduce(BigDecimal.ZERO,
+                            BigDecimal::add);
         }
 
         BigDecimal remainingBalance = totalPrice.subtract(depositPaid);
@@ -51,8 +53,10 @@ public class CheckoutService {
         boolean isLate = false;
         BigDecimal lateCheckoutFee = BigDecimal.ZERO;
         if (actualCheckoutTime != null) {
-            LocalTime standardCheckoutTime = LocalTime.of(11, 0);
-            LocalDateTime standardCheckout = LocalDateTime.of(reservation.getCheckOutAt(), standardCheckoutTime);
+            LocalTime standardCheckoutTime = LocalTime.of(11,
+                    0);
+            LocalDateTime standardCheckout = LocalDateTime.of(reservation.getCheckOutAt(),
+                    standardCheckoutTime);
             isLate = actualCheckoutTime.isAfter(standardCheckout);
             if (isLate) {
                 lateCheckoutFee = config.getLateCheckoutFee();
@@ -62,22 +66,28 @@ public class CheckoutService {
         int totalRoomCapacity = reservation.getDetails().stream()
                 .mapToInt(d -> d.getRoomType().getMaxOccupancy() * d.getRoomCount())
                 .sum();
-        int extraGuestCount = Math.max(0, registeredGuestCount - totalRoomCapacity);
+        int extraGuestCount = Math.max(0,
+                registeredGuestCount - totalRoomCapacity);
         BigDecimal extraGuestFee = config.getExtraGuestFee().multiply(BigDecimal.valueOf(extraGuestCount));
 
         BigDecimal totalDue = remainingBalance.add(lateCheckoutFee).add(extraGuestFee);
 
         return new CheckoutCalculation(
-                totalPrice, depositPaid, remainingBalance,
-                lateCheckoutFee, extraGuestFee, totalDue,
-                isLate, extraGuestCount
+                totalPrice,
+                depositPaid,
+                remainingBalance,
+                lateCheckoutFee,
+                extraGuestFee,
+                totalDue,
+                isLate,
+                extraGuestCount
         );
     }
 
     @Transactional
     public Reservation complete(Long reservationId, CheckoutCalculation calc, BigDecimal amountReceived,
-                                 PaymentMethod method, String principal, LocalDateTime actualCheckoutTime,
-                                 boolean applyLateFee, BigDecimal extraGuestFeeOverride) {
+                                PaymentMethod method, String principal, LocalDateTime actualCheckoutTime,
+                                boolean applyLateFee, BigDecimal extraGuestFeeOverride) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
 

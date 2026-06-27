@@ -2,7 +2,7 @@ package com.hospi.manage.features.notification.controller;
 
 import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.core.security.session.AccountPrincipal;
-import com.hospi.manage.features.admin.account.enums.Role;
+import com.hospi.manage.features.account.enums.Role;
 import com.hospi.manage.features.notification.dto.NotificationDTO;
 import com.hospi.manage.features.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;

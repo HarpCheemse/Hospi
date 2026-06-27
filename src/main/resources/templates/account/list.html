@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Account Management | Hospi</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js" defer></script>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<body class="staff-layout">
+
+    <!-- SIDEBAR -->
+    <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+
+    <!-- MAIN -->
+    <main class="staff-page">
+
+        <!-- TOAST -->
+        <div th:replace="~{fragments/components/toast :: toast}"></div>
+
+        <!-- HEADER -->
+        <header class="staff-page-header">
+
+            <section>
+
+                <h1 class="staff-page-title">
+                    Account Management
+                </h1>
+
+                <p class="page-description">
+                    Review and manage user accounts across the system.
+                </p>
+
+            </section>
+
+            <a th:href="@{/admin/accounts/create}"
+               class="btn btn-primary btn-lg">
+                Create Account
+            </a>
+
+        </header>
+
+        <!-- FILTERS -->
+        <section class="card">
+
+            <div class="border-b border-border p-5">
+
+                <h2 class="text-lg font-semibold">
+                    Search & Filters
+                </h2>
+
+            </div>
+
+            <div class="grid grid-cols-3 gap-5 p-5">
+
+                <div>
+
+                    <label class="mb-2 block text-sm font-medium">
+                        Search
+                    </label>
+
+                    <input type="text"
+                           placeholder="Search by name or email..."
+                           class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+
+                </div>
+
+                <div>
+
+                    <label class="mb-2 block text-sm font-medium">
+                        Role
+                    </label>
+
+                    <select
+                            class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+
+                        <option>All Roles</option>
+                        <option>Admin</option>
+                        <option>Manager</option>
+                        <option>Receptionist</option>
+                        <option>Housekeeper</option>
+                        <option>Accountant</option>
+                        <option>Customer</option>
+
+                    </select>
+
+                </div>
+
+                <div>
+
+                    <label class="mb-2 block text-sm font-medium">
+                        Status
+                    </label>
+
+                    <select
+                            class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+
+                        <option>All Statuses</option>
+                        <option>Active</option>
+                        <option>Disabled</option>
+                        <option>Locked</option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ACCOUNTS -->
+        <section class="overflow-hidden card">
+
+            <div class="border-b border-border p-5">
+
+                <h2 class="text-lg font-semibold">
+                    Accounts
+                </h2>
+
+            </div>
+
+            <div class="overflow-x-auto">
+
+                <table class="w-full">
+
+                    <thead class="bg-muted">
+
+                    <tr>
+
+                        <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">
+                            Account
+                        </th>
+
+                        <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">
+                            Role
+                        </th>
+
+                        <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">
+                            Status
+                        </th>
+
+                        <th class="px-5 py-4 text-right text-sm font-medium text-muted-foreground">
+                            Actions
+                        </th>
+
+                    </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    <tr th:each="account : ${accounts}"
+                        class="border-t border-border">
+
+                        <td class="px-5 py-4">
+
+                            <p class="font-medium"
+                               th:text="${account.fullName()}">
+                                John Smith
+                            </p>
+
+                            <p class="text-sm text-muted-foreground max-w-[200px] truncate"
+                               th:text="${account.email()}">
+                                john@hospi.com
+                            </p>
+
+                        </td>
+
+                        <td class="px-5 py-4"
+                            th:text="${account.role()}">
+                            MANAGER
+                        </td>
+
+                        <td class="px-5 py-4">
+
+                            <span th:if="${account.status().name() == 'ACTIVE'}"
+                                  class="pill-success"
+                                  th:text="${account.status()}">
+                                ACTIVE
+                            </span>
+
+                            <span th:if="${account.status().name() == 'DISABLED'}"
+                                  class="pill-danger"
+                                  th:text="${account.status()}">
+                                DISABLED
+                            </span>
+
+                            <span th:if="${account.status().name() == 'LOCKED'}"
+                                  class="pill-warning"
+                                  th:text="${account.status()}">
+                                LOCKED
+                            </span>
+
+                        </td>
+
+                        <td class="px-5 py-4 text-right">
+
+                            <a th:href="@{/admin/accounts/{id}(id=${account.id()})}"
+                               class="btn btn-secondary btn-sm">
+                                View
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(accounts)}">
+
+                        <td colspan="4"
+                            class="px-5 py-10 text-center text-muted-foreground">
+                            No accounts found.
+                        </td>
+
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+</html>

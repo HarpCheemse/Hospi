@@ -1,6 +1,7 @@
 package com.hospi.manage.features.auth.controller;
 
-import com.hospi.manage.features.admin.account.service.AccountService;
+import com.hospi.manage.features.account.service.AccountService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,12 +13,9 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @Controller
 @RequestMapping("/login")
+@RequiredArgsConstructor
 public class LoginController {
     private final AccountService accountService;
-
-    LoginController(AccountService accountService) {
-        this.accountService = accountService;
-    }
 
     /**
      * Show the login page. Display error or logout message if present in request

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Edit Account | Hospi</title>
+
+    <link rel="stylesheet"
+          th:href="@{/css/app.css}">
+</head>
+
+<body class="staff-layout">
+
+    <!-- SIDEBAR -->
+    <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+
+    <!-- MAIN -->
+    <main class="staff-page">
+
+        <div th:replace="~{fragments/components/toast :: toast}"></div>
+
+        <!-- HEADER -->
+        <header class="staff-page-header">
+
+            <section>
+
+                <h1 class="staff-page-title">
+                    Edit Account
+                </h1>
+
+                <p class="page-description">
+                    Update account information and permissions.
+                </p>
+
+            </section>
+
+            <a th:href="@{'/admin/accounts/' + ${accountId}}"
+               class="btn btn-secondary btn-lg">
+                Cancel
+            </a>
+
+        </header>
+
+        <!-- FORM -->
+        <form th:action="@{'/admin/accounts/' + ${accountId} + '/edit'}"
+              th:object="${form}"
+              method="post"
+              class="flex flex-col gap-6"
+              novalidate>
+
+            <section class="card">
+
+                <div class="border-b border-border p-5">
+
+                    <h2 class="text-lg font-semibold">
+                        Account Information
+                    </h2>
+
+                </div>
+
+                <div class="grid grid-cols-2 gap-5 p-5">
+
+                    <!-- FULL NAME -->
+                    <div>
+
+                        <label class="mb-2 block text-sm font-medium">
+                            Full Name <span class="text-danger">*</span>
+                        </label>
+                        <input type="text"
+                               th:field="*{fullName}"
+                               class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+
+                        <p th:if="${#fields.hasErrors('fullName')}"
+                           th:errors="*{fullName}"
+                           class="mt-1 text-sm text-danger">
+                        </p>
+
+                    </div>
+
+                    <!-- EMAIL -->
+                    <div>
+
+                        <label class="mb-2 block text-sm font-medium">
+                            Email Address <span class="text-danger">*</span>
+                        </label>
+                        <input type="email"
+                               th:field="*{email}"
+                               class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+
+                        <p th:if="${#fields.hasErrors('email')}"
+                           th:errors="*{email}"
+                           class="mt-1 text-sm text-danger">
+                        </p>
+
+                    </div>
+
+                    <!-- PHONE -->
+                    <div>
+
+                        <label class="mb-2 block text-sm font-medium">
+                            Phone Number
+                        </label>
+
+                        <input type="text"
+                               th:field="*{phone}"
+                               class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+
+                        <p th:if="${#fields.hasErrors('phone')}"
+                           th:errors="*{phone}"
+                           class="mt-1 text-sm text-danger">
+                        </p>
+
+                    </div>
+
+                    <!-- ROLE -->
+                    <div>
+
+                        <label class="mb-2 block text-sm font-medium">
+                            Role <span class="text-danger">*</span>
+                        </label>
+                        <select th:field="*{role}"
+                                class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+
+                            <option value="">Select role</option>
+
+                            <option th:each="role : ${roles}"
+                                    th:value="${role}"
+                                    th:text="${role}">
+                            </option>
+
+                        </select>
+
+                        <p th:if="${#fields.hasErrors('role')}"
+                           th:errors="*{role}"
+                           class="mt-1 text-sm text-danger">
+                        </p>
+
+                    </div>
+
+                    <!-- STATUS -->
+                    <div>
+
+                        <label class="mb-2 block text-sm font-medium">
+                            Status <span class="text-danger">*</span>
+                        </label>
+                        <select th:field="*{status}"
+                                class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+
+                            <option value="">Select status</option>
+
+                            <option th:each="status : ${statuses}"
+                                    th:value="${status}"
+                                    th:text="${status}">
+                            </option>
+
+                        </select>
+
+                        <p th:if="${#fields.hasErrors('status')}"
+                           th:errors="*{status}"
+                           class="mt-1 text-sm text-danger">
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- ACTIONS -->
+            <div class="flex justify-end gap-3">
+
+                <a th:href="@{'/admin/accounts/' + ${accountId}}"
+                   class="btn btn-secondary btn-lg">
+                    Cancel
+                </a>
+
+                <button type="submit"
+                        class="btn btn-primary btn-lg">
+                    Save Changes
+                </button>
+
+            </div>
+
+        </form>
+
+    </main>
+
+</body>
+</html>

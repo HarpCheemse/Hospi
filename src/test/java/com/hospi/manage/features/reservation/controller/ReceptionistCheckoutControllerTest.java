@@ -1,19 +1,17 @@
 package com.hospi.manage.features.reservation.controller;
 
-import com.hospi.manage.features.admin.config.entity.SystemConfig;
-import com.hospi.manage.features.admin.config.service.SystemConfigService;
+import com.hospi.manage.features.config.entity.SystemConfig;
+import com.hospi.manage.features.config.service.SystemConfigService;
 import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.payment.entity.Payment;
 import com.hospi.manage.features.payment.repository.PaymentRepository;
-import com.hospi.manage.features.receptionist.dto.CheckoutCalculation;
-import com.hospi.manage.features.receptionist.dto.CheckoutForm;
-import com.hospi.manage.features.receptionist.service.CheckoutService;
 import com.hospi.manage.features.receptionist.controller.ReceptionistCheckoutController;
+import com.hospi.manage.features.receptionist.dto.CheckoutCalculation;
 import com.hospi.manage.features.reservation.entity.Reservation;
-import com.hospi.manage.features.reservation.entity.ReservationDetail;
 import com.hospi.manage.features.reservation.entity.StayingGuest;
 import com.hospi.manage.features.reservation.enums.BookingSource;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
+import com.hospi.manage.features.reservation.service.CheckoutService;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.reservation.service.StayingGuestService;
 import org.junit.jupiter.api.Test;
@@ -68,11 +66,19 @@ class ReceptionistCheckoutControllerTest {
         reservation.setGuestName("John Smith");
         reservation.setGuestEmail("john@hospi.com");
         reservation.setGuestPhone("+84 912 345 678");
-        reservation.setCheckInAt(LocalDate.of(2026, 6, 20));
-        reservation.setCheckOutAt(LocalDate.of(2026, 6, 26));
+        reservation.setCheckInAt(LocalDate.of(2026,
+                6,
+                20));
+        reservation.setCheckOutAt(LocalDate.of(2026,
+                6,
+                26));
         reservation.setSource(BookingSource.ONLINE);
         reservation.setTotalPrice(BigDecimal.valueOf(500));
-        reservation.setCheckedOutAt(LocalDateTime.of(2026, 6, 26, 11, 0));
+        reservation.setCheckedOutAt(LocalDateTime.of(2026,
+                6,
+                26,
+                11,
+                0));
         reservation.setCheckedOutBy("receptionist");
         reservation.setLateCheckoutFeeApplied(null);
         reservation.setExtraGuestFeeApplied(null);
@@ -84,11 +90,19 @@ class ReceptionistCheckoutControllerTest {
     void checkout_shouldRender() throws Exception {
         Reservation reservation = createReservation(ReservationStatus.CHECKED_IN);
         when(reservationService.findById(1L)).thenReturn(reservation);
-        when(stayingGuestService.getGuests(1L)).thenReturn(List.of(new StayingGuest(), new StayingGuest()));
-        when(checkoutService.calculate(any(), any(), anyInt())).thenReturn(
-                new CheckoutCalculation(BigDecimal.valueOf(500), BigDecimal.valueOf(200),
-                        BigDecimal.valueOf(300), BigDecimal.ZERO, BigDecimal.ZERO,
-                        BigDecimal.valueOf(300), false, 0));
+        when(stayingGuestService.getGuests(1L)).thenReturn(List.of(new StayingGuest(),
+                new StayingGuest()));
+        when(checkoutService.calculate(any(),
+                any(),
+                anyInt())).thenReturn(
+                new CheckoutCalculation(BigDecimal.valueOf(500),
+                        BigDecimal.valueOf(200),
+                        BigDecimal.valueOf(300),
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        BigDecimal.valueOf(300),
+                        false,
+                        0));
         SystemConfig config = new SystemConfig();
         config.setLateCheckoutFee(BigDecimal.valueOf(50));
         config.setExtraGuestFee(BigDecimal.valueOf(25));
@@ -118,20 +132,32 @@ class ReceptionistCheckoutControllerTest {
     void completeCheckout_shouldRedirect_onSuccess() throws Exception {
         Reservation reservation = createReservation(ReservationStatus.CHECKED_IN);
         when(reservationService.findById(1L)).thenReturn(reservation);
-        when(stayingGuestService.getGuests(1L)).thenReturn(List.of(new StayingGuest(), new StayingGuest()));
-        when(checkoutService.calculate(any(), any(), anyInt())).thenReturn(
-                new CheckoutCalculation(BigDecimal.valueOf(500), BigDecimal.valueOf(200),
-                        BigDecimal.valueOf(300), BigDecimal.ZERO, BigDecimal.ZERO,
-                        BigDecimal.valueOf(300), false, 0));
+        when(stayingGuestService.getGuests(1L)).thenReturn(List.of(new StayingGuest(),
+                new StayingGuest()));
+        when(checkoutService.calculate(any(),
+                any(),
+                anyInt())).thenReturn(
+                new CheckoutCalculation(BigDecimal.valueOf(500),
+                        BigDecimal.valueOf(200),
+                        BigDecimal.valueOf(300),
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        BigDecimal.valueOf(300),
+                        false,
+                        0));
 
         Principal principal = mock(Principal.class);
         when(principal.getName()).thenReturn("receptionist");
 
         mockMvc.perform(post("/receptionist/reservations/1/checkout")
-                        .param("paymentMethod", "CASH")
-                        .param("amountReceived", "300")
-                        .param("actualCheckoutTime", "2026-06-26T11:00")
-                        .param("applyLateFee", "false")
+                        .param("paymentMethod",
+                                "CASH")
+                        .param("amountReceived",
+                                "300")
+                        .param("actualCheckoutTime",
+                                "2026-06-26T11:00")
+                        .param("applyLateFee",
+                                "false")
                         .principal(principal))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/receptionist/reservations/1/receipt"))
@@ -142,22 +168,41 @@ class ReceptionistCheckoutControllerTest {
     void completeCheckout_shouldRedirect_onError() throws Exception {
         Reservation reservation = createReservation(ReservationStatus.CHECKED_IN);
         when(reservationService.findById(1L)).thenReturn(reservation);
-        when(stayingGuestService.getGuests(1L)).thenReturn(List.of(new StayingGuest(), new StayingGuest()));
-        when(checkoutService.calculate(any(), any(), anyInt())).thenReturn(
-                new CheckoutCalculation(BigDecimal.valueOf(500), BigDecimal.valueOf(200),
-                        BigDecimal.valueOf(300), BigDecimal.ZERO, BigDecimal.ZERO,
-                        BigDecimal.valueOf(300), false, 0));
+        when(stayingGuestService.getGuests(1L)).thenReturn(List.of(new StayingGuest(),
+                new StayingGuest()));
+        when(checkoutService.calculate(any(),
+                any(),
+                anyInt())).thenReturn(
+                new CheckoutCalculation(BigDecimal.valueOf(500),
+                        BigDecimal.valueOf(200),
+                        BigDecimal.valueOf(300),
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        BigDecimal.valueOf(300),
+                        false,
+                        0));
         doThrow(new IllegalStateException("Payment declined"))
-                .when(checkoutService).complete(anyLong(), any(), any(), any(), anyString(), any(), anyBoolean(), any());
+                .when(checkoutService).complete(anyLong(),
+                        any(),
+                        any(),
+                        any(),
+                        anyString(),
+                        any(),
+                        anyBoolean(),
+                        any());
 
         Principal principal = mock(Principal.class);
         when(principal.getName()).thenReturn("receptionist");
 
         mockMvc.perform(post("/receptionist/reservations/1/checkout")
-                        .param("paymentMethod", "CASH")
-                        .param("amountReceived", "300")
-                        .param("actualCheckoutTime", "2026-06-26T11:00")
-                        .param("applyLateFee", "false")
+                        .param("paymentMethod",
+                                "CASH")
+                        .param("amountReceived",
+                                "300")
+                        .param("actualCheckoutTime",
+                                "2026-06-26T11:00")
+                        .param("applyLateFee",
+                                "false")
                         .principal(principal))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/receptionist/reservations/1/checkout"))

@@ -1,6 +1,6 @@
 package com.hospi.manage.features.auth.controller;
 
-import com.hospi.manage.features.admin.account.service.AccountService;
+import com.hospi.manage.features.account.service.AccountService;
 import com.hospi.manage.features.notification.service.NotificationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

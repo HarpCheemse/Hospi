@@ -1,8 +1,8 @@
 package com.hospi.manage.features.room.service;
 
 import com.hospi.manage.common.exception.ResourceNotFoundException;
-import com.hospi.manage.features.admin.account.enums.Role;
-import com.hospi.manage.features.manager.detail.repository.HotelRepository;
+import com.hospi.manage.features.account.enums.Role;
+import com.hospi.manage.features.hotel.repository.HotelRepository;
 import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.RoomAssignment;

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Create Account | Hospi</title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<body class="staff-layout">
+
+    <!-- SIDEBAR -->
+    <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+
+    <!-- MAIN -->
+    <main class="staff-page">
+
+        <!-- HEADER -->
+        <header class="staff-page-header">
+
+            <section>
+                <h1 class="staff-page-title">
+                    Create Account
+                </h1>
+
+                <p class="page-description">
+                    Add a new staff account to the system.
+                </p>
+            </section>
+
+        </header>
+
+        <!-- FORM -->
+        <section class="max-w-3xl card">
+
+            <div class="border-b border-border p-5">
+
+                <h2 class="text-lg font-semibold">
+                    Account Details
+                </h2>
+
+            </div>
+
+            <form th:action="@{/admin/accounts/create}"
+                  th:object="${form}"
+                  method="post"
+                  class="flex flex-col gap-5 p-5"
+                  novalidate>
+
+                <!-- FULL NAME -->
+                <div>
+                    <label class="mb-2 block text-sm font-medium">
+                        Full Name <span class="text-danger">*</span>
+                    </label>
+                    <input type="text"
+                           th:field="*{fullName}"
+                           placeholder="e.g. John Smith"
+                           class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+
+                    <p class="mt-1 text-xs text-danger"
+                       th:if="${#fields.hasErrors('fullName')}"
+                       th:errors="*{fullName}">
+                    </p>
+                </div>
+
+                <!-- EMAIL -->
+                <div>
+                    <label class="mb-2 block text-sm font-medium">
+                        Email <span class="text-danger">*</span>
+                    </label>
+                    <input type="email"
+                           th:field="*{email}"
+                           placeholder="e.g. john@hospi.com"
+                           class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+
+                    <p class="mt-1 text-xs text-danger"
+                       th:if="${#fields.hasErrors('email')}"
+                       th:errors="*{email}">
+                    </p>
+                </div>
+
+                <!-- PHONE -->
+                <div>
+                    <label class="mb-2 block text-sm font-medium">
+                        Phone
+                    </label>
+
+                    <input type="text"
+                           th:field="*{phone}"
+                           placeholder="e.g. +65 9123 4567"
+                           class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+
+                    <p class="mt-1 text-xs text-danger"
+                       th:if="${#fields.hasErrors('phone')}"
+                       th:errors="*{phone}">
+                    </p>
+                </div>
+
+                <!-- ROLE -->
+                <div>
+                    <label class="mb-2 block text-sm font-medium">
+                        Role <span class="text-danger">*</span>
+                    </label>
+                    <select th:field="*{role}"
+                            class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+
+                        <option value="">Select role</option>
+
+                        <option th:each="role : ${roles}"
+                                th:value="${role}"
+                                th:text="${role}">
+                            Role
+                        </option>
+
+                    </select>
+
+                    <p class="mt-1 text-xs text-danger"
+                       th:if="${#fields.hasErrors('role')}"
+                       th:errors="*{role}">
+                    </p>
+                </div>
+
+                <!-- PASSWORD -->
+                <div>
+                    <label class="mb-2 block text-sm font-medium">
+                        Password <span class="text-danger">*</span>
+                    </label>
+                    <input type="password"
+                           th:field="*{password}"
+                           placeholder="••••••••"
+                           class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
+
+                    <p class="mt-1 text-xs text-danger"
+                       th:if="${#fields.hasErrors('password')}"
+                       th:errors="*{password}">
+                    </p>
+                </div>
+
+                <!-- ACTIONS -->
+                <div class="flex items-center justify-end gap-3 pt-2">
+
+                    <a th:href="@{/admin/accounts}"
+                       class="btn btn-secondary btn-lg">
+                        Cancel
+                    </a>
+
+                    <button type="submit"
+                            class="btn btn-primary btn-lg">
+                        Create Account
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+    </main>
+
+</body>
+</html>

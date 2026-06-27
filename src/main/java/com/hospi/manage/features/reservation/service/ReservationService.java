@@ -1,7 +1,7 @@
 package com.hospi.manage.features.reservation.service;
 
 import com.hospi.manage.common.exception.ResourceNotFoundException;
-import com.hospi.manage.features.admin.account.enums.Role;
+import com.hospi.manage.features.account.enums.Role;
 import com.hospi.manage.features.guest.dto.BookingDraft;
 import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.payment.entity.Payment;

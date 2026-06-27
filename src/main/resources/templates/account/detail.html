@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Account Details | Hospi</title>
+
+    <link rel="stylesheet"
+          th:href="@{/css/app.css}">
+</head>
+
+<body class="staff-layout">
+
+    <!-- SIDEBAR -->
+    <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+
+    <!-- MAIN -->
+    <main class="staff-page">
+
+        <!-- TOAST -->
+        <div th:replace="~{fragments/components/toast :: toast}"></div>
+
+        <!-- HEADER -->
+        <header class="staff-page-header">
+
+            <section>
+
+                <h1 class="staff-page-title"
+                    th:text="${account.fullName}">
+                    John Doe
+                </h1>
+
+                <p class="page-description">
+                    Review account information and permissions.
+                </p>
+
+            </section>
+
+            <a th:href="@{'/admin/accounts/' + ${account.id} + '/edit'}"
+               class="btn btn-primary btn-lg">
+                Edit Account
+            </a>
+
+        </header>
+
+        <!-- ACCOUNT INFORMATION -->
+        <section class="card">
+
+            <div class="border-b border-border p-5">
+
+                <h2 class="text-lg font-semibold">
+                    Account Information
+                </h2>
+
+            </div>
+
+            <div class="grid grid-cols-2 gap-5 p-5">
+
+                <div>
+
+                    <p class="text-sm text-muted-foreground">
+                        Full Name
+                    </p>
+
+                    <p class="mt-1 font-medium"
+                       th:text="${account.fullName}">
+                        John Doe
+                    </p>
+
+                </div>
+
+                <div>
+
+                    <p class="text-sm text-muted-foreground">
+                        Email Address
+                    </p>
+
+                    <p class="mt-1 font-medium truncate"
+                       th:text="${account.email}">
+                        john@hospi.com
+                    </p>
+
+                </div>
+
+                <div>
+
+                    <p class="text-sm text-muted-foreground">
+                        Phone Number
+                    </p>
+
+                    <p class="mt-1 font-medium"
+                       th:text="${account.phone}">
+                        0123456789
+                    </p>
+
+                </div>
+
+                <div>
+
+                    <p class="text-sm text-muted-foreground">
+                        Role
+                    </p>
+
+                    <div class="mt-1">
+
+                        <span class="pill-muted"
+                              th:text="${account.role}">
+                            MANAGER
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ACCOUNT STATUS -->
+        <section class="card mt-6">
+
+            <div class="border-b border-border p-5">
+
+                <h2 class="text-lg font-semibold">
+                    Account Status
+                </h2>
+
+            </div>
+
+            <div class="grid grid-cols-2 gap-5 p-5">
+
+                <div>
+
+                    <p class="text-sm text-muted-foreground">
+                        Status
+                    </p>
+
+                    <div class="mt-1">
+
+                        <span th:if="${account.status.name() == 'ACTIVE'}"
+                              class="pill-success">
+                            Active
+                        </span>
+
+                        <span th:if="${account.status.name() == 'DISABLED'}"
+                              class="pill-danger">
+                            Disabled
+                        </span>
+
+                        <span th:if="${account.status.name() == 'LOCKED'}"
+                              class="pill-warning">
+                            Locked
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+</html>

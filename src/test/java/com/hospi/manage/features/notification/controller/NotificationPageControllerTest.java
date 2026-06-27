@@ -2,9 +2,9 @@ package com.hospi.manage.features.notification.controller;
 
 import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.core.security.session.AccountPrincipal;
-import com.hospi.manage.features.admin.account.entity.Account;
-import com.hospi.manage.features.admin.account.enums.AccountStatus;
-import com.hospi.manage.features.admin.account.enums.Role;
+import com.hospi.manage.features.account.entity.Account;
+import com.hospi.manage.features.account.enums.AccountStatus;
+import com.hospi.manage.features.account.enums.Role;
 import com.hospi.manage.features.notification.service.NotificationService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

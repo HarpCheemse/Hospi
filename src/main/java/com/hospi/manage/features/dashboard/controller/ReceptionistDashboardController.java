@@ -1,4 +1,4 @@
-package com.hospi.manage.features.reservation.controller;
+package com.hospi.manage.features.dashboard.controller;
 
 import com.hospi.manage.common.constant.Attributes;
 import org.springframework.stereotype.Controller;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  */
 @Controller
 @RequestMapping("/receptionist")
-public class DashboardController {
+public class ReceptionistDashboardController {
     /**
      * Show the receptionist dashboard page.
      */

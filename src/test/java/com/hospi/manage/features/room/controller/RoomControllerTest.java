@@ -1,7 +1,7 @@
 package com.hospi.manage.features.room.controller;
 
-import com.hospi.manage.features.manager.detail.entity.Hotel;
-import com.hospi.manage.features.manager.detail.service.HotelService;
+import com.hospi.manage.features.hotel.entity.Hotel;
+import com.hospi.manage.features.hotel.service.HotelService;
 import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.room.entity.Room;
 import com.hospi.manage.features.room.entity.RoomType;

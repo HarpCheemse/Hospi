@@ -1,7 +1,7 @@
 package com.hospi.manage.features.reservation.service;
 
-import com.hospi.manage.features.admin.config.entity.SystemConfig;
-import com.hospi.manage.features.admin.config.service.SystemConfigService;
+import com.hospi.manage.features.config.entity.SystemConfig;
+import com.hospi.manage.features.config.service.SystemConfigService;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;

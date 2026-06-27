@@ -1,9 +1,9 @@
 package com.hospi.manage.features.payment.service;
 
 import com.hospi.manage.common.exception.ResourceNotFoundException;
-import com.hospi.manage.features.admin.account.enums.Role;
-import com.hospi.manage.features.admin.config.entity.SystemConfig;
-import com.hospi.manage.features.admin.config.service.SystemConfigService;
+import com.hospi.manage.features.account.enums.Role;
+import com.hospi.manage.features.config.entity.SystemConfig;
+import com.hospi.manage.features.config.service.SystemConfigService;
 import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.payment.entity.Payment;
 import com.hospi.manage.features.payment.enums.PaymentMethod;

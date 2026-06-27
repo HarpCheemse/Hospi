@@ -1,15 +1,15 @@
 package com.hospi.manage.features.receptionist.controller;
 
 import com.hospi.manage.common.constant.Attributes;
-import com.hospi.manage.features.admin.config.service.SystemConfigService;
+import com.hospi.manage.features.config.service.SystemConfigService;
 import com.hospi.manage.features.payment.entity.Payment;
 import com.hospi.manage.features.payment.enums.PaymentMethod;
 import com.hospi.manage.features.payment.repository.PaymentRepository;
 import com.hospi.manage.features.receptionist.dto.CheckoutCalculation;
 import com.hospi.manage.features.receptionist.dto.CheckoutForm;
-import com.hospi.manage.features.receptionist.service.CheckoutService;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
+import com.hospi.manage.features.reservation.service.CheckoutService;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.reservation.service.StayingGuestService;
 import org.springframework.stereotype.Controller;
@@ -46,7 +46,8 @@ public class ReceptionistCheckoutController {
 
     @ModelAttribute
     void addCommonAttributes(Model model) {
-        model.addAttribute(Attributes.ACTIVE_SIDEBAR, "RESERVATIONS");
+        model.addAttribute(Attributes.ACTIVE_SIDEBAR,
+                "RESERVATIONS");
     }
 
     @GetMapping("/{id}/checkout")
@@ -58,13 +59,20 @@ public class ReceptionistCheckoutController {
         }
 
         int registeredGuests = stayingGuestService.getGuests(id).size();
-        CheckoutCalculation calc = checkoutService.calculate(reservation, null, registeredGuests);
+        CheckoutCalculation calc = checkoutService.calculate(reservation,
+                null,
+                registeredGuests);
 
-        model.addAttribute("reservation", reservation);
-        model.addAttribute("calc", calc);
-        model.addAttribute("config", systemConfigService.getConfig());
-        model.addAttribute("registeredGuests", registeredGuests);
-        model.addAttribute("form", new CheckoutForm());
+        model.addAttribute("reservation",
+                reservation);
+        model.addAttribute("calc",
+                calc);
+        model.addAttribute("config",
+                systemConfigService.getConfig());
+        model.addAttribute("registeredGuests",
+                registeredGuests);
+        model.addAttribute("form",
+                new CheckoutForm());
 
         return "receptionist/reservation/checkout";
     }
@@ -79,19 +87,28 @@ public class ReceptionistCheckoutController {
             int registeredGuests = stayingGuestService.getGuests(id).size();
 
             LocalDateTime actualTime = form.isApplyLateFee() ? form.getActualCheckoutTime() : null;
-            CheckoutCalculation calc = checkoutService.calculate(reservation, actualTime, registeredGuests);
+            CheckoutCalculation calc = checkoutService.calculate(reservation,
+                    actualTime,
+                    registeredGuests);
 
             PaymentMethod method = PaymentMethod.valueOf(form.getPaymentMethod());
 
-            checkoutService.complete(id, calc, form.getAmountReceived(), method,
-                    principal.getName(), form.getActualCheckoutTime(),
-                    form.isApplyLateFee(), form.getExtraGuestFeeOverride());
+            checkoutService.complete(id,
+                    calc,
+                    form.getAmountReceived(),
+                    method,
+                    principal.getName(),
+                    form.getActualCheckoutTime(),
+                    form.isApplyLateFee(),
+                    form.getExtraGuestFeeOverride());
 
-            redirect.addFlashAttribute("success", "Checkout completed successfully.");
+            redirect.addFlashAttribute("success",
+                    "Checkout completed successfully.");
             return "redirect:/receptionist/reservations/" + id + "/receipt";
 
         } catch (Exception e) {
-            redirect.addFlashAttribute("error", e.getMessage());
+            redirect.addFlashAttribute("error",
+                    e.getMessage());
             return "redirect:/receptionist/reservations/" + id + "/checkout";
         }
     }
@@ -106,7 +123,8 @@ public class ReceptionistCheckoutController {
         List<Payment> payments = paymentRepository.findAllByReservationId(id);
         BigDecimal depositPaid = payments.stream()
                 .map(Payment::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .reduce(BigDecimal.ZERO,
+                        BigDecimal::add);
 
         BigDecimal totalPaid = depositPaid;
         if (reservation.getLateCheckoutFeeApplied() != null) {
@@ -116,9 +134,12 @@ public class ReceptionistCheckoutController {
             totalPaid = totalPaid.add(reservation.getExtraGuestFeeApplied());
         }
 
-        model.addAttribute("reservation", reservation);
-        model.addAttribute("depositPaid", depositPaid);
-        model.addAttribute("totalPaid", totalPaid);
+        model.addAttribute("reservation",
+                reservation);
+        model.addAttribute("depositPaid",
+                depositPaid);
+        model.addAttribute("totalPaid",
+                totalPaid);
         return "receptionist/reservation/receipt";
     }
 }

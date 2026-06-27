@@ -1,7 +1,7 @@
 package com.hospi.manage.core.security.session;
 
-import com.hospi.manage.features.admin.account.entity.Account;
-import com.hospi.manage.features.admin.account.repository.AccountRepository;
+import com.hospi.manage.features.account.entity.Account;
+import com.hospi.manage.features.account.repository.AccountRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

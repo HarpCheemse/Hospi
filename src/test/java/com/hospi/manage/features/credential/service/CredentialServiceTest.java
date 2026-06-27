@@ -1,10 +1,10 @@
 package com.hospi.manage.features.credential.service;
 
 import com.hospi.manage.common.exception.ResourceNotFoundException;
-import com.hospi.manage.features.admin.account.entity.Account;
-import com.hospi.manage.features.admin.account.enums.AccountStatus;
-import com.hospi.manage.features.admin.account.enums.Role;
-import com.hospi.manage.features.admin.account.repository.AccountRepository;
+import com.hospi.manage.features.account.entity.Account;
+import com.hospi.manage.features.account.enums.AccountStatus;
+import com.hospi.manage.features.account.enums.Role;
+import com.hospi.manage.features.account.repository.AccountRepository;
 import com.hospi.manage.features.credential.dto.CredentialView;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
