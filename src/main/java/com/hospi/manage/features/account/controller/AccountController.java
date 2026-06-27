@@ -4,7 +4,6 @@ import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.features.account.dto.AccountCreateForm;
 import com.hospi.manage.features.account.dto.AccountEditForm;
 import com.hospi.manage.features.account.dto.AccountView;
-import com.hospi.manage.features.account.enums.AccountStatus;
 import com.hospi.manage.features.account.enums.Role;
 import com.hospi.manage.features.account.service.AccountService;
 import com.hospi.manage.features.account.validator.AccountValidator;
@@ -16,7 +15,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Controller for admin account management (CRUD for staff accounts).
@@ -29,16 +29,34 @@ public class AccountController {
     private final AccountValidator accountValidator;
 
     /**
-     * Show the account list page with all staff accounts.
+     * Set the active sidebar highlight for this feature.
+     */
+    @ModelAttribute
+    public void addCommonAttributes(Model model) {
+        model.addAttribute(Attributes.ACTIVE_SIDEBAR, "STAFF_ACCOUNTS");
+    }
+
+    /**
+     * Show the account list page with optional filtering by search text and role.
      */
     @GetMapping
-    public String list(Model model) {
-
-        model.addAttribute(
-                "accounts",
-                accountService.findAllViews()
-        );
-
+    public String list(@RequestParam(required = false) String search,
+                       @RequestParam(required = false) Role role,
+                       Model model) {
+        List<AccountView> all = accountService.findAllViews();
+        if (search != null && !search.isBlank()) {
+            String q = search.toLowerCase();
+            all = all.stream()
+                    .filter(a -> a.fullName().toLowerCase().contains(q) || a.email().toLowerCase().contains(q))
+                    .collect(Collectors.toList());
+        }
+        if (role != null) {
+            all = all.stream()
+                    .filter(a -> a.role() == role)
+                    .collect(Collectors.toList());
+        }
+        model.addAttribute("accounts", all);
+        model.addAttribute("roles", Role.values());
         return "account/list";
     }
 
@@ -47,19 +65,8 @@ public class AccountController {
      */
     @GetMapping("/create")
     String create(Model model) {
-        AccountCreateForm form = new AccountCreateForm(
-                null,
-                null,
-                null,
-                null,
-                null
-        );
-        model.addAttribute("statuses",
-                AccountStatus.values());
-        model.addAttribute("roles",
-                Role.values());
-        model.addAttribute(Attributes.FORM,
-                form);
+        model.addAttribute(Attributes.FORM, new AccountCreateForm(null, null, null, null, null));
+        model.addAttribute("roles", Role.values());
         return "account/create";
     }
 
@@ -68,10 +75,7 @@ public class AccountController {
      */
     @GetMapping("/{id}")
     String detail(@PathVariable Long id, Model model) {
-        AccountView account = accountService.getAccountView(id);
-        model.addAttribute("account",
-                account);
-
+        model.addAttribute("account", accountService.getAccountView(id));
         return "account/detail";
     }
 
@@ -79,25 +83,10 @@ public class AccountController {
      * Show the account edit form pre-populated with current values.
      */
     @GetMapping("/{id}/edit")
-    public String edit(@PathVariable Long id,
-                       Model model) {
-
-        model.addAttribute(
-                Attributes.FORM,
-                accountService.getEditForm(id)
-        );
-
-        model.addAttribute("roles",
-                Arrays.stream(Role.values())
-                        .filter(role -> role != Role.ADMIN)
-                        .toList());
-
-        model.addAttribute("statuses",
-                AccountStatus.values());
-
-        model.addAttribute("accountId",
-                id);
-
+    public String edit(@PathVariable Long id, Model model) {
+        model.addAttribute(Attributes.FORM, accountService.getEditForm(id));
+        model.addAttribute("roles", Role.values());
+        model.addAttribute("accountId", id);
         return "account/edit";
     }
 
@@ -106,32 +95,19 @@ public class AccountController {
      * redirects to the account list.
      */
     @PostMapping("/create")
-    public String createAccount(
-            @Valid @ModelAttribute(Attributes.FORM) AccountCreateForm form,
-            BindingResult bindingResult,
-            RedirectAttributes redirectAttributes,
-            Model model) {
-
-        accountValidator.validateCreate(form,
-                bindingResult);
+    public String createAccount(@Valid @ModelAttribute(Attributes.FORM) AccountCreateForm form,
+                                BindingResult bindingResult,
+                                RedirectAttributes redirectAttributes,
+                                Model model) {
+        accountValidator.validateCreate(form, bindingResult);
 
         if (bindingResult.hasErrors()) {
-
-            model.addAttribute("roles",
-                    Role.values());
-            model.addAttribute("statuses",
-                    AccountStatus.values());
-
+            model.addAttribute("roles", Role.values());
             return "account/create";
         }
 
         accountService.createAccount(form);
-
-        redirectAttributes.addFlashAttribute(
-                Attributes.SUCCESS,
-                "Account created successfully"
-        );
-
+        redirectAttributes.addFlashAttribute(Attributes.SUCCESS, "Account created successfully");
         return "redirect:/admin/accounts";
     }
 
@@ -145,34 +121,26 @@ public class AccountController {
                                 BindingResult bindingResult,
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
+        AccountView current = accountService.getAccountView(id);
+        if (current.role() == Role.ADMIN && form.role() != Role.ADMIN) {
+            redirectAttributes.addFlashAttribute(Attributes.ERROR, "Cannot downgrade an admin account");
+            return "redirect:/admin/accounts";
+        }
+        if (current.role() != Role.ADMIN && form.role() == Role.ADMIN) {
+            redirectAttributes.addFlashAttribute(Attributes.ERROR, "Cannot promote a user to admin");
+            return "redirect:/admin/accounts";
+        }
 
-        accountValidator.validateUpdate(id,
-                form,
-                bindingResult);
+        accountValidator.validateUpdate(id, form, bindingResult);
 
         if (bindingResult.hasErrors()) {
-
-            model.addAttribute("roles",
-                    Arrays.stream(Role.values())
-                            .filter(role -> role != Role.ADMIN)
-                            .toList());
-
-            model.addAttribute("statuses",
-                    AccountStatus.values());
-            model.addAttribute("accountId",
-                    id);
-
+            model.addAttribute("roles", Role.values());
+            model.addAttribute("accountId", id);
             return "account/edit";
         }
 
-        accountService.updateAccount(id,
-                form);
-
-        redirectAttributes.addFlashAttribute(
-                Attributes.SUCCESS,
-                "Account updated successfully"
-        );
-
+        accountService.updateAccount(id, form);
+        redirectAttributes.addFlashAttribute(Attributes.SUCCESS, "Account updated successfully");
         return "redirect:/admin/accounts";
     }
 }

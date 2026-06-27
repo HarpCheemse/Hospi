@@ -121,8 +121,11 @@ public class AccountValidator {
                 "password",
                 bindingResult);
 
-        validateRole(form.role(),
-                bindingResult);
+        if (form.role() == Role.ADMIN) {
+            bindingResult.rejectValue("role",
+                    "role.not.allowed",
+                    "Admin accounts cannot be created");
+        }
     }
 
     /**
@@ -133,9 +136,6 @@ public class AccountValidator {
      * @param bindingResult binding result to populate with validation failures
      */
     public void validateUpdate(Long id, AccountEditForm form, BindingResult bindingResult) {
-        validateRole(form.role(),
-                bindingResult);
-
         validateEmailUpdate(id,
                 form.email(),
                 bindingResult);
@@ -148,19 +148,6 @@ public class AccountValidator {
             bindingResult.rejectValue("email",
                     "email.duplicate",
                     "Email is already in use");
-        }
-    }
-
-    private void validateRole(Role role, BindingResult bindingResult) {
-
-        if (role == null) {
-            return;
-        }
-
-        if (role == Role.ADMIN) {
-            bindingResult.rejectValue("role",
-                    "role.not.allowed",
-                    "Admin accounts cannot be created");
         }
     }
 
