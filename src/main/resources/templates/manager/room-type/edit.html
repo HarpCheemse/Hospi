@@ -244,9 +244,17 @@
                             <img th:src="@{/room-type-picture/{id}(id=${pic})}"
                                  alt="" class="aspect-square w-full object-cover">
                         </div>
-                        <input type="hidden" name="removeImageIds" th:value="${pic}">
                         <button type="button"
-                                @click="$el.closest('.relative').remove(); existingCount--"
+                                th:attr="data-pic-id=${pic}"
+                                @click="
+                            const input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = 'removeImageIds';
+                            input.value = $el.dataset.picId;
+                            $el.closest('form').appendChild(input);
+                            $el.closest('.relative').remove();
+                            existingCount--;
+                        "
                                 class="mt-1.5 w-full rounded-lg bg-danger/10 py-1 text-xs font-medium text-danger">
                             Delete
                         </button>
