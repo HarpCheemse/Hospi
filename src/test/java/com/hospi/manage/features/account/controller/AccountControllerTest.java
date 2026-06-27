@@ -23,6 +23,7 @@ import static com.hospi.manage.common.constant.Attributes.SUCCESS;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -217,5 +218,26 @@ class AccountControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/accounts"))
                 .andExpect(flash().attribute(ERROR, "Cannot promote a user to admin"));
+    }
+
+    @Test
+    void deleteAccount_shouldRedirectWithSuccess() throws Exception {
+        mockMvc.perform(post("/admin/accounts/delete/2"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/accounts"))
+                .andExpect(flash().attribute(SUCCESS, "Account deleted successfully"));
+
+        verify(accountService).softDelete(2L);
+    }
+
+    @Test
+    void deleteAccount_shouldRedirectWithError_whenIllegalState() throws Exception {
+        doThrow(new IllegalStateException("Cannot delete an admin account"))
+                .when(accountService).softDelete(1L);
+
+        mockMvc.perform(post("/admin/accounts/delete/1"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/accounts/1"))
+                .andExpect(flash().attribute(ERROR, "Cannot delete an admin account"));
     }
 }

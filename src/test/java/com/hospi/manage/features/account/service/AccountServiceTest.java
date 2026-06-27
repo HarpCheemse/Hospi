@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -226,5 +227,39 @@ class AccountServiceTest {
         assertEquals("newHash", account1.getPasswordHash());
         assertEquals("newHash", account2.getPasswordHash());
         verify(accountRepository).saveAll(List.of(account1, account2));
+    }
+
+    @Test
+    void shouldSoftDelete() {
+        Account account = new Account();
+        account.setId(1L);
+        account.setRole(Role.RECEPTIONIST);
+        account.setActive(true);
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+
+        accountService.softDelete(1L);
+
+        assertFalse(account.isActive());
+        verify(accountRepository).save(account);
+    }
+
+    @Test
+    void shouldThrow_whenSoftDeletingAdmin() {
+        Account account = new Account();
+        account.setId(1L);
+        account.setRole(Role.ADMIN);
+        account.setActive(true);
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+
+        assertThrows(IllegalStateException.class, () -> accountService.softDelete(1L));
+    }
+
+    @Test
+    void shouldThrow_whenSoftDeletingNonExistent() {
+        when(accountRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> accountService.softDelete(1L));
     }
 }
