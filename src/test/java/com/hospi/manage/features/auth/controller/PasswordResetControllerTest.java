@@ -1,9 +1,9 @@
 package com.hospi.manage.features.auth.controller;
 
 import com.hospi.manage.common.interfaces.EmailService;
-import com.hospi.manage.features.admin.account.entity.Account;
-import com.hospi.manage.features.admin.account.repository.AccountRepository;
-import com.hospi.manage.features.admin.account.validator.AccountValidator;
+import com.hospi.manage.features.account.entity.Account;
+import com.hospi.manage.features.account.repository.AccountRepository;
+import com.hospi.manage.features.account.validator.AccountValidator;
 import com.hospi.manage.features.auth.enums.OtpType;
 import com.hospi.manage.features.auth.service.OtpService;
 import com.hospi.manage.features.notification.service.NotificationService;

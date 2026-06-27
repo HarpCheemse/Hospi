@@ -1,8 +1,8 @@
 package com.hospi.manage.features.guest.controller;
 
-import com.hospi.manage.features.manager.detail.entity.Hotel;
-import com.hospi.manage.features.manager.detail.entity.HotelPicture;
-import com.hospi.manage.features.manager.detail.service.HotelService;
+import com.hospi.manage.features.hotel.entity.Hotel;
+import com.hospi.manage.features.hotel.entity.HotelPicture;
+import com.hospi.manage.features.hotel.service.HotelService;
 import com.hospi.manage.features.notification.service.NotificationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

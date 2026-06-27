@@ -1,6 +1,6 @@
 package com.hospi.manage.features.reservation.service;
 
-import com.hospi.manage.features.admin.config.service.SystemConfigService;
+import com.hospi.manage.features.config.service.SystemConfigService;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.CancellationReason;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * Periodically cancels PENDING reservations that have exceeded the configured expiry window.
  * Runs every 60 seconds. The expiry threshold is {@code pendingBookingExpiryMinutes}
- * from {@link com.hospi.manage.features.admin.config.entity.SystemConfig}.
+ * from {@link com.hospi.manage.features.config.entity.SystemConfig}.
  */
 @Slf4j
 @Component

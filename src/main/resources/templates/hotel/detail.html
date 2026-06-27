@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title th:text="${hotel.name} + ' | Hospi'">
+        Hotel | Hospi
+    </title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<body class="staff-layout">
+
+    <!-- SIDEBAR -->
+    <div th:replace="~{fragments/manager-sidebar :: sidebar}"></div>
+
+    <!-- MAIN -->
+    <main class="staff-page">
+
+        <!-- HEADER -->
+        <div class="staff-page-header">
+
+            <div>
+                <h1 class="staff-page-title"
+                    th:text="${hotel.name}">
+                    Hotel Name
+                </h1>
+
+                <p class="page-description">
+                    View hotel profile, contact information, operations, and settings.
+                </p>
+            </div>
+
+            <div class="flex items-center gap-3">
+
+                <a th:href="@{/manager/details/edit}"
+                   class="btn btn-primary">
+                    Edit Hotel
+                </a>
+
+                <a th:href="@{/manager}"
+                   class="btn btn-secondary">
+                    Back
+                </a>
+
+            </div>
+
+        </div>
+
+        <!-- HERO -->
+        <section class="overflow-hidden card">
+            <div class="relative h-[300px] overflow-hidden">
+
+                <img th:if="${!#lists.isEmpty(hotel.pictures)}"
+                     th:src="@{/hotel-picture/{id}(id=${hotel.pictures[0].id})}"
+                     alt="Hotel Image"
+                     class="absolute inset-0 h-full w-full object-cover">
+
+                <!-- Fallback -->
+                <div th:if="${#lists.isEmpty(hotel.pictures)}"
+                     class="absolute inset-0 bg-background"></div>
+
+                <!-- Dark overlay -->
+                <div class="absolute inset-0 bg-black/40"></div>
+
+                <!-- Content -->
+                <div class="relative flex h-full items-center justify-center">
+
+                    <div class="text-center text-white">
+
+                        <h2 class="text-3xl font-bold"
+                            th:text="${hotel.name}">
+                            Hotel Name
+                        </h2>
+
+                        <p class="mt-2 text-white/80"
+                           th:text="${hotel.address}">
+                            Address
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- Status -->
+                <div class="absolute right-5 top-5">
+                    ...
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- GRID -->
+        <div class="mt-6 grid grid-cols-12 gap-6">
+
+            <!-- LEFT -->
+            <div class="col-span-8 flex flex-col gap-6">
+
+                <!-- OVERVIEW -->
+                <section class="card">
+                    <div class="border-b border-border p-5">
+                        <h2 class="text-lg font-semibold">Overview</h2>
+                    </div>
+
+                    <div class="p-5">
+                        <p class="whitespace-pre-line text-muted-foreground"
+                           th:text="${hotel.description}">
+                            Hotel description...
+                        </p>
+                    </div>
+                </section>
+
+                <!-- FEATURES -->
+                <section class="card">
+                    <div class="border-b border-border p-5">
+                        <h2 class="text-lg font-semibold">Features & Amenities</h2>
+                    </div>
+
+                    <div class="p-5 flex flex-wrap gap-3">
+                        <div th:each="feature : ${#strings.arraySplit(hotel.features, ',')}"
+                             class="rounded-full border border-border bg-background px-4 py-2 text-sm">
+                            <span th:text="${#strings.trim(feature)}">Feature</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- GALLERY -->
+                <section class="card">
+                    <div class="border-b border-border p-5">
+                        <h2 class="text-lg font-semibold">Gallery</h2>
+                        <p class="mt-1 text-sm text-muted-foreground">Additional hotel photos.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-3 p-5">
+                        <div th:each="pic, stat : ${hotel.pictures}"
+                             th:if="${stat.index > 0}">
+                            <div class="w-32 overflow-hidden rounded-xl border border-border bg-background">
+                                <img th:src="@{/hotel-picture/{id}(id=${pic.id})}"
+                                     alt=""
+                                     class="aspect-square w-full object-cover">
+                            </div>
+                        </div>
+                        <div th:if="${#lists.size(hotel.pictures) <= 1}"
+                             class="flex w-full items-center justify-center rounded-xl border-2 border-dashed border-border py-16 text-muted-foreground">
+                            No additional images
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- RIGHT -->
+            <div class="col-span-4 flex flex-col gap-6">
+
+                <!-- CONTACT -->
+                <section class="card">
+                    <div class="border-b border-border p-5">
+                        <h2 class="text-lg font-semibold">Contact</h2>
+                    </div>
+
+                    <div class="flex flex-col gap-4 p-5 text-sm">
+
+                        <div>
+                            <p class="text-muted-foreground">Address</p>
+                            <p class="font-medium" th:text="${hotel.address}">Address</p>
+                        </div>
+
+                        <div>
+                            <p class="text-muted-foreground">Phone</p>
+                            <p class="font-medium" th:text="${hotel.phone}">Phone</p>
+                        </div>
+
+                        <div>
+                            <p class="text-muted-foreground">Email</p>
+                            <p class="font-medium truncate" th:text="${hotel.email}">Email</p>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- OPERATIONS -->
+                <section class="card">
+                    <div class="border-b border-border p-5">
+                        <h2 class="text-lg font-semibold">Operations</h2>
+                    </div>
+
+                    <div class="flex flex-col gap-4 p-5 text-sm">
+
+                        <div class="flex justify-between">
+                            <span class="text-muted-foreground">Check-In</span>
+                            <span class="font-medium"
+                                  th:text="${#temporals.format(hotel.checkInTime,'HH:mm')}">
+                                14:00
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between">
+                            <span class="text-muted-foreground">Check-Out</span>
+                            <span class="font-medium"
+                                  th:text="${#temporals.format(hotel.checkOutTime,'HH:mm')}">
+                                12:00
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between">
+                            <span class="text-muted-foreground">Floors</span>
+                            <span class="font-medium"
+                                  th:text="${hotel.floorCount}">
+                                10
+                            </span>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- RATINGS -->
+                <section class="card">
+                    <div class="border-b border-border p-5">
+                        <h2 class="text-lg font-semibold">Ratings</h2>
+                    </div>
+
+                    <div class="p-5 text-center">
+                        <div class="text-4xl font-bold text-primary"
+                             th:text="${hotel.averageRating}">
+                            4.8
+                        </div>
+
+                        <div class="mt-2 text-sm text-muted-foreground">
+                            Average Rating
+                        </div>
+
+                        <div class="mt-4 text-sm">
+                            <span th:text="${hotel.reviewCount}">0</span> Reviews
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</body>
+</html>

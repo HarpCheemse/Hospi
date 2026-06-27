@@ -3,7 +3,7 @@ package com.hospi.manage.features.notification.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
-import com.hospi.manage.features.admin.account.enums.Role;
+import com.hospi.manage.features.account.enums.Role;
 @Entity
 @Table(name = "notifications")
 @Getter

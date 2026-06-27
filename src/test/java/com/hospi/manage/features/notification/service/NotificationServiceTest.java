@@ -1,6 +1,6 @@
 package com.hospi.manage.features.notification.service;
 
-import com.hospi.manage.features.admin.account.enums.Role;
+import com.hospi.manage.features.account.enums.Role;
 import com.hospi.manage.features.notification.dto.NotificationDTO;
 import com.hospi.manage.features.notification.entity.Notification;
 import com.hospi.manage.features.notification.repository.NotificationRepository;

@@ -2,15 +2,16 @@ package com.hospi.manage.features.auth.controller;
 
 import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.common.interfaces.EmailService;
-import com.hospi.manage.features.admin.account.entity.Account;
-import com.hospi.manage.features.admin.account.repository.AccountRepository;
-import com.hospi.manage.features.admin.account.validator.AccountValidator;
+import com.hospi.manage.features.account.entity.Account;
+import com.hospi.manage.features.account.repository.AccountRepository;
+import com.hospi.manage.features.account.validator.AccountValidator;
 import com.hospi.manage.features.auth.dto.ForgotPasswordForm;
 import com.hospi.manage.features.auth.dto.ResetPasswordForm;
 import com.hospi.manage.features.auth.dto.VerifyOtpForm;
 import com.hospi.manage.features.auth.enums.OtpType;
 import com.hospi.manage.features.auth.service.OtpService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,25 +26,13 @@ import static com.hospi.manage.common.constant.Attributes.SUCCESS;
  */
 @Controller
 @RequestMapping("/auth/password")
+@RequiredArgsConstructor
 public class PasswordResetController {
     private final AccountRepository accountRepository;
     private final OtpService otpService;
     private final AccountValidator accountValidator;
     private final PasswordEncoder encoder;
     private final EmailService emailService;
-
-    /**
-     * Construct the controller with required services.
-     */
-    public PasswordResetController(AccountRepository accountRepository, OtpService otpService,
-                                   AccountValidator accountValidator, PasswordEncoder encoder,
-                                   EmailService emailService) {
-        this.accountRepository = accountRepository;
-        this.otpService = otpService;
-        this.accountValidator = accountValidator;
-        this.encoder = encoder;
-        this.emailService = emailService;
-    }
 
     /**
      * Show the forgot-password form where the user enters their email.

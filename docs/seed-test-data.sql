@@ -39,11 +39,11 @@ FROM otp_challenges;
 -- ────────────────────────────────────────────────────────────────────────────
 -- 1. Staffs
 -- ────────────────────────────────────────────────────────────────────────────
-INSERT INTO staffs (full_name, email, password_hash, phone, role, status, created_at)
-VALUES ('Alice Admin', 'admin@gmail.com', '123', '+84 901 000 001', 'ADMIN', 'ACTIVE', NOW()),
-       ('Leo Leader', 'leader@gmail.com', '123', '+84 901 000 002', 'LEADER', 'ACTIVE', NOW()),
-       ('Rita Receptionist', 'receptionist@gmail.com', '123', '+84 901 000 003', 'RECEPTIONIST', 'ACTIVE', NOW()),
-       ('Mike Manager', 'manager@gmail.com', '123', '+84 901 000 004', 'MANAGER', 'ACTIVE', NOW());
+INSERT INTO staffs (full_name, email, password_hash, phone, role, active, created_at)
+VALUES ('Alice Admin', 'admin@gmail.com', '123', '+84 901 000 001', 'ADMIN', true, NOW()),
+       ('Leo Leader', 'leader@gmail.com', '123', '+84 901 000 002', 'LEADER', true, NOW()),
+       ('Rita Receptionist', 'receptionist@gmail.com', '123', '+84 901 000 003', 'RECEPTIONIST', true, NOW()),
+       ('Mike Manager', 'manager@gmail.com', '123', '+84 901 000 004', 'MANAGER', true, NOW());
 
 -- ────────────────────────────────────────────────────────────────────────────
 -- 2. Hotel

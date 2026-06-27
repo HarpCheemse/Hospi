@@ -1,10 +1,9 @@
 package com.hospi.manage.features.credential.service;
 
 import com.hospi.manage.common.exception.ResourceNotFoundException;
-import com.hospi.manage.features.admin.account.entity.Account;
-import com.hospi.manage.features.admin.account.enums.AccountStatus;
-import com.hospi.manage.features.admin.account.enums.Role;
-import com.hospi.manage.features.admin.account.repository.AccountRepository;
+import com.hospi.manage.features.account.entity.Account;
+import com.hospi.manage.features.account.enums.Role;
+import com.hospi.manage.features.account.repository.AccountRepository;
 import com.hospi.manage.features.credential.dto.CredentialView;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,7 +51,7 @@ class CredentialServiceTest {
         account.setEmail("john@test.com");
         account.setPhone("1234567890");
         account.setRole(Role.RECEPTIONIST);
-        account.setStatus(AccountStatus.ACTIVE);
+        account.setActive(true);
         account.setCreatedAt(now);
 
         when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
@@ -63,7 +62,7 @@ class CredentialServiceTest {
         assertEquals("john@test.com", view.email());
         assertEquals("RECEPTIONIST", view.role());
         assertEquals("1234567890", view.phone());
-        assertEquals("ACTIVE", view.status());
+        assertEquals("Active", view.status());
         assertEquals(now, view.createdAt());
     }
 
@@ -92,3 +91,4 @@ class CredentialServiceTest {
         assertTrue(saved == account);
     }
 }
+

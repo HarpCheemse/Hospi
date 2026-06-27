@@ -2,10 +2,9 @@ package com.hospi.manage.features.credential.controller;
 
 import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.core.security.session.AccountPrincipal;
-import com.hospi.manage.features.admin.account.entity.Account;
-import com.hospi.manage.features.admin.account.enums.AccountStatus;
-import com.hospi.manage.features.admin.account.enums.Role;
-import com.hospi.manage.features.admin.account.validator.AccountValidator;
+import com.hospi.manage.features.account.entity.Account;
+import com.hospi.manage.features.account.enums.Role;
+import com.hospi.manage.features.account.validator.AccountValidator;
 import com.hospi.manage.features.credential.dto.ChangePasswordForm;
 import com.hospi.manage.features.credential.dto.CredentialView;
 import com.hospi.manage.features.credential.service.CredentialService;
@@ -63,7 +62,7 @@ class CredentialControllerTest {
         account.setId(1L);
         account.setEmail("receptionist@test.com");
         account.setRole(Role.RECEPTIONIST);
-        account.setStatus(AccountStatus.ACTIVE);
+        account.setActive(true);
         var principal = new AccountPrincipal(account);
         var auth = new UsernamePasswordAuthenticationToken(
                 principal, principal.getPassword(), principal.getAuthorities());
@@ -125,3 +124,4 @@ class CredentialControllerTest {
                 .andExpect(view().name("auth/change-password"));
     }
 }
+
