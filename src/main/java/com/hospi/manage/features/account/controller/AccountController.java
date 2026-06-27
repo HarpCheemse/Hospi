@@ -143,4 +143,20 @@ public class AccountController {
         redirectAttributes.addFlashAttribute(Attributes.SUCCESS, "Account updated successfully");
         return "redirect:/admin/accounts";
     }
+
+    /**
+     * Soft-delete a staff account. Only non-admin accounts can be deleted.
+     */
+    @PostMapping("/delete/{id}")
+    public String deleteAccount(@PathVariable Long id,
+                                RedirectAttributes redirectAttributes) {
+        try {
+            accountService.softDelete(id);
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute(Attributes.ERROR, e.getMessage());
+            return "redirect:/admin/accounts/" + id;
+        }
+        redirectAttributes.addFlashAttribute(Attributes.SUCCESS, "Account deleted successfully");
+        return "redirect:/admin/accounts";
+    }
 }

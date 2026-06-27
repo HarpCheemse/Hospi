@@ -5,6 +5,7 @@ import com.hospi.manage.features.account.dto.AccountCreateForm;
 import com.hospi.manage.features.account.dto.AccountEditForm;
 import com.hospi.manage.features.account.dto.AccountView;
 import com.hospi.manage.features.account.entity.Account;
+import com.hospi.manage.features.account.enums.Role;
 import com.hospi.manage.features.account.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -96,6 +97,20 @@ public class AccountService {
         account.setPhone(form.phone());
         account.setRole(form.role());
 
+        accountRepository.save(account);
+    }
+
+    /** Soft-delete an account by marking it inactive. */
+    @Transactional
+    public void softDelete(Long id) {
+        Account account = accountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Account " + id));
+        if (!account.isActive()) {
+            throw new ResourceNotFoundException("Account " + id);
+        }
+        if (account.getRole() == Role.ADMIN) {
+            throw new IllegalStateException("Cannot delete an admin account");
+        }
+        account.setActive(false);
         accountRepository.save(account);
     }
 
