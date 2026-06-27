@@ -3,7 +3,6 @@ package com.hospi.manage.features.account.validator;
 import com.hospi.manage.features.account.dto.AccountCreateForm;
 import com.hospi.manage.features.account.dto.AccountEditForm;
 import com.hospi.manage.features.account.entity.Account;
-import com.hospi.manage.features.account.enums.AccountStatus;
 import com.hospi.manage.features.account.enums.Role;
 import com.hospi.manage.features.account.repository.AccountRepository;
 import com.hospi.manage.features.credential.dto.ChangePasswordForm;
@@ -196,8 +195,7 @@ class AccountValidatorTest {
                 "John Doe",
                 "john@hospi.com",
                 "0123456789",
-                Role.MANAGER,
-                AccountStatus.ACTIVE
+                Role.MANAGER
         );
 
         when(accountRepository.existsByEmailAndIdNot("john@hospi.com",

@@ -3,7 +3,6 @@ package com.hospi.manage.features.notification.controller;
 import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.core.security.session.AccountPrincipal;
 import com.hospi.manage.features.account.entity.Account;
-import com.hospi.manage.features.account.enums.AccountStatus;
 import com.hospi.manage.features.account.enums.Role;
 import com.hospi.manage.features.notification.service.NotificationService;
 import org.junit.jupiter.api.AfterEach;
@@ -40,7 +39,7 @@ class NotificationPageControllerTest {
         account.setId(1L);
         account.setEmail("receptionist@test.com");
         account.setRole(Role.RECEPTIONIST);
-        account.setStatus(AccountStatus.ACTIVE);
+        account.setActive(true);
         var principal = new AccountPrincipal(account);
         var auth = new UsernamePasswordAuthenticationToken(
                 principal, principal.getPassword(), principal.getAuthorities());
@@ -68,7 +67,7 @@ class NotificationPageControllerTest {
         adminAccount.setId(1L);
         adminAccount.setEmail("admin@test.com");
         adminAccount.setRole(Role.ADMIN);
-        adminAccount.setStatus(AccountStatus.ACTIVE);
+        adminAccount.setActive(true);
         var adminPrincipal = new AccountPrincipal(adminAccount);
         var auth = new UsernamePasswordAuthenticationToken(
                 adminPrincipal, adminPrincipal.getPassword(), adminPrincipal.getAuthorities());
@@ -92,3 +91,4 @@ class NotificationPageControllerTest {
                 .andExpect(flash().attributeExists(Attributes.SUCCESS));
     }
 }
+

@@ -3,7 +3,6 @@ package com.hospi.manage.features.account.controller;
 import com.hospi.manage.features.account.dto.AccountCreateForm;
 import com.hospi.manage.features.account.dto.AccountEditForm;
 import com.hospi.manage.features.account.dto.AccountView;
-import com.hospi.manage.features.account.enums.AccountStatus;
 import com.hospi.manage.features.account.enums.Role;
 import com.hospi.manage.features.account.service.AccountService;
 import com.hospi.manage.features.account.validator.AccountValidator;
@@ -18,6 +17,7 @@ import org.springframework.validation.BindingResult;
 
 import java.util.List;
 
+import static com.hospi.manage.common.constant.Attributes.ERROR;
 import static com.hospi.manage.common.constant.Attributes.FORM;
 import static com.hospi.manage.common.constant.Attributes.SUCCESS;
 import static org.hamcrest.Matchers.containsString;
@@ -53,8 +53,8 @@ class AccountControllerTest {
     @Test
     void list_shouldRender() throws Exception {
         var accounts = List.of(
-                new AccountView(1L, "Alice Admin", "alice@test.com", "123", Role.ADMIN, AccountStatus.ACTIVE),
-                new AccountView(2L, "Bob Receptionist", "bob@test.com", "456", Role.RECEPTIONIST, AccountStatus.ACTIVE)
+                new AccountView(1L, "Alice Admin", "alice@test.com", "123", Role.ADMIN),
+                new AccountView(2L, "Bob Receptionist", "bob@test.com", "456", Role.RECEPTIONIST)
         );
         when(accountService.findAllViews()).thenReturn(accounts);
 
@@ -62,7 +62,7 @@ class AccountControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("account/list"))
                 .andExpect(model().attributeExists("accounts"))
-                .andExpect(content().string(containsString("Account Management")));
+                .andExpect(content().string(containsString("Staff Accounts")));
     }
 
     @Test
@@ -70,15 +70,14 @@ class AccountControllerTest {
         mockMvc.perform(get("/admin/accounts/create"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("account/create"))
-                .andExpect(model().attributeExists("statuses"))
                 .andExpect(model().attributeExists("roles"))
                 .andExpect(model().attributeExists(FORM))
-                .andExpect(content().string(containsString("Staff Accounts")));
+                .andExpect(content().string(containsString("Create Account")));
     }
 
     @Test
     void detail_shouldRender() throws Exception {
-        var account = new AccountView(1L, "Test User", "test@test.com", "789", Role.MANAGER, AccountStatus.ACTIVE);
+        var account = new AccountView(1L, "Test User", "test@test.com", "789", Role.MANAGER);
         when(accountService.getAccountView(1L)).thenReturn(account);
 
         mockMvc.perform(get("/admin/accounts/1"))
@@ -90,7 +89,7 @@ class AccountControllerTest {
 
     @Test
     void edit_shouldRender() throws Exception {
-        var editForm = new AccountEditForm("Test User", "test@test.com", "789", Role.MANAGER, AccountStatus.ACTIVE);
+        var editForm = new AccountEditForm("Test User", "test@test.com", "789", Role.MANAGER);
         when(accountService.getEditForm(1L)).thenReturn(editForm);
 
         mockMvc.perform(get("/admin/accounts/1/edit"))
@@ -98,9 +97,9 @@ class AccountControllerTest {
                 .andExpect(view().name("account/edit"))
                 .andExpect(model().attributeExists(FORM))
                 .andExpect(model().attributeExists("roles"))
-                .andExpect(model().attributeExists("statuses"))
                 .andExpect(model().attributeExists("accountId"))
-                .andExpect(content().string(containsString("Edit Account")));
+                .andExpect(content().string(containsString("Edit Account")))
+                .andExpect(content().string(containsString("Modify user information")));
     }
 
     @Test
@@ -122,8 +121,7 @@ class AccountControllerTest {
         mockMvc.perform(post("/admin/accounts/create"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("account/create"))
-                .andExpect(model().attributeExists("roles"))
-                .andExpect(model().attributeExists("statuses"));
+                .andExpect(model().attributeExists("roles"));
     }
 
     @Test
@@ -141,17 +139,18 @@ class AccountControllerTest {
                         .param("role", "RECEPTIONIST"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("account/create"))
-                .andExpect(model().attributeExists("roles"))
-                .andExpect(model().attributeExists("statuses"));
+                .andExpect(model().attributeExists("roles"));
     }
 
     @Test
     void updateAccount_shouldRedirect_onSuccess() throws Exception {
+        var managerView = new AccountView(1L, "Test User", "test@test.com", "789", Role.MANAGER);
+        when(accountService.getAccountView(1L)).thenReturn(managerView);
+
         mockMvc.perform(post("/admin/accounts/1/edit")
                         .param("fullName", "Test User")
                         .param("email", "test@test.com")
-                        .param("role", "RECEPTIONIST")
-                        .param("status", "ACTIVE"))
+                        .param("role", "RECEPTIONIST"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/accounts"))
                 .andExpect(flash().attributeExists(SUCCESS));
@@ -161,16 +160,21 @@ class AccountControllerTest {
 
     @Test
     void updateAccount_shouldReRender_onValidationError() throws Exception {
+        var managerView = new AccountView(1L, "Test User", "test@test.com", "789", Role.MANAGER);
+        when(accountService.getAccountView(1L)).thenReturn(managerView);
+
         mockMvc.perform(post("/admin/accounts/1/edit"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("account/edit"))
                 .andExpect(model().attributeExists("roles"))
-                .andExpect(model().attributeExists("statuses"))
                 .andExpect(model().attributeExists("accountId"));
     }
 
     @Test
     void updateAccount_shouldReRender_whenValidatorRejects() throws Exception {
+        var managerView = new AccountView(1L, "Test User", "test@test.com", "789", Role.MANAGER);
+        when(accountService.getAccountView(1L)).thenReturn(managerView);
+
         doAnswer(invocation -> {
             BindingResult br = invocation.getArgument(2);
             br.rejectValue("email", "duplicate", "Email already exists");
@@ -180,12 +184,38 @@ class AccountControllerTest {
         mockMvc.perform(post("/admin/accounts/1/edit")
                         .param("fullName", "Test User")
                         .param("email", "test@test.com")
-                        .param("role", "RECEPTIONIST")
-                        .param("status", "ACTIVE"))
+                        .param("role", "RECEPTIONIST"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("account/edit"))
                 .andExpect(model().attributeExists("roles"))
-                .andExpect(model().attributeExists("statuses"))
                 .andExpect(model().attributeExists("accountId"));
+    }
+
+    @Test
+    void updateAccount_shouldRedirectWithError_whenDowngradingAdmin() throws Exception {
+        var adminView = new AccountView(1L, "Alice Admin", "admin@test.com", "123", Role.ADMIN);
+        when(accountService.getAccountView(1L)).thenReturn(adminView);
+
+        mockMvc.perform(post("/admin/accounts/1/edit")
+                        .param("fullName", "Alice Admin")
+                        .param("email", "admin@test.com")
+                        .param("role", "MANAGER"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/accounts"))
+                .andExpect(flash().attribute(ERROR, "Cannot downgrade an admin account"));
+    }
+
+    @Test
+    void updateAccount_shouldRedirectWithError_whenPromotingToAdmin() throws Exception {
+        var managerView = new AccountView(2L, "Mike Manager", "mike@test.com", "456", Role.MANAGER);
+        when(accountService.getAccountView(2L)).thenReturn(managerView);
+
+        mockMvc.perform(post("/admin/accounts/2/edit")
+                        .param("fullName", "Mike Manager")
+                        .param("email", "mike@test.com")
+                        .param("role", "ADMIN"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/accounts"))
+                .andExpect(flash().attribute(ERROR, "Cannot promote a user to admin"));
     }
 }

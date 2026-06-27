@@ -1,7 +1,6 @@
 package com.hospi.manage.features.reservation.controller;
 
 import com.hospi.manage.features.account.entity.Account;
-import com.hospi.manage.features.account.enums.AccountStatus;
 import com.hospi.manage.features.account.enums.Role;
 import com.hospi.manage.core.security.session.AccountPrincipal;
 import com.hospi.manage.features.notification.service.NotificationService;
@@ -63,7 +62,7 @@ class PaymentControllerTest {
         Account account = new Account();
         account.setEmail("receptionist@test.com");
         account.setRole(Role.RECEPTIONIST);
-        account.setStatus(AccountStatus.ACTIVE);
+        account.setActive(true);
         AccountPrincipal principal = new AccountPrincipal(account);
         var auth = new UsernamePasswordAuthenticationToken(
                 principal, principal.getPassword(), principal.getAuthorities());
@@ -124,3 +123,4 @@ class PaymentControllerTest {
                 .andExpect(flash().attributeExists(ERROR));
     }
 }
+

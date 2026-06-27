@@ -5,7 +5,6 @@ import com.hospi.manage.features.account.dto.AccountCreateForm;
 import com.hospi.manage.features.account.dto.AccountEditForm;
 import com.hospi.manage.features.account.dto.AccountView;
 import com.hospi.manage.features.account.entity.Account;
-import com.hospi.manage.features.account.enums.AccountStatus;
 import com.hospi.manage.features.account.enums.Role;
 import com.hospi.manage.features.account.repository.AccountRepository;
 
@@ -24,6 +23,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -95,7 +95,6 @@ class AccountServiceTest {
         account1.setEmail("alice@test.com");
         account1.setPhone("111");
         account1.setRole(Role.ADMIN);
-        account1.setStatus(AccountStatus.ACTIVE);
 
         Account account2 = new Account();
         account2.setId(2L);
@@ -103,7 +102,6 @@ class AccountServiceTest {
         account2.setEmail("bob@test.com");
         account2.setPhone("222");
         account2.setRole(Role.RECEPTIONIST);
-        account2.setStatus(AccountStatus.DISABLED);
 
         when(accountRepository.findAll()).thenReturn(List.of(account1, account2));
 
@@ -115,13 +113,11 @@ class AccountServiceTest {
         assertEquals("alice@test.com", views.get(0).email());
         assertEquals("111", views.get(0).phone());
         assertEquals(Role.ADMIN, views.get(0).role());
-        assertEquals(AccountStatus.ACTIVE, views.get(0).status());
         assertEquals(2L, views.get(1).id());
         assertEquals("Bob", views.get(1).fullName());
         assertEquals("bob@test.com", views.get(1).email());
         assertEquals("222", views.get(1).phone());
         assertEquals(Role.RECEPTIONIST, views.get(1).role());
-        assertEquals(AccountStatus.DISABLED, views.get(1).status());
     }
 
     @Test
@@ -139,7 +135,7 @@ class AccountServiceTest {
         assertEquals("555", saved.getPhone());
         assertEquals("hashedValue", saved.getPasswordHash());
         assertEquals(Role.RECEPTIONIST, saved.getRole());
-        assertEquals(AccountStatus.DISABLED, saved.getStatus());
+        assertTrue(saved.isActive());
     }
 
     @Test
@@ -150,7 +146,6 @@ class AccountServiceTest {
         account.setEmail("alice@test.com");
         account.setPhone("111");
         account.setRole(Role.ADMIN);
-        account.setStatus(AccountStatus.ACTIVE);
 
         when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
 
@@ -161,7 +156,6 @@ class AccountServiceTest {
         assertEquals("alice@test.com", view.email());
         assertEquals("111", view.phone());
         assertEquals(Role.ADMIN, view.role());
-        assertEquals(AccountStatus.ACTIVE, view.status());
     }
 
     @Test
@@ -172,7 +166,6 @@ class AccountServiceTest {
         account.setEmail("bob@test.com");
         account.setPhone("222");
         account.setRole(Role.MANAGER);
-        account.setStatus(AccountStatus.DISABLED);
 
         when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
 
@@ -182,7 +175,6 @@ class AccountServiceTest {
         assertEquals("bob@test.com", form.email());
         assertEquals("222", form.phone());
         assertEquals(Role.MANAGER, form.role());
-        assertEquals(AccountStatus.DISABLED, form.status());
     }
 
     @Test
@@ -193,11 +185,10 @@ class AccountServiceTest {
         account.setEmail("old@test.com");
         account.setPhone("000");
         account.setRole(Role.RECEPTIONIST);
-        account.setStatus(AccountStatus.DISABLED);
 
         when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
 
-        AccountEditForm form = new AccountEditForm("New Name", "new@test.com", "999", Role.ADMIN, AccountStatus.ACTIVE);
+        AccountEditForm form = new AccountEditForm("New Name", "new@test.com", "999", Role.ADMIN);
         accountService.updateAccount(1L, form);
 
         verify(accountRepository).save(account);
@@ -205,14 +196,14 @@ class AccountServiceTest {
         assertEquals("new@test.com", account.getEmail());
         assertEquals("999", account.getPhone());
         assertEquals(Role.ADMIN, account.getRole());
-        assertEquals(AccountStatus.ACTIVE, account.getStatus());
+        assertTrue(account.isActive());
     }
 
     @Test
     void shouldThrow_whenUpdatingNonExistent() {
         when(accountRepository.findById(1L)).thenReturn(Optional.empty());
 
-        AccountEditForm form = new AccountEditForm("N", "n@t.com", "0", Role.RECEPTIONIST, AccountStatus.ACTIVE);
+        AccountEditForm form = new AccountEditForm("N", "n@t.com", "0", Role.RECEPTIONIST);
 
         assertThrows(ResourceNotFoundException.class, () -> accountService.updateAccount(1L, form));
     }
