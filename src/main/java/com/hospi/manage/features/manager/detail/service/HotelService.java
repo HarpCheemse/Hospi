@@ -6,19 +6,23 @@ import com.hospi.manage.common.utils.ImageUtils;
 import com.hospi.manage.features.manager.detail.dto.HotelForm;
 import com.hospi.manage.features.manager.detail.entity.Hotel;
 import com.hospi.manage.features.manager.detail.entity.HotelPicture;
+import com.hospi.manage.features.manager.detail.repository.HotelPictureRepository;
 import com.hospi.manage.features.manager.detail.repository.HotelRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @Service
 public class HotelService {
     private final HotelRepository hotelRepository;
+    private final HotelPictureRepository hotelPictureRepository;
 
-    HotelService(HotelRepository hotelRepository) {
+    HotelService(HotelRepository hotelRepository, HotelPictureRepository hotelPictureRepository) {
         this.hotelRepository = hotelRepository;
+        this.hotelPictureRepository = hotelPictureRepository;
     }
 
     /** Retrieve the single hotel entity. */
@@ -46,9 +50,16 @@ public class HotelService {
         return form;
     }
 
-    /** Update hotel details and optionally replace the hotel picture. */
+    /**
+     * Update hotel details and manage images (cover, gallery additions, removals).
+     *
+     * @param form            hotel metadata fields
+     * @param coverImage      new cover image (replaces existing cover, sortOrder=0)
+     * @param newImages       new gallery images to append
+     * @param removeImageIds  IDs of existing gallery images to delete
+     */
     @Transactional
-    public void update(HotelForm form, MultipartFile images)
+    public void update(HotelForm form, MultipartFile coverImage, MultipartFile[] newImages, List<Long> removeImageIds)
             throws IOException {
         Hotel hotel = find();
 
@@ -62,18 +73,48 @@ public class HotelService {
         hotel.setFeatures(form.getFeatures());
         hotel.setStatus(form.getStatus());
 
-        if (images != null && !images.isEmpty()) {
-            byte[] compressed = ImageUtils.compressWebP(images,
-                    720,
-                    0.75f);
-            HotelPicture picture = new HotelPicture();
-            picture.setHotel(hotel);
-            picture.setImageData(compressed);
-
-            //This is temporary solution due to only have 1 picture per hotel
-            hotel.getPictures().clear();
-            hotel.getPictures().add(picture);
+        // Remove images by ID
+        if (removeImageIds != null && !removeImageIds.isEmpty()) {
+            List<HotelPicture> toRemove = hotelPictureRepository.findAllById(removeImageIds);
+            hotel.getPictures().removeAll(toRemove);
+            hotelPictureRepository.deleteAll(toRemove);
         }
+
+        // Replace cover image
+        if (coverImage != null && !coverImage.isEmpty()) {
+            byte[] compressed = ImageUtils.compressWebP(coverImage, 720, 0.75f);
+            HotelPicture cover = hotel.getPictures().stream()
+                    .filter(p -> p.getSortOrder() != null && p.getSortOrder() == 0)
+                    .findFirst()
+                    .orElseGet(() -> {
+                        HotelPicture p = new HotelPicture();
+                        p.setHotel(hotel);
+                        p.setSortOrder(0);
+                        hotel.getPictures().add(p);
+                        return p;
+                    });
+            cover.setImageData(compressed);
+        }
+
+        // Append new gallery images
+        if (newImages != null) {
+            int nextSort = hotel.getPictures().stream()
+                    .mapToInt(p -> p.getSortOrder() != null ? p.getSortOrder() : 0)
+                    .max()
+                    .orElse(0) + 1;
+
+            for (MultipartFile file : newImages) {
+                if (!file.isEmpty()) {
+                    byte[] compressed = ImageUtils.compressWebP(file, 720, 0.75f);
+                    HotelPicture pic = new HotelPicture();
+                    pic.setHotel(hotel);
+                    pic.setImageData(compressed);
+                    pic.setSortOrder(nextSort++);
+                    hotel.getPictures().add(pic);
+                }
+            }
+        }
+
         hotelRepository.save(hotel);
     }
 }

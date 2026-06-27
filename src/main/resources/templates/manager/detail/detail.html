@@ -127,6 +127,28 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- GALLERY -->
+                <section class="card">
+                    <div class="border-b border-border p-5">
+                        <h2 class="text-lg font-semibold">Gallery</h2>
+                        <p class="mt-1 text-sm text-muted-foreground">Additional hotel photos.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-3 p-5">
+                        <div th:each="pic, stat : ${hotel.pictures}"
+                             th:if="${stat.index > 0}">
+                            <div class="w-32 overflow-hidden rounded-xl border border-border bg-background">
+                                <img th:src="@{/hotel-picture/{id}(id=${pic.id})}"
+                                     alt=""
+                                     class="aspect-square w-full object-cover">
+                            </div>
+                        </div>
+                        <div th:if="${#lists.size(hotel.pictures) <= 1}"
+                             class="flex w-full items-center justify-center rounded-xl border-2 border-dashed border-border py-16 text-muted-foreground">
+                            No additional images
+                        </div>
+                    </div>
+                </section>
             </div>
 
             <!-- RIGHT -->
@@ -212,36 +234,6 @@
                         <div class="mt-4 text-sm">
                             <span th:text="${hotel.reviewCount}">0</span> Reviews
                         </div>
-                    </div>
-                </section>
-
-                <!-- SYSTEM -->
-                <section class="card">
-                    <div class="border-b border-border p-5">
-                        <h2 class="text-lg font-semibold">System Info</h2>
-                    </div>
-
-                    <div class="flex flex-col gap-4 p-5 text-sm">
-
-                        <div class="flex justify-between">
-                            <span class="text-muted-foreground">ID</span>
-                            <span class="font-medium" th:text="${hotel.id}">1</span>
-                        </div>
-
-                        <div class="flex justify-between">
-                            <span class="text-muted-foreground">Created</span>
-                            <span class="font-medium"
-                                  th:text="${#temporals.format(hotel.createdAt,'dd MMM yyyy HH:mm')}">
-                            </span>
-                        </div>
-
-                        <div class="flex justify-between">
-                            <span class="text-muted-foreground">Updated</span>
-                            <span class="font-medium"
-                                  th:text="${#temporals.format(hotel.updatedAt,'dd MMM yyyy HH:mm')}">
-                            </span>
-                        </div>
-
                     </div>
                 </section>
 
