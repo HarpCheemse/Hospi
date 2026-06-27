@@ -6,188 +6,124 @@
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
-
     <title>Edit Account | Hospi</title>
-
-    <link rel="stylesheet"
-          th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.9/cdn.min.js" defer></script>
 </head>
 
 <body class="staff-layout">
 
-    <!-- SIDEBAR -->
-    <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+<div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
 
-    <!-- MAIN -->
-    <main class="staff-page">
+<main class="staff-page">
 
-        <div th:replace="~{fragments/components/toast :: toast}"></div>
+    <div th:replace="~{fragments/components/toast :: toast}"></div>
 
-        <!-- HEADER -->
-        <header class="staff-page-header">
+    <!-- HEADER -->
+    <div class="staff-page-header">
 
-            <section>
+        <div class="flex items-center gap-4">
 
-                <h1 class="staff-page-title">
-                    Edit Account
-                </h1>
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/user.svg}" alt="">
+            </div>
 
-                <p class="page-description">
-                    Update account information and permissions.
-                </p>
+            <div>
+                <h1 class="staff-page-title">Edit Account</h1>
+                <p class="page-description">Update account information and permissions.</p>
+            </div>
 
-            </section>
+        </div>
 
-            <a th:href="@{'/admin/accounts/' + ${accountId}}"
-               class="btn btn-secondary btn-lg">
-                Cancel
-            </a>
+        <a th:href="@{'/admin/accounts/' + ${accountId}}"
+           class="btn btn-secondary btn-lg">
+            Back
+        </a>
 
-        </header>
+    </div>
 
-        <!-- FORM -->
-        <form th:action="@{'/admin/accounts/' + ${accountId} + '/edit'}"
-              th:object="${form}"
-              method="post"
-              class="flex flex-col gap-6"
-              novalidate>
+    <!-- FORM -->
+    <form th:object="${form}"
+          th:action="@{|/admin/accounts/${accountId}/edit|}"
+          method="post"
+          class="grid grid-cols-2 gap-6"
+          novalidate>
 
-            <section class="card">
+        <!-- ACCOUNT DETAILS -->
+        <section class="card col-span-2">
 
-                <div class="border-b border-border p-5">
+            <div class="border-b border-border px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <img th:src="@{/assets/icons/user.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div>
+                        <h2 class="text-xl font-semibold">Account Details</h2>
+                        <p class="mt-1 text-sm text-muted-foreground">Modify user information and role.</p>
+                    </div>
+                </div>
+            </div>
 
-                    <h2 class="text-lg font-semibold">
-                        Account Information
-                    </h2>
+            <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
 
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Full Name <span class="text-danger">*</span></label>
+                    <div th:replace="~{fragments/form-error :: error('fullName')}"></div>
+                    <input th:field="*{fullName}"
+                           type="text" class="input"
+                           th:classappend="${#fields.hasErrors('fullName')} ? 'input-error' : ''"
+                           required>
                 </div>
 
-                <div class="grid grid-cols-2 gap-5 p-5">
-
-                    <!-- FULL NAME -->
-                    <div>
-
-                        <label class="mb-2 block text-sm font-medium">
-                            Full Name <span class="text-danger">*</span>
-                        </label>
-                        <input type="text"
-                               th:field="*{fullName}"
-                               class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
-
-                        <p th:if="${#fields.hasErrors('fullName')}"
-                           th:errors="*{fullName}"
-                           class="mt-1 text-sm text-danger">
-                        </p>
-
-                    </div>
-
-                    <!-- EMAIL -->
-                    <div>
-
-                        <label class="mb-2 block text-sm font-medium">
-                            Email Address <span class="text-danger">*</span>
-                        </label>
-                        <input type="email"
-                               th:field="*{email}"
-                               class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
-
-                        <p th:if="${#fields.hasErrors('email')}"
-                           th:errors="*{email}"
-                           class="mt-1 text-sm text-danger">
-                        </p>
-
-                    </div>
-
-                    <!-- PHONE -->
-                    <div>
-
-                        <label class="mb-2 block text-sm font-medium">
-                            Phone Number
-                        </label>
-
-                        <input type="text"
-                               th:field="*{phone}"
-                               class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
-
-                        <p th:if="${#fields.hasErrors('phone')}"
-                           th:errors="*{phone}"
-                           class="mt-1 text-sm text-danger">
-                        </p>
-
-                    </div>
-
-                    <!-- ROLE -->
-                    <div>
-
-                        <label class="mb-2 block text-sm font-medium">
-                            Role <span class="text-danger">*</span>
-                        </label>
-                        <select th:field="*{role}"
-                                class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
-
-                            <option value="">Select role</option>
-
-                            <option th:each="role : ${roles}"
-                                    th:value="${role}"
-                                    th:text="${role}">
-                            </option>
-
-                        </select>
-
-                        <p th:if="${#fields.hasErrors('role')}"
-                           th:errors="*{role}"
-                           class="mt-1 text-sm text-danger">
-                        </p>
-
-                    </div>
-
-                    <!-- STATUS -->
-                    <div>
-
-                        <label class="mb-2 block text-sm font-medium">
-                            Status <span class="text-danger">*</span>
-                        </label>
-                        <select th:field="*{status}"
-                                class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
-
-                            <option value="">Select status</option>
-
-                            <option th:each="status : ${statuses}"
-                                    th:value="${status}"
-                                    th:text="${status}">
-                            </option>
-
-                        </select>
-
-                        <p th:if="${#fields.hasErrors('status')}"
-                           th:errors="*{status}"
-                           class="mt-1 text-sm text-danger">
-                        </p>
-
-                    </div>
-
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Email Address <span class="text-danger">*</span></label>
+                    <div th:replace="~{fragments/form-error :: error('email')}"></div>
+                    <input th:field="*{email}"
+                           type="email" class="input"
+                           th:classappend="${#fields.hasErrors('email')} ? 'input-error' : ''"
+                           required>
                 </div>
 
-            </section>
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Phone Number</label>
+                    <div th:replace="~{fragments/form-error :: error('phone')}"></div>
+                    <input th:field="*{phone}"
+                           type="text" class="input"
+                           th:classappend="${#fields.hasErrors('phone')} ? 'input-error' : ''">
+                </div>
 
-            <!-- ACTIONS -->
-            <div class="flex justify-end gap-3">
-
-                <a th:href="@{'/admin/accounts/' + ${accountId}}"
-                   class="btn btn-secondary btn-lg">
-                    Cancel
-                </a>
-
-                <button type="submit"
-                        class="btn btn-primary btn-lg">
-                    Save Changes
-                </button>
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Role <span class="text-danger">*</span></label>
+                    <div th:replace="~{fragments/form-error :: error('role')}"></div>
+                    <select th:field="*{role}" class="input"
+                            th:classappend="${#fields.hasErrors('role')} ? 'input-error' : ''">
+                        <option value="">Select role</option>
+                        <option th:each="role : ${roles}"
+                                th:value="${role}" th:text="${role}">
+                        </option>
+                    </select>
+                </div>
 
             </div>
 
-        </form>
+        </section>
 
-    </main>
+        <!-- ACTIONS -->
+        <section class="card col-span-2">
+
+            <div class="flex items-center justify-end gap-3 p-5">
+
+                <a th:href="@{'/admin/accounts/' + ${accountId}}"
+                   class="btn btn-secondary btn-lg">Cancel</a>
+
+                <button type="submit"
+                        class="btn btn-primary btn-lg">Save Changes</button>
+
+            </div>
+
+        </section>
+
+    </form>
+
+</main>
 
 </body>
 </html>
