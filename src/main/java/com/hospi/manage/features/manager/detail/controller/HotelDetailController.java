@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.util.List;
@@ -61,9 +62,11 @@ public class HotelDetailController {
     public String updateDetail(@ModelAttribute HotelForm form,
                                @RequestParam(value = "coverImage", required = false) MultipartFile coverImage,
                                @RequestParam(value = "newImages", required = false) MultipartFile[] newImages,
-                               @RequestParam(value = "removeImageIds", required = false) List<Long> removeImageIds)
+                               @RequestParam(value = "removeImageIds", required = false) List<Long> removeImageIds,
+                               RedirectAttributes redirect)
             throws IOException {
         hotelService.update(form, coverImage, newImages, removeImageIds);
+        redirect.addFlashAttribute(Attributes.SUCCESS, "Hotel details updated.");
         return "redirect:/manager/details";
     }
 }
