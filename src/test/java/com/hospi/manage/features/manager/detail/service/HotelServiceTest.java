@@ -7,6 +7,7 @@ import com.hospi.manage.features.manager.detail.dto.HotelForm;
 import com.hospi.manage.features.manager.detail.entity.Hotel;
 import com.hospi.manage.features.manager.detail.entity.HotelPicture;
 import com.hospi.manage.features.manager.detail.enums.HotelStatus;
+import com.hospi.manage.features.manager.detail.repository.HotelPictureRepository;
 import com.hospi.manage.features.manager.detail.repository.HotelRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,13 +32,16 @@ class HotelServiceTest {
     @Mock
     private HotelRepository hotelRepository;
 
+    @Mock
+    private HotelPictureRepository hotelPictureRepository;
+
     @Test
     void find_shouldReturnHotel_whenFound() {
         Hotel hotel = new Hotel();
         hotel.setId(1L);
         when(hotelRepository.findById(HotelConstants.HOTEL_ID)).thenReturn(Optional.of(hotel));
 
-        HotelService service = new HotelService(hotelRepository);
+        HotelService service = new HotelService(hotelRepository, hotelPictureRepository);
         Hotel result = service.find();
 
         assertNotNull(result);
@@ -47,7 +52,7 @@ class HotelServiceTest {
     void find_shouldThrow_whenNotFound() {
         when(hotelRepository.findById(HotelConstants.HOTEL_ID)).thenReturn(Optional.empty());
 
-        HotelService service = new HotelService(hotelRepository);
+        HotelService service = new HotelService(hotelRepository, hotelPictureRepository);
 
         assertThrows(ResourceNotFoundException.class, service::find);
     }
@@ -66,7 +71,7 @@ class HotelServiceTest {
         hotel.setStatus(HotelStatus.ACTIVE);
         when(hotelRepository.findById(HotelConstants.HOTEL_ID)).thenReturn(Optional.of(hotel));
 
-        HotelService service = new HotelService(hotelRepository);
+        HotelService service = new HotelService(hotelRepository, hotelPictureRepository);
         HotelForm form = service.getForm();
 
         assertEquals("Test Hotel", form.getName());
@@ -98,8 +103,8 @@ class HotelServiceTest {
         form.setFeatures("Updated features");
         form.setStatus(HotelStatus.CLOSED);
 
-        HotelService service = new HotelService(hotelRepository);
-        service.update(form, null);
+        HotelService service = new HotelService(hotelRepository, hotelPictureRepository);
+        service.update(form, null, null, null);
 
         verify(hotelRepository).save(hotel);
         assertEquals("Updated Hotel", hotel.getName());
@@ -114,28 +119,29 @@ class HotelServiceTest {
     }
 
     @Test
-    void update_shouldProcessImage_whenProvided() throws IOException {
+    void update_shouldReplaceCoverImage_whenProvided() throws IOException {
         Hotel hotel = new Hotel();
         hotel.setPictures(new ArrayList<>());
         when(hotelRepository.findById(HotelConstants.HOTEL_ID)).thenReturn(Optional.of(hotel));
         when(hotelRepository.save(any())).thenReturn(hotel);
 
-        MultipartFile images = mock(MultipartFile.class);
-        when(images.isEmpty()).thenReturn(false);
+        MultipartFile coverImage = mock(MultipartFile.class);
+        when(coverImage.isEmpty()).thenReturn(false);
 
         byte[] compressedData = new byte[]{1, 2, 3, 4};
 
-        HotelService service = new HotelService(hotelRepository);
+        HotelService service = new HotelService(hotelRepository, hotelPictureRepository);
 
         try (MockedStatic<ImageUtils> mocked = mockStatic(ImageUtils.class)) {
-            mocked.when(() -> ImageUtils.compressWebP(images, 720, 0.75f)).thenReturn(compressedData);
+            mocked.when(() -> ImageUtils.compressWebP(coverImage, 720, 0.75f)).thenReturn(compressedData);
 
-            service.update(new HotelForm(), images);
+            service.update(new HotelForm(), coverImage, null, null);
 
             verify(hotelRepository).save(hotel);
             assertEquals(1, hotel.getPictures().size());
+            assertEquals(0, hotel.getPictures().get(0).getSortOrder());
             assertArrayEquals(compressedData, hotel.getPictures().get(0).getImageData());
-            mocked.verify(() -> ImageUtils.compressWebP(images, 720, 0.75f));
+            mocked.verify(() -> ImageUtils.compressWebP(coverImage, 720, 0.75f));
         }
     }
 
@@ -143,8 +149,91 @@ class HotelServiceTest {
     void update_shouldThrow_whenHotelNotFound() {
         when(hotelRepository.findById(HotelConstants.HOTEL_ID)).thenReturn(Optional.empty());
 
-        HotelService service = new HotelService(hotelRepository);
+        HotelService service = new HotelService(hotelRepository, hotelPictureRepository);
 
-        assertThrows(ResourceNotFoundException.class, () -> service.update(new HotelForm(), null));
+        assertThrows(ResourceNotFoundException.class, () -> service.update(new HotelForm(), null, null, null));
+    }
+
+    @Test
+    void update_shouldReplaceExistingCoverImage_whenCoverExists() throws IOException {
+        HotelPicture existingCover = new HotelPicture();
+        existingCover.setId(1L);
+        existingCover.setSortOrder(0);
+        existingCover.setImageData(new byte[]{0});
+
+        Hotel hotel = new Hotel();
+        hotel.setPictures(new ArrayList<>(List.of(existingCover)));
+        when(hotelRepository.findById(HotelConstants.HOTEL_ID)).thenReturn(Optional.of(hotel));
+        when(hotelRepository.save(any())).thenReturn(hotel);
+
+        MultipartFile coverImage = mock(MultipartFile.class);
+        when(coverImage.isEmpty()).thenReturn(false);
+
+        byte[] compressedData = new byte[]{5, 6, 7, 8};
+
+        HotelService service = new HotelService(hotelRepository, hotelPictureRepository);
+
+        try (MockedStatic<ImageUtils> mocked = mockStatic(ImageUtils.class)) {
+            mocked.when(() -> ImageUtils.compressWebP(coverImage, 720, 0.75f)).thenReturn(compressedData);
+
+            service.update(new HotelForm(), coverImage, null, null);
+
+            verify(hotelRepository).save(hotel);
+            assertEquals(1, hotel.getPictures().size());
+            assertArrayEquals(compressedData, hotel.getPictures().get(0).getImageData());
+        }
+    }
+
+    @Test
+    void update_shouldAddGalleryImages_whenProvided() throws IOException {
+        Hotel hotel = new Hotel();
+        hotel.setPictures(new ArrayList<>());
+        when(hotelRepository.findById(HotelConstants.HOTEL_ID)).thenReturn(Optional.of(hotel));
+        when(hotelRepository.save(any())).thenReturn(hotel);
+
+        MultipartFile newImage1 = mock(MultipartFile.class);
+        when(newImage1.isEmpty()).thenReturn(false);
+        MultipartFile newImage2 = mock(MultipartFile.class);
+        when(newImage2.isEmpty()).thenReturn(false);
+
+        byte[] data1 = new byte[]{1};
+        byte[] data2 = new byte[]{2};
+
+        HotelService service = new HotelService(hotelRepository, hotelPictureRepository);
+
+        try (MockedStatic<ImageUtils> mocked = mockStatic(ImageUtils.class)) {
+            mocked.when(() -> ImageUtils.compressWebP(newImage1, 720, 0.75f)).thenReturn(data1);
+            mocked.when(() -> ImageUtils.compressWebP(newImage2, 720, 0.75f)).thenReturn(data2);
+
+            service.update(new HotelForm(), null, new MultipartFile[]{newImage1, newImage2}, null);
+
+            verify(hotelRepository).save(hotel);
+            assertEquals(2, hotel.getPictures().size());
+            assertEquals(1, hotel.getPictures().get(0).getSortOrder());
+            assertEquals(2, hotel.getPictures().get(1).getSortOrder());
+        }
+    }
+
+    @Test
+    void update_shouldRemoveImages_whenRemoveImageIdsProvided() throws IOException {
+        HotelPicture pic1 = new HotelPicture();
+        pic1.setId(1L);
+        pic1.setSortOrder(0);
+        HotelPicture pic2 = new HotelPicture();
+        pic2.setId(2L);
+        pic2.setSortOrder(1);
+
+        Hotel hotel = new Hotel();
+        hotel.setPictures(new ArrayList<>(List.of(pic1, pic2)));
+        when(hotelRepository.findById(HotelConstants.HOTEL_ID)).thenReturn(Optional.of(hotel));
+        when(hotelPictureRepository.findAllById(List.of(2L))).thenReturn(List.of(pic2));
+        when(hotelRepository.save(any())).thenReturn(hotel);
+
+        HotelService service = new HotelService(hotelRepository, hotelPictureRepository);
+        service.update(new HotelForm(), null, null, List.of(2L));
+
+        verify(hotelPictureRepository).deleteAll(List.of(pic2));
+        verify(hotelRepository).save(hotel);
+        assertEquals(1, hotel.getPictures().size());
     }
 }
