@@ -93,4 +93,52 @@ public class SystemConfigFormTest {
 
         assertFalse(violations.isEmpty());
     }
+
+    @Test
+    void shouldFail_whenDefaultDepositPercentageIsZero() {
+        SystemConfigForm form = new SystemConfigForm(
+                new BigDecimal("10.00"), new BigDecimal("0.00"), new BigDecimal("50.00"),
+                new BigDecimal("15.00"), 30, 24, 30, 5,
+                new BigDecimal("50.00"), 24);
+
+        Set<ConstraintViolation<SystemConfigForm>> violations = validator.validate(form);
+
+        assertFalse(violations.isEmpty());
+    }
+
+    @Test
+    void shouldFail_whenTaxRateOver100() {
+        SystemConfigForm form = new SystemConfigForm(
+                new BigDecimal("101.00"), new BigDecimal("20.00"), new BigDecimal("50.00"),
+                new BigDecimal("15.00"), 30, 24, 30, 5,
+                new BigDecimal("50.00"), 24);
+
+        Set<ConstraintViolation<SystemConfigForm>> violations = validator.validate(form);
+
+        assertFalse(violations.isEmpty());
+    }
+
+    @Test
+    void shouldFail_whenMaxBookingDaysOver30() {
+        SystemConfigForm form = new SystemConfigForm(
+                new BigDecimal("10.00"), new BigDecimal("20.00"), new BigDecimal("50.00"),
+                new BigDecimal("15.00"), 30, 24, 31, 5,
+                new BigDecimal("50.00"), 24);
+
+        Set<ConstraintViolation<SystemConfigForm>> violations = validator.validate(form);
+
+        assertFalse(violations.isEmpty());
+    }
+
+    @Test
+    void shouldFail_whenMaxRoomPerBookOver20() {
+        SystemConfigForm form = new SystemConfigForm(
+                new BigDecimal("10.00"), new BigDecimal("20.00"), new BigDecimal("50.00"),
+                new BigDecimal("15.00"), 30, 24, 30, 21,
+                new BigDecimal("50.00"), 24);
+
+        Set<ConstraintViolation<SystemConfigForm>> violations = validator.validate(form);
+
+        assertFalse(violations.isEmpty());
+    }
 }

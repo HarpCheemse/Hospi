@@ -67,7 +67,8 @@ class SystemConfigControllerTest {
         mockMvc.perform(get("/admin/configs/edit"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("config/edit"))
-                .andExpect(model().attribute(Attributes.FORM, form));
+                .andExpect(model().attribute(Attributes.FORM, form))
+                .andExpect(content().string(containsString("Edit System Configuration")));
     }
 
     @Test
