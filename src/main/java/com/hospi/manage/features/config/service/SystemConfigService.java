@@ -9,6 +9,7 @@ import com.hospi.manage.features.config.repository.SystemConfigRepository;
 import com.hospi.manage.features.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /** Business logic for reading and updating system-wide hotel configuration. */
 @Service
@@ -42,6 +43,7 @@ public class SystemConfigService {
     }
 
     /** Update all system configuration fields. */
+    @Transactional
     public void updateSystemConfigs(SystemConfigForm form) {
         SystemConfig configs = getConfig();
 
