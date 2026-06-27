@@ -1,6 +1,5 @@
 package com.hospi.manage.features.account.dto;
 
-import com.hospi.manage.features.account.enums.AccountStatus;
 import com.hospi.manage.features.account.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -23,9 +22,6 @@ public record AccountEditForm(
         String phone,
 
         @NotNull(message = "Role is required")
-        Role role,
-
-        @NotNull(message = "Status is required")
-        AccountStatus status
+        Role role
 ) {
 }

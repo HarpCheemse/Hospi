@@ -30,7 +30,7 @@ public class CredentialService {
                 account.getEmail(),
                 account.getRole().name(),
                 account.getPhone(),
-                account.getStatus().name(),
+                account.isActive() ? "Active" : "Inactive",
                 account.getCreatedAt());
 
         return view;

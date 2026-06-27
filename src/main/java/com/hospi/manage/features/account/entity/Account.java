@@ -1,6 +1,5 @@
 package com.hospi.manage.features.account.entity;
 
-import com.hospi.manage.features.account.enums.AccountStatus;
 import com.hospi.manage.features.account.enums.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -43,9 +42,8 @@ public class Account {
     @Column(name = "role", length = 50)
     private Role role;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 50)
-    private AccountStatus status;
+    @Column(name = "active")
+    private boolean active = true;
 
     /**
      * Set the creation timestamp before persisting.

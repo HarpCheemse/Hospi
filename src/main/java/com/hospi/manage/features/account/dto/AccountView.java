@@ -1,6 +1,5 @@
 package com.hospi.manage.features.account.dto;
 
-import com.hospi.manage.features.account.enums.AccountStatus;
 import com.hospi.manage.features.account.enums.Role;
 
 /** View model for displaying an account in a list. */
@@ -9,7 +8,6 @@ public record AccountView(
         String fullName,
         String email,
         String phone,
-        Role role,
-        AccountStatus status
+        Role role
 ) {
 }

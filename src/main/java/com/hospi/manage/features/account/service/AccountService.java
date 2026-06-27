@@ -5,7 +5,6 @@ import com.hospi.manage.features.account.dto.AccountCreateForm;
 import com.hospi.manage.features.account.dto.AccountEditForm;
 import com.hospi.manage.features.account.dto.AccountView;
 import com.hospi.manage.features.account.entity.Account;
-import com.hospi.manage.features.account.enums.AccountStatus;
 import com.hospi.manage.features.account.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,24 +20,29 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
 
-    /** Find an account by ID. */
+    /** Find an active account by ID. */
     public Account findById(Long id) {
-        return accountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Account"));
+        Account account = accountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Account"));
+        if (!account.isActive()) {
+            throw new ResourceNotFoundException("Account");
+        }
+        return account;
     }
 
-    /** Find an account by email address. */
+    /** Find an account by email address (any active status). */
     public Account findByEmail(String email) {
         return accountRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("Email"));
     }
 
-    /** Return all accounts as view models. */
+    /** Return all active accounts as view models. */
     public List<AccountView> findAllViews() {
-        return accountRepository.findAll().stream().map(account -> new AccountView(account.getId(),
-                account.getFullName(),
-                account.getEmail(),
-                account.getPhone(),
-                account.getRole(),
-                account.getStatus())).toList();
+        return accountRepository.findAll().stream()
+                .filter(Account::isActive)
+                .map(account -> new AccountView(account.getId(),
+                        account.getFullName(),
+                        account.getEmail(),
+                        account.getPhone(),
+                        account.getRole())).toList();
     }
 
     /** Create a new staff account with a hashed password. */
@@ -55,7 +59,6 @@ public class AccountService {
         account.setPasswordHash(passwordHash);
 
         account.setRole(form.role());
-        account.setStatus(AccountStatus.DISABLED);
 
         accountRepository.save(account);
     }
@@ -67,8 +70,7 @@ public class AccountService {
                 account.getFullName(),
                 account.getEmail(),
                 account.getPhone(),
-                account.getRole(),
-                account.getStatus());
+                account.getRole());
     }
 
     /** Return the edit form populated with existing account data. */
@@ -78,21 +80,21 @@ public class AccountService {
         return new AccountEditForm(account.getFullName(),
                 account.getEmail(),
                 account.getPhone(),
-                account.getRole(),
-                account.getStatus());
+                account.getRole());
     }
 
     /** Update an existing account's personal details, role, and status. */
     @Transactional
     public void updateAccount(Long id, AccountEditForm form) {
-
         Account account = accountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Account " + id));
+        if (!account.isActive()) {
+            throw new ResourceNotFoundException("Account " + id);
+        }
 
         account.setFullName(form.fullName());
         account.setEmail(form.email());
         account.setPhone(form.phone());
         account.setRole(form.role());
-        account.setStatus(form.status());
 
         accountRepository.save(account);
     }
@@ -100,16 +102,11 @@ public class AccountService {
     /** Re-hash all account passwords with the given raw password value. */
     @Transactional
     public void rehashAllPasswords(String defaultRawPassword) {
-
         List<Account> accounts = accountRepository.findAll();
-
         for (Account account : accounts) {
-
             String newHash = passwordEncoder.encode(defaultRawPassword);
-
             account.setPasswordHash(newHash);
         }
-
         accountRepository.saveAll(accounts);
     }
 }

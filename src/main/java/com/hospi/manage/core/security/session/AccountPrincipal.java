@@ -55,7 +55,7 @@ public class AccountPrincipal implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return account.getStatus().name().equals("ACTIVE");
+        return account.isActive();
     }
 
     @Override
@@ -65,6 +65,6 @@ public class AccountPrincipal implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return account.getStatus().name().equals("ACTIVE");
+        return account.isActive();
     }
 }
