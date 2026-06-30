@@ -55,6 +55,10 @@ public class RoomService {
         return roomRepository.findByActiveTrueOrderByFloorNumberAscRoomNumberAsc();
     }
 
+    public List<Room> getActiveDirtyRooms() {
+        return roomRepository.findByConditionStatusAndActiveTrueOrderByFloorNumberAscRoomNumberAsc(ConditionStatus.DIRTY);
+    }
+
     /** Create one or more rooms on a floor with auto-generated room numbers. */
     @Transactional
     public void createRoom(RoomCreateForm form) {
@@ -165,8 +169,19 @@ public class RoomService {
     @Transactional
     public void updateConditionStatus(Long id, ConditionStatus status) {
         Room room = findById(id);
+        ConditionStatus oldCondition = room.getConditionStatus();
         room.setConditionStatus(status);
         roomRepository.save(room);
+
+        if (oldCondition != ConditionStatus.CLEAN && status == ConditionStatus.CLEAN) {
+            notificationService.notifyRole(
+                    Role.RECEPTIONIST,
+                    "Room Ready",
+                    "Room " + room.getRoomNumber() + " is now clean and available",
+                    "ROOM",
+                    String.valueOf(room.getId())
+            );
+        }
     }
 
     /** Soft-delete a room by marking it inactive. */

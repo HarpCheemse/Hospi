@@ -20,6 +20,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import com.hospi.manage.features.admin.account.enums.Role;
+import com.hospi.manage.features.notification.service.NotificationService;
 
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +47,9 @@ class RoomServiceTest {
 
     @Mock
     private StayingGuestRepository stayingGuestRepository;
+
+    @Mock
+    private NotificationService notificationService;
 
     @InjectMocks
     private RoomService roomService;
@@ -305,5 +310,45 @@ class RoomServiceTest {
 
         verify(roomRepository,
                 never()).save(any());
+    }
+
+    @Test
+    void getActiveDirtyRooms_shouldReturnOnlyActiveDirtyRooms() {
+        Room room = new Room();
+        room.setId(1L);
+        room.setActive(true);
+        room.setConditionStatus(ConditionStatus.DIRTY);
+
+        when(roomRepository.findByConditionStatusAndActiveTrueOrderByFloorNumberAscRoomNumberAsc(ConditionStatus.DIRTY))
+                .thenReturn(List.of(room));
+
+        List<Room> result = roomService.getActiveDirtyRooms();
+
+        assertEquals(1, result.size());
+        assertEquals(ConditionStatus.DIRTY, result.get(0).getConditionStatus());
+        verify(roomRepository).findByConditionStatusAndActiveTrueOrderByFloorNumberAscRoomNumberAsc(ConditionStatus.DIRTY);
+    }
+
+    @Test
+    void updateConditionStatus_shouldNotifyReceptionist_whenRoomBecomesClean() {
+        Room room = new Room();
+        room.setId(1L);
+        room.setActive(true);
+        room.setRoomNumber("101");
+        room.setConditionStatus(ConditionStatus.DIRTY);
+
+        when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
+
+        roomService.updateConditionStatus(1L, ConditionStatus.CLEAN);
+
+        assertEquals(ConditionStatus.CLEAN, room.getConditionStatus());
+        verify(roomRepository).save(room);
+        verify(notificationService).notifyRole(
+                Role.RECEPTIONIST,
+                "Room Ready",
+                "Room 101 is now clean and available",
+                "ROOM",
+                "1"
+        );
     }
 }

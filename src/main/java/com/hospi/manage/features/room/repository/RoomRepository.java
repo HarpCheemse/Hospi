@@ -16,6 +16,8 @@ import java.util.Optional;
 public interface RoomRepository extends JpaRepository<Room, Long> {
     List<Room> findByActiveTrueOrderByFloorNumberAscRoomNumberAsc();
 
+    List<Room> findByConditionStatusAndActiveTrueOrderByFloorNumberAscRoomNumberAsc(com.hospi.manage.features.room.enums.ConditionStatus conditionStatus);
+
     Optional<Room> findByRoomNumberAndActiveTrue(String roomNumber);
 
     List<Room> findByRoomTypeIdAndOccupancyStatusAndActiveTrue(Long roomTypeId, OccupancyStatus occupancyStatus);
