@@ -6,6 +6,9 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+/**
+ * JPA entity representing an image associated with a hotel.
+ */
 @Entity
 @Table(name = "hotel_pictures")
 @Getter
@@ -29,6 +32,9 @@ public class HotelPicture {
     @JoinColumn(name = "hotel_id")
     private Hotel hotel;
 
+    /**
+     * Set the creation timestamp before persisting.
+     */
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();

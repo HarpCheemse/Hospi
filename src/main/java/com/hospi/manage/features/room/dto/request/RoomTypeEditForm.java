@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.math.BigDecimal;
 import java.util.List;
 
+/** Form for editing an existing room type. */
 public record RoomTypeEditForm(
         @NotNull(message = "Room category is required")
         RoomCategory category,
@@ -48,6 +49,7 @@ public record RoomTypeEditForm(
 
         List<Long> removeImageIds
 ) {
+    /** Create a form pre-populated from an existing room type. */
     public static RoomTypeEditForm from(RoomType roomType) {
         return new RoomTypeEditForm(
                 roomType.getCategory(),

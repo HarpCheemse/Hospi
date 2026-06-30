@@ -9,6 +9,7 @@ import com.hospi.manage.features.admin.config.repository.SystemConfigRepository;
 import com.hospi.manage.features.notification.service.NotificationService;
 import org.springframework.stereotype.Service;
 
+/** Business logic for reading and updating system-wide hotel configuration. */
 @Service
 public class SystemConfigService {
     private final SystemConfigRepository systemConfigRepository;
@@ -20,11 +21,13 @@ public class SystemConfigService {
         this.notificationService = notificationService;
     }
 
+    /** Retrieve the system configuration for the hotel. */
     public SystemConfig getConfig() {
         return systemConfigRepository.findById(HotelConstants.HOTEL_ID).
                 orElseThrow(() -> new ResourceNotFoundException("System configs"));
     }
 
+    /** Return the system configuration form populated with current values. */
     public SystemConfigForm getForm() {
         SystemConfig configs = getConfig();
         SystemConfigForm form = new SystemConfigForm(
@@ -42,6 +45,7 @@ public class SystemConfigService {
         return form;
     }
 
+    /** Update all system configuration fields. */
     public void updateSystemConfigs(SystemConfigForm form) {
         SystemConfig configs = getConfig();
 

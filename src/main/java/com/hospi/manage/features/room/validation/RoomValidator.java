@@ -7,6 +7,7 @@ import com.hospi.manage.features.room.repository.RoomRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 
+/** Validator for room create and edit forms ({@link RoomCreateForm}, {@link RoomEditForm}). */
 @Component
 public class RoomValidator {
     private final RoomRepository roomRepository;
@@ -15,6 +16,13 @@ public class RoomValidator {
         this.roomRepository = roomRepository;
     }
 
+    /**
+     * Validate a room-edit form for number format and uniqueness.
+     *
+     * @param room   the existing room being edited
+     * @param form   the edit form data
+     * @param errors binding result to populate with validation failures
+     */
     public void validateUpdate(Room room, RoomEditForm form, Errors errors) {
         if (errors.hasFieldErrors("roomNumber")) {
             return;
@@ -34,6 +42,12 @@ public class RoomValidator {
         }
     }
 
+    /**
+     * Validate a room-creation form for floor capacity.
+     *
+     * @param form   the room creation form data
+     * @param errors binding result to populate with validation failures
+     */
     public void validateCreate(RoomCreateForm form, Errors errors) {
         Integer highest =
                 roomRepository.findHighestRoomNumberByFloor(form.floor());

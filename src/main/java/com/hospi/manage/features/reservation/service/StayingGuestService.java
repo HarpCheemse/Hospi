@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+/** Business logic for managing staying guests associated with a reservation. */
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -21,10 +22,12 @@ public class StayingGuestService {
     private final StayingGuestRepository stayingGuestRepository;
     private final ReservationRepository reservationRepository;
 
+    /** Return all staying guests for a reservation. */
     public List<StayingGuest> getGuests(Long reservationId) {
         return stayingGuestRepository.findByReservationIdOrderByCreatedAtAsc(reservationId);
     }
 
+    /** Add a new staying guest to a reservation. */
     public int getAdultGuestCount(Long reservationId, LocalDate checkInAt) {
         return (int) stayingGuestRepository.findByReservationIdOrderByCreatedAtAsc(reservationId)
                 .stream()
@@ -45,6 +48,7 @@ public class StayingGuestService {
         return stayingGuestRepository.save(guest);
     }
 
+    /** Update an existing staying guest's details after verifying ownership. */
     public StayingGuest updateGuest(Long reservationId, Long guestId, StayingGuestForm form) {
         StayingGuest guest = stayingGuestRepository.findById(guestId)
                 .orElseThrow(() -> new ResourceNotFoundException("Staying guest"));
@@ -60,6 +64,7 @@ public class StayingGuestService {
         return stayingGuestRepository.save(guest);
     }
 
+    /** Find a staying guest by ID and verify it belongs to the reservation. */
     public StayingGuest getGuest(Long reservationId, Long guestId) {
         StayingGuest guest = stayingGuestRepository.findById(guestId)
                 .orElseThrow(() -> new ResourceNotFoundException("Staying guest"));
@@ -71,6 +76,7 @@ public class StayingGuestService {
         return guest;
     }
 
+    /** Delete a staying guest after verifying ownership. */
     public void deleteGuest(Long reservationId, Long guestId) {
         StayingGuest guest = stayingGuestRepository.findById(guestId)
                 .orElseThrow(() -> new ResourceNotFoundException("Staying guest"));

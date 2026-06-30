@@ -1,5 +1,6 @@
 package com.hospi.manage.features.reservation.service;
 
+import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.admin.account.enums.Role;
 import com.hospi.manage.features.guest.dto.BookingDraft;
 import com.hospi.manage.features.notification.service.NotificationService;
@@ -12,7 +13,6 @@ import com.hospi.manage.features.reservation.entity.ReservationDetail;
 import com.hospi.manage.features.reservation.enums.BookingSource;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
-import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.room.dto.response.RoomSelection;
 import com.hospi.manage.features.room.entity.RoomType;
 import com.hospi.manage.features.room.repository.RoomTypeRepository;
@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/** Business logic for reservation CRUD, check-in, stay extension, and online booking creation. */
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
@@ -39,44 +40,56 @@ public class ReservationService {
     private final RoomTypeRepository roomTypeRepository;
     private final PaymentRepository paymentRepository;
     private final RoomAvailabilityService roomAvailabilityService;
-    private final AvailabilityService availabilityService;
     private final NotificationService notificationService;
 
+    /** Find all reservations with the given status, ordered by check-in date descending. */
     public List<Reservation> findByStatus(ReservationStatus status) {
         return reservationRepository.findByStatusOrderByCheckInAtDesc(status);
     }
 
+    /** Find all reservations matching any of the given statuses. */
     public List<Reservation> findByStatuses(List<ReservationStatus> statuses) {
         return reservationRepository.findByStatusInOrderByCheckInAtDesc(statuses);
     }
 
+    /** Find reservations filtered by statuses, guest name, and optional date. */
     public List<Reservation> findFiltered(List<ReservationStatus> statuses,
-                                           String guestName,
-                                           LocalDate date) {
+                                          String guestName,
+                                          LocalDate date) {
         String searchPattern = "%";
         if (guestName != null && !guestName.isBlank()) {
             searchPattern = "%" + guestName.trim().toLowerCase() + "%";
         }
         if (date != null) {
-            return reservationRepository.findFilteredWithDate(statuses, searchPattern, date);
+            return reservationRepository.findFilteredWithDate(statuses,
+                    searchPattern,
+                    date);
         }
-        return reservationRepository.findFiltered(statuses, searchPattern);
+        return reservationRepository.findFiltered(statuses,
+                searchPattern);
     }
 
+    /** Find reservations filtered by statuses, guest name, and optional date with pagination. */
     public Page<Reservation> findFiltered(List<ReservationStatus> statuses,
-                                           String guestName,
-                                           LocalDate date,
-                                           Pageable pageable) {
+                                          String guestName,
+                                          LocalDate date,
+                                          Pageable pageable) {
         String searchPattern = "%";
         if (guestName != null && !guestName.isBlank()) {
             searchPattern = "%" + guestName.trim().toLowerCase() + "%";
         }
         if (date != null) {
-            return reservationRepository.findFilteredWithDate(statuses, searchPattern, date, pageable);
+            return reservationRepository.findFilteredWithDate(statuses,
+                    searchPattern,
+                    date,
+                    pageable);
         }
-        return reservationRepository.findFiltered(statuses, searchPattern, pageable);
+        return reservationRepository.findFiltered(statuses,
+                searchPattern,
+                pageable);
     }
 
+    /** Find checked-in reservations optionally filtered by search term. */
     public List<Reservation> findCheckedInFiltered(String search) {
         if (search == null || search.isBlank()) {
             return findByStatus(ReservationStatus.CHECKED_IN);
@@ -84,30 +97,44 @@ public class ReservationService {
         return reservationRepository.findCheckedInFiltered("%" + search.trim().toLowerCase() + "%");
     }
 
+    /** Find checked-in reservations with pagination and optional search filter. */
     public Page<Reservation> findCheckedInFiltered(String search, Pageable pageable) {
         if (search == null || search.isBlank()) {
-            return reservationRepository.findByStatusOrderByCheckInAtDesc(ReservationStatus.CHECKED_IN, pageable);
+            return reservationRepository.findByStatusOrderByCheckInAtDesc(ReservationStatus.CHECKED_IN,
+                    pageable);
         }
-        return reservationRepository.findCheckedInFiltered("%" + search.trim().toLowerCase() + "%", pageable);
+        return reservationRepository.findCheckedInFiltered("%" + search.trim().toLowerCase() + "%",
+                pageable);
     }
 
+    /** Find a reservation by ID. */
     public Reservation findById(Long id) {
         return reservationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Reservation"));
     }
 
-    public java.util.Optional<Reservation> findByPaymentIdempotencyKey(String paymentIdempotencyKey) {
-        return reservationRepository.findByPaymentIdempotencyKey(paymentIdempotencyKey);
+    /** Find a reservation by its payment idempotency key. */
+    public Reservation findByPaymentIdempotencyKey(String paymentIdempotencyKey) {
+        return reservationRepository.findByPaymentIdempotencyKey(paymentIdempotencyKey)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
     }
 
-    /// This function return RoomTypeId and amount of reservations for a given day range
-    public Map<Long, Integer> getBookedCounts(LocalDate checkInAt, LocalDate checkOutAt) {
-        return availabilityService.computeBookedCounts(checkInAt,
+    /** Compute the number of booked rooms per room type for a given date range. */
+    public Map<Long, Integer> computeBookedCounts(LocalDate checkInAt, LocalDate checkOutAt) {
+        return roomAvailabilityService.computeBookedCounts(checkInAt,
                 checkOutAt,
                 null);
     }
 
+    /** Create a new offline (receptionist) reservation with room selections. */
     @Transactional
     public Reservation createReservation(OfflineBookingForm form) {
+        Map<Long, Integer> required = form.roomSelections().stream()
+                .filter(r -> r.roomCount() != null && r.roomCount() > 0)
+                .collect(Collectors.toMap(RoomSelection::roomTypeId, RoomSelection::roomCount));
+        if (!required.isEmpty() && !roomAvailabilityService.canFulfil(required, form.checkInAt(), form.checkOutAt(), null)) {
+            throw new IllegalStateException("Selected rooms are no longer available");
+        }
+
         Reservation reservation = new Reservation();
         reservation.setGuestName(form.guestName());
         reservation.setGuestEmail(form.guestEmail());
@@ -128,20 +155,11 @@ public class ReservationService {
 
             if (count == null || count <= 0) continue;
 
-            RoomType roomType = roomTypeRepository.findById(roomTypeId).orElse(null);
-            if (roomType == null) continue;
+            RoomType roomType = roomTypeRepository.findById(roomTypeId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Room type " + roomTypeId));
 
-            ReservationDetail detail = new ReservationDetail();
-            detail.setReservation(reservation);
-            detail.setRoomType(roomType);
-            detail.setRoomCount(count);
-            detail.setBasePrice(roomType.getBasePrice());
-
-            BigDecimal lineTotal = roomType.getBasePrice().multiply(BigDecimal.valueOf(count));
-            detail.setTotalPrice(lineTotal);
-            totalPrice = totalPrice.add(lineTotal);
-
-            details.add(detail);
+            totalPrice = totalPrice.add(roomType.getBasePrice().multiply(BigDecimal.valueOf(count)));
+            details.add(buildDetail(reservation, roomType, count, 1));
         }
 
         reservation.setDetails(details);
@@ -161,6 +179,7 @@ public class ReservationService {
         return saved;
     }
 
+    /** Check in a confirmed reservation. */
     @Transactional
     public Reservation checkIn(Long reservationId, LocalDate today, String bookingCode, String principal) {
         Reservation reservation = reservationRepository.findById(reservationId)
@@ -204,52 +223,60 @@ public class ReservationService {
         return code.toString();
     }
 
+    /** Create a pending online reservation from the booking wizard draft. */
     @Transactional
     public Reservation createOnlineBookingPending(BookingDraft draft, String paymentIdempotencyKey) {
+        Map<Long, Integer> required = draft.getRooms().selections().stream()
+                .collect(Collectors.toMap(
+                        BookingDraft.RoomSelection::roomTypeId,
+                        BookingDraft.RoomSelection::count
+                ));
+        if (!roomAvailabilityService.canFulfil(required,
+                draft.getDates().checkInAt(),
+                draft.getDates().checkOutAt(),
+                null)) {
+            throw new IllegalStateException("Sorry, some of the rooms you selected are no longer available. Please revise your selection.");
+        }
+
         Reservation reservation = new Reservation();
-        reservation.setGuestName(draft.getGuestName());
-        reservation.setGuestEmail(draft.getGuestEmail());
-        reservation.setGuestPhone(draft.getGuestPhone());
-        reservation.setGuestDateOfBirth(draft.getGuestDateOfBirth());
-        reservation.setGuestNationality(draft.getGuestNationality());
-        reservation.setCheckInAt(draft.getCheckInAt());
-        reservation.setCheckOutAt(draft.getCheckOutAt());
+        reservation.setGuestName(draft.getGuest().name());
+        reservation.setGuestEmail(draft.getGuest().email());
+        reservation.setGuestPhone(draft.getGuest().phone());
+        reservation.setGuestDateOfBirth(draft.getGuest().dateOfBirth());
+        reservation.setGuestNationality(draft.getGuest().nationality());
+        reservation.setCheckInAt(draft.getDates().checkInAt());
+        reservation.setCheckOutAt(draft.getDates().checkOutAt());
         reservation.setStatus(ReservationStatus.PENDING);
         reservation.setSource(BookingSource.ONLINE);
         reservation.setConfirmationCode(generateConfirmationCode());
         reservation.setPaymentIdempotencyKey(paymentIdempotencyKey);
 
-        long nights = nightsBetween(draft.getCheckInAt(), draft.getCheckOutAt());
+        long nights = nightsBetween(draft.getDates().checkInAt(),
+                draft.getDates().checkOutAt());
 
-        List<Long> roomTypeIds = draft.getRoomSelections().stream()
+        List<Long> roomTypeIds = draft.getRooms().selections().stream()
                 .map(BookingDraft.RoomSelection::roomTypeId)
                 .toList();
         Map<Long, RoomType> roomTypeMap = roomTypeRepository.findAllById(roomTypeIds).stream()
-                .collect(Collectors.toMap(RoomType::getId, rt -> rt));
+                .collect(Collectors.toMap(RoomType::getId,
+                        rt -> rt));
 
         BigDecimal totalPrice = BigDecimal.ZERO;
         List<ReservationDetail> details = new ArrayList<>();
 
-        for (BookingDraft.RoomSelection room : draft.getRoomSelections()) {
+        for (BookingDraft.RoomSelection room : draft.getRooms().selections()) {
             Long roomTypeId = room.roomTypeId();
             Integer count = room.count();
 
             if (count == null || count <= 0) continue;
 
             RoomType roomType = roomTypeMap.get(roomTypeId);
-            if (roomType == null) continue;
+            if (roomType == null) {
+                throw new ResourceNotFoundException("Room type " + roomTypeId);
+            }
 
-            ReservationDetail detail = new ReservationDetail();
-            detail.setReservation(reservation);
-            detail.setRoomType(roomType);
-            detail.setRoomCount(count);
-            detail.setBasePrice(roomType.getBasePrice());
-
-            BigDecimal lineTotal = roomType.getBasePrice().multiply(BigDecimal.valueOf(count)).multiply(BigDecimal.valueOf(nights));
-            detail.setTotalPrice(lineTotal);
-            totalPrice = totalPrice.add(lineTotal);
-
-            details.add(detail);
+            totalPrice = totalPrice.add(roomType.getBasePrice().multiply(BigDecimal.valueOf(count)).multiply(BigDecimal.valueOf(nights)));
+            details.add(buildDetail(reservation, roomType, count, nights));
         }
 
         reservation.setDetails(details);
@@ -258,10 +285,20 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
 
+    /** Confirm a pending reservation and record the PayPal payment. */
     @Transactional
-    public void confirmAndAddPayment(Long reservationId, BigDecimal amount, String confirmedBy, String paymentIdempotencyKey) {
+    public void confirmAndAddPayment(Long reservationId, BigDecimal amount, String confirmedBy,
+                                     String paymentIdempotencyKey) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
+
+        if (reservation.getStatus() == ReservationStatus.CONFIRMED) {
+            return;
+        }
+        if (reservation.getStatus() != ReservationStatus.PENDING) {
+            throw new IllegalStateException("Reservation cannot be confirmed in current status");
+        }
+
         reservation.setStatus(ReservationStatus.CONFIRMED);
         reservation.setPaymentIdempotencyKey(paymentIdempotencyKey);
 
@@ -272,6 +309,7 @@ public class ReservationService {
         payment.setConfirmedAt(LocalDateTime.now());
         payment.setConfirmedBy(confirmedBy);
 
+        reservationRepository.save(reservation);
         paymentRepository.save(payment);
 
         notificationService.notifyRole(
@@ -283,6 +321,7 @@ public class ReservationService {
         );
     }
 
+    /** Cancel a pending reservation. */
     @Transactional
     public void cancelPendingReservation(Long id) {
         Reservation reservation = findById(id);
@@ -293,6 +332,7 @@ public class ReservationService {
         reservationRepository.save(reservation);
     }
 
+    /** Extend a checked-in reservation by the given number of extra days. */
     @Transactional
     public Reservation extendStay(Long reservationId, int extraDays) {
         if (extraDays <= 0) {
@@ -311,7 +351,7 @@ public class ReservationService {
                 Collectors.summingInt(ReservationDetail::getRoomCount)));
 
         // canFulfil returns true when rooms ARE available — no inversion needed
-        if (!availabilityService.canFulfil(required,
+        if (!roomAvailabilityService.canFulfil(required,
                 reservation.getCheckOutAt(),
                 newCheckout,
                 reservationId)) {
@@ -334,6 +374,23 @@ public class ReservationService {
     }
 
     private long nightsBetween(LocalDate checkIn, LocalDate checkOut) {
-        return ChronoUnit.DAYS.between(checkIn, checkOut);
+        if (!checkOut.isAfter(checkIn)) {
+            throw new IllegalArgumentException("Check-out date must be after check-in date");
+        }
+        return ChronoUnit.DAYS.between(checkIn,
+                checkOut);
+    }
+
+    private ReservationDetail buildDetail(Reservation reservation, RoomType roomType, int count, long nights) {
+        ReservationDetail detail = new ReservationDetail();
+        detail.setReservation(reservation);
+        detail.setRoomType(roomType);
+        detail.setRoomCount(count);
+        detail.setBasePrice(roomType.getBasePrice());
+        BigDecimal lineTotal = roomType.getBasePrice()
+                .multiply(BigDecimal.valueOf(count))
+                .multiply(BigDecimal.valueOf(nights));
+        detail.setTotalPrice(lineTotal);
+        return detail;
     }
 }

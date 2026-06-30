@@ -6,6 +6,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * JPA entity representing a physical room with its type, number, floor, and status flags.
+ */
 @Entity
 @Table(name = "rooms")
 @Getter

@@ -14,9 +14,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
 
+/** Utility service that resizes and converts uploaded images to WebP format. */
 @Service
 public class ImageCompressionService {
 
+    /** Resize and convert an uploaded image to WebP format. */
     public byte[] toWebp(MultipartFile file, int targetWidth, float quality) throws IOException {
 
         BufferedImage original = ImageIO.read(file.getInputStream());

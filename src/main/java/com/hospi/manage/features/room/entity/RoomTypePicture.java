@@ -6,6 +6,9 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+/**
+ * JPA entity representing an image (cover or gallery) associated with a room type.
+ */
 @Entity
 @Table(name = "room_type_pictures")
 @Getter
@@ -30,15 +33,24 @@ public class RoomTypePicture {
     @JoinColumn(name = "room_type_id")
     private RoomType roomType;
 
+    /**
+     * Set the creation timestamp before persisting.
+     */
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();
     }
 
+    /**
+     * Return {@code true} if this picture is the cover image (sort order is 1).
+     */
     public boolean isCover() {
         return Integer.valueOf(1).equals(this.sortOrder);
     }
 
+    /**
+     * Return {@code true} if this picture is not the cover image (gallery image).
+     */
     public boolean isAdditional() {
         return !isCover();
     }

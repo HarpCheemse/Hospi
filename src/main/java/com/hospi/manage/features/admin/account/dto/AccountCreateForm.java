@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+/** Form for creating a new staff account. */
 public record AccountCreateForm(
 
         @NotBlank(message = "Full name is required")

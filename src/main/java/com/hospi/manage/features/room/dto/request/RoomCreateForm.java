@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
+/** Form for creating rooms on a floor for a room type. */
 public record RoomCreateForm(
         @NotNull(message = "Floor is required")
         @Min(value = 1, message = "Floor can not be less than")

@@ -7,6 +7,7 @@ import com.hospi.manage.features.room.enums.BedType;
 import java.math.BigDecimal;
 import java.util.List;
 
+/** View model for room type availability with pictures and counts. */
 public record RoomTypeAvailabilityView(
         Long roomTypeId,
         String name,

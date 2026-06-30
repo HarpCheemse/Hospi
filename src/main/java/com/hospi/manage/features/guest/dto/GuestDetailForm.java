@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
+/** Form for capturing guest personal details during booking. */
 public record GuestDetailForm(
         @NotBlank(message = "Full name is required")
         @Size(max = 30, message = "Full name must not exceed 30 characters")

@@ -32,7 +32,7 @@
     ];
     var MAX_ROOMS = /*[[${maxRooms}]]*/ 10;
     var DEPOSIT_PCT = /*[[${depositPercentage}]]*/ 20;
-    var NIGHTS = /*[[${draft.numberOfNights}]]*/ 1;
+    var NIGHTS = /*[[${nights}]]*/ 1;
 </script>
 
 <main class="flex-grow">
@@ -47,8 +47,8 @@
                 <div class="text-left">
                     <h1 class="text-4xl md:text-5xl font-bold font-display text-text">Choose Your Rooms</h1>
                     <p class="mt-1 text-sm text-muted-foreground">
-                        Select the rooms you'd like for <strong th:text="${draft.checkInAt}">check-in</strong> to <strong
-                            th:text="${draft.checkOutAt}">check-out</strong>.
+                        Select the rooms you'd like for <strong th:text="${draft.dates.checkInAt}">check-in</strong> to <strong
+                            th:text="${draft.dates.checkOutAt}">check-out</strong>.
                     </p>
                 </div>
             </div>

@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/** Validator for the room-type creation form ({@link RoomTypeCreateForm}). */
 @Component
 public class CreateRoomTypeValidator {
 
@@ -17,12 +18,18 @@ public class CreateRoomTypeValidator {
     private static final List<String> ALLOWED_IMAGE_TYPES = List.of("image/jpeg",
             "image/png",
             "image/webp");
-    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
 
     public CreateRoomTypeValidator(RoomTypeRepository roomTypeRepository) {
         this.roomTypeRepository = roomTypeRepository;
     }
 
+    /**
+     * Validate the room-type creation form for duplicates, cover image, features, and price.
+     *
+     * @param form   the room-type creation form data
+     * @param errors binding result to populate with validation failures
+     */
     public void validate(RoomTypeCreateForm form, Errors errors) {
         validateDuplicateRoomType(form,
                 errors);

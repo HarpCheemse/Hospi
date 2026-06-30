@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import static com.hospi.manage.features.reservation.enums.ReservationStatus.*;
 
+/** Business logic for guest-side booking lookup, tracking, and review submission. */
 @Service
 @RequiredArgsConstructor
 public class BookingTrackerService {
@@ -22,17 +23,20 @@ public class BookingTrackerService {
     private final ReservationRepository reservationRepository;
     private final ReviewRepository reviewRepository;
 
+    /** Find a reservation by guest email and confirmation code. */
     @Transactional(readOnly = true)
     public Reservation lookupByEmailAndCode(String email, String code) {
         return reservationRepository.findByGuestEmailAndConfirmationCode(email, code)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
     }
 
+    /** Resolve multiple reservations by their confirmation codes. */
     @Transactional(readOnly = true)
     public List<Reservation> resolveByCodes(Set<String> codes) {
         return reservationRepository.findByConfirmationCodeIn(codes);
     }
 
+    /** Build a map of reservation ID to existing review for a list of reservations. */
     @Transactional(readOnly = true)
     public Map<Long, Review> buildReviewMap(List<Reservation> reservations) {
         List<Long> ids = reservations.stream().map(Reservation::getId).toList();
@@ -40,6 +44,7 @@ public class BookingTrackerService {
                 .collect(Collectors.toMap(r -> r.getReservation().getId(), r -> r));
     }
 
+    /** Build a map of reservation ID to CSS pill class based on status. */
     public Map<Long, String> buildPillClasses(List<Reservation> reservations) {
         return reservations.stream().collect(Collectors.toMap(
                 Reservation::getId,
@@ -47,6 +52,7 @@ public class BookingTrackerService {
         ));
     }
 
+    /** Submit a review for a checked-out reservation belonging to the tracked codes. */
     @Transactional
     public Review submitReview(Long reservationId, Integer rating, Set<String> trackedCodes) {
         List<Reservation> trackedReservations = resolveByCodes(trackedCodes);

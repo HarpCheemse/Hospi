@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+/** View model for a single reservation row in a list. */
 public record ReservationListItemView(
     Long id,
     String guestName,

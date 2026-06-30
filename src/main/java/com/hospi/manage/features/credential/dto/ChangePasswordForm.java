@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Size;
 
 import java.beans.ConstructorProperties;
 
+/** Form for changing the current user's password. */
 public record ChangePasswordForm(
 
         @NotBlank(message = "Current password is required")

@@ -21,13 +21,14 @@ public class HotelService {
         this.hotelRepository = hotelRepository;
     }
 
-    /// There is only 1 hotel
+    /** Retrieve the single hotel entity. */
     public Hotel find() {
         return hotelRepository.findById(HotelConstants.HOTEL_ID).orElseThrow(
                 () -> new ResourceNotFoundException("Hotel")
         );
     }
 
+    /** Return the hotel edit form populated with current values. */
     public HotelForm getForm() {
         Hotel hotel = find();
         HotelForm form = new HotelForm();
@@ -46,6 +47,7 @@ public class HotelService {
         return form;
     }
 
+    /** Update hotel details and optionally replace the hotel picture. */
     @Transactional
     public void update(HotelForm form, MultipartFile images)
             throws IOException {
