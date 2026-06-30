@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+<aside th:fragment="sidebar"
+       class="flex h-full w-64 flex-col border-r border-border bg-surface p-5">
+
+    <!-- BRAND -->
+    <div class="mb-8 flex items-center gap-3">
+        <div class="h-9 w-9 rounded-lg bg-primary"></div>
+        <span class="text-lg font-semibold text-foreground">Hospi</span>
+    </div>
+
+    <!-- NAV -->
+    <nav class="flex-1 overflow-y-auto space-y-1 text-sm">
+
+        <!-- TASKS -->
+        <a th:href="@{/leader}"
+           class="flex items-center gap-3 rounded-lg p-2"
+           th:classappend="${activeSidebar == 'TASKS'}
+                 ? ' bg-primary/10 text-primary font-medium'
+                 : ' hover:bg-muted text-foreground'">
+
+            <img th:src="@{/assets/icons/list-todo.svg}" alt="Tasks"/>
+            Tasks
+
+        </a>
+
+        <!-- NOTIFICATIONS -->
+        <a th:href="@{/notifications}"
+           class="flex items-center justify-between rounded-lg p-2"
+           th:classappend="${activeSidebar == 'NOTIFICATIONS'}
+                 ? ' bg-primary/10 text-primary font-medium'
+                 : ' hover:bg-muted text-foreground'">
+
+            <div class="flex items-center gap-3">
+                <img th:src="@{/assets/icons/bell.svg}" alt="Notifications"/>
+                Notifications
+            </div>
+
+            <span class="pill-notification" th:if="${unreadNotificationCount > 0}" th:text="${unreadNotificationCount}">0</span>
+
+        </a>
+
+        <!-- CREDENTIALS -->
+        <a th:href="@{/credentials}"
+           class="flex items-center gap-3 rounded-lg p-2"
+           th:classappend="${activeSidebar == 'CREDENTIALS'}
+                 ? ' bg-primary/10 text-primary font-medium'
+                 : ' hover:bg-muted text-foreground'">
+
+            <img th:src="@{/assets/icons/key-square.svg}" alt="Credentials"/>
+            Credentials
+
+        </a>
+
+    </nav>
+
+    <!-- LOGOUT -->
+    <div class="mt-auto pt-4">
+        <form th:action="@{/logout}" method="post" novalidate>
+            <button type="submit" class="btn btn-danger w-full justify-start">
+                <img th:src="@{/assets/icons/log-out.svg}"
+                     class="h-5 w-5 brightness-0 invert" alt="Logout">
+                Logout
+            </button>
+        </form>
+    </div>
+
+</aside>
+
+</body>
+</html>
