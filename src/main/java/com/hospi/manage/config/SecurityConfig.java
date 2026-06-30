@@ -100,6 +100,7 @@ public class SecurityConfig {
                         .requestMatchers("/manager/**").hasRole("MANAGER")
                         .requestMatchers("/receptionist/**").hasAnyRole("RECEPTIONIST",
                                 "ADMIN")
+                        .requestMatchers("/leader/**").hasRole("LEADER")
 
                         .anyRequest().authenticated())
 
