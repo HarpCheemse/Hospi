@@ -454,4 +454,137 @@ class BookingFlowControllerTest {
         mockMvc.perform(get("/book/confirmation").param("code",
                 "HSP-ABCDEF")).andExpect(status().isOk()).andExpect(view().name("guest/booking/confirmation")).andExpect(model().attributeExists(BOOKING_CODE)).andExpect(content().string(containsString("HSP-ABCDEF")));
     }
+
+    // --- POST /book (submitDates) ---
+
+    @Test
+    void submitDates_shouldReRender_whenBindingErrors() throws Exception {
+        mockMvc.perform(post("/book")
+                        .param("checkInAt", "")
+                        .param("checkOutAt", ""))
+                .andExpect(status().isOk())
+                .andExpect(view().name("guest/booking/book"));
+    }
+
+    @Test
+    void submitDates_shouldRedirectToRooms_whenValid() throws Exception {
+        mockMvc.perform(post("/book")
+                        .param("checkInAt", LocalDate.now().plusDays(1).toString())
+                        .param("checkOutAt", LocalDate.now().plusDays(5).toString()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/book/rooms"));
+    }
+
+    // --- POST /verify/send-otp (sendOtp) ---
+
+    @Test
+    void sendOtp_shouldReRender_whenBindingErrors() throws Exception {
+        var draft = new BookingDraft();
+        draft.setDates(new BookingDraft.BookingDates(LocalDate.now().plusDays(5), LocalDate.now().plusDays(10)));
+        draft.setRooms(new BookingDraft.BookingRooms(List.of(new BookingDraft.RoomSelection(1L, "Deluxe", 1, java.math.BigDecimal.valueOf(150))), java.math.BigDecimal.valueOf(750), java.math.BigDecimal.valueOf(150), 5));
+
+        mockMvc.perform(post("/book/verify/send-otp")
+                        .sessionAttr(BOOKING_DRAFT, draft)
+                        .param("guestName", "")
+                        .param("guestEmail", "")
+                        .param("guestPhone", "")
+                        .param("guestDateOfBirth", "")
+                        .param("guestNationality", ""))
+                .andExpect(status().isOk())
+                .andExpect(view().name("guest/booking/verify"));
+    }
+
+    @Test
+    void sendOtp_shouldRedirectWithError_whenRateLimited() throws Exception {
+        var draft = new BookingDraft();
+        draft.setDates(new BookingDraft.BookingDates(LocalDate.now().plusDays(5), LocalDate.now().plusDays(10)));
+        draft.setRooms(new BookingDraft.BookingRooms(List.of(new BookingDraft.RoomSelection(1L, "Deluxe", 1, java.math.BigDecimal.valueOf(150))), java.math.BigDecimal.valueOf(750), java.math.BigDecimal.valueOf(150), 5));
+
+        when(bookingFlowService.initiateBookingOtp(any())).thenReturn(null);
+
+        mockMvc.perform(post("/book/verify/send-otp")
+                        .sessionAttr(BOOKING_DRAFT, draft)
+                        .param("guestName", "Jane")
+                        .param("guestEmail", "jane@test.com")
+                        .param("guestPhone", "1234567890")
+                        .param("guestDateOfBirth", "1990-01-01")
+                        .param("guestNationality", "US"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/book/verify"))
+                .andExpect(flash().attributeExists(ERROR));
+    }
+
+    @Test
+    void sendOtp_shouldRedirectToVerifyOtp_whenValid() throws Exception {
+        var draft = new BookingDraft();
+        draft.setDates(new BookingDraft.BookingDates(LocalDate.now().plusDays(5), LocalDate.now().plusDays(10)));
+        draft.setRooms(new BookingDraft.BookingRooms(List.of(new BookingDraft.RoomSelection(1L, "Deluxe", 1, java.math.BigDecimal.valueOf(150))), java.math.BigDecimal.valueOf(750), java.math.BigDecimal.valueOf(150), 5));
+
+        when(bookingFlowService.initiateBookingOtp(any())).thenReturn("j***@test.com");
+
+        mockMvc.perform(post("/book/verify/send-otp")
+                        .sessionAttr(BOOKING_DRAFT, draft)
+                        .param("guestName", "Jane")
+                        .param("guestEmail", "jane@test.com")
+                        .param("guestPhone", "1234567890")
+                        .param("guestDateOfBirth", "1990-01-01")
+                        .param("guestNationality", "US"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/book/verify-otp"))
+                .andExpect(flash().attributeExists(SUCCESS));
+    }
+
+    // --- POST /verify-otp (verifyOtp) ---
+
+    @Test
+    void verifyOtp_shouldRedirectToVerify_whenNoGuest() throws Exception {
+        mockMvc.perform(post("/book/verify-otp")
+                        .sessionAttr(BOOKING_DRAFT, new BookingDraft())
+                        .param("otp", "123456"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/book/verify"));
+    }
+
+    @Test
+    void verifyOtp_shouldReRender_whenBindingErrors() throws Exception {
+        var draft = new BookingDraft();
+        draft.setGuest(new BookingDraft.BookingGuest("Jane", "jane@test.com", null, null, null));
+
+        mockMvc.perform(post("/book/verify-otp")
+                        .sessionAttr(BOOKING_DRAFT, draft)
+                        .param("otp", ""))
+                .andExpect(status().isOk())
+                .andExpect(view().name("guest/booking/verify-otp"))
+                .andExpect(model().attributeExists(OTP_FORM));
+    }
+
+    @Test
+    void verifyOtp_shouldRedirectWithError_whenOtpInvalid() throws Exception {
+        var draft = new BookingDraft();
+        draft.setGuest(new BookingDraft.BookingGuest("Jane", "jane@test.com", null, null, null));
+
+        when(bookingFlowService.verifyBookingOtp("jane@test.com", "000000")).thenReturn(null);
+
+        mockMvc.perform(post("/book/verify-otp")
+                        .sessionAttr(BOOKING_DRAFT, draft)
+                        .param("otp", "000000"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/book/verify-otp"))
+                .andExpect(flash().attributeExists(ERROR));
+    }
+
+    @Test
+    void verifyOtp_shouldRedirectToPay_whenValid() throws Exception {
+        var draft = new BookingDraft();
+        draft.setGuest(new BookingDraft.BookingGuest("Jane", "jane@test.com", null, null, null));
+
+        when(bookingFlowService.verifyBookingOtp("jane@test.com", "123456")).thenReturn("valid-token");
+
+        mockMvc.perform(post("/book/verify-otp")
+                        .sessionAttr(BOOKING_DRAFT, draft)
+                        .param("otp", "123456"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/book/pay"))
+                .andExpect(request().sessionAttribute("otpToken", "valid-token"));
+    }
 }

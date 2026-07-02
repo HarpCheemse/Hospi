@@ -138,6 +138,9 @@ public class CreateRoomTypeValidator {
     }
 
     private void validatePrice(RoomTypeCreateForm form, Errors errors) {
+        if (form.basePrice() == null || errors.hasFieldErrors("basePrice")) {
+            return;
+        }
         if (form.basePrice().scale() > 2) {
             errors.rejectValue("basePrice",
                     "invalid",

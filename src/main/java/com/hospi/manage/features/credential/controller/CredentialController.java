@@ -2,8 +2,8 @@ package com.hospi.manage.features.credential.controller;
 
 import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.core.security.session.AccountPrincipal;
-import com.hospi.manage.features.admin.account.enums.Role;
-import com.hospi.manage.features.admin.account.validator.AccountValidator;
+import com.hospi.manage.features.account.enums.Role;
+import com.hospi.manage.features.account.validator.AccountValidator;
 import com.hospi.manage.features.credential.dto.ChangePasswordForm;
 import com.hospi.manage.features.credential.dto.CredentialView;
 import com.hospi.manage.features.credential.service.CredentialService;

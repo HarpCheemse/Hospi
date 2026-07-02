@@ -1,6 +1,6 @@
 package com.hospi.manage.features.notification.repository;
 
-import com.hospi.manage.features.admin.account.entity.Account;
+import com.hospi.manage.features.account.entity.Account;
 import com.hospi.manage.features.notification.entity.Notification;
 import com.hospi.manage.features.notification.entity.StaffNotificationView;
 import org.springframework.data.domain.Page;

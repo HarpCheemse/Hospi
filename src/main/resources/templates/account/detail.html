@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Account Details | Hospi</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.9/cdn.min.js" defer></script>
+</head>
+
+<body class="staff-layout">
+
+<div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+
+<main class="staff-page">
+
+    <div th:replace="~{fragments/components/toast :: toast}"></div>
+
+    <!-- HEADER -->
+    <div class="staff-page-header">
+
+        <div class="flex items-center gap-4">
+
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/user.svg}" alt="">
+            </div>
+
+            <div>
+                <h1 class="staff-page-title" th:text="${account.fullName}">John Doe</h1>
+                <p class="page-description">Review account information and permissions.</p>
+            </div>
+
+        </div>
+
+        <div class="flex items-center gap-3">
+
+            <a th:href="@{/admin/accounts}"
+               class="btn btn-secondary btn-lg">Back</a>
+
+            <a th:href="@{'/admin/accounts/' + ${account.id} + '/edit'}"
+               class="btn btn-primary btn-lg">Edit Account</a>
+
+        </div>
+
+    </div>
+
+    <!-- ACCOUNT INFORMATION -->
+    <section class="card">
+
+        <div class="border-b border-border px-6 py-5">
+            <div class="flex items-center gap-3">
+                <img th:src="@{/assets/icons/user.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                <div>
+                    <h2 class="text-xl font-semibold">Account Information</h2>
+                    <p class="mt-1 text-sm text-muted-foreground">Personal details and role assignment.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
+
+            <div>
+                <p class="text-sm text-muted-foreground">Full Name</p>
+                <p class="mt-1 font-medium" th:text="${account.fullName}">John Doe</p>
+            </div>
+
+            <div>
+                <p class="text-sm text-muted-foreground">Email Address</p>
+                <p class="mt-1 font-medium truncate" th:text="${account.email}">john@hospi.com</p>
+            </div>
+
+            <div>
+                <p class="text-sm text-muted-foreground">Phone Number</p>
+                <p class="mt-1 font-medium" th:text="${account.phone}">0123456789</p>
+            </div>
+
+            <div>
+                <p class="text-sm text-muted-foreground">Role</p>
+                <div class="mt-1">
+                    <span class="pill-muted" th:text="${account.role}">MANAGER</span>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+</body>
+</html>
+

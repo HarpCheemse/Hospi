@@ -71,7 +71,7 @@
             <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-2 xl:grid-cols-3">
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium">Category <span class="text-danger">*</span></label>
-                    <div th:replace="~{fragments/form-error :: error('category')"></div>
+                    <div th:replace="~{fragments/form-error :: error('category')}"></div>
                     <select th:field="*{category}" class="input">
                         <option th:each="cat : ${view.categories}"
                                 th:value="${cat}" th:text="${cat}">
@@ -80,7 +80,7 @@
                 </div>
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium">Tier <span class="text-danger">*</span></label>
-                    <div th:replace="~{fragments/form-error :: error('tier')"></div>
+                    <div th:replace="~{fragments/form-error :: error('tier')}"></div>
                     <select th:field="*{tier}" class="input">
                         <option th:each="tier : ${view.tiers}"
                                 th:value="${tier}" th:text="${tier}">
@@ -89,7 +89,7 @@
                 </div>
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium">Bed Type <span class="text-danger">*</span></label>
-                    <div th:replace="~{fragments/form-error :: error('bedType')"></div>
+                    <div th:replace="~{fragments/form-error :: error('bedType')}"></div>
                     <select th:field="*{bedType}" class="input">
                         <option th:each="bedType : ${view.bedTypes}"
                                 th:value="${bedType}" th:text="${bedType}">
@@ -112,19 +112,19 @@
             <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-3">
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium">Base Price <span class="text-danger">*</span></label>
-                    <div th:replace="~{fragments/form-error :: error('basePrice')"></div>
+                    <div th:replace="~{fragments/form-error :: error('basePrice')}"></div>
                     <input type="number" min="0" step="0.01"
                            th:field="*{basePrice}" placeholder="320" class="input">
                 </div>
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium">Area (m²) <span class="text-danger">*</span></label>
-                    <div th:replace="~{fragments/form-error :: error('area')"></div>
+                    <div th:replace="~{fragments/form-error :: error('area')}"></div>
                     <input type="number" min="0"
                            th:field="*{area}" placeholder="48" class="input">
                 </div>
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium">Max Occupancy <span class="text-danger">*</span></label>
-                    <div th:replace="~{fragments/form-error :: error('maxOccupancy')"></div>
+                    <div th:replace="~{fragments/form-error :: error('maxOccupancy')}"></div>
                     <input type="number" min="1"
                            th:field="*{maxOccupancy}" placeholder="2" class="input">
                 </div>
@@ -144,14 +144,14 @@
             <div class="flex flex-col gap-6 p-6">
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium">Description <span class="text-danger">*</span></label>
-                    <div th:replace="~{fragments/form-error :: error('description')"></div>
+                    <div th:replace="~{fragments/form-error :: error('description')}"></div>
                     <textarea th:field="*{description}" rows="4"
                               placeholder="Spacious luxury suite with private balcony and premium amenities..."
                               class="input"></textarea>
                 </div>
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium">Features <span class="text-danger">*</span></label>
-                    <div th:replace="~{fragments/form-error :: error('features')"></div>
+                    <div th:replace="~{fragments/form-error :: error('features')}"></div>
                     <textarea th:field="*{features}" rows="4"
                               placeholder="WiFi, Smart TV, Balcony, Mini Bar, Bathtub..."
                               class="input"></textarea>
@@ -167,7 +167,7 @@
                     <img th:src="@{/assets/icons/image-plus.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
                     <div><h2 class="text-xl font-semibold">Cover Image</h2>
                         <p class="mt-1 text-sm text-muted-foreground">Upload a cover image for this room type.</p>
-                        <div th:replace="~{fragments/form-error :: error('coverImage')"></div>
+                        <div th:replace="~{fragments/form-error :: error('coverImage')}"></div>
                     </div>
                 </div>
             </div>
@@ -244,9 +244,17 @@
                             <img th:src="@{/room-type-picture/{id}(id=${pic})}"
                                  alt="" class="aspect-square w-full object-cover">
                         </div>
-                        <input type="hidden" name="removeImageIds" th:value="${pic}">
                         <button type="button"
-                                @click="$el.closest('.relative').remove(); existingCount--"
+                                th:attr="data-pic-id=${pic}"
+                                @click="
+                            const input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = 'removeImageIds';
+                            input.value = $el.dataset.picId;
+                            $el.closest('form').appendChild(input);
+                            $el.closest('.relative').remove();
+                            existingCount--;
+                        "
                                 class="mt-1.5 w-full rounded-lg bg-danger/10 py-1 text-xs font-medium text-danger">
                             Delete
                         </button>

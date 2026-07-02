@@ -1,7 +1,7 @@
 package com.hospi.manage.features.guest.service;
 
 import com.hospi.manage.common.interfaces.EmailService;
-import com.hospi.manage.features.admin.config.service.SystemConfigService;
+import com.hospi.manage.features.config.service.SystemConfigService;
 import com.hospi.manage.features.auth.enums.OtpType;
 import com.hospi.manage.features.auth.service.OtpService;
 import com.hospi.manage.features.guest.dto.BookingDraft;

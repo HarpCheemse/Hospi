@@ -4,14 +4,13 @@ import com.hospi.manage.features.room.dto.request.RoomTypeEditForm;
 import com.hospi.manage.features.room.enums.RoomCategory;
 import com.hospi.manage.features.room.enums.RoomTier;
 import com.hospi.manage.features.room.repository.RoomTypeRepository;
-import com.hospi.manage.features.room.validation.EditRoomTypeValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class EditRoomTypeValidatorTest {
 
     @Mock
@@ -38,8 +37,7 @@ class EditRoomTypeValidatorTest {
     @BeforeEach
     void setup() {
         form = mock(RoomTypeEditForm.class);
-        errors = new BeanPropertyBindingResult(form,
-                "form");
+        errors = new BeanPropertyBindingResult(form, "form");
     }
 
     @Test
@@ -56,16 +54,12 @@ class EditRoomTypeValidatorTest {
 
         when(form.coverImage()).thenReturn(cover);
         when(form.newImages()).thenReturn(null);
-        when(form.removeImageIds()).thenReturn(null);
 
         when(roomTypeRepository.existsByCategoryAndTierAndIdNotAndActiveTrue(any(),
                 any(),
                 anyLong())).thenReturn(false);
 
-        validator.validate(1L,
-                form,
-                0,
-                errors);
+        validator.validate(1L, form, 0, errors);
 
         assertFalse(errors.hasErrors());
     }
@@ -81,10 +75,7 @@ class EditRoomTypeValidatorTest {
                 any(),
                 anyLong())).thenReturn(true);
 
-        validator.validate(1L,
-                form,
-                0,
-                errors);
+        validator.validate(1L, form, 0, errors);
 
         assertTrue(errors.hasFieldErrors("tier"));
     }
@@ -123,10 +114,7 @@ class EditRoomTypeValidatorTest {
 
         when(form.newImages()).thenReturn(images);
 
-        validator.validate(1L,
-                form,
-                0,
-                errors);
+        validator.validate(1L, form, 0, errors);
 
         assertTrue(errors.hasFieldErrors("newImages"));
     }
@@ -140,10 +128,7 @@ class EditRoomTypeValidatorTest {
 
         when(form.features()).thenReturn("wifi, @@bad");
 
-        validator.validate(1L,
-                form,
-                0,
-                errors);
+        validator.validate(1L, form, 0, errors);
 
         assertTrue(errors.hasFieldErrors("features"));
     }
@@ -157,10 +142,7 @@ class EditRoomTypeValidatorTest {
 
         when(form.features()).thenReturn("wifi, wifi");
 
-        validator.validate(1L,
-                form,
-                0,
-                errors);
+        validator.validate(1L, form, 0, errors);
 
         assertTrue(errors.hasFieldErrors("features"));
     }
@@ -173,10 +155,7 @@ class EditRoomTypeValidatorTest {
 
         when(form.basePrice()).thenReturn(new BigDecimal("10.123"));
 
-        validator.validate(1L,
-                form,
-                0,
-                errors);
+        validator.validate(1L, form, 0, errors);
 
         assertTrue(errors.hasFieldErrors("basePrice"));
     }

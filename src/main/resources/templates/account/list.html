@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Accounts | Hospi</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.9/cdn.min.js" defer></script>
+</head>
+
+<body class="staff-layout">
+
+<div th:replace="~{/fragments/admin-sidebar :: sidebar}"></div>
+
+<main class="staff-page">
+
+    <div th:replace="~{fragments/components/toast :: toast}"></div>
+
+    <header class="staff-page-header">
+
+        <div class="flex items-center gap-4">
+
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/user.svg}" alt="">
+            </div>
+
+            <div>
+                <h1 class="staff-page-title">Staff Accounts</h1>
+                <p class="page-description">
+                    Review and manage user accounts across the system.
+                </p>
+            </div>
+
+        </div>
+
+        <a th:href="@{/admin/accounts/create}" class="btn btn-primary btn-lg">
+            + Create Account
+        </a>
+
+    </header>
+
+    <section class="overflow-hidden card">
+
+        <!-- FILTERS -->
+        <form th:action="@{/admin/accounts}"
+              method="get"
+              class="flex w-full items-end gap-4 border-b border-border p-5"
+              novalidate>
+
+            <div class="flex-1 flex flex-col gap-2">
+                <label class="text-sm font-medium">Search</label>
+                <input type="text" name="search" placeholder="Search by name or email..."
+                       class="input" th:value="${param.search}">
+            </div>
+
+            <div class="flex-1 flex flex-col gap-2">
+                <label class="text-sm font-medium">Role</label>
+                <select name="role" class="input">
+                    <option value="">All Roles</option>
+                    <option th:each="r : ${roles}"
+                            th:value="${r}"
+                            th:text="${r}"
+                            th:selected="${param.role != null && param.role[0] == r.name()}">Role</option>
+                </select>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+                <a th:href="@{/admin/accounts}" class="btn btn-secondary btn-sm">Clear</a>
+            </div>
+
+        </form>
+
+        <!-- TABLE -->
+        <div class="overflow-x-auto">
+
+            <table class="w-full">
+
+                <thead class="bg-muted">
+
+                <tr>
+                    <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">
+                        Account
+                    </th>
+                    <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">
+                        Role
+                    </th>
+                    <th class="px-5 py-4 text-right text-sm font-medium text-muted-foreground">
+                        Actions
+                    </th>
+                </tr>
+
+                </thead>
+
+                <tbody>
+
+                <tr th:each="account : ${accounts}"
+                    class="border-t border-border">
+
+                    <td class="px-5 py-4">
+
+                        <p class="font-medium text-foreground"
+                           th:text="${account.fullName()}">
+                            John Smith
+                        </p>
+
+                        <p class="text-sm text-muted-foreground max-w-[200px] truncate"
+                           th:text="${account.email()}">
+                            john@hospi.com
+                        </p>
+
+                    </td>
+
+                    <td class="px-5 py-4">
+                        <span class="pill-muted" th:text="${account.role()}">MANAGER</span>
+                    </td>
+
+                    <td class="px-5 py-4 text-right">
+                        <a th:href="@{/admin/accounts/{id}(id=${account.id()})}"
+                           class="btn btn-secondary btn-sm">View</a>
+                    </td>
+
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(accounts)}">
+                    <td colspan="3" class="px-5 py-10 text-center text-muted-foreground">
+                        No accounts found.
+                    </td>
+                </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</main>
+
+</body>
+</html>

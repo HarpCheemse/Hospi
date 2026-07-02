@@ -1,17 +1,17 @@
-package com.hospi.manage.features.receptionist.controller;
+package com.hospi.manage.features.reservation.controller;
 
 import com.hospi.manage.common.constant.Attributes;
-import com.hospi.manage.features.admin.config.service.SystemConfigService;
+import com.hospi.manage.features.config.service.SystemConfigService;
 import com.hospi.manage.features.payment.entity.Payment;
 import com.hospi.manage.features.payment.enums.PaymentMethod;
 import com.hospi.manage.features.payment.repository.PaymentRepository;
-import com.hospi.manage.features.receptionist.dto.CheckoutCalculation;
-import com.hospi.manage.features.receptionist.dto.CheckoutForm;
-import com.hospi.manage.features.receptionist.dto.CheckoutView;
-import com.hospi.manage.features.receptionist.dto.ReceiptView;
-import com.hospi.manage.features.receptionist.service.CheckoutService;
+import com.hospi.manage.features.reservation.dto.response.CheckoutCalculation;
+import com.hospi.manage.features.reservation.dto.response.CheckoutForm;
+import com.hospi.manage.features.reservation.dto.response.CheckoutView;
+import com.hospi.manage.features.reservation.dto.response.ReceiptView;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
+import com.hospi.manage.features.reservation.service.CheckoutService;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.reservation.service.StayingGuestService;
 import lombok.RequiredArgsConstructor;
@@ -20,11 +20,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.math.BigDecimal;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Controller for receptionist-facing reservation checkout and receipts.
+ */
 @Controller
 @RequestMapping("/receptionist/reservations")
 @RequiredArgsConstructor
@@ -38,7 +40,8 @@ public class ReceptionistCheckoutController {
 
     @ModelAttribute
     void addCommonAttributes(Model model) {
-        model.addAttribute(Attributes.ACTIVE_SIDEBAR, "RESERVATIONS");
+        model.addAttribute(Attributes.ACTIVE_SIDEBAR,
+                "RESERVATIONS");
     }
 
     @GetMapping("/{id}/checkout")

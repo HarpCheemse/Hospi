@@ -1,8 +1,8 @@
 package com.hospi.manage.features.credential.service;
 
 import com.hospi.manage.common.exception.ResourceNotFoundException;
-import com.hospi.manage.features.admin.account.entity.Account;
-import com.hospi.manage.features.admin.account.repository.AccountRepository;
+import com.hospi.manage.features.account.entity.Account;
+import com.hospi.manage.features.account.repository.AccountRepository;
 import com.hospi.manage.features.credential.dto.CredentialView;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,7 +30,7 @@ public class CredentialService {
                 account.getEmail(),
                 account.getRole().name(),
                 account.getPhone(),
-                account.getStatus().name(),
+                account.isActive() ? "Active" : "Inactive",
                 account.getCreatedAt());
 
         return view;

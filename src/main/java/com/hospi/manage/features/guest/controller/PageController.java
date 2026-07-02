@@ -1,7 +1,7 @@
 package com.hospi.manage.features.guest.controller;
 
-import com.hospi.manage.features.manager.detail.entity.Hotel;
-import com.hospi.manage.features.manager.detail.service.HotelService;
+import com.hospi.manage.features.hotel.entity.Hotel;
+import com.hospi.manage.features.hotel.service.HotelService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;

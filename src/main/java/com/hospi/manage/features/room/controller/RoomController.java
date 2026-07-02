@@ -1,7 +1,7 @@
 package com.hospi.manage.features.room.controller;
 
 import com.hospi.manage.common.constant.Attributes;
-import com.hospi.manage.features.manager.detail.service.HotelService;
+import com.hospi.manage.features.hotel.service.HotelService;
 import com.hospi.manage.features.room.dto.request.RoomCreateForm;
 import com.hospi.manage.features.room.dto.request.RoomEditForm;
 import com.hospi.manage.features.room.dto.response.RoomOccupancyView;
