@@ -52,7 +52,8 @@
         </header>
 
         <!-- CONTAINER FOR TASK PANEL -->
-        <section class="card-panel mt-6" x-data="{ count: [[${dirtyRooms.size()}]] }">
+        <!-- CONTAINER FOR TASK PANEL -->
+        <section class="card-panel mt-6" th:x-data="|{ count: ${dirtyRooms.size()}, confirmOpen: false, selectedRoomId: null, selectedRoomNum: null, cleanedRooms: [] }|">
             <div class="mb-4 flex items-center justify-between">
                 <div>
                     <h2 class="text-lg font-semibold text-foreground">Active Tasks</h2>
@@ -69,11 +70,8 @@
             <!-- TASK LIST -->
             <div class="flex flex-col gap-2" x-show="count > 0">
                 <div th:each="room : ${dirtyRooms}" 
-                     x-data="{ show: true, roomId: [[${room.id}]], roomNum: [[${room.roomNumber}]] }" 
-                     x-show="show" 
-                     x-transition:leave="transition ease-in duration-300"
-                     x-transition:leave-start="opacity-100 scale-100"
-                     x-transition:leave-end="opacity-0 scale-95"
+                     th:x-data="|{ roomId: ${room.id}, roomNum: '${room.roomNumber}' }|"
+                     x-show="!cleanedRooms.includes(roomId)" 
                      class="grid grid-cols-12 items-center gap-3 rounded-lg border border-border bg-background p-4 text-sm shadow-sm">
                     
                     <div class="col-span-3">
@@ -91,26 +89,56 @@
 
                     <div class="col-span-3 flex justify-end">
                         <button class="btn btn-success" 
-                                @click="
-                                    try {
-                                        const response = await fetch('/leader/rooms/' + roomId + '/clean', {
-                                            method: 'POST',
-                                            headers: {
-                                                'Content-Type': 'application/x-www-form-urlencoded',
-                                                [window.csrfHeader || 'X-CSRF-TOKEN']: window.csrfToken
-                                            }
-                                        });
-                                        if (response.ok) {
-                                            show = false;
-                                            count--;
-                                        } else {
-                                            alert('Error completing task for Room ' + roomNum);
-                                        }
-                                    } catch (err) {
-                                        alert('Error completing task for Room ' + roomNum);
-                                    }
-                                ">
+                                @click="selectedRoomId = roomId; selectedRoomNum = roomNum; confirmOpen = true">
                             Mark Done
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONFIRMATION MODAL -->
+            <div x-show="confirmOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
+                <!-- BACKDROP -->
+                <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="confirmOpen = false"></div>
+                <!-- MODAL CONTENT -->
+                <div x-show="confirmOpen"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 scale-100"
+                     x-transition:leave-end="opacity-0 scale-95"
+                     class="relative mx-4 w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl">
+                    
+                    <h3 class="text-lg font-semibold text-foreground">Confirm Room Cleaned</h3>
+                    <p class="mt-2 text-sm text-muted-foreground">
+                        Are you sure you want to mark <strong x-text="'Room ' + selectedRoomNum"></strong> as clean?
+                    </p>
+
+                    <div class="mt-6 flex justify-end gap-3">
+                        <button @click="confirmOpen = false" class="btn btn-ghost">
+                            Cancel
+                        </button>
+                        <button @click="
+                            fetch('/leader/rooms/' + selectedRoomId + '/clean', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                    [window.csrfHeader || 'X-CSRF-TOKEN']: window.csrfToken
+                                }
+                            }).then(response => {
+                                if (response.ok) {
+                                    cleanedRooms.push(selectedRoomId);
+                                    count--;
+                                    confirmOpen = false;
+                                } else {
+                                    alert('Error completing task for Room ' + selectedRoomNum);
+                                }
+                            }).catch(err => {
+                                alert('Error completing task for Room ' + selectedRoomNum);
+                            });
+                        " class="btn btn-success">
+                            Yes, Mark Clean
                         </button>
                     </div>
                 </div>
