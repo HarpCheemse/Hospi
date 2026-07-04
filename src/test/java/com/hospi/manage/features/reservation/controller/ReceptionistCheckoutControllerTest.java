@@ -5,8 +5,7 @@ import com.hospi.manage.features.config.service.SystemConfigService;
 import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.payment.entity.Payment;
 import com.hospi.manage.features.payment.repository.PaymentRepository;
-import com.hospi.manage.features.receptionist.controller.ReceptionistCheckoutController;
-import com.hospi.manage.features.receptionist.dto.CheckoutCalculation;
+import com.hospi.manage.features.reservation.dto.response.CheckoutCalculation;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.StayingGuest;
 import com.hospi.manage.features.reservation.enums.BookingSource;
@@ -111,10 +110,8 @@ class ReceptionistCheckoutControllerTest {
         mockMvc.perform(get("/receptionist/reservations/1/checkout"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("receptionist/reservation/checkout"))
-                .andExpect(model().attributeExists("reservation"))
-                .andExpect(model().attributeExists("calc"))
+                .andExpect(model().attributeExists("view"))
                 .andExpect(model().attributeExists("config"))
-                .andExpect(model().attributeExists("registeredGuests"))
                 .andExpect(model().attributeExists("form"));
     }
 
@@ -185,11 +182,9 @@ class ReceptionistCheckoutControllerTest {
                 .when(checkoutService).complete(anyLong(),
                         any(),
                         any(),
-                        any(),
                         anyString(),
                         any(),
-                        anyBoolean(),
-                        any());
+                        anyBoolean());
 
         Principal principal = mock(Principal.class);
         when(principal.getName()).thenReturn("receptionist");
@@ -221,9 +216,7 @@ class ReceptionistCheckoutControllerTest {
         mockMvc.perform(get("/receptionist/reservations/1/receipt"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("receptionist/reservation/receipt"))
-                .andExpect(model().attributeExists("reservation"))
-                .andExpect(model().attributeExists("depositPaid"))
-                .andExpect(model().attributeExists("totalPaid"));
+                .andExpect(model().attributeExists("view"));
     }
 
     @Test
