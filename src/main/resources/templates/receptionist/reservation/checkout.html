@@ -34,31 +34,31 @@
             <div class="grid grid-cols-2 gap-5">
                 <div>
                     <label class="mb-1 block text-sm font-medium text-muted-foreground">Guest Name</label>
-                    <p class="text-foreground font-medium" th:text="${reservation.guestName}">John Smith</p>
+                    <p class="text-foreground font-medium" th:text="${view.reservation.guestName}">John Smith</p>
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-medium text-muted-foreground">Source</label>
-                    <span class="pill-muted text-sm" th:text="${reservation.source.name()}">ONLINE</span>
+                    <span class="pill-muted text-sm" th:text="${view.reservation.source.name()}">ONLINE</span>
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-medium text-muted-foreground">Check-In</label>
-                    <p class="text-foreground" th:text="${#temporals.format(reservation.checkInAt, 'dd MMM yyyy')}">15 Jun 2026</p>
+                    <p class="text-foreground" th:text="${#temporals.format(view.reservation.checkInAt, 'dd MMM yyyy')}">15 Jun 2026</p>
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-medium text-muted-foreground">Scheduled Check-Out</label>
-                    <p class="text-foreground" th:text="${#temporals.format(reservation.checkOutAt, 'dd MMM yyyy')}">18 Jun 2026</p>
+                    <p class="text-foreground" th:text="${#temporals.format(view.reservation.checkOutAt, 'dd MMM yyyy')}">18 Jun 2026</p>
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-medium text-muted-foreground">Rooms</label>
                     <div class="flex flex-wrap gap-1">
-                        <th:block th:each="detail : ${reservation.details}">
+                        <th:block th:each="detail : ${view.reservation.details}">
                             <span class="pill-muted text-sm" th:text="${detail.roomType.name} + ' x' + ${detail.roomCount}">Deluxe x2</span>
                         </th:block>
                     </div>
                 </div>
                 <div>
-                    <label class="mb-1 block text-sm font-medium text-muted-foreground">Registered Guests</label>
-                    <p class="text-foreground" th:text="${registeredGuests}">2</p>
+                    <label class="mb-1 block text-sm font-medium text-muted-foreground">Adult Guests (14+)</label>
+                    <p class="text-foreground" th:text="${view.adultGuests}">2</p>
                 </div>
             </div>
         </div>
@@ -73,15 +73,15 @@
             <div class="space-y-4">
                 <div class="flex justify-between py-2">
                     <span class="text-muted-foreground">Total Price</span>
-                    <span class="font-medium" th:text="|$${#numbers.formatDecimal(calc.totalPrice, 0, 2)}|">$1000.00</span>
+                    <span class="font-medium" th:text="|$${#numbers.formatDecimal(view.calc.totalPrice, 0, 2)}|">$1000.00</span>
                 </div>
                 <div class="flex justify-between py-2">
                     <span class="text-muted-foreground">Deposit Paid</span>
-                    <span class="font-medium text-success" th:text="|$${#numbers.formatDecimal(calc.depositPaid, 0, 2)}|">$200.00</span>
+                    <span class="font-medium text-success" th:text="|$${#numbers.formatDecimal(view.calc.depositPaid, 0, 2)}|">$200.00</span>
                 </div>
                 <div class="flex justify-between py-2 border-t border-border">
                     <span class="font-medium">Remaining Balance</span>
-                    <span class="font-medium" th:text="|$${#numbers.formatDecimal(calc.remainingBalance, 0, 2)}|">$800.00</span>
+                    <span class="font-medium" th:text="|$${#numbers.formatDecimal(view.calc.remainingBalance, 0, 2)}|">$800.00</span>
                 </div>
 
                 <div class="border-t border-border pt-4">
@@ -106,40 +106,30 @@
                     <div class="flex items-center gap-4 mb-4">
                         <span class="text-sm font-medium">Extra Guest Fee</span>
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-muted-foreground" th:if="${calc.extraGuestCount > 0}"
-                                  th:text="${calc.extraGuestCount} + ' guest(s) × $' + ${#numbers.formatDecimal(config.extraGuestFee, 0, 2)}">
-                                1 guest(s) × $25.00
+                            <span class="text-sm text-muted-foreground" th:if="${view.calc.extraGuestCount > 0}"
+                                  th:text="${view.calc.extraGuestCount} + ' guest(s) &times; $' + ${#numbers.formatDecimal(config.extraGuestFee, 0, 2)} + ' = $' + ${#numbers.formatDecimal(view.calc.extraGuestFee, 0, 2)}">
+                                1 guest(s) &times; $25.00 = $25.00
                             </span>
-                            <span class="text-sm text-muted-foreground" th:unless="${calc.extraGuestCount > 0}">
+                            <span class="text-sm text-muted-foreground" th:unless="${view.calc.extraGuestCount > 0}">
                                 No extra guests
                             </span>
-                            <input type="number" name="extraGuestFeeOverride" step="1" min="0"
-                                   th:value="${calc.extraGuestFee}"
-                                   class="w-24 rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
-                                   placeholder="Override">
                         </div>
                     </div>
                 </div>
 
                 <div class="flex justify-between py-3 border-t-2 border-border text-lg font-bold">
                     <span>Total Due</span>
-                    <span th:text="|$${#numbers.formatDecimal(calc.totalDue, 0, 2)}|">$800.00</span>
+                    <span th:text="|$${#numbers.formatDecimal(view.calc.totalDue, 0, 2)}|">$800.00</span>
                 </div>
             </div>
 
             <!-- PAYMENT FORM -->
-            <form th:action="@{/receptionist/reservations/{id}/checkout(id=${reservation.id})}"
+            <form th:action="@{/receptionist/reservations/{id}/checkout(id=${view.reservation.id})}"
                   method="post"
                   class="mt-6 border-t border-border pt-6">
 
-                <div class="grid grid-cols-3 gap-4">
-                    <div>
-                        <label class="mb-2 block text-sm font-medium text-foreground">Amount Received</label>
-                        <input type="number" name="amountReceived" step="0.01" required
-                               th:value="${calc.totalDue}"
-                               class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
-                    </div>
-                    <div>
+                <div class="flex items-end gap-4">
+                    <div class="w-48">
                         <label class="mb-2 block text-sm font-medium text-foreground">Payment Method</label>
                         <select name="paymentMethod" required
                                 class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
@@ -148,11 +138,9 @@
                             <option value="CARD">Card</option>
                         </select>
                     </div>
-                    <div class="flex items-end">
-                        <button type="submit" class="btn btn-primary btn-lg w-full">
-                            Complete Check-Out
-                        </button>
-                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        Complete Check-Out &mdash; <span th:text="|$${#numbers.formatDecimal(view.calc.totalDue, 0, 2)}|">$800.00</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -171,3 +159,4 @@
 
 </body>
 </html>
+

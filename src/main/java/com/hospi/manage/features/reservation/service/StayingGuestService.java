@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 /** Business logic for managing staying guests associated with a reservation. */
@@ -26,6 +28,13 @@ public class StayingGuestService {
     }
 
     /** Add a new staying guest to a reservation. */
+    public int getAdultGuestCount(Long reservationId, LocalDate checkInAt) {
+        return (int) stayingGuestRepository.findByReservationIdOrderByCreatedAtAsc(reservationId)
+                .stream()
+                .filter(g -> ChronoUnit.YEARS.between(g.getDateOfBirth(), checkInAt) >= 14)
+                .count();
+    }
+
     public StayingGuest addGuest(Long reservationId, StayingGuestForm form) {
         var reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
