@@ -1,4 +1,4 @@
-package com.hospi.manage.features.receptionist.dto;
+package com.hospi.manage.features.reservation.dto.response;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
