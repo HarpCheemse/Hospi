@@ -644,6 +644,26 @@ shouldRedirectToRooms_whenNotAvailable
 - Test business logic branches: success path, each failure path (validation, not-found, business-rule violation).
 - A new ownership-check branch (§3) must have a test asserting the mismatched-parent case throws — this is the exact bug class this doc exists to prevent.
 
+### 10.7 Running tests
+
+Prefer quiet mode and disable the Spring Boot banner for faster feedback. These flags suppress noisy output and only show failures:
+
+```shell
+# All tests
+mvn test -q
+
+# Single test method
+mvn test -Dtest=ClassName#methodName -q -Dspring.main.banner-mode=off
+
+# Single test class
+mvn test -Dtest=ClassName -q -Dspring.main.banner-mode=off
+```
+
+The `-q` (quiet) flag surpresses INFO-level Maven output. The
+`-Dspring.main.banner-mode=off` flag skips the Spring Boot ASCII banner each
+context load. Together they reduce controller-test output from ~40 lines per run
+to just the failure report.
+
 ---
 
 ## 11. Logging Conventions

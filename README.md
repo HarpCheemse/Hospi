@@ -4,8 +4,9 @@ Hotel management web application built with Spring Boot 3.5, Thymeleaf, and Post
 
 ## Quick start
 - Build: `mvn compile` (no Maven wrapper; system Maven 3.9+ required)
-- Test all: `mvn test`
-- Single test: `mvn test -Dtest=ClassName#methodName`
+- Test all: `mvn test -q`
+- Single test: `mvn test -Dtest=ClassName#methodName -q -Dspring.main.banner-mode=off`
+- Single class: `mvn test -Dtest=ClassName -q -Dspring.main.banner-mode=off`
 - Package: `mvn package -DskipTests`
 - Dev server: run `HospiApplication.java` in your IDE (Spring Boot 3.5)
 - Profile `dev` is active by default (`spring.profiles.active=dev`)
