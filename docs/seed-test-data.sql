@@ -8,6 +8,10 @@ BEGIN;
 -- Cleanup
 -- ────────────────────────────────────────────────────────────────────────────
 DELETE
+FROM invoice_items;
+DELETE
+FROM invoices;
+DELETE
 FROM reviews;
 DELETE
 FROM payments;
@@ -469,5 +473,295 @@ INSERT INTO reviews (reservation_id, rating, created_at)
 SELECT r.id, 4 + (r.id % 2), NOW()
 FROM reservations r
 WHERE r.status = 'CHECKED_OUT';
+
+-- ────────────────────────────────────────────────────────────────────────────
+-- 13. Invoices (one per CHECKED_OUT reservation for revenue demo)
+-- ────────────────────────────────────────────────────────────────────────────
+DO
+$$
+    DECLARE
+        inv_id      bigint;
+        r           RECORD;
+        month_shift INT := 0;
+    BEGIN
+        FOR r IN SELECT id, total_price, source
+                 FROM reservations
+                 WHERE status = 'CHECKED_OUT'
+                 ORDER BY id
+            LOOP
+                INSERT INTO invoices (booking_id, subtotal, tax_amount, deposit_used,
+                                      total_amount, balance_due, status, created_at)
+                VALUES (r.id,
+                        r.total_price,
+                        ROUND(r.total_price * 0.10, 2),
+                        CASE WHEN r.source = 'ONLINE' THEN ROUND(r.total_price * 0.30, 2) ELSE 0 END,
+                        r.total_price,
+                        0,
+                        'PAID',
+                        NOW() - make_interval(months => month_shift))
+                RETURNING id INTO inv_id;
+
+                INSERT INTO invoice_items (invoice_id, item_type, description, quantity, unit_price, amount)
+                VALUES (inv_id, 'ROOM', 'BASIC FAMILY', 1, r.total_price, r.total_price);
+
+                INSERT INTO invoice_items (invoice_id, item_type, description, quantity, unit_price, amount)
+                VALUES (inv_id, 'TAX', 'Tax (10%)', 1, ROUND(r.total_price * 0.10, 2),
+                        ROUND(r.total_price * 0.10, 2));
+
+                IF r.source = 'ONLINE' THEN
+                    INSERT INTO invoice_items (invoice_id, item_type, description, quantity, unit_price, amount)
+                    VALUES (inv_id, 'DISCOUNT', 'Deposit applied', 1, ROUND(r.total_price * 0.30, 2),
+                            ROUND(r.total_price * 0.30, 2));
+                END IF;
+
+                month_shift := month_shift + 1;
+            END LOOP;
+    END
+$$;
+
+-- ────────────────────────────────────────────────────────────────────────────
+-- 14. Additional seed data: 125 reservations spanning 36 months
+-- ────────────────────────────────────────────────────────────────────────────
+DO
+$$
+    DECLARE
+        names       TEXT[] := ARRAY['Liam Garcia', 'Emma Chen', 'Noah Kim', 'Olivia Patel',
+            'James Wilson', 'Sophia Lee', 'Benjamin Park', 'Isabella Wang', 'Lucas Nguyen',
+            'Mia Tanaka', 'Ethan Brown', 'Charlotte Davis', 'Mason Miller', 'Amelia Wilson',
+            'Logan Moore', 'Harper Taylor', 'Oliver Anderson', 'Evelyn Thomas', 'Elijah Jackson',
+            'Abigail White', 'Aiden Martin', 'Ella Johnson', 'Caden Lewis', 'Avery Walker',
+            'Jackson Hall'];
+        emails      TEXT[] := ARRAY['liam.g@email.com', 'emma.c@email.com', 'noah.k@email.com',
+            'olivia.p@email.com', 'james.w@email.com', 'sophia.l@email.com', 'ben.p@email.com',
+            'isabella.w@email.com', 'lucas.n@email.com', 'mia.t@email.com', 'ethan.b@email.com',
+            'charlotte.d@email.com', 'mason.m@email.com', 'amelia.w@email.com', 'logan.m@email.com',
+            'harper.t@email.com', 'oliver.a@email.com', 'evelyn.t@email.com', 'elijah.j@email.com',
+            'abigail.w@email.com', 'aiden.m@email.com', 'ella.j@email.com', 'caden.l@email.com',
+            'avery.w@email.com', 'jackson.h@email.com'];
+        phones      TEXT[] := ARRAY['+1 555 100 001', '+1 555 100 002', '+1 555 100 003',
+            '+1 555 100 004', '+1 555 100 005', '+1 555 100 006', '+1 555 100 007',
+            '+1 555 100 008', '+1 555 100 009', '+1 555 100 010', '+1 555 100 011',
+            '+1 555 100 012', '+1 555 100 013', '+1 555 100 014', '+1 555 100 015',
+            '+1 555 100 016', '+1 555 100 017', '+1 555 100 018', '+1 555 100 019',
+            '+1 555 100 020', '+1 555 100 021', '+1 555 100 022', '+1 555 100 023',
+            '+1 555 100 024', '+1 555 100 025'];
+        dobs        DATE[] := ARRAY['1985-06-15', '1990-03-22', '1982-11-08', '1993-09-01',
+            '1978-12-25', '1995-04-18', '1987-07-30', '1991-01-14', '1984-08-05', '1996-10-28',
+            '1981-05-12', '1989-02-19', '1976-11-03', '1994-07-21', '1983-09-09', '1992-04-07',
+            '1986-12-15', '1997-01-28', '1980-06-22', '1991-08-11', '1988-03-05', '1995-10-30',
+            '1982-07-17', '1993-12-03', '1987-05-20'];
+        nationalities TEXT[] := ARRAY['Vietnamese', 'American', 'British', 'Japanese', 'Korean',
+            'French', 'German', 'Spanish', 'Italian', 'Indian', 'Australian', 'Chinese', 'Filipino',
+            'Brazilian', 'Canadian'];
+
+        rt_ids      BIGINT[];
+        rt_names    TEXT[] := ARRAY['BASIC DOUBLE', 'DELUXE DOUBLE', 'SUPERIOR DOUBLE',
+            'BASIC FAMILY', 'DELUXE SUITE'];
+        rt_prices   NUMERIC[] := ARRAY[85.00, 145.00, 280.00, 220.00, 450.00];
+
+        inv_id      BIGINT;
+        r_id        BIGINT;
+        rt_idx      INT;
+        nights      INT;
+        source      TEXT;
+        pay_method  TEXT;
+        total_price NUMERIC;
+        tax_amt     NUMERIC;
+        deposit     NUMERIC;
+        month_off   INT;
+        day_off     INT;
+        check_in    DATE;
+        check_out   DATE;
+        guest_idx   INT;
+        nat_idx     INT;
+    BEGIN
+        FOR j IN 1..5 LOOP
+            rt_ids := rt_ids || (SELECT id FROM room_types WHERE name = rt_names[j]);
+        END LOOP;
+
+        -- ====================================================================
+        -- 100 CHECKED_OUT reservations spanning 36 months
+        -- ====================================================================
+        FOR i IN 1..100 LOOP
+            rt_idx := ((i - 1) % 5) + 1;
+            nights := 2 + ((i * 3) % 4);
+            source := CASE WHEN i % 2 = 0 THEN 'ONLINE' ELSE 'OFFLINE' END;
+            pay_method := CASE
+                              WHEN source = 'ONLINE' THEN 'PAYPAL'
+                              WHEN i % 3 = 0 THEN 'CASH'
+                              ELSE 'CARD' END;
+
+            month_off := FLOOR((i - 1) * 36.0 / 100.0);
+            day_off := ((i * 7) % 25);
+            check_in := (DATE_TRUNC('month', CURRENT_DATE)::DATE
+                             - make_interval(months => month_off))::DATE + day_off;
+            check_out := check_in + nights;
+
+            total_price := rt_prices[rt_idx] * nights;
+            tax_amt := ROUND(total_price * 0.10, 2);
+            deposit := CASE WHEN source = 'ONLINE' THEN ROUND(total_price * 0.30, 2) ELSE 0 END;
+            guest_idx := ((i - 1) % 25) + 1;
+            nat_idx := ((i - 1) % 15) + 1;
+
+            INSERT INTO reservations (guest_name, guest_email, guest_phone, guest_date_of_birth,
+                                      guest_nationality, check_in_at, check_out_at, status, source,
+                                      confirmation_code, total_price, checked_in_at, checked_in_by,
+                                      created_at, updated_at)
+            VALUES (names[guest_idx], emails[guest_idx], phones[guest_idx], dobs[guest_idx],
+                    nationalities[nat_idx], check_in, check_out, 'CHECKED_OUT', source,
+                    CASE WHEN source = 'ONLINE'
+                             THEN 'HSP-' || UPPER(SUBSTR(MD5(i::TEXT || 'S'), 1, 6))
+                         ELSE NULL END,
+                    total_price,
+                    check_in::TIMESTAMP, 'Rita Receptionist',
+                    check_in::TIMESTAMP - INTERVAL '30 days',
+                    check_in::TIMESTAMP - INTERVAL '30 days')
+            RETURNING id INTO r_id;
+
+            INSERT INTO reservation_details (reservation_id, room_type_id, room_count, base_price, total_price)
+            VALUES (r_id, rt_ids[rt_idx], 1, rt_prices[rt_idx], total_price);
+
+            INSERT INTO payments (reservation_id, amount, payment_method, confirmed_at, confirmed_by)
+            VALUES (r_id, CASE WHEN source = 'ONLINE' THEN deposit ELSE total_price END,
+                    pay_method, check_in::TIMESTAMP, 'Rita Receptionist');
+
+            INSERT INTO staying_guests (reservation_id, guest_name, date_of_birth, nationality, created_at)
+            VALUES (r_id, names[guest_idx], dobs[guest_idx], nationalities[nat_idx],
+                    check_in::TIMESTAMP - INTERVAL '30 days');
+
+            INSERT INTO invoices (booking_id, subtotal, tax_amount, deposit_used,
+                                  total_amount, balance_due, status, created_at)
+            VALUES (r_id, total_price, tax_amt, deposit, total_price, 0, 'PAID',
+                    check_out::TIMESTAMP)
+            RETURNING id INTO inv_id;
+
+            INSERT INTO invoice_items (invoice_id, item_type, description, quantity, unit_price, amount)
+            VALUES (inv_id, 'ROOM', rt_names[rt_idx] || ' x1', nights, rt_prices[rt_idx], total_price);
+
+            INSERT INTO invoice_items (invoice_id, item_type, description, quantity, unit_price, amount)
+            VALUES (inv_id, 'TAX', 'Tax (10%)', 1, tax_amt, tax_amt);
+
+            IF source = 'ONLINE' THEN
+                INSERT INTO invoice_items (invoice_id, item_type, description, quantity, unit_price, amount)
+                VALUES (inv_id, 'DISCOUNT', 'Deposit applied', 1, deposit, deposit);
+            END IF;
+
+            INSERT INTO reviews (reservation_id, rating, created_at)
+            VALUES (r_id, 3 + (i % 3), check_out::TIMESTAMP);
+        END LOOP;
+
+        -- ====================================================================
+        -- 10 CHECKED_IN (current stays)
+        -- ====================================================================
+        FOR i IN 101..110 LOOP
+            rt_idx := ((i - 1) % 5) + 1;
+            nights := 3 + ((i * 2) % 3);
+            source := CASE WHEN i % 3 = 0 THEN 'ONLINE' ELSE 'OFFLINE' END;
+            pay_method := CASE
+                              WHEN source = 'ONLINE' THEN 'PAYPAL'
+                              WHEN i % 2 = 0 THEN 'CASH'
+                              ELSE 'CARD' END;
+            check_in := CURRENT_DATE - (5 + (i % 10));
+            check_out := check_in + nights;
+
+            total_price := rt_prices[rt_idx] * nights;
+            deposit := CASE WHEN source = 'ONLINE' THEN ROUND(total_price * 0.30, 2) ELSE total_price END;
+            guest_idx := ((i - 1) % 25) + 1;
+            nat_idx := ((i - 1) % 15) + 1;
+
+            INSERT INTO reservations (guest_name, guest_email, guest_phone, guest_date_of_birth,
+                                      guest_nationality, check_in_at, check_out_at, status, source,
+                                      confirmation_code, total_price, checked_in_at, checked_in_by,
+                                      created_at, updated_at)
+            VALUES (names[guest_idx], emails[guest_idx], phones[guest_idx], dobs[guest_idx],
+                    nationalities[nat_idx], check_in, check_out, 'CHECKED_IN', source,
+                    CASE WHEN source = 'ONLINE'
+                             THEN 'HSP-' || UPPER(SUBSTR(MD5(i::TEXT || 'C'), 1, 6))
+                         ELSE NULL END,
+                    total_price,
+                    check_in::TIMESTAMP, 'Rita Receptionist', NOW() - INTERVAL '1 day',
+                    NOW() - INTERVAL '1 day')
+            RETURNING id INTO r_id;
+
+            INSERT INTO reservation_details (reservation_id, room_type_id, room_count, base_price, total_price)
+            VALUES (r_id, rt_ids[rt_idx], 1, rt_prices[rt_idx], total_price);
+
+            INSERT INTO payments (reservation_id, amount, payment_method, confirmed_at, confirmed_by)
+            VALUES (r_id, deposit, pay_method, check_in::TIMESTAMP, 'Rita Receptionist');
+
+            INSERT INTO staying_guests (reservation_id, guest_name, date_of_birth, nationality, created_at)
+            VALUES (r_id, names[guest_idx], dobs[guest_idx], nationalities[nat_idx], NOW());
+
+            INSERT INTO room_assignments (reservation_id, room_id, assigned_at)
+            SELECT r_id, rm.id, check_in::TIMESTAMP
+            FROM rooms rm
+            WHERE rm.room_type_id = rt_ids[rt_idx]
+              AND rm.is_active = true
+            ORDER BY rm.id
+            LIMIT 1 OFFSET (r_id % 5);
+        END LOOP;
+
+        -- ====================================================================
+        -- 10 CONFIRMED (upcoming bookings)
+        -- ====================================================================
+        FOR i IN 111..120 LOOP
+            rt_idx := ((i - 1) % 5) + 1;
+            nights := 2 + ((i * 3) % 3);
+            source := CASE WHEN i % 2 = 0 THEN 'ONLINE' ELSE 'OFFLINE' END;
+            pay_method := CASE
+                              WHEN source = 'ONLINE' THEN 'PAYPAL'
+                              WHEN i % 3 = 0 THEN 'CASH'
+                              ELSE 'CARD' END;
+            check_in := CURRENT_DATE + (1 + (i % 14));
+            check_out := check_in + nights;
+
+            total_price := rt_prices[rt_idx] * nights;
+            deposit := CASE WHEN source = 'ONLINE' THEN ROUND(total_price * 0.30, 2) ELSE total_price END;
+            guest_idx := ((i - 1) % 25) + 1;
+            nat_idx := ((i - 1) % 15) + 1;
+
+            INSERT INTO reservations (guest_name, guest_email, guest_phone, guest_date_of_birth,
+                                      guest_nationality, check_in_at, check_out_at, status, source,
+                                      confirmation_code, total_price, created_at, updated_at)
+            VALUES (names[guest_idx], emails[guest_idx], phones[guest_idx], dobs[guest_idx],
+                    nationalities[nat_idx], check_in, check_out, 'CONFIRMED', source,
+                    CASE WHEN source = 'ONLINE'
+                             THEN 'HSP-' || UPPER(SUBSTR(MD5(i::TEXT || 'F'), 1, 6))
+                         ELSE NULL END,
+                    total_price, NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days')
+            RETURNING id INTO r_id;
+
+            INSERT INTO reservation_details (reservation_id, room_type_id, room_count, base_price, total_price)
+            VALUES (r_id, rt_ids[rt_idx], 1, rt_prices[rt_idx], total_price);
+
+            INSERT INTO payments (reservation_id, amount, payment_method, confirmed_at, confirmed_by)
+            VALUES (r_id, deposit, pay_method, NOW() - INTERVAL '2 days', 'Rita Receptionist');
+        END LOOP;
+
+        -- ====================================================================
+        -- 5 PENDING
+        -- ====================================================================
+        FOR i IN 121..125 LOOP
+            nights := 2 + ((i * 2) % 3);
+            check_in := CURRENT_DATE + (5 + ((i - 121) * 5));
+            check_out := check_in + nights;
+
+            total_price := 85.00 * nights;
+            guest_idx := ((i - 1) % 25) + 1;
+            nat_idx := ((i - 1) % 15) + 1;
+
+            INSERT INTO reservations (guest_name, guest_email, guest_phone, guest_date_of_birth,
+                                      guest_nationality, check_in_at, check_out_at, status, source,
+                                      confirmation_code, total_price, created_at, updated_at)
+            VALUES (names[guest_idx], emails[guest_idx], phones[guest_idx], dobs[guest_idx],
+                    nationalities[nat_idx], check_in, check_out, 'PENDING', 'OFFLINE', NULL,
+                    total_price, NOW(), NOW())
+            RETURNING id INTO r_id;
+
+            INSERT INTO reservation_details (reservation_id, room_type_id, room_count, base_price, total_price)
+            VALUES (r_id, rt_ids[1], 1, 85.00, total_price);
+        END LOOP;
+    END
+$$;
 
 COMMIT;
