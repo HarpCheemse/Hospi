@@ -52,10 +52,10 @@ VALUES ('Alice Admin', 'admin@gmail.com', '123', '+84 901 000 001', 'ADMIN', tru
 -- ────────────────────────────────────────────────────────────────────────────
 -- 2. Hotel
 -- ────────────────────────────────────────────────────────────────────────────
-INSERT INTO hotels (name, description, address, phone, email,
+INSERT INTO hotels (id, name, description, address, phone, email,
                     average_rating, review_count, features, check_in_time, check_out_time,
                     floor_count, status, created_at, updated_at)
-VALUES ('Hospi Grand Hotel',
+VALUES (1, 'Hospi Grand Hotel',
         'A modern boutique hotel in the heart of the city, offering luxurious rooms and exceptional service.',
         '123 Nguyen Hue Street, District 1, Ho Chi Minh City',
         '+84 28 3822 1234',
