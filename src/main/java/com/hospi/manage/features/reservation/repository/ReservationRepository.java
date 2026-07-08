@@ -156,4 +156,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     Optional<Reservation> findByPaymentIdempotencyKey(String paymentIdempotencyKey);
 
     List<Reservation> findByStatusAndCreatedAtBefore(ReservationStatus status, LocalDateTime before);
+
+    /** Batch lookup reservations by their IDs. */
+    List<Reservation> findByIdIn(List<Long> ids);
 }

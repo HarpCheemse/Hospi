@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revenue Reports | Hospi</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+
+    <script th:inline="javascript">
+        var CHART_LABELS = /*[[${view.chartLabels()}]]*/ [];
+        var CHART_REVENUE = /*[[${view.chartRevenue()}]]*/ [];
+        var CHART_BOOKINGS = /*[[${view.chartBookings()}]]*/ [];
+
+        var ROOM_LABELS = /*[[${view.roomTypeLabels()}]]*/ [];
+        var ROOM_REVENUE = /*[[${view.roomTypeRevenue()}]]*/ [];
+
+        var PAY_LABELS = /*[[${view.paymentMethodLabels()}]]*/ [];
+        var PAY_REVENUE = /*[[${view.paymentMethodRevenue()}]]*/ [];
+
+        var SRC_LABELS = /*[[${view.sourceLabels()}]]*/ [];
+        var SRC_REVENUE = /*[[${view.sourceRevenue()}]]*/ [];
+
+
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+</head>
+
+<body class="staff-layout">
+
+<!-- SIDEBAR -->
+<aside th:replace="~{fragments/manager-sidebar :: sidebar}"></aside>
+
+<!-- MAIN -->
+<main class="staff-page">
+
+    <div th:replace="~{fragments/components/toast :: toast}"></div>
+
+    <!-- HEADER -->
+    <header class="staff-page-header">
+        <section>
+            <h1 class="staff-page-title">Revenue Reports</h1>
+            <p class="page-description">
+                Annual revenue breakdown and analysis
+            </p>
+        </section>
+
+        <section class="flex items-center gap-2">
+            <label class="text-sm font-medium text-muted-foreground">Year</label>
+            <select onchange="window.location.href = '/manager/revenues?year=' + this.value"
+                    class="input input-sm">
+                <option th:each="y : ${#numbers.sequence(2022, 2027)}"
+                        th:value="${y}"
+                        th:selected="${y == selectedYear}"
+                        th:text="${y}">2026</option>
+            </select>
+        </section>
+    </header>
+
+    <!-- BENTO GRID -->
+    <section class="mb-4 grid grid-cols-3 gap-4">
+
+        <!-- Revenue Trend — hero -->
+        <div class="col-span-2 row-span-2 card-panel">
+            <div class="mb-3">
+                <h2 class="text-lg font-semibold text-foreground">Revenue Trend</h2>
+                <p class="text-sm text-muted-foreground">Monthly revenue breakdown</p>
+            </div>
+            <canvas id="revenueChart" class="h-64 w-full"></canvas>
+        </div>
+
+        <!-- KPIs: 4 cards stacked vertically, each flex-1 fills evenly -->
+        <div class="col-span-1 row-span-2 flex flex-col gap-1.5">
+            <div class="flex-1 rounded-xl border border-border bg-surface p-4 flex flex-col justify-center min-h-0">
+                <div class="flex items-center gap-2 mb-0.5">
+                    <img th:src="@{/assets/icons/circle-dollar-sign.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                    <p class="text-xs text-muted-foreground">Total Revenue</p>
+                </div>
+                <p class="text-xl font-bold text-foreground"
+                   th:text="|$${#numbers.formatDecimal(view.totalRevenue(), 1, 0)}|">$0</p>
+            </div>
+            <div class="flex-1 rounded-xl border border-border bg-surface p-4 flex flex-col justify-center min-h-0">
+                <div class="flex items-center gap-2 mb-0.5">
+                    <img th:src="@{/assets/icons/calendar-check.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                    <p class="text-xs text-muted-foreground">Bookings</p>
+                </div>
+                <p class="text-xl font-bold text-foreground" th:text="${view.totalBookings()}">0</p>
+            </div>
+            <div class="flex-1 rounded-xl border border-border bg-surface p-4 flex flex-col justify-center min-h-0">
+                <div class="flex items-center gap-2 mb-0.5">
+                    <img th:src="@{/assets/icons/receipt.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                    <p class="text-xs text-muted-foreground">Tax Collected</p>
+                </div>
+                <p class="text-xl font-bold text-foreground"
+                   th:text="|$${#numbers.formatDecimal(view.taxCollected(), 1, 0)}|">$0</p>
+            </div>
+            <div class="flex-1 rounded-xl border border-border bg-surface p-4 flex flex-col justify-center min-h-0">
+                <div class="flex items-center gap-2 mb-0.5">
+                    <img th:src="@{/assets/icons/bed-double.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                    <p class="text-xs text-muted-foreground">Room-Nights</p>
+                </div>
+                <p class="text-xl font-bold text-foreground" th:text="${view.totalRoomNights()}">0</p>
+            </div>
+        </div>
+
+        <!-- Bottom row: Room Type, Payment Method, Booking Source -->
+        <div class="card-panel">
+            <div class="mb-2 flex items-center gap-2">
+                <img th:src="@{/assets/icons/bed-double.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                <h2 class="text-sm font-semibold text-foreground">Revenue by Room Type</h2>
+            </div>
+            <canvas id="roomTypeChart" class="h-36 w-full"></canvas>
+        </div>
+
+        <div class="card-panel">
+            <div class="mb-2 flex items-center gap-2">
+                <img th:src="@{/assets/icons/credit-card.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                <h2 class="text-sm font-semibold text-foreground">Payment Method</h2>
+            </div>
+            <canvas id="paymentChart" class="h-36 w-full"></canvas>
+        </div>
+
+        <div class="card-panel">
+            <div class="mb-2 flex items-center gap-2">
+                <img th:src="@{/assets/icons/globe.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                <h2 class="text-sm font-semibold text-foreground">Booking Source</h2>
+            </div>
+            <canvas id="sourceChart" class="h-36 w-full"></canvas>
+        </div>
+
+    </section>
+
+    <!-- ROOM TYPE DETAIL -->
+    <section class="mb-6 card-panel" th:if="${not #lists.isEmpty(view.roomTypeBreakdown())}">
+        <div class="mb-4">
+            <h2 class="text-lg font-semibold text-foreground">Room Type Detail</h2>
+            <p class="text-sm text-muted-foreground">Revenue, bookings, and share by room type</p>
+        </div>
+        <div class="divide-y divide-border">
+            <div th:each="r, stat : ${view.roomTypeBreakdown()}"
+                 class="flex items-center gap-4 py-3">
+                <!-- Colored dot -->
+                <span class="flex-shrink-0 inline-block h-3 w-3 rounded-full"
+                      th:style="'background-color: ' + ${T(java.util.List).of(
+                        'rgba(245,158,11,0.8)', 'rgba(239,68,68,0.8)',
+                        'rgba(249,115,22,0.8)', 'rgba(217,119,6,0.8)',
+                        'rgba(220,38,38,0.8)', 'rgba(180,83,9,0.8)'
+                      ).get(stat.index % 6)}"></span>
+                <!-- Room type name -->
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-foreground truncate" th:text="${r.roomType()}">BASIC DOUBLE</p>
+                </div>
+                <!-- Revenue -->
+                <div class="w-28 text-right">
+                    <p class="text-sm font-semibold text-foreground"
+                       th:text="|$${#numbers.formatDecimal(r.revenue(), 1, 0)}|">$12,000</p>
+                </div>
+                <!-- Bookings -->
+                <div class="w-16 text-right">
+                    <p class="text-sm text-muted-foreground" th:text="${r.bookings()}">12</p>
+                </div>
+                <!-- Share bar -->
+                <div class="w-32">
+                    <div class="flex items-center gap-2">
+                        <div class="flex-1 h-2 rounded-full bg-muted">
+                            <div class="h-2 rounded-full"
+                                 th:style="'width: ' + ${r.percentage()} + '%; background-color: ' + ${T(java.util.List).of(
+                                    'rgba(245,158,11,0.8)', 'rgba(239,68,68,0.8)',
+                                    'rgba(249,115,22,0.8)', 'rgba(217,119,6,0.8)',
+                                    'rgba(220,38,38,0.8)', 'rgba(180,83,9,0.8)'
+                                  ).get(stat.index % 6)}"></div>
+                        </div>
+                        <span class="text-sm text-muted-foreground w-10 text-right" th:text="|${r.percentage()}%|">24%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- EMPTY STATE -->
+    <div th:if="${view.totalBookings() == 0}"
+         class="card-empty">
+        <h2 class="text-lg font-semibold">No Revenue Data</h2>
+        <p class="mt-2 text-sm text-muted-foreground">
+            No completed bookings found for the selected period.
+        </p>
+    </div>
+
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof Chart === 'undefined') return;
+
+        var blue = 'rgba(59, 130, 246, 0.6)';
+        var blueBorder = 'rgb(59, 130, 246)';
+
+        // 1. Revenue Trend (bar)
+        var c1 = document.getElementById('revenueChart');
+        if (c1 && CHART_LABELS.length > 0) {
+            new Chart(c1, {
+                type: 'bar',
+                data: {
+                    labels: CHART_LABELS,
+                    datasets: [{
+                        label: 'Revenue',
+                        data: CHART_REVENUE,
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                        borderColor: 'rgb(59, 130, 246)',
+                        borderWidth: 1,
+                        borderRadius: 3
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true,
+                        ticks: { callback: function (v) { return '$' + v.toLocaleString(); } } }
+                    } }
+            });
+        }
+
+        // 2. Room Type (doughnut — warm gradient)
+        var warm = ['rgba(245, 158, 11, 0.7)', 'rgba(239, 68, 68, 0.7)',
+                    'rgba(249, 115, 22, 0.7)', 'rgba(217, 119, 6, 0.7)',
+                    'rgba(220, 38, 38, 0.7)', 'rgba(180, 83, 9, 0.7)'];
+        var c2 = document.getElementById('roomTypeChart');
+        if (c2 && ROOM_LABELS.length > 0) {
+            new Chart(c2, {
+                type: 'doughnut',
+                data: {
+                    labels: ROOM_LABELS,
+                    datasets: [{
+                        data: ROOM_REVENUE,
+                        backgroundColor: warm.slice(0, ROOM_LABELS.length),
+                        borderWidth: 1
+                    }]
+                },
+                options: { responsive: true,
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } } }
+            });
+        }
+
+        // 3. Payment Method (polar area — distinct palette)
+        var payColors = ['rgba(16, 185, 129, 0.7)', 'rgba(59, 130, 246, 0.7)', 'rgba(15, 23, 42, 0.7)'];
+        var c3 = document.getElementById('paymentChart');
+        if (c3 && PAY_LABELS.length > 0) {
+            new Chart(c3, {
+                type: 'polarArea',
+                data: {
+                    labels: PAY_LABELS,
+                    datasets: [{
+                        data: PAY_REVENUE,
+                        backgroundColor: payColors.slice(0, PAY_LABELS.length),
+                        borderWidth: 1
+                    }]
+                },
+                options: { responsive: true,
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
+                    scales: { r: { beginAtZero: true, ticks: { display: false } } } }
+            });
+        }
+
+        // 4. Booking Source (doughnut — two high-contrast colors)
+        var srcColors = ['rgba(99, 102, 241, 0.7)', 'rgba(20, 184, 166, 0.7)'];
+        var c4 = document.getElementById('sourceChart');
+        if (c4 && SRC_LABELS.length > 0) {
+            new Chart(c4, {
+                type: 'doughnut',
+                data: {
+                    labels: SRC_LABELS,
+                    datasets: [{
+                        data: SRC_REVENUE,
+                        backgroundColor: srcColors.slice(0, SRC_LABELS.length),
+                        borderWidth: 1
+                    }]
+                },
+                options: { responsive: true,
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } } }
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

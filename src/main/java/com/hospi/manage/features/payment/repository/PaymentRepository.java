@@ -6,9 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Repository for {@link Payment} entity — provides payment lookup by reservation.
- */
+/** Spring Data JPA repository for Payment entities. */
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     List<Payment> findAllByReservationId(Long reservationId);
@@ -16,4 +14,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     Optional<Payment> findByReservationId(Long reservationId);
 
     boolean existsByReservationId(Long reservationId);
+
+    /** Batch lookup payments for multiple reservation IDs. */
+    List<Payment> findByReservationIdIn(List<Long> reservationIds);
 }
