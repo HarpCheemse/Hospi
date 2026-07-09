@@ -98,7 +98,6 @@ public class PaymentService {
     }
 
     /** Refund a captured PayPal order by order ID. Used when payment captured but reservation expired. */
-    @Transactional
     public boolean refundOnlineBookingPayment(String orderId)
             throws IOException {
         return payPalService.refundOrder(orderId);

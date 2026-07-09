@@ -446,7 +446,7 @@ WHERE r.status = 'CHECKED_IN';
 -- ────────────────────────────────────────────────────────────────────────────
 -- 11. Payments
 -- ────────────────────────────────────────────────────────────────────────────
-INSERT INTO payments (reservation_id, amount, payment_method, confirmed_at, confirmed_by)
+INSERT INTO payments (reservation_id, amount, payment_method, confirmed_at, confirmed_by, order_id)
 SELECT r.id,
        CASE
            WHEN r.source = 'ONLINE' THEN ROUND(r.total_price * 0.3, 2)
@@ -462,7 +462,8 @@ SELECT r.id,
            WHEN r.status IN ('CHECKED_IN', 'CHECKED_OUT')
                THEN r.checked_in_by
            ELSE r.guest_email
-           END
+           END,
+       CASE WHEN r.source = 'ONLINE' THEN COALESCE(r.confirmation_code, 'HSP-' || UPPER(SUBSTR(MD5(r.id::TEXT || 'pay'), 1, 8))) ELSE NULL END
 FROM reservations r
 WHERE r.status IN ('CHECKED_IN', 'CONFIRMED', 'CHECKED_OUT');
 
@@ -621,9 +622,10 @@ $$
             INSERT INTO reservation_details (reservation_id, room_type_id, room_count, base_price, total_price)
             VALUES (r_id, rt_ids[rt_idx], 1, rt_prices[rt_idx], total_price);
 
-            INSERT INTO payments (reservation_id, amount, payment_method, confirmed_at, confirmed_by)
+            INSERT INTO payments (reservation_id, amount, payment_method, confirmed_at, confirmed_by, order_id)
             VALUES (r_id, CASE WHEN source = 'ONLINE' THEN deposit ELSE total_price END,
-                    pay_method, check_in::TIMESTAMP, 'Rita Receptionist');
+                    pay_method, check_in::TIMESTAMP, 'Rita Receptionist',
+                    CASE WHEN source = 'ONLINE' THEN 'HSP-' || UPPER(SUBSTR(MD5(i::TEXT || 'S'), 1, 8)) ELSE NULL END);
 
             INSERT INTO staying_guests (reservation_id, guest_name, date_of_birth, nationality, created_at)
             VALUES (r_id, names[guest_idx], dobs[guest_idx], nationalities[nat_idx],
@@ -686,8 +688,9 @@ $$
             INSERT INTO reservation_details (reservation_id, room_type_id, room_count, base_price, total_price)
             VALUES (r_id, rt_ids[rt_idx], 1, rt_prices[rt_idx], total_price);
 
-            INSERT INTO payments (reservation_id, amount, payment_method, confirmed_at, confirmed_by)
-            VALUES (r_id, deposit, pay_method, check_in::TIMESTAMP, 'Rita Receptionist');
+            INSERT INTO payments (reservation_id, amount, payment_method, confirmed_at, confirmed_by, order_id)
+            VALUES (r_id, deposit, pay_method, check_in::TIMESTAMP, 'Rita Receptionist',
+                    CASE WHEN source = 'ONLINE' THEN 'HSP-' || UPPER(SUBSTR(MD5(i::TEXT || 'C'), 1, 8)) ELSE NULL END);
 
             INSERT INTO staying_guests (reservation_id, guest_name, date_of_birth, nationality, created_at)
             VALUES (r_id, names[guest_idx], dobs[guest_idx], nationalities[nat_idx], NOW());
@@ -734,8 +737,9 @@ $$
             INSERT INTO reservation_details (reservation_id, room_type_id, room_count, base_price, total_price)
             VALUES (r_id, rt_ids[rt_idx], 1, rt_prices[rt_idx], total_price);
 
-            INSERT INTO payments (reservation_id, amount, payment_method, confirmed_at, confirmed_by)
-            VALUES (r_id, deposit, pay_method, NOW() - INTERVAL '2 days', 'Rita Receptionist');
+            INSERT INTO payments (reservation_id, amount, payment_method, confirmed_at, confirmed_by, order_id)
+            VALUES (r_id, deposit, pay_method, NOW() - INTERVAL '2 days', 'Rita Receptionist',
+                    CASE WHEN source = 'ONLINE' THEN 'HSP-' || UPPER(SUBSTR(MD5(i::TEXT || 'F'), 1, 8)) ELSE NULL END);
         END LOOP;
 
         -- ====================================================================
@@ -761,6 +765,35 @@ $$
             INSERT INTO reservation_details (reservation_id, room_type_id, room_count, base_price, total_price)
             VALUES (r_id, rt_ids[1], 1, 85.00, total_price);
         END LOOP;
+    END
+$$;
+
+-- ────────────────────────────────────────────────────────────────────────────
+-- 15. Cancelled reservation with payment (for refund test scenario)
+-- ────────────────────────────────────────────────────────────────────────────
+DO
+$$
+    DECLARE
+        cid  BIGINT;
+        rt   BIGINT;
+    BEGIN
+        SELECT id INTO rt FROM room_types WHERE name = 'BASIC DOUBLE' LIMIT 1;
+
+        INSERT INTO reservations (guest_name, guest_email, guest_phone, guest_date_of_birth,
+                                  guest_nationality, check_in_at, check_out_at, status, source,
+                                  confirmation_code, total_price, created_at, updated_at)
+        VALUES ('Sarah Cancelled', 'sarah.c@email.com', '+1 555 999 001', '1990-03-15', 'American',
+                CURRENT_DATE + 5, CURRENT_DATE + 8, 'CONFIRMED', 'ONLINE', 'HSP-CXL-TST1',
+                255.00, NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days')
+        RETURNING id INTO cid;
+
+        INSERT INTO reservation_details (reservation_id, room_type_id, room_count, base_price, total_price)
+        VALUES (cid, rt, 1, 85.00, 255.00);
+
+        INSERT INTO payments (reservation_id, amount, payment_method, confirmed_at, confirmed_by, order_id)
+        VALUES (cid, 76.50, 'PAYPAL', NOW() - INTERVAL '2 days', 'Rita Receptionist', 'HSP-CXL-TST1');
+
+        UPDATE reservations SET status = 'CANCELLED' WHERE id = cid;
     END
 $$;
 

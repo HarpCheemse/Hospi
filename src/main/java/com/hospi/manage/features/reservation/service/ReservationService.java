@@ -308,6 +308,7 @@ public class ReservationService {
         payment.setPaymentMethod(PaymentMethod.PAYPAL);
         payment.setConfirmedAt(LocalDateTime.now());
         payment.setConfirmedBy(confirmedBy);
+        payment.setOrderId(paymentIdempotencyKey);
 
         reservationRepository.save(reservation);
         paymentRepository.save(payment);
@@ -327,6 +328,9 @@ public class ReservationService {
         Reservation reservation = findById(id);
         if (reservation.getStatus() != ReservationStatus.PENDING) {
             throw new IllegalStateException("Only PENDING reservations can be cancelled");
+        }
+        if (reservation.getSource() == BookingSource.ONLINE) {
+            throw new IllegalStateException("Online pending reservations cannot be cancelled manually");
         }
         reservation.setStatus(ReservationStatus.CANCELLED);
         reservationRepository.save(reservation);
