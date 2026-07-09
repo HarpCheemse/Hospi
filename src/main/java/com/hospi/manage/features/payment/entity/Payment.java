@@ -44,4 +44,7 @@ public class Payment {
 
     @Column(name = "refunded_at")
     private LocalDateTime refundedAt;
+
+    @Column(name = "order_id", length = 255)
+    private String orderId;
 }
