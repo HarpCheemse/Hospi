@@ -7,6 +7,7 @@ import com.hospi.manage.features.account.enums.Role;
 import com.hospi.manage.features.account.validator.AccountValidator;
 import com.hospi.manage.features.credential.dto.ChangePasswordForm;
 import com.hospi.manage.features.credential.dto.CredentialView;
+import com.hospi.manage.features.audit.service.AuditService;
 import com.hospi.manage.features.credential.service.CredentialService;
 import com.hospi.manage.features.notification.service.NotificationService;
 import org.junit.jupiter.api.AfterEach;
@@ -55,6 +56,9 @@ class CredentialControllerTest {
 
     @MockitoBean
     private NotificationService notificationService;
+
+    @MockitoBean
+    private AuditService auditService;
 
     @BeforeEach
     void setUpSecurityContext() {

@@ -1,10 +1,14 @@
 package com.hospi.manage.features.config.controller;
 
 import com.hospi.manage.common.constant.Attributes;
+import com.hospi.manage.features.audit.service.AuditService;
 import com.hospi.manage.features.config.dto.SystemConfigForm;
 import com.hospi.manage.features.config.service.SystemConfigService;
+import com.hospi.manage.core.security.session.AccountPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -22,44 +26,25 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequiredArgsConstructor
 public class SystemConfigController {
     private final SystemConfigService systemConfigService;
+    private final AuditService auditService;
 
-    /**
-     * Set the active sidebar highlight for this feature.
-     */
     @ModelAttribute
     void addCommonAttributes(Model model) {
         model.addAttribute(Attributes.ACTIVE_SIDEBAR, "SYSTEM_CONFIGS");
     }
 
-    /**
-     * Show the system configuration listing page.
-     */
     @GetMapping
     public String config(Model model) {
-
-
-        model.addAttribute(
-                "configs",
-                systemConfigService.getConfig()
-        );
-
+        model.addAttribute("configs", systemConfigService.getConfig());
         return "config/list";
     }
 
-    /**
-     * Show the configuration edit form pre-populated with current values.
-     */
     @GetMapping("/edit")
     public String edit(Model model) {
         model.addAttribute(Attributes.FORM, systemConfigService.getForm());
-
         return "config/edit";
     }
 
-    /**
-     * Update system configuration values. Validates input, persists changes, then
-     * redirects to the config listing.
-     */
     @PostMapping("/edit")
     public String updateConfigs(@Valid @ModelAttribute(Attributes.FORM) SystemConfigForm form,
                                 BindingResult bindingResult,
@@ -70,11 +55,18 @@ public class SystemConfigController {
         }
 
         systemConfigService.updateSystemConfigs(form);
+        auditService.log(null, currentStaffName(), "UPDATE", "SYSTEM_CONFIG", null,
+                "System configuration updated");
 
-        redirectAttributes.addFlashAttribute(
-                Attributes.SUCCESS,
-                "Configs updated successfully"
-        );
+        redirectAttributes.addFlashAttribute(Attributes.SUCCESS, "Configs updated successfully");
         return "redirect:/admin/configs";
+    }
+
+    private String currentStaffName() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof AccountPrincipal p) {
+            return p.getAccount().getFullName();
+        }
+        return "System";
     }
 }

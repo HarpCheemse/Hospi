@@ -3,6 +3,7 @@ package com.hospi.manage.features.config.controller;
 import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.features.config.dto.SystemConfigForm;
 import com.hospi.manage.features.config.entity.SystemConfig;
+import com.hospi.manage.features.audit.service.AuditService;
 import com.hospi.manage.features.config.service.SystemConfigService;
 import com.hospi.manage.features.notification.service.NotificationService;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,9 @@ class SystemConfigControllerTest {
 
     @MockitoBean
     private NotificationService notificationService;
+
+    @MockitoBean
+    private AuditService auditService;
 
     @Test
     void config_shouldRender() throws Exception {

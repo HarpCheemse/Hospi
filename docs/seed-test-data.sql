@@ -8,6 +8,8 @@ BEGIN;
 -- Cleanup
 -- ────────────────────────────────────────────────────────────────────────────
 DELETE
+FROM audit_logs;
+DELETE
 FROM invoice_items;
 DELETE
 FROM invoices;

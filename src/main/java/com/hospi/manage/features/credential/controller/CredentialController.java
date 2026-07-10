@@ -4,6 +4,7 @@ import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.core.security.session.AccountPrincipal;
 import com.hospi.manage.features.account.enums.Role;
 import com.hospi.manage.features.account.validator.AccountValidator;
+import com.hospi.manage.features.audit.service.AuditService;
 import com.hospi.manage.features.credential.dto.ChangePasswordForm;
 import com.hospi.manage.features.credential.dto.CredentialView;
 import com.hospi.manage.features.credential.service.CredentialService;
@@ -28,15 +29,14 @@ public class CredentialController {
     private final CredentialService credentialService;
     private final AccountValidator accountValidator;
     private final PasswordEncoder passwordEncoder;
+    private final AuditService auditService;
 
-    /**
-     * Construct the controller with required services.
-     */
     public CredentialController(CredentialService credentialService, AccountValidator accountValidator,
-                                PasswordEncoder passwordEncoder) {
+                                PasswordEncoder passwordEncoder, AuditService auditService) {
         this.credentialService = credentialService;
         this.accountValidator = accountValidator;
         this.passwordEncoder = passwordEncoder;
+        this.auditService = auditService;
     }
 
     /**
@@ -102,6 +102,9 @@ public class CredentialController {
 
         credentialService.changePassword(principal.getAccount(),
                 form.newPassword());
+        auditService.log(principal.getAccount().getId(), principal.getAccount().getFullName(),
+                "CHANGE_PASSWORD", "CREDENTIAL", principal.getAccount().getId(),
+                "Password changed");
 
         return "redirect:/credentials";
     }

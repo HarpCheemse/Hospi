@@ -7,6 +7,10 @@ import com.hospi.manage.features.account.dto.AccountView;
 import com.hospi.manage.features.account.enums.Role;
 import com.hospi.manage.features.account.service.AccountService;
 import com.hospi.manage.features.account.validator.AccountValidator;
+import com.hospi.manage.features.audit.service.AuditService;
+import com.hospi.manage.core.security.session.AccountPrincipal;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -27,6 +31,7 @@ import java.util.stream.Collectors;
 public class AccountController {
     private final AccountService accountService;
     private final AccountValidator accountValidator;
+    private final AuditService auditService;
 
     /**
      * Set the active sidebar highlight for this feature.
@@ -107,6 +112,8 @@ public class AccountController {
         }
 
         accountService.createAccount(form);
+        auditService.log(null, currentStaffName(), "CREATE", "ACCOUNT", null,
+                "Created account: " + form.email());
         redirectAttributes.addFlashAttribute(Attributes.SUCCESS, "Account created successfully");
         return "redirect:/admin/accounts";
     }
@@ -140,6 +147,8 @@ public class AccountController {
         }
 
         accountService.updateAccount(id, form);
+        auditService.log(null, currentStaffName(), "UPDATE", "ACCOUNT", id,
+                "Updated account: " + form.email());
         redirectAttributes.addFlashAttribute(Attributes.SUCCESS, "Account updated successfully");
         return "redirect:/admin/accounts";
     }
@@ -152,11 +161,20 @@ public class AccountController {
                                 RedirectAttributes redirectAttributes) {
         try {
             accountService.softDelete(id);
+            auditService.log(null, currentStaffName(), "DELETE", "ACCOUNT", id, "Deleted account");
         } catch (IllegalStateException e) {
             redirectAttributes.addFlashAttribute(Attributes.ERROR, e.getMessage());
             return "redirect:/admin/accounts/" + id;
         }
         redirectAttributes.addFlashAttribute(Attributes.SUCCESS, "Account deleted successfully");
         return "redirect:/admin/accounts";
+    }
+
+    private String currentStaffName() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof AccountPrincipal p) {
+            return p.getAccount().getFullName();
+        }
+        return "System";
     }
 }

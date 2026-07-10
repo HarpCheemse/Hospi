@@ -6,7 +6,9 @@ import com.hospi.manage.features.account.dto.AccountView;
 import com.hospi.manage.features.account.enums.Role;
 import com.hospi.manage.features.account.service.AccountService;
 import com.hospi.manage.features.account.validator.AccountValidator;
+import com.hospi.manage.features.audit.service.AuditService;
 import com.hospi.manage.features.notification.service.NotificationService;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -50,6 +52,9 @@ class AccountControllerTest {
 
     @MockitoBean
     private NotificationService notificationService;
+
+    @MockitoBean
+    private AuditService auditService;
 
     @Test
     void list_shouldRender() throws Exception {
