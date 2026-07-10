@@ -7,6 +7,13 @@
     <title>Manage Staying Guests | Hospi</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 
+    <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
+    <style>[x-cloak] { display: none !important; }</style>
+    <script th:inline="javascript">
+        window.csrfToken = /*[[${_csrf != null ? _csrf.token : ''}]]*/ '';
+        window.csrfHeader = /*[[${_csrf != null ? _csrf.headerName : ''}]]*/ '';
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.9/cdn.min.js" defer></script>
 </head>
 
@@ -206,7 +213,7 @@
                                 <td class="py-3 pr-4 text-muted-foreground"
                                     th:text="${'Floor ' + a.room.floorNumber}">Floor 2
                                 </td>
-                                <td class="py-3 text-right">
+                                <td class="py-3 text-right whitespace-nowrap">
                                     <form th:action="@{/receptionist/reservations/{id}/manage/rooms/{aid}/remove(id=${view.reservation().id}, aid=${a.id})}"
                                           method="post"
                                           class="inline"
@@ -382,9 +389,44 @@
 
             </section>
 
+            <!-- SWAP ROOM -->
+            <section class="card" th:if="${not #lists.isEmpty(view.reservation().details)}">
+                <div class="border-b border-border px-6 py-5">
+                    <div class="flex items-center gap-3">
+                        <img th:src="@{/assets/icons/door-open.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                        <div>
+                            <h2 class="text-xl font-semibold">Swap Room</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-border text-muted-foreground text-xs">
+                                <th class="px-4 py-2 font-medium text-left">Room Type</th>
+                                <th class="px-4 py-2 font-medium text-right">Qty</th>
+                                <th class="px-4 py-2 font-medium text-right"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="d : ${view.reservation().details}"
+                                class="border-b border-border/50">
+                                <td class="px-4 py-2 font-medium text-foreground" th:text="${d.roomType.name}">Deluxe Double</td>
+                                <td class="px-4 py-2 text-center text-muted-foreground" th:text="${d.roomCount}">2</td>
+                                <td class="px-4 py-2 text-right">
+                                    <a th:href="@{/receptionist/reservations/{id}/manage/swap(id=${view.reservation().id}, from=${d.roomType.id})}"
+                                       class="text-xs text-primary hover:underline">Swap</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
         </div>
 
     </div>
+
 </main>
 
 </body>
