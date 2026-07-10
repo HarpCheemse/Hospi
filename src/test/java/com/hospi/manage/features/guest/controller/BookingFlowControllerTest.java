@@ -508,7 +508,8 @@ class BookingFlowControllerTest {
                         .param("guestEmail", "jane@test.com")
                         .param("guestPhone", "1234567890")
                         .param("guestDateOfBirth", "1990-01-01")
-                        .param("guestNationality", "US"))
+                        .param("guestNationality", "US")
+                        .param("acceptedTos", "true"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/book/verify"))
                 .andExpect(flash().attributeExists(ERROR));
@@ -528,7 +529,8 @@ class BookingFlowControllerTest {
                         .param("guestEmail", "jane@test.com")
                         .param("guestPhone", "1234567890")
                         .param("guestDateOfBirth", "1990-01-01")
-                        .param("guestNationality", "US"))
+                        .param("guestNationality", "US")
+                        .param("acceptedTos", "true"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/book/verify-otp"))
                 .andExpect(flash().attributeExists(SUCCESS));

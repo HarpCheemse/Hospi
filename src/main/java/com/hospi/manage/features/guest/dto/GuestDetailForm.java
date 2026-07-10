@@ -1,5 +1,6 @@
 package com.hospi.manage.features.guest.dto;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -28,6 +29,9 @@ public record GuestDetailForm(
         LocalDate guestDateOfBirth,
 
         @Size(max = 30, message = "Nationality must not exceed 30 characters")
-        String guestNationality
+        String guestNationality,
+
+        @AssertTrue(message = "You must accept the Terms of Service")
+        Boolean acceptedTos
 ) {
 }

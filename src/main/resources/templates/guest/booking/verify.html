@@ -100,6 +100,21 @@
                    class="input">
           </div>
 
+          <!-- TOS CHECKBOX -->
+          <div class="mt-4 flex items-start gap-3">
+            <input type="checkbox" id="acceptedTos" name="acceptedTos"
+                   class="mt-1 h-4 w-4 rounded border-border"
+                   th:field="*{acceptedTos}">
+            <label for="acceptedTos" class="text-sm text-muted-foreground">
+              I have read and agree to the
+              <a th:href="@{/policies}" target="_blank" class="text-primary hover:underline">Terms of Service</a>
+            </label>
+          </div>
+          <div th:if="${#fields.hasErrors('acceptedTos')}"
+               class="text-xs text-danger mt-1">
+            <p th:each="err : ${#fields.errors('acceptedTos')}" th:text="${err}">You must accept the Terms of Service</p>
+          </div>
+
           <div class="flex items-center justify-end gap-3 pt-2">
             <button type="submit" class="btn btn-primary btn-lg">
               Send OTP Code

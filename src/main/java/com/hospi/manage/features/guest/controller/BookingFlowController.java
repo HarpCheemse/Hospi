@@ -168,7 +168,8 @@ public class BookingFlowController {
                             guest != null ? guest.email() : null,
                             guest != null ? guest.phone() : null,
                             guest != null ? guest.dateOfBirth() : null,
-                            guest != null ? guest.nationality() : null
+                            guest != null ? guest.nationality() : null,
+                            draft.isAcceptedTos()
                     ));
         }
         model.addAttribute(DRAFT,
@@ -193,6 +194,7 @@ public class BookingFlowController {
                 form.guestPhone(),
                 form.guestDateOfBirth(),
                 form.guestNationality()));
+        draft.setAcceptedTos(Boolean.TRUE.equals(form.acceptedTos()));
 
         String maskedEmail = bookingFlowService.initiateBookingOtp(draft);
         if (maskedEmail == null) {
