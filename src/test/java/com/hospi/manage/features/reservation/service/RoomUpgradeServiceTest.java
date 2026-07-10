@@ -106,8 +106,36 @@ class RoomUpgradeServiceTest {
 
         service.swapOne(1L, 1L, 2L);
 
-        assertEquals("DELUXE DOUBLE", detail.getRoomType().getName());
-        assertEquals(BigDecimal.valueOf(145), detail.getBasePrice());
+        assertEquals(1, reservation.getDetails().size());
+        var newDetail = reservation.getDetails().get(0);
+        assertEquals("DELUXE DOUBLE", newDetail.getRoomType().getName());
+        assertEquals(BigDecimal.valueOf(145), newDetail.getBasePrice());
+    }
+
+    @Test
+    void swapOne_shouldMerge_whenTargetTypeAlreadyExists() {
+        detail.setRoomCount(2);
+        detail.setTotalPrice(BigDecimal.valueOf(850));
+
+        var existingDeluxe = new ReservationDetail();
+        existingDeluxe.setRoomType(deluxeDouble);
+        existingDeluxe.setBasePrice(BigDecimal.valueOf(145));
+        existingDeluxe.setRoomCount(1);
+        existingDeluxe.setTotalPrice(BigDecimal.valueOf(725));
+        reservation.getDetails().add(existingDeluxe);
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+        when(roomTypeRepository.findById(2L)).thenReturn(Optional.of(deluxeDouble));
+        when(reservationRepository.save(any())).thenReturn(reservation);
+
+        service.swapOne(1L, 1L, 2L);
+
+        assertEquals(2, reservation.getDetails().size());
+        assertEquals(1, detail.getRoomCount());
+        var merged = reservation.getDetails().stream()
+                .filter(d -> d.getRoomType().getId().equals(2L))
+                .findFirst().orElseThrow();
+        assertEquals(2, merged.getRoomCount());
     }
 
     @Test

@@ -67,12 +67,27 @@ public class RoomUpgradeService {
         var delta = newRoomType.getBasePrice().subtract(oldBasePrice)
                 .multiply(BigDecimal.valueOf(remainingNights));
 
+        // Reduce the source detail
         if (detail.getRoomCount() > 1) {
             detail.setRoomCount(detail.getRoomCount() - 1);
             detail.setTotalPrice(detail.getBasePrice()
                     .multiply(BigDecimal.valueOf(detail.getRoomCount()))
                     .multiply(BigDecimal.valueOf(remainingNights)));
+        } else {
+            reservation.getDetails().remove(detail);
+        }
 
+        // Check if target room type already exists — merge instead of creating new
+        var existingTarget = reservation.getDetails().stream()
+                .filter(d -> d.getRoomType().getId().equals(newRoomTypeId))
+                .findFirst();
+        if (existingTarget.isPresent()) {
+            var et = existingTarget.get();
+            et.setRoomCount(et.getRoomCount() + 1);
+            et.setTotalPrice(et.getBasePrice()
+                    .multiply(BigDecimal.valueOf(et.getRoomCount()))
+                    .multiply(BigDecimal.valueOf(remainingNights)));
+        } else {
             var newDetail = new ReservationDetail();
             newDetail.setReservation(reservation);
             newDetail.setRoomType(newRoomType);
@@ -80,10 +95,6 @@ public class RoomUpgradeService {
             newDetail.setBasePrice(newRoomType.getBasePrice());
             newDetail.setTotalPrice(newRoomType.getBasePrice().multiply(BigDecimal.valueOf(remainingNights)));
             reservation.getDetails().add(newDetail);
-        } else {
-            detail.setRoomType(newRoomType);
-            detail.setBasePrice(newRoomType.getBasePrice());
-            detail.setTotalPrice(detail.getBasePrice().multiply(BigDecimal.valueOf(remainingNights)));
         }
 
         reservation.setTotalPrice(reservation.getTotalPrice().add(delta));
