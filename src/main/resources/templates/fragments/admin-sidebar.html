@@ -59,6 +59,19 @@
 
         </a>
 
+        <!-- AUDIT LOGS -->
+        <a th:href="@{/admin/audit-logs}"
+           class="flex items-center gap-3 rounded-lg p-2"
+           th:classappend="${activeSidebar == 'AUDIT_LOGS'}
+           ? ' bg-primary/10 text-primary font-medium'
+           : ' hover:bg-muted text-foreground'">
+
+            <img th:src="@{/assets/icons/clipboard-check.svg}" alt="Audit Logs">
+
+            Audit Logs
+
+        </a>
+
         <!-- NOTIFICATIONS -->
         <a th:href="@{/notifications}"
            class="flex items-center justify-between rounded-lg p-2"
