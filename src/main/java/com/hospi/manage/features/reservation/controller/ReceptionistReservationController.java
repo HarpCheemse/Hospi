@@ -1,6 +1,7 @@
 package com.hospi.manage.features.reservation.controller;
 
 import com.hospi.manage.common.constant.Attributes;
+import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.reservation.dto.request.*;
 import com.hospi.manage.features.reservation.dto.response.*;
 import com.hospi.manage.features.reservation.entity.Reservation;
@@ -12,7 +13,12 @@ import com.hospi.manage.features.reservation.service.RoomAvailabilityService;
 import com.hospi.manage.features.reservation.service.StayingGuestService;
 import com.hospi.manage.features.reservation.validation.DateSearchValidator;
 import com.hospi.manage.features.reservation.validation.OfflineBookingFormValidator;
+import com.hospi.manage.features.reservation.service.RoomUpgradeService;
 import com.hospi.manage.features.room.dto.response.RoomSelection;
+import com.hospi.manage.features.room.enums.OccupancyStatus;
+import com.hospi.manage.features.room.repository.RoomRepository;
+import com.hospi.manage.features.room.entity.RoomType;
+import com.hospi.manage.features.room.repository.RoomTypeRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +32,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,6 +50,9 @@ public class ReceptionistReservationController {
     private final RoomAvailabilityService roomAvailabilityService;
     private final StayingGuestService stayingGuestService;
     private final RoomAssignmentService roomAssignmentService;
+    private final RoomUpgradeService roomUpgradeService;
+    private final RoomTypeRepository roomTypeRepository;
+    private final RoomRepository roomRepository;
 
     private final static int pageSize = 10;
 
@@ -398,6 +408,58 @@ public class ReceptionistReservationController {
                     e.getMessage());
         }
 
+        return "redirect:/receptionist/reservations/" + id + "/manage";
+    }
+
+    /** Show available room types to swap to, for a specific current room type. */
+    @GetMapping("/{id}/manage/swap")
+    String swapForm(@PathVariable Long id, @RequestParam Long from, Model model) {
+        var reservation = reservationService.findById(id);
+        if (reservation.getStatus() != ReservationStatus.CHECKED_IN) {
+            return "redirect:/receptionist/reservations/stays";
+        }
+        model.addAttribute(Attributes.ACTIVE_SIDEBAR, Attributes.CURRENT_STAYS);
+        model.addAttribute("reservation", reservation);
+        model.addAttribute("fromTypeId", from);
+
+        var detail = reservation.getDetails().stream()
+                .filter(d -> d.getRoomType().getId().equals(from))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Room type"));
+
+        if (reservation.getCheckOutAt() != null) {
+            var remainingNights = ChronoUnit.DAYS.between(LocalDate.now(), reservation.getCheckOutAt());
+            var allTypes = roomTypeRepository.findByActiveTrue();
+
+            List<RoomType> options = new ArrayList<>();
+            for (var rt : allTypes) {
+                if (rt.getBasePrice().compareTo(detail.getBasePrice()) <= 0) continue;
+                if (rt.getId().equals(from)) continue;
+                boolean hasVacant = !roomRepository
+                        .findByRoomTypeIdAndOccupancyStatusAndActiveTrue(rt.getId(), OccupancyStatus.VACANT)
+                        .isEmpty();
+                if (!hasVacant) continue;
+                options.add(rt);
+            }
+            model.addAttribute("options", options);
+            model.addAttribute("currentType", detail.getRoomType());
+            model.addAttribute("remainingNights", remainingNights);
+            model.addAttribute("totalNights", ChronoUnit.DAYS.between(reservation.getCheckInAt(), reservation.getCheckOutAt()));
+        }
+
+        return "receptionist/reservation/swap";
+    }
+
+    /** Swap one unit from a room type to a higher-tier type. */
+    @PostMapping("/{id}/manage/swap")
+    String swapRoom(@PathVariable Long id, @RequestParam Long roomTypeId,
+                    @RequestParam Long from, RedirectAttributes redirect) {
+        try {
+            roomUpgradeService.swapOne(id, from, roomTypeId);
+            redirect.addFlashAttribute(Attributes.SUCCESS, "Room swapped successfully.");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            redirect.addFlashAttribute(Attributes.ERROR, e.getMessage());
+        }
         return "redirect:/receptionist/reservations/" + id + "/manage";
     }
 }

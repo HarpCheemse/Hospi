@@ -797,4 +797,46 @@ $$
     END
 $$;
 
+-- ────────────────────────────────────────────────────────────────────────────
+-- 16. CHECKED_IN reservation with 2× BASIC DOUBLE (for swap test)
+-- ────────────────────────────────────────────────────────────────────────────
+DO
+$$
+    DECLARE
+        rid  BIGINT;
+        rt   BIGINT;
+    BEGIN
+        SELECT id INTO rt FROM room_types WHERE name = 'BASIC DOUBLE' LIMIT 1;
+
+        INSERT INTO reservations (guest_name, guest_email, guest_phone, guest_date_of_birth,
+                                  guest_nationality, check_in_at, check_out_at, status, source,
+                                  total_price, checked_in_at, checked_in_by, created_at, updated_at)
+        VALUES ('Swap Test Guest', 'swap.test@email.com', '+1 555 777 001', '1988-04-12', 'American',
+                CURRENT_DATE - 2, CURRENT_DATE + 3, 'CHECKED_IN', 'OFFLINE',
+                850.00, CURRENT_TIMESTAMP - INTERVAL '2 days', 'Rita Receptionist',
+                NOW() - INTERVAL '3 days', NOW() - INTERVAL '3 days')
+        RETURNING id INTO rid;
+
+        INSERT INTO reservation_details (reservation_id, room_type_id, room_count, base_price, total_price)
+        VALUES (rid, rt, 2, 85.00, 850.00);
+
+        INSERT INTO payments (reservation_id, amount, payment_method, confirmed_at, confirmed_by)
+        VALUES (rid, 850.00, 'CARD', CURRENT_TIMESTAMP - INTERVAL '2 days', 'Rita Receptionist');
+
+        INSERT INTO staying_guests (reservation_id, guest_name, date_of_birth, nationality, created_at)
+        VALUES (rid, 'Swap Test Guest', '1988-04-12', 'American', NOW());
+
+        -- Assign 2 BASIC DOUBLE rooms
+        INSERT INTO room_assignments (reservation_id, room_id, assigned_at)
+        SELECT rid, r.id, CURRENT_TIMESTAMP - INTERVAL '2 days'
+        FROM rooms r
+        WHERE r.room_type_id = rt AND r.is_active = true AND r.occupancy_status = 'VACANT'
+        ORDER BY r.id
+        LIMIT 2;
+
+        UPDATE rooms SET occupancy_status = 'OCCUPIED'
+        WHERE id IN (SELECT room_id FROM room_assignments WHERE reservation_id = rid);
+    END
+$$;
+
 COMMIT;

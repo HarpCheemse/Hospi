@@ -5,10 +5,13 @@ import com.hospi.manage.features.reservation.dto.request.*;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.BookingSource;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
+import com.hospi.manage.features.reservation.service.RoomUpgradeService;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.reservation.service.RoomAssignmentService;
 import com.hospi.manage.features.reservation.service.RoomAvailabilityService;
 import com.hospi.manage.features.reservation.service.StayingGuestService;
+import com.hospi.manage.features.room.repository.RoomRepository;
+import com.hospi.manage.features.room.repository.RoomTypeRepository;
 import com.hospi.manage.features.reservation.validation.DateSearchValidator;
 import com.hospi.manage.features.reservation.validation.OfflineBookingFormValidator;
 import com.hospi.manage.features.room.dto.response.RoomTypeAvailability;
@@ -61,6 +64,15 @@ class ReceptionistReservationControllerTest {
 
     @MockitoBean
     private RoomAssignmentService roomAssignmentService;
+
+    @MockitoBean
+    private RoomUpgradeService roomUpgradeService;
+
+    @MockitoBean
+    private RoomTypeRepository roomTypeRepository;
+
+    @MockitoBean
+    private RoomRepository roomRepository;
 
     @MockitoBean
     private NotificationService notificationService;
