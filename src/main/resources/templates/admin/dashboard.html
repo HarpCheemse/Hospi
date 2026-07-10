@@ -1,282 +1,167 @@
 <!DOCTYPE html>
-<html lang="en"
-      xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | Hospi</title>
-
-    <link rel="stylesheet"
-          th:href="@{/css/app.css}"/>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 
 <body class="staff-layout">
 
-    <!-- SIDEBAR -->
-    <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+<div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
 
-    <!-- MAIN -->
-    <main class="staff-page">
+<main class="staff-page">
 
-        <!-- HEADER -->
-        <header class="staff-page-header">
+    <div th:replace="~{fragments/components/toast :: toast}"></div>
 
-            <section>
-                <h1 class="staff-page-title">Admin Dashboard</h1>
-                <p class="page-description">
-                    Monitor platform activity, staff management, and system health
-                </p>
-            </section>
+    <header class="staff-page-header">
+        <section>
+            <h1 class="staff-page-title">Admin Dashboard</h1>
+            <p class="page-description">Staff oversight and system activity</p>
+        </section>
+    </header>
 
-        </header>
+    <!-- STAFF STATS -->
+    <section class="mb-6 grid grid-cols-4 gap-4">
+        <div class="card-compact">
+            <div class="mb-3 flex items-start justify-between">
+                <p class="text-sm text-muted-foreground">Total Staff</p>
+                <img th:src="@{/assets/icons/users.svg}" class="h-5 w-5 text-primary opacity-70" alt="">
+            </div>
+            <p class="text-2xl font-bold text-foreground" th:text="${totalStaff}">0</p>
+        </div>
+        <div class="card-compact">
+            <div class="mb-3 flex items-start justify-between">
+                <p class="text-sm text-muted-foreground">Managers</p>
+                <img th:src="@{/assets/icons/user.svg}" class="h-5 w-5 text-primary opacity-70" alt="">
+            </div>
+            <p class="text-2xl font-bold text-foreground" th:text="${managerCount}">0</p>
+        </div>
+        <div class="card-compact">
+            <div class="mb-3 flex items-start justify-between">
+                <p class="text-sm text-muted-foreground">Receptionists</p>
+                <img th:src="@{/assets/icons/phone.svg}" class="h-5 w-5 text-primary opacity-70" alt="">
+            </div>
+            <p class="text-2xl font-bold text-foreground" th:text="${receptionistCount}">0</p>
+        </div>
+        <div class="card-compact">
+            <div class="mb-3 flex items-start justify-between">
+                <p class="text-sm text-muted-foreground">Leaders</p>
+                <img th:src="@{/assets/icons/shield-check.svg}" class="h-5 w-5 text-primary opacity-70" alt="">
+            </div>
+            <p class="text-2xl font-bold text-foreground" th:text="${leaderCount}">0</p>
+        </div>
+    </section>
 
-        <!-- STATS -->
-        <section class="mb-6 grid grid-cols-4 gap-4">
+    <!-- GRID -->
+    <section class="grid grid-cols-12 gap-4">
 
-            <div class="card-compact">
-
-                <div class="mb-4 flex items-start justify-between">
-
+        <!-- RECENT ACTIVITY -->
+        <section class="card-panel col-span-7">
+            <div class="mb-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <img th:src="@{/assets/icons/clipboard-check.svg}" class="h-5 w-5 text-primary opacity-70" alt="">
                     <div>
-                        <p class="text-sm text-muted-foreground">
-                            Total Staff
-                        </p>
-
-                        <p class="mt-1 text-2xl font-bold text-foreground">
-                            86
-                        </p>
+                        <h2 class="text-lg font-semibold text-foreground">Recent Activity</h2>
+                        <p class="text-sm text-muted-foreground">Latest admin actions</p>
                     </div>
-
-                    <img th:src="@{/assets/icons/users.svg}"
-                         alt="Users">
-
                 </div>
-
-                <p class="pill-success">
-                    +12 this month
-                </p>
-
+                <a th:href="@{/admin/audit-logs}" class="btn btn-secondary btn-sm">View All</a>
             </div>
 
-            <div class="card-compact">
-
-                <div class="mb-4 flex items-start justify-between">
-
-                    <div>
-                        <p class="text-sm text-muted-foreground">
-                            Active Roles
-                        </p>
-
-                        <p class="mt-1 text-2xl font-bold text-foreground">
-                            14
-                        </p>
-                    </div>
-
-                    <img th:src="@{/assets/icons/shield-check.svg}"
-                         alt="Roles">
-
-                </div>
-
-                <p class="pill-muted">
-                    Permission groups
-                </p>
-
+            <div th:if="${#lists.isEmpty(recentLogs)}" class="py-8 text-center text-sm text-muted-foreground">
+                No activity recorded yet.
             </div>
 
-            <div class="card-compact">
-
-                <div class="mb-4 flex items-start justify-between">
-
-                    <div>
-                        <p class="text-sm text-muted-foreground">
-                            RAM Usage
-                        </p>
-
-                        <p class="mt-1 text-2xl font-bold text-foreground">
-                            145 MB
+            <div th:if="${!#lists.isEmpty(recentLogs)}" class="flex flex-col gap-3">
+                <div th:each="log : ${recentLogs}" class="flex items-start gap-3">
+                    <div th:classappend="${log.action == 'CREATE'} ? 'bg-primary' : (${log.action == 'DELETE'} ? 'bg-danger' : (${log.action == 'CHANGE_PASSWORD'} ? 'bg-warning' : 'bg-muted-foreground'))"
+                         class="mt-2 h-2 w-2 rounded-full"></div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm text-foreground truncate" th:text="${log.details}">Action details</p>
+                        <p class="text-xs text-muted-foreground">
+                            <span th:text="${log.staffName != null ? log.staffName : 'System'}">Admin</span>
+                            · <span th:text="${#temporals.format(log.createdAt, 'dd MMM HH:mm')}">15 Jun 14:30</span>
                         </p>
                     </div>
-
-                    <img th:src="@{/assets/icons/memory-stick.svg}"
-                         alt="RAM Usage">
-
                 </div>
-
-                <p class="pill-muted">
-                    Stable operations
-                </p>
-
             </div>
-
-            <div class="card-compact">
-
-                <div class="mb-4 flex items-start justify-between">
-
-                    <div>
-                        <p class="text-sm text-muted-foreground">
-                            System Uptime
-                        </p>
-
-                        <p class="mt-1 text-2xl font-bold text-foreground">
-                            99.98%
-                        </p>
-                    </div>
-
-                    <img th:src="@{/assets/icons/server.svg}"
-                         alt="Server">
-
-                </div>
-
-                <p class="pill-success">
-                    Healthy
-                </p>
-
-            </div>
-
         </section>
 
-        <!-- GRID -->
-        <section class="grid grid-cols-12 gap-4">
-
-            <!-- RECENT ACTIVITY -->
-            <section class="card-panel col-span-7">
-
-                <div class="mb-4 flex items-center justify-between">
-
-                    <div>
-
-                        <h2 class="text-lg font-semibold text-foreground">
-                            Recent Activity
-                        </h2>
-
-                        <p class="text-sm text-muted-foreground">
-                            Latest system events
-                        </p>
-
-                    </div>
-
-                    <button class="btn btn-secondary btn-sm">
-                        View All
-                    </button>
-
+        <!-- SYSTEM OVERVIEW -->
+        <section class="card-panel col-span-5">
+            <div class="mb-4 flex items-center gap-3">
+                <img th:src="@{/assets/icons/server.svg}" class="h-5 w-5 text-primary opacity-70" alt="">
+                <div>
+                    <h2 class="text-lg font-semibold text-foreground">Role Distribution</h2>
+                    <p class="text-sm text-muted-foreground">Staff breakdown by role</p>
                 </div>
+            </div>
 
-                <div class="flex flex-col gap-4">
-
-                    <div class="flex items-start gap-3">
-                        <div class="mt-2 h-2 w-2 rounded-full bg-primary"></div>
-                        <div>
-                            <p class="text-sm font-medium text-foreground">
-                                New receptionist account created
-                            </p>
-                            <p class="text-xs text-muted-foreground">
-                                5 minutes ago
-                            </p>
-                        </div>
+            <div class="flex flex-col gap-4">
+                <div>
+                    <div class="mb-1 flex justify-between text-sm">
+                        <span class="text-foreground">Manager</span>
+                        <span class="text-muted-foreground" th:text="${managerCount}">0</span>
                     </div>
-
-                    <div class="flex items-start gap-3">
-                        <div class="mt-2 h-2 w-2 rounded-full bg-primary"></div>
-                        <div>
-                            <p class="text-sm font-medium text-foreground">
-                                Role permissions updated
-                            </p>
-                            <p class="text-xs text-muted-foreground">
-                                18 minutes ago
-                            </p>
-                        </div>
+                    <div class="h-2 w-full rounded-full bg-muted">
+                        <div class="h-2 rounded-full bg-accent"
+                             th:style="'width: ' + (${totalStaff > 0} ? (${managerCount} * 100 / ${totalStaff}) : 0) + '%'"></div>
                     </div>
-
-                    <div class="flex items-start gap-3">
-                        <div class="mt-2 h-2 w-2 rounded-full bg-primary"></div>
-                        <div>
-                            <p class="text-sm font-medium text-foreground">
-                                Backup completed successfully
-                            </p>
-                            <p class="text-xs text-muted-foreground">
-                                1 hour ago
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="flex items-start gap-3">
-                        <div class="mt-2 h-2 w-2 rounded-full bg-warning"></div>
-                        <div>
-                            <p class="text-sm font-medium text-foreground">
-                                Failed login attempts detected
-                            </p>
-                            <p class="text-xs text-muted-foreground">
-                                2 hours ago
-                            </p>
-                        </div>
-                    </div>
-
                 </div>
-
-            </section>
-
-            <!-- SYSTEM HEALTH -->
-            <section class="card-panel col-span-5">
-
-                <div class="mb-4 flex items-center justify-between">
-
-                    <div>
-                        <h2 class="text-lg font-semibold text-foreground">
-                            System Health
-                        </h2>
-                        <p class="text-sm text-muted-foreground">Current system status</p>
+                <div>
+                    <div class="mb-1 flex justify-between text-sm">
+                        <span class="text-foreground">Receptionist</span>
+                        <span class="text-muted-foreground" th:text="${receptionistCount}">0</span>
                     </div>
-
-                    <span class="pill-success">
-                        Healthy
-                    </span>
-
+                    <div class="h-2 w-full rounded-full bg-muted">
+                        <div class="h-2 rounded-full bg-success"
+                             th:style="'width: ' + (${totalStaff > 0} ? (${receptionistCount} * 100 / ${totalStaff}) : 0) + '%'"></div>
+                    </div>
                 </div>
-
-                <div class="flex flex-col gap-5">
-
-                    <div>
-                        <div class="mb-1 flex justify-between text-sm">
-                            <span class="text-foreground">CPU Usage</span>
-                            <span class="text-muted-foreground">42%</span>
-                        </div>
-
-                        <div class="h-2 w-full rounded-full bg-muted">
-                            <div class="h-2 rounded-full bg-primary"
-                                 style="width: 42%"></div>
-                        </div>
+                <div>
+                    <div class="mb-1 flex justify-between text-sm">
+                        <span class="text-foreground">Leader</span>
+                        <span class="text-muted-foreground" th:text="${leaderCount}">0</span>
                     </div>
-
-                    <div>
-                        <div class="mb-1 flex justify-between text-sm">
-                            <span class="text-foreground">Database Load</span>
-                            <span class="text-muted-foreground">63%</span>
-                        </div>
-
-                        <div class="h-2 w-full rounded-full bg-muted">
-                            <div class="h-2 rounded-full bg-primary"
-                                 style="width: 63%"></div>
-                        </div>
+                    <div class="h-2 w-full rounded-full bg-muted">
+                        <div class="h-2 rounded-full bg-warning"
+                             th:style="'width: ' + (${totalStaff > 0} ? (${leaderCount} * 100 / ${totalStaff}) : 0) + '%'"></div>
                     </div>
-
-                    <div>
-                        <div class="mb-1 flex justify-between text-sm">
-                            <span class="text-foreground">Storage Usage</span>
-                            <span class="text-muted-foreground">71%</span>
-                        </div>
-
-                        <div class="h-2 w-full rounded-full bg-muted">
-                            <div class="h-2 rounded-full bg-primary"
-                                 style="width: 71%"></div>
-                        </div>
-                    </div>
-
                 </div>
-
-            </section>
-
+            </div>
         </section>
 
-    </main>
+    </section>
+
+    <!-- NOTIFICATIONS -->
+    <section class="mt-4 card-panel" th:if="${recentNotifications != null and not #lists.isEmpty(recentNotifications.content)}">
+        <div class="mb-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <img th:src="@{/assets/icons/bell.svg}" class="h-5 w-5 text-primary opacity-70" alt="">
+                <div>
+                    <h2 class="text-lg font-semibold text-foreground">Recent Notifications</h2>
+                    <p class="text-sm text-muted-foreground">Latest system alerts</p>
+                </div>
+            </div>
+            <a th:href="@{/notifications}" class="btn btn-secondary btn-sm">View All</a>
+        </div>
+        <div class="flex flex-col gap-3">
+            <div th:each="n : ${recentNotifications.content}" class="flex items-start gap-3">
+                <div class="mt-2 h-2 w-2 rounded-full bg-primary"></div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-foreground" th:text="${n.title}">Notification title</p>
+                    <p class="text-xs text-muted-foreground truncate" th:text="${n.body}">Notification body</p>
+                    <p class="text-xs text-muted-foreground"
+                       th:text="${#temporals.format(n.createdAt, 'dd MMM HH:mm')}">15 Jun 14:30</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
 
 </body>
 </html>

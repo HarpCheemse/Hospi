@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Logs | Hospi</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<body class="staff-layout">
+
+<div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+
+<main class="staff-page">
+
+    <div th:replace="~{fragments/components/toast :: toast}"></div>
+
+    <header class="staff-page-header">
+        <div class="flex items-center gap-4">
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/shield-check.svg}" alt="">
+            </div>
+            <div>
+                <h1 class="staff-page-title">Audit Logs</h1>
+                <p class="page-description">Track all admin actions across the system</p>
+            </div>
+        </div>
+    </header>
+
+    <section class="card">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-muted">
+                    <tr>
+                        <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">Time</th>
+                        <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">Staff</th>
+                        <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">Action</th>
+                        <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="log : ${logs.content}"
+                        class="border-t border-border hover:bg-muted/30">
+                        <td class="px-5 py-4 text-sm text-muted-foreground whitespace-nowrap"
+                            th:text="${#temporals.format(log.createdAt, 'dd MMM yyyy HH:mm')}">15 Jun 2026 14:30</td>
+                        <td class="px-5 py-4 text-sm text-foreground" th:text="${log.staffName != null ? log.staffName : 'System'}">Admin</td>
+                        <td class="px-5 py-4">
+                            <span th:switch="${log.action}" class="text-xs font-medium">
+                                <span th:case="'CREATE'" class="pill-success">Create</span>
+                                <span th:case="'UPDATE'" class="pill-muted">Update</span>
+                                <span th:case="'DELETE'" class="pill-danger">Delete</span>
+                                <span th:case="'CHANGE_PASSWORD'" class="pill-warning">Password</span>
+                                <span th:case="*" class="pill-muted" th:text="${log.action}">Action</span>
+                            </span>
+                        </td>
+                        <td class="px-5 py-4 text-sm text-muted-foreground" th:text="${log.details}">Account created</td>
+                    </tr>
+                </tbody>
+                <tfoot th:if="${logs.totalPages > 1}">
+                    <tr>
+                        <td colspan="4" class="px-5 py-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-muted-foreground">
+                                    Page <span th:text="${logs.number + 1}">1</span> of <span th:text="${logs.totalPages}">1</span>
+                                </span>
+                                <div class="flex items-center gap-2">
+                                    <a th:href="@{/admin/audit-logs(page=${logs.number - 1})}"
+                                       th:classappend="${logs.first} ? 'pointer-events-none opacity-50' : ''"
+                                       class="btn btn-ghost btn-sm">Prev</a>
+                                    <a th:href="@{/admin/audit-logs(page=${logs.number + 1})}"
+                                       th:classappend="${logs.last} ? 'pointer-events-none opacity-50' : ''"
+                                       class="btn btn-ghost btn-sm">Next</a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </section>
+
+</main>
+
+</body>
+</html>
