@@ -15,6 +15,7 @@ public class BookingDraft {
     private BookingDates dates;
     private BookingRooms rooms;
     private BookingGuest guest;
+    private boolean acceptedTos;
 
     public record BookingDates(LocalDate checkInAt, LocalDate checkOutAt) {
     }

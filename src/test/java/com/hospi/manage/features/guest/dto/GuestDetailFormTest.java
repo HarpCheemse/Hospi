@@ -24,7 +24,7 @@ class GuestDetailFormTest {
 
     private static GuestDetailForm validForm() {
         return new GuestDetailForm("John Doe", "john@example.com", "+1234567890",
-                LocalDate.of(1990, 1, 1), null);
+                LocalDate.of(1990, 1, 1), null, true);
     }
 
     @Test
@@ -39,7 +39,7 @@ class GuestDetailFormTest {
     @Test
     void shouldFail_whenGuestNameBlank() {
         GuestDetailForm form = new GuestDetailForm("", "john@example.com", "+1234567890",
-                LocalDate.of(1990, 1, 1), null);
+                LocalDate.of(1990, 1, 1), null, true);
 
         Set<ConstraintViolation<GuestDetailForm>> violations = validator.validate(form);
 
@@ -50,7 +50,7 @@ class GuestDetailFormTest {
     @Test
     void shouldFail_whenGuestEmailBlank() {
         GuestDetailForm form = new GuestDetailForm("John Doe", "", "+1234567890",
-                LocalDate.of(1990, 1, 1), null);
+                LocalDate.of(1990, 1, 1), null, true);
 
         Set<ConstraintViolation<GuestDetailForm>> violations = validator.validate(form);
 
@@ -61,7 +61,7 @@ class GuestDetailFormTest {
     @Test
     void shouldFail_whenGuestEmailInvalid() {
         GuestDetailForm form = new GuestDetailForm("John Doe", "not-an-email", "+1234567890",
-                LocalDate.of(1990, 1, 1), null);
+                LocalDate.of(1990, 1, 1), null, true);
 
         Set<ConstraintViolation<GuestDetailForm>> violations = validator.validate(form);
 
@@ -72,7 +72,7 @@ class GuestDetailFormTest {
     @Test
     void shouldFail_whenGuestPhoneBlank() {
         GuestDetailForm form = new GuestDetailForm("John Doe", "john@example.com", "",
-                LocalDate.of(1990, 1, 1), null);
+                LocalDate.of(1990, 1, 1), null, true);
 
         Set<ConstraintViolation<GuestDetailForm>> violations = validator.validate(form);
 
@@ -83,7 +83,7 @@ class GuestDetailFormTest {
     @Test
     void shouldFail_whenGuestDateOfBirthNull() {
         GuestDetailForm form = new GuestDetailForm("John Doe", "john@example.com", "+1234567890",
-                null, null);
+                null, null, true);
 
         Set<ConstraintViolation<GuestDetailForm>> violations = validator.validate(form);
 
@@ -94,7 +94,7 @@ class GuestDetailFormTest {
     @Test
     void shouldFail_whenGuestDateOfBirthFuture() {
         GuestDetailForm form = new GuestDetailForm("John Doe", "john@example.com", "+1234567890",
-                LocalDate.now().plusDays(1), null);
+                LocalDate.now().plusDays(1), null, true);
 
         Set<ConstraintViolation<GuestDetailForm>> violations = validator.validate(form);
 
@@ -110,5 +110,16 @@ class GuestDetailFormTest {
         Set<ConstraintViolation<GuestDetailForm>> violations = validator.validate(form);
 
         assertTrue(violations.isEmpty());
+    }
+
+    @Test
+    void shouldFail_whenTosNotAccepted() {
+        GuestDetailForm form = new GuestDetailForm("John Doe", "john@example.com", "+1234567890",
+                LocalDate.of(1990, 1, 1), null, false);
+
+        Set<ConstraintViolation<GuestDetailForm>> violations = validator.validate(form);
+
+        assertFalse(violations.isEmpty());
+        assertEquals("acceptedTos", violations.iterator().next().getPropertyPath().toString());
     }
 }
