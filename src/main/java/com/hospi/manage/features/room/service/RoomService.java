@@ -21,8 +21,9 @@ import com.hospi.manage.features.room.enums.OccupancyStatus;
 import com.hospi.manage.features.room.mapper.RoomMapper;
 import com.hospi.manage.features.room.repository.RoomRepository;
 import com.hospi.manage.features.room.repository.RoomTypeRepository;
-import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,24 +32,13 @@ import java.util.stream.Collectors;
 
 /** Business logic for room CRUD, floor views, occupancy tracking, and soft-deletion. */
 @Service
+@RequiredArgsConstructor
 public class RoomService {
     private final RoomRepository roomRepository;
     private final RoomTypeRepository roomTypeRepository;
     private final NotificationService notificationService;
     private final RoomAssignmentRepository roomAssignmentRepository;
     private final StayingGuestRepository stayingGuestRepository;
-
-    RoomService(RoomRepository roomRepository,
-                RoomTypeRepository roomTypeRepository,
-                NotificationService notificationService,
-                RoomAssignmentRepository roomAssignmentRepository,
-                StayingGuestRepository stayingGuestRepository) {
-        this.roomRepository = roomRepository;
-        this.roomTypeRepository = roomTypeRepository;
-        this.notificationService = notificationService;
-        this.roomAssignmentRepository = roomAssignmentRepository;
-        this.stayingGuestRepository = stayingGuestRepository;
-    }
 
     /** Return all active rooms ordered by floor and room number. */
     public List<Room> findAll() {
@@ -123,6 +113,7 @@ public class RoomService {
     }
 
     /** Update a room's type, number, and condition status. */
+    @Transactional
     public void updateRoom(Long id, RoomEditForm form) {
         Room room = findById(id);
 

@@ -11,6 +11,7 @@ import com.hospi.manage.features.room.service.RoomService;
 import com.hospi.manage.features.room.service.RoomTypeService;
 import com.hospi.manage.features.room.validation.RoomValidator;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,22 +24,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
  */
 @Controller
 @RequestMapping("/manager/rooms")
+@RequiredArgsConstructor
 public class RoomController {
-    final private HotelService hotelService;
-    final private RoomTypeService roomTypeService;
-    final private RoomService roomService;
-
-    final private RoomValidator roomValidator;
-
-    RoomController(HotelService hotelService,
-                   RoomTypeService roomTypeService,
-                   RoomService roomService,
-                   RoomValidator roomValidator) {
-        this.hotelService = hotelService;
-        this.roomTypeService = roomTypeService;
-        this.roomService = roomService;
-        this.roomValidator = roomValidator;
-    }
+    private final HotelService hotelService;
+    private final RoomTypeService roomTypeService;
+    private final RoomService roomService;
+    private final RoomValidator roomValidator;
 
     /**
      * Set the active sidebar highlight for this feature.

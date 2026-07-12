@@ -4,17 +4,15 @@ import com.hospi.manage.features.room.dto.request.RoomCreateForm;
 import com.hospi.manage.features.room.dto.request.RoomEditForm;
 import com.hospi.manage.features.room.entity.Room;
 import com.hospi.manage.features.room.repository.RoomRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 
 /** Validator for room create and edit forms ({@link RoomCreateForm}, {@link RoomEditForm}). */
 @Component
+@RequiredArgsConstructor
 public class RoomValidator {
     private final RoomRepository roomRepository;
-
-    public RoomValidator(RoomRepository roomRepository) {
-        this.roomRepository = roomRepository;
-    }
 
     /**
      * Validate a room-edit form for number format and uniqueness.
