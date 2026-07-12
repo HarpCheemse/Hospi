@@ -123,12 +123,12 @@ class AccountServiceTest {
 
     @Test
     void shouldCreateAccount_withDisabledStatus() {
-        AccountCreateForm form = new AccountCreateForm("John", "john@test.com", "rawPass", "555", Role.RECEPTIONIST);
-        when(passwordEncoder.encode("rawPass")).thenReturn("hashedValue");
+        AccountCreateForm form = new AccountCreateForm("John", "john@test.com", "555", Role.RECEPTIONIST);
+        when(passwordEncoder.encode(anyString())).thenReturn("hashedValue");
 
         accountService.createAccount(form);
 
-        verify(passwordEncoder).encode("rawPass");
+        verify(passwordEncoder).encode(anyString());
         verify(accountRepository).save(accountCaptor.capture());
         Account saved = accountCaptor.getValue();
         assertEquals("John", saved.getFullName());

@@ -113,7 +113,6 @@ class AccountControllerTest {
         mockMvc.perform(post("/admin/accounts/create")
                         .param("fullName", "Test User")
                         .param("email", "test@test.com")
-                        .param("password", "Password1")
                         .param("phone", "1234567890")
                         .param("role", "RECEPTIONIST"))
                 .andExpect(status().is3xxRedirection())
