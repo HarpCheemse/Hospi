@@ -152,8 +152,10 @@
 
                     <div class="flex flex-col gap-2">
                         <label class="text-sm font-medium">Description</label>
+                        <div th:replace="~{fragments/form-error :: error('description')}"></div>
                         <textarea rows="4"
                                   th:field="*{description}"
+                                  th:classappend="${#fields.hasErrors('description')} ? 'input-error' : ''"
                                   class="input"
                                   placeholder="Describe your hotel..."></textarea>
                     </div>
