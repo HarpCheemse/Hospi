@@ -1,4 +1,4 @@
-package com.hospi.manage.features.credential.dto;
+package com.hospi.manage.features.credential.dto.response;
 
 import java.time.LocalDateTime;
 

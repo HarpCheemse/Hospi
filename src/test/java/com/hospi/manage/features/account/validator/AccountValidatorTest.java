@@ -5,7 +5,7 @@ import com.hospi.manage.features.account.dto.AccountEditForm;
 import com.hospi.manage.features.account.entity.Account;
 import com.hospi.manage.features.account.enums.Role;
 import com.hospi.manage.features.account.repository.AccountRepository;
-import com.hospi.manage.features.credential.dto.ChangePasswordForm;
+import com.hospi.manage.features.credential.dto.request.ChangePasswordForm;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

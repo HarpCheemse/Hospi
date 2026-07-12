@@ -1,4 +1,4 @@
-package com.hospi.manage.features.credential.dto;
+package com.hospi.manage.features.credential.dto.request;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
