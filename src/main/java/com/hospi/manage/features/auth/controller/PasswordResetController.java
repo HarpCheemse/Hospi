@@ -19,6 +19,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import static com.hospi.manage.common.constant.Attributes.FORM;
 import static com.hospi.manage.common.constant.Attributes.SUCCESS;
 
 /**
@@ -39,7 +40,7 @@ public class PasswordResetController {
      */
     @GetMapping("/forgot")
     public String forgot(Model model) {
-        model.addAttribute("form",
+        model.addAttribute(FORM,
                 new ForgotPasswordForm(null));
         return "auth/forgot-password";
     }
@@ -49,7 +50,7 @@ public class PasswordResetController {
      * it via email, and redirect to the OTP verification page.
      */
     @PostMapping("/forgot")
-    public String handleForgotPassword(@Valid @ModelAttribute("form") ForgotPasswordForm form,
+    public String handleForgotPassword(@Valid @ModelAttribute(FORM) ForgotPasswordForm form,
                                        BindingResult bindingResult, RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             return "auth/forgot-password";
@@ -81,7 +82,7 @@ public class PasswordResetController {
      */
     @GetMapping("/verify-otp")
     public String verifyOtpPage(@RequestParam String email, Model model) {
-        model.addAttribute("form",
+        model.addAttribute(FORM,
                 new VerifyOtpForm(email,
                         null));
         return "auth/verify-otp";
@@ -92,7 +93,7 @@ public class PasswordResetController {
      * redirect to the password reset page.
      */
     @PostMapping("/verify-otp")
-    public String verifyOtp(@Valid @ModelAttribute("form") VerifyOtpForm form, BindingResult bindingResult,
+    public String verifyOtp(@Valid @ModelAttribute(FORM) VerifyOtpForm form, BindingResult bindingResult,
                             RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             return "auth/verify-otp";
@@ -126,7 +127,7 @@ public class PasswordResetController {
             return "redirect:/auth/password/forgot";
         }
 
-        model.addAttribute("form",
+        model.addAttribute(FORM,
                 new ResetPasswordForm(null,
                         null));
         model.addAttribute("token",
@@ -139,7 +140,7 @@ public class PasswordResetController {
      * invalidate the token, and redirect to login.
      */
     @PostMapping("/reset")
-    public String resetPassword(@RequestParam String token, @Valid @ModelAttribute("form") ResetPasswordForm form,
+    public String resetPassword(@RequestParam String token, @Valid @ModelAttribute(FORM) ResetPasswordForm form,
                                 BindingResult bindingResult, RedirectAttributes redirectAttributes) {
         if (!otpService.isValidToken(token)) {
             return "redirect:/auth/password/forgot";
@@ -159,7 +160,7 @@ public class PasswordResetController {
 
         otpService.invalidateToken(token);
 
-        redirectAttributes.addFlashAttribute("success",
+        redirectAttributes.addFlashAttribute(SUCCESS,
                 "Password reset successfully");
         return "redirect:/login";
     }

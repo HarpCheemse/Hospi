@@ -2,18 +2,16 @@ package com.hospi.manage.core.security.session;
 
 import com.hospi.manage.features.account.entity.Account;
 import com.hospi.manage.features.account.repository.AccountRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class AccountUserDetailsService implements UserDetailsService {
     private final AccountRepository accountRepository;
-
-    public AccountUserDetailsService(AccountRepository accountRepository) {
-        this.accountRepository = accountRepository;
-    }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
