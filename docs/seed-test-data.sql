@@ -163,12 +163,9 @@ FROM (VALUES ('501', 5), ('502', 5), ('503', 5), ('504', 5),
 WHERE rt.name = 'DELUXE SUITE';
 
 -- ────────────────────────────────────────────────────────────────────────────
--- 6. Update room statuses for realistic testing
+-- 6. Update room conditions for realistic testing (occupancy is derived from
+--    room_assignments — see section 17)
 -- ────────────────────────────────────────────────────────────────────────────
-UPDATE rooms
-SET occupancy_status = 'OCCUPIED'
-WHERE room_number IN ('108', '112', '209', '213', '308', '312', '409', '413', '502', '506');
-
 UPDATE rooms
 SET condition_status = 'DIRTY'
 WHERE room_number IN ('111', '116', '211', '216', '311', '316', '411', '416', '505', '510');
@@ -177,10 +174,6 @@ UPDATE rooms
 SET condition_status = 'MAINTENANCE',
     is_active        = false
 WHERE room_number IN ('114', '120', '214', '220', '314', '320', '414', '420', '509', '515');
-
-UPDATE rooms
-SET occupancy_status = 'VACANT'
-WHERE room_number IN ('107', '115', '207', '215', '307', '315', '407', '415', '501', '512');
 
 -- ────────────────────────────────────────────────────────────────────────────
 -- 7. Reservations (50 total)
@@ -836,9 +829,22 @@ $$
         ORDER BY r.id
         LIMIT 2;
 
-        UPDATE rooms SET occupancy_status = 'OCCUPIED'
-        WHERE id IN (SELECT room_id FROM room_assignments WHERE reservation_id = rid);
     END
 $$;
+
+-- ────────────────────────────────────────────────────────────────────────────
+-- 17. Derive occupancy from room assignments
+-- ────────────────────────────────────────────────────────────────────────────
+UPDATE rooms r
+SET occupancy_status = CASE
+                           WHEN EXISTS (SELECT 1
+                                        FROM room_assignments ra
+                                                 JOIN reservations res ON res.id = ra.reservation_id
+                                        WHERE ra.room_id = r.id
+                                          AND res.status = 'CHECKED_IN')
+                               THEN 'OCCUPIED'
+                           ELSE 'VACANT'
+    END
+WHERE r.is_active = true;
 
 COMMIT;
