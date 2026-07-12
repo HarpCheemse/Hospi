@@ -32,17 +32,17 @@
     }
 
     .btn-accent {
-        background: #b8923e;
-        color: #2A1F0A;
+        background: var(--color-accent);
+        color: var(--color-accent-foreground);
         box-shadow: 0 1px 3px rgba(120, 80, 15, 0.25);
     }
 
     .btn-accent:hover {
-        background: #a17e2e;
+        background: color-mix(in srgb, var(--color-accent) 85%, black);
     }
 
     .btn-accent:active {
-        background: #8a6b25;
+        background: color-mix(in srgb, var(--color-accent) 70%, black);
     }
 
     .btn-secondary {

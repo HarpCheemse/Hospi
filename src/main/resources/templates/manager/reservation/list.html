@@ -43,19 +43,31 @@
     <!-- SUMMARY BAR -->
     <section class="mb-6 grid grid-cols-4 gap-4">
         <div class="card-compact">
-            <p class="text-sm text-muted-foreground">Pending Review</p>
+            <div class="flex items-center gap-2 mb-1">
+                <img th:src="@{/assets/icons/clock.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                <p class="text-sm text-muted-foreground">Pending Review</p>
+            </div>
             <p class="text-xl font-bold text-foreground" th:text="${pendingCount}">0</p>
         </div>
         <div class="card-compact">
-            <p class="text-sm text-muted-foreground">Arriving Today</p>
+            <div class="flex items-center gap-2 mb-1">
+                <img th:src="@{/assets/icons/calendar-check.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                <p class="text-sm text-muted-foreground">Arriving Today</p>
+            </div>
             <p class="text-xl font-bold text-foreground" th:text="${arrivingToday}">0</p>
         </div>
         <div class="card-compact">
-            <p class="text-sm text-muted-foreground">Departing Today</p>
+            <div class="flex items-center gap-2 mb-1">
+                <img th:src="@{/assets/icons/log-out.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                <p class="text-sm text-muted-foreground">Departing Today</p>
+            </div>
             <p class="text-xl font-bold text-foreground" th:text="${departingToday}">0</p>
         </div>
         <div class="card-compact">
-            <p class="text-sm text-muted-foreground">Current In-House</p>
+            <div class="flex items-center gap-2 mb-1">
+                <img th:src="@{/assets/icons/bed-double.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                <p class="text-sm text-muted-foreground">Current In-House</p>
+            </div>
             <p class="text-xl font-bold text-foreground" th:text="${inHouseCount}">0</p>
         </div>
     </section>
@@ -70,9 +82,6 @@
             <a th:href="@{/manager/reservations(scope='upcoming', status=${activeStatus}, search=${view.filterSearch()})}"
                th:classappend="${activeScope == 'upcoming'} ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'"
                class="px-3 py-2 text-sm font-medium border-b-2 transition">Upcoming</a>
-            <a th:href="@{/manager/reservations(scope='in-house', status=${activeStatus}, search=${view.filterSearch()})}"
-               th:classappend="${activeScope == 'in-house'} ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'"
-               class="px-3 py-2 text-sm font-medium border-b-2 transition">In House</a>
             <a th:href="@{/manager/reservations(scope='history', status=${activeStatus}, search=${view.filterSearch()})}"
                th:classappend="${activeScope == 'history'} ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'"
                class="px-3 py-2 text-sm font-medium border-b-2 transition">History</a>
@@ -194,17 +203,56 @@
                     <tr>
                         <td colspan="8" class="px-5 py-3">
                             <div class="flex items-center justify-between">
-                                <span class="text-sm text-muted-foreground">
-                                    Page <span th:text="${view.page() + 1}">1</span>
-                                    of <span th:text="${view.totalPages()}">1</span>
-                                </span>
                                 <div class="flex items-center gap-2">
                                     <a th:href="@{/manager/reservations(scope=${activeScope}, status=${activeStatus}, search=${view.filterSearch()}, page=${view.page() - 1})}"
                                        th:classappend="${view.page() == 0} ? 'pointer-events-none opacity-50' : ''"
-                                       class="btn btn-ghost btn-sm">Prev</a>
+                                       class="btn btn-ghost btn-sm">&larr; Prev</a>
+
+                                    <div class="flex items-center gap-1">
+                                        <a th:href="@{/manager/reservations(scope=${activeScope}, status=${activeStatus}, search=${view.filterSearch()}, page=0)}"
+                                           th:classappend="${view.page() == 0} ? 'btn-primary' : 'btn-ghost'"
+                                           class="btn btn-sm w-8 justify-center">1</a>
+
+                                        <span th:if="${view.page() > 2}"
+                                              class="px-1 text-xs text-muted-foreground">&hellip;</span>
+
+                                        <a th:each="p : ${#numbers.sequence(1, view.totalPages() - 2)}"
+                                           th:if="${p >= view.page() - 1 and p <= view.page() + 1}"
+                                           th:href="@{/manager/reservations(scope=${activeScope}, status=${activeStatus}, search=${view.filterSearch()}, page=${p})}"
+                                           th:classappend="${p == view.page()} ? 'btn-primary' : 'btn-ghost'"
+                                           class="btn btn-sm w-8 justify-center"
+                                           th:text="${p + 1}">2</a>
+
+                                        <span th:if="${view.page() < view.totalPages() - 3}"
+                                              class="px-1 text-xs text-muted-foreground">&hellip;</span>
+
+                                        <a th:href="@{/manager/reservations(scope=${activeScope}, status=${activeStatus}, search=${view.filterSearch()}, page=${view.totalPages() - 1})}"
+                                           th:classappend="${view.page() == view.totalPages() - 1} ? 'btn-primary' : 'btn-ghost'"
+                                           class="btn btn-sm w-8 justify-center"
+                                           th:text="${view.totalPages()}">10</a>
+                                    </div>
+
                                     <a th:href="@{/manager/reservations(scope=${activeScope}, status=${activeStatus}, search=${view.filterSearch()}, page=${view.page() + 1})}"
                                        th:classappend="${view.page() >= view.totalPages() - 1} ? 'pointer-events-none opacity-50' : ''"
-                                       class="btn btn-ghost btn-sm">Next</a>
+                                       class="btn btn-ghost btn-sm">Next &rarr;</a>
+                                </div>
+
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm text-muted-foreground">
+                                        Page <span th:text="${view.page() + 1}">1</span>/<span th:text="${view.totalPages()}">1</span>
+                                    </span>
+
+                                    <form th:action="@{/manager/reservations(scope=${activeScope}, status=${activeStatus}, search=${view.filterSearch()})}"
+                                          method="get" class="flex items-center gap-1"
+                                          onsubmit="const input = this.querySelector('[name=page]'); input.value = parseInt(input.value) - 1 || 0;">
+                                        <input type="hidden" name="scope" th:value="${activeScope}">
+                                        <input type="hidden" name="status" th:value="${activeStatus}">
+                                        <input type="hidden" name="search" th:value="${view.filterSearch()}">
+                                        <input type="number" name="page" min="1" th:max="${view.totalPages()}"
+                                               class="input input-sm w-16 text-center" placeholder="#"
+                                               th:value="${view.page() + 1}">
+                                        <button type="submit" class="btn btn-ghost btn-sm px-2">Go</button>
+                                    </form>
                                 </div>
                             </div>
                         </td>

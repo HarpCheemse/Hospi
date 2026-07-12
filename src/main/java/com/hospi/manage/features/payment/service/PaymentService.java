@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 /** Orchestrates PayPal operations and payment record persistence. */
 @Service
@@ -101,6 +102,31 @@ public class PaymentService {
     public boolean refundOnlineBookingPayment(String orderId)
             throws IOException {
         return payPalService.refundOrder(orderId);
+    }
+
+    /** Return all payments for a reservation. */
+    public List<Payment> getPaymentsByReservationId(Long reservationId) {
+        return paymentRepository.findAllByReservationId(reservationId);
+    }
+
+    /** Return payments for multiple reservations. */
+    public List<Payment> getPaymentsByReservationId(List<Long> reservationIds) {
+        if (reservationIds.isEmpty()) return List.of();
+        return paymentRepository.findByReservationIdIn(reservationIds);
+    }
+
+    /** Mark payments as refunded and set reservation to CANCELLED. */
+    @Transactional
+    public void markRefunded(Reservation reservation, List<Payment> payments) {
+        var refundAmount = calculateRefund(reservation);
+        for (var p : payments) {
+            if (p.getRefundedAt() == null) {
+                p.setRefundedAmount(refundAmount);
+                p.setRefundedAt(LocalDateTime.now());
+                paymentRepository.save(p);
+            }
+        }
+        reservation.setStatus(ReservationStatus.CANCELLED);
     }
 
     /** Calculate refund amount based on system config (full vs partial refund window). */

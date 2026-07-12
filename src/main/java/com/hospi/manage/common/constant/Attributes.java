@@ -58,8 +58,19 @@ public class Attributes {
 
     /** Model attribute key for the selected year filter. */
     public static final String SELECTED_YEAR = "selectedYear";
-
-    /** Model attribute key for the selected month filter. */
     public static final String SELECTED_MONTH = "selectedMonth";
+
+    /** Reservation list model attribute keys. */
+    public static final String ALL_STATUSES = "allStatuses";
+    public static final String ACTIVE_SCOPE = "activeScope";
+    public static final String ACTIVE_STATUS = "activeStatus";
+    public static final String PENDING_COUNT = "pendingCount";
+    public static final String ARRIVING_TODAY = "arrivingToday";
+    public static final String DEPARTING_TODAY = "departingToday";
+    public static final String IN_HOUSE_COUNT = "inHouseCount";
+    public static final String PAYMENT_STATUSES = "paymentStatuses";
+    public static final String RESERVATION = "reservation";
+    public static final String GUESTS = "guests";
+    public static final String PAYMENTS = "payments";
 
 }
