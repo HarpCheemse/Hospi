@@ -29,14 +29,16 @@ class AccountEditFormTest {
     }
 
     @Test
-    void shouldPass_whenPhoneNull() {
-        var form = new AccountEditForm("John Doe", "john@example.com", null, Role.LEADER);
-        assertTrue(validator.validate(form).isEmpty());
+    void shouldFail_whenPhoneBlank() {
+        var form = new AccountEditForm("John Doe", "john@example.com", "", Role.LEADER);
+        Set<ConstraintViolation<AccountEditForm>> violations = validator.validate(form);
+        assertFalse(violations.isEmpty());
+        assertEquals("phone", violations.iterator().next().getPropertyPath().toString());
     }
 
     @Test
     void shouldFail_whenFullNameBlank() {
-        var form = new AccountEditForm("", "john@example.com", null, Role.LEADER);
+        var form = new AccountEditForm("", "john@example.com", "1234567890", Role.LEADER);
         Set<ConstraintViolation<AccountEditForm>> violations = validator.validate(form);
         assertFalse(violations.isEmpty());
         assertEquals("fullName", violations.iterator().next().getPropertyPath().toString());
@@ -44,7 +46,7 @@ class AccountEditFormTest {
 
     @Test
     void shouldFail_whenEmailBlank() {
-        var form = new AccountEditForm("John Doe", "", null, Role.LEADER);
+        var form = new AccountEditForm("John Doe", "", "1234567890", Role.LEADER);
         Set<ConstraintViolation<AccountEditForm>> violations = validator.validate(form);
         assertFalse(violations.isEmpty());
         assertEquals("email", violations.iterator().next().getPropertyPath().toString());
@@ -52,7 +54,7 @@ class AccountEditFormTest {
 
     @Test
     void shouldFail_whenEmailInvalid() {
-        var form = new AccountEditForm("John Doe", "not-an-email", null, Role.LEADER);
+        var form = new AccountEditForm("John Doe", "not-an-email", "1234567890", Role.LEADER);
         Set<ConstraintViolation<AccountEditForm>> violations = validator.validate(form);
         assertFalse(violations.isEmpty());
         assertEquals("email", violations.iterator().next().getPropertyPath().toString());
@@ -60,7 +62,7 @@ class AccountEditFormTest {
 
     @Test
     void shouldFail_whenRoleNull() {
-        var form = new AccountEditForm("John Doe", "john@example.com", null, null);
+        var form = new AccountEditForm("John Doe", "john@example.com", "1234567890", null);
         Set<ConstraintViolation<AccountEditForm>> violations = validator.validate(form);
         assertFalse(violations.isEmpty());
         assertEquals("role", violations.iterator().next().getPropertyPath().toString());
