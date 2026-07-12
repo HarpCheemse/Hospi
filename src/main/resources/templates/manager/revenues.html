@@ -39,15 +39,24 @@
     <div th:replace="~{fragments/components/toast :: toast}"></div>
 
     <!-- HEADER -->
-    <header class="staff-page-header">
-        <section>
-            <h1 class="staff-page-title">Revenue Reports</h1>
-            <p class="page-description">
-                Annual revenue breakdown and analysis
-            </p>
-        </section>
+    <div class="staff-page-header">
 
-        <section class="flex items-center gap-2">
+        <div class="flex items-center gap-4">
+
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/circle-dollar-sign.svg}" alt="">
+            </div>
+
+            <div>
+                <h1 class="staff-page-title">Revenue Reports</h1>
+                <p class="page-description">
+                    Annual revenue breakdown and analysis
+                </p>
+            </div>
+
+        </div>
+
+        <div class="flex items-center gap-2">
             <label class="text-sm font-medium text-muted-foreground">Year</label>
             <select onchange="window.location.href = '/manager/revenues?year=' + this.value"
                     class="input input-sm">
@@ -56,8 +65,9 @@
                         th:selected="${y == selectedYear}"
                         th:text="${y}">2026</option>
             </select>
-        </section>
-    </header>
+        </div>
+
+    </div>
 
     <!-- BENTO GRID -->
     <section class="mb-4 grid grid-cols-3 gap-4">

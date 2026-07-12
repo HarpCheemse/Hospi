@@ -32,7 +32,7 @@ public class ManagerRevenueController {
         LocalDate start = LocalDate.of(y, 1, 1);
         LocalDate end = LocalDate.of(y, 12, 31);
         model.addAttribute(Attributes.VIEW, revenueService.getRevenueView(start, end, String.valueOf(y)));
-        model.addAttribute("selectedYear", y);
+        model.addAttribute(Attributes.SELECTED_YEAR, y);
         return "manager/revenues";
     }
 }
