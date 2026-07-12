@@ -29,14 +29,16 @@ class AccountCreateFormTest {
     }
 
     @Test
-    void shouldPass_whenPhoneNull() {
-        var form = new AccountCreateForm("John Doe", "john@example.com", "password123", null, Role.LEADER);
-        assertTrue(validator.validate(form).isEmpty());
+    void shouldFail_whenPhoneBlank() {
+        var form = new AccountCreateForm("John Doe", "john@example.com", "password123", "", Role.LEADER);
+        Set<ConstraintViolation<AccountCreateForm>> violations = validator.validate(form);
+        assertFalse(violations.isEmpty());
+        assertEquals("phone", violations.iterator().next().getPropertyPath().toString());
     }
 
     @Test
     void shouldFail_whenFullNameBlank() {
-        var form = new AccountCreateForm("", "john@example.com", "password123", null, Role.LEADER);
+        var form = new AccountCreateForm("", "john@example.com", "password123", "1234567890", Role.LEADER);
         Set<ConstraintViolation<AccountCreateForm>> violations = validator.validate(form);
         assertFalse(violations.isEmpty());
         assertEquals("fullName", violations.iterator().next().getPropertyPath().toString());
@@ -44,7 +46,7 @@ class AccountCreateFormTest {
 
     @Test
     void shouldFail_whenEmailBlank() {
-        var form = new AccountCreateForm("John Doe", "", "password123", null, Role.LEADER);
+        var form = new AccountCreateForm("John Doe", "", "password123", "1234567890", Role.LEADER);
         Set<ConstraintViolation<AccountCreateForm>> violations = validator.validate(form);
         assertFalse(violations.isEmpty());
         assertEquals("email", violations.iterator().next().getPropertyPath().toString());
@@ -52,7 +54,7 @@ class AccountCreateFormTest {
 
     @Test
     void shouldFail_whenEmailInvalid() {
-        var form = new AccountCreateForm("John Doe", "not-an-email", "password123", null, Role.LEADER);
+        var form = new AccountCreateForm("John Doe", "not-an-email", "password123", "1234567890", Role.LEADER);
         Set<ConstraintViolation<AccountCreateForm>> violations = validator.validate(form);
         assertFalse(violations.isEmpty());
         assertEquals("email", violations.iterator().next().getPropertyPath().toString());
@@ -60,7 +62,7 @@ class AccountCreateFormTest {
 
     @Test
     void shouldFail_whenPasswordBlank() {
-        var form = new AccountCreateForm("John Doe", "john@example.com", "", null, Role.LEADER);
+        var form = new AccountCreateForm("John Doe", "john@example.com", "", "1234567890", Role.LEADER);
         Set<ConstraintViolation<AccountCreateForm>> violations = validator.validate(form);
         assertFalse(violations.isEmpty());
         assertEquals("password", violations.iterator().next().getPropertyPath().toString());
@@ -68,7 +70,7 @@ class AccountCreateFormTest {
 
     @Test
     void shouldFail_whenRoleNull() {
-        var form = new AccountCreateForm("John Doe", "john@example.com", "password123", null, null);
+        var form = new AccountCreateForm("John Doe", "john@example.com", "password123", "1234567890", null);
         Set<ConstraintViolation<AccountCreateForm>> violations = validator.validate(form);
         assertFalse(violations.isEmpty());
         assertEquals("role", violations.iterator().next().getPropertyPath().toString());
