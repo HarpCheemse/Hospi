@@ -10,6 +10,7 @@ import com.hospi.manage.features.room.service.RoomTypeService;
 import com.hospi.manage.features.room.validation.CreateRoomTypeValidator;
 import com.hospi.manage.features.room.validation.EditRoomTypeValidator;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -23,20 +24,11 @@ import java.io.IOException;
  */
 @Controller
 @RequestMapping("/manager/room-types")
+@RequiredArgsConstructor
 public class RoomTypeController {
     private final RoomTypeService roomTypeService;
     private final CreateRoomTypeValidator createRoomTypeValidator;
     private final EditRoomTypeValidator editRoomTypeValidator;
-
-    /**
-     * Construct the controller with required services.
-     */
-    public RoomTypeController(RoomTypeService roomTypeService, CreateRoomTypeValidator createRoomTypeValidator,
-                              EditRoomTypeValidator editRoomTypeValidator) {
-        this.roomTypeService = roomTypeService;
-        this.createRoomTypeValidator = createRoomTypeValidator;
-        this.editRoomTypeValidator = editRoomTypeValidator;
-    }
 
     /**
      * Set the active sidebar highlight for this feature.

@@ -9,30 +9,24 @@ import com.hospi.manage.features.room.enums.RoomCategory;
 import com.hospi.manage.features.room.enums.RoomTier;
 import com.hospi.manage.features.room.repository.RoomRepository;
 import com.hospi.manage.features.room.repository.RoomTypeRepository;
-import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.List;
 
 /** Business logic for room type CRUD and image management. */
 @Service
+@RequiredArgsConstructor
 public class RoomTypeService {
     private final RoomTypeRepository roomTypeRepository;
     private final RoomTypePictureService roomTypePictureService;
     private final RoomRepository roomRepository;
 
-    private static final int CoverWidth = 1080;
+    private static final int COVER_WIDTH = 1080;
     private static final int GALLERY_WIDTH = 720;
     private static final float IMAGE_QUALITY = 0.75f;
-
-    public RoomTypeService(RoomTypeRepository roomTypeRepository,
-                           RoomTypePictureService roomTypePictureService,
-                           RoomRepository roomRepository) {
-        this.roomTypeRepository = roomTypeRepository;
-        this.roomTypePictureService = roomTypePictureService;
-        this.roomRepository = roomRepository;
-    }
 
     /** Create a new room type with a cover image. */
     @Transactional

@@ -5,8 +5,9 @@ import com.hospi.manage.common.service.ImageCompressionService;
 import com.hospi.manage.features.room.entity.RoomType;
 import com.hospi.manage.features.room.entity.RoomTypePicture;
 import com.hospi.manage.features.room.repository.RoomTypePictureRepository;
-import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -14,6 +15,7 @@ import java.util.List;
 
 /** Business logic for managing room type cover and gallery images. */
 @Service
+@RequiredArgsConstructor
 public class RoomTypePictureService {
     private final ImageCompressionService imageCompressionService;
     private final RoomTypePictureRepository roomTypePictureRepository;
@@ -24,12 +26,6 @@ public class RoomTypePictureService {
 
     private static final int COVER_ORDER = 1;
     private static final int GALLERY_ORDER = 2;
-
-    public RoomTypePictureService(ImageCompressionService imageCompressionService,
-                                  RoomTypePictureRepository roomTypePictureRepository) {
-        this.imageCompressionService = imageCompressionService;
-        this.roomTypePictureRepository = roomTypePictureRepository;
-    }
 
     /** Find a room type picture by ID. */
     public RoomTypePicture findById(Long id) {
