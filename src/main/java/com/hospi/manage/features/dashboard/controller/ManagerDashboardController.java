@@ -1,6 +1,7 @@
 package com.hospi.manage.features.dashboard.controller;
 
 import com.hospi.manage.common.constant.Attributes;
+import com.hospi.manage.features.hotel.service.HotelService;
 import com.hospi.manage.features.invoice.service.RevenueService;
 import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
@@ -32,6 +33,7 @@ public class ManagerDashboardController {
     private final ReservationService reservationService;
     private final RoomService roomService;
     private final RevenueService revenueService;
+    private final HotelService hotelService;
     private final NotificationService notificationService;
 
     @GetMapping
@@ -44,6 +46,7 @@ public class ManagerDashboardController {
         addKpis(model, today, allRooms);
         addRoomStats(model, allRooms);
         addRecentReservations(model);
+        addHotelRating(model);
         addUserInfo(model, principal);
 
         return "manager/dashboard";
@@ -93,6 +96,12 @@ public class ManagerDashboardController {
         all.sort((a, b) -> b.getCreatedAt() != null && a.getCreatedAt() != null
                 ? b.getCreatedAt().compareTo(a.getCreatedAt()) : 0);
         model.addAttribute(Attributes.RECENT_RESERVATIONS, all.stream().limit(5).toList());
+    }
+
+    private void addHotelRating(Model model) {
+        var hotel = hotelService.find();
+        model.addAttribute("hotelRating", hotel.getAverageRating());
+        model.addAttribute("hotelReviewCount", hotel.getReviewCount());
     }
 
     private void addUserInfo(Model model, AccountPrincipal principal) {

@@ -1,5 +1,6 @@
 package com.hospi.manage.features.dashboard.controller;
 
+import com.hospi.manage.features.hotel.service.HotelService;
 import com.hospi.manage.features.invoice.service.RevenueService;
 import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.reservation.service.ReservationService;
@@ -38,8 +39,15 @@ class ManagerDashboardControllerTest {
     @MockitoBean
     private NotificationService notificationService;
 
+    @MockitoBean
+    private HotelService hotelService;
+
     @Test
     void dashboard_shouldRender() throws Exception {
+        var hotel = new com.hospi.manage.features.hotel.entity.Hotel();
+        hotel.setAverageRating(java.math.BigDecimal.valueOf(4.5));
+        hotel.setReviewCount(100);
+        when(hotelService.find()).thenReturn(hotel);
         when(reservationService.findByStatus(any())).thenReturn(List.of());
         when(reservationService.findByStatuses(any())).thenReturn(List.of());
         when(roomService.findAll()).thenReturn(List.of());
@@ -64,6 +72,8 @@ class ManagerDashboardControllerTest {
                 .andExpect(model().attributeExists("dirtyRooms"))
                 .andExpect(model().attributeExists("maintenanceRooms"))
                 .andExpect(model().attributeExists("recentReservations"))
+                .andExpect(model().attributeExists("hotelRating"))
+                .andExpect(model().attributeExists("hotelReviewCount"))
                 .andExpect(content().string(containsString("Manager Dashboard")))
                 .andExpect(content().string(containsString("0%")));
     }
@@ -75,6 +85,10 @@ class ManagerDashboardControllerTest {
         room.setConditionStatus(com.hospi.manage.features.room.enums.ConditionStatus.CLEAN);
         room.setActive(true);
 
+        var hotel = new com.hospi.manage.features.hotel.entity.Hotel();
+        hotel.setAverageRating(java.math.BigDecimal.valueOf(4.5));
+        hotel.setReviewCount(100);
+        when(hotelService.find()).thenReturn(hotel);
         when(reservationService.findByStatus(any())).thenReturn(List.of());
         when(reservationService.findByStatuses(any())).thenReturn(List.of());
         when(roomService.findAll()).thenReturn(java.util.List.of(room, room));

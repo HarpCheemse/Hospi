@@ -184,6 +184,25 @@
 
             </section>
 
+            <!-- Hotel Rating -->
+            <section class="card-panel">
+                <div class="mb-4 flex items-center gap-2">
+                    <img th:src="@{/assets/icons/shield-check.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div>
+                        <h2 class="text-lg font-semibold text-foreground">Hotel Rating</h2>
+                        <p class="text-sm text-muted-foreground">Guest satisfaction</p>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-primary" th:text="${hotelRating}">4.8</div>
+                    <div class="mt-1 text-sm text-muted-foreground">Average Rating</div>
+                    <div class="mt-2 text-sm">
+                        <span class="font-medium text-foreground" th:text="${hotelReviewCount}">0</span>
+                        <span class="text-muted-foreground"> reviews</span>
+                    </div>
+                </div>
+            </section>
+
             <!-- Recent Notifications -->
             <section class="card-panel">
                 <div class="mb-4 flex items-center justify-between">
