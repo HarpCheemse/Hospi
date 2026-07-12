@@ -96,7 +96,7 @@ public class AccountController {
     @GetMapping("/{id}/edit")
     public String edit(@PathVariable Long id, Model model) {
         model.addAttribute(Attributes.FORM, accountService.getEditForm(id));
-        model.addAttribute("roles", Role.values());
+        model.addAttribute("roles", availableRoles());
         model.addAttribute("accountId", id);
         return "account/edit";
     }
@@ -120,7 +120,7 @@ public class AccountController {
         accountValidator.validateUpdate(id, form, bindingResult);
 
         if (bindingResult.hasErrors()) {
-            model.addAttribute("roles", Role.values());
+            model.addAttribute("roles", availableRoles());
             model.addAttribute("accountId", id);
             return "account/edit";
         }
