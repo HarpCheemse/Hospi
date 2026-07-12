@@ -33,11 +33,11 @@
             </div>
         </div>
 
-        <div class="user-pill" th:if="${staffName != null}">
-            <div class="avatar" th:text="${#strings.substring(staffName, 0, 1)}">J</div>
+        <div class="user-pill" th:if="${view.staffName != null}">
+            <div class="avatar" th:text="${#strings.substring(view.staffName, 0, 1)}">J</div>
             <div>
-                <p class="text-sm font-medium text-foreground" th:text="${staffName}">John Doe</p>
-                <p class="text-xs text-muted-foreground" th:text="${staffRole}">Manager</p>
+                <p class="text-sm font-medium text-foreground" th:text="${view.staffName}">John Doe</p>
+                <p class="text-xs text-muted-foreground" th:text="${view.staffRole}">Manager</p>
             </div>
         </div>
     </div>
@@ -51,8 +51,8 @@
                 <p class="text-sm text-muted-foreground">Occupancy Rate</p>
             </div>
             <p class="text-2xl font-bold text-foreground"
-               th:text="${totalRooms > 0 ? #numbers.formatDecimal(occupiedRooms * 100 / totalRooms, 0, 0) + '%' : '0%'}">0%</p>
-            <p class="text-xs text-muted-foreground mt-1" th:text="|${occupiedRooms} / ${totalRooms} rooms|">0/0 rooms</p>
+               th:text="${view.totalRooms > 0 ? #numbers.formatDecimal(view.occupiedRooms * 100 / view.totalRooms, 0, 0) + '%' : '0%'}">0%</p>
+            <p class="text-xs text-muted-foreground mt-1" th:text="|${view.occupiedRooms} / ${view.totalRooms} rooms|">0/0 rooms</p>
         </div>
 
         <div class="card-compact">
@@ -60,7 +60,7 @@
                 <img th:src="@{/assets/icons/clipboard-check.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
                 <p class="text-sm text-muted-foreground">Check-Ins Today</p>
             </div>
-            <p class="text-2xl font-bold text-foreground" th:text="${checkInsToday}">0</p>
+            <p class="text-2xl font-bold text-foreground" th:text="${view.checkInsToday}">0</p>
         </div>
 
         <div class="card-compact">
@@ -68,7 +68,7 @@
                 <img th:src="@{/assets/icons/calendar-check.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
                 <p class="text-sm text-muted-foreground">Check-Outs Today</p>
             </div>
-            <p class="text-2xl font-bold text-foreground" th:text="${checkOutsToday}">0</p>
+            <p class="text-2xl font-bold text-foreground" th:text="${view.checkOutsToday}">0</p>
         </div>
 
         <div class="card-compact">
@@ -76,7 +76,7 @@
                 <img th:src="@{/assets/icons/list-todo.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
                 <p class="text-sm text-muted-foreground">Dirty Rooms</p>
             </div>
-            <p class="text-2xl font-bold text-foreground" th:text="${dirtyRooms}">0</p>
+            <p class="text-2xl font-bold text-foreground" th:text="${view.dirtyRooms}">0</p>
         </div>
 
         <div class="card-compact">
@@ -84,7 +84,7 @@
                 <img th:src="@{/assets/icons/clock.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
                 <p class="text-sm text-muted-foreground">Pending</p>
             </div>
-            <p class="text-2xl font-bold text-foreground" th:text="${pendingCount}">0</p>
+            <p class="text-2xl font-bold text-foreground" th:text="${view.pendingCount}">0</p>
         </div>
 
         <div class="card-compact">
@@ -93,7 +93,7 @@
                 <p class="text-sm text-muted-foreground">Revenue This Month</p>
             </div>
             <p class="text-2xl font-bold text-foreground"
-               th:text="|$${#numbers.formatDecimal(revenueThisMonth, 1, 0)}|">$0</p>
+               th:text="|$${#numbers.formatDecimal(view.revenueThisMonth, 1, 0)}|">$0</p>
         </div>
 
     </section>
@@ -117,12 +117,12 @@
                     <a th:href="@{/manager/reservations}" class="btn btn-primary btn-sm">View All</a>
                 </div>
 
-                <div th:if="${#lists.isEmpty(recentReservations)}" class="py-8 text-center text-sm text-muted-foreground">
+                <div th:if="${#lists.isEmpty(view.recentReservations)}" class="py-8 text-center text-sm text-muted-foreground">
                     No reservations found.
                 </div>
 
-                <div th:if="${!#lists.isEmpty(recentReservations)}" class="flex flex-col gap-3">
-                    <div th:each="r : ${recentReservations}" class="flex items-center justify-between border-b border-border/50 pb-3 last:border-0 last:pb-0">
+                <div th:if="${!#lists.isEmpty(view.recentReservations)}" class="flex flex-col gap-3">
+                    <div th:each="r : ${view.recentReservations}" class="flex items-center justify-between border-b border-border/50 pb-3 last:border-0 last:pb-0">
                         <div>
                             <p class="text-sm font-medium text-foreground" th:text="${r.guestName}">Jane Doe</p>
                             <p class="text-xs text-muted-foreground">
@@ -132,12 +132,12 @@
                             </p>
                         </div>
                         <div class="text-right">
-                            <span th:switch="${r.status.name()}" class="text-xs font-medium">
+                            <span th:switch="${r.statusName}" class="text-xs font-medium">
                                 <span th:case="'PENDING'" class="pill-warning">Pending</span>
                                 <span th:case="'CONFIRMED'" class="pill-muted">Confirmed</span>
                                 <span th:case="'CHECKED_IN'" class="pill-success">In House</span>
                                 <span th:case="'CHECKED_OUT'" class="pill-accent">Checked Out</span>
-                                <span th:case="*" class="pill-muted" th:text="${r.status.name()}">Other</span>
+                                <span th:case="*" class="pill-muted" th:text="${r.statusName}">Other</span>
                             </span>
                             <p class="mt-1 text-xs text-muted-foreground"
                                th:text="|$${#numbers.formatDecimal(r.totalPrice, 1, 0)}|">$0</p>
@@ -158,12 +158,12 @@
                     </div>
                 </div>
 
-                <div th:if="${#lists.isEmpty(roomTypes)}" class="py-4 text-center text-sm text-muted-foreground">
+                <div th:if="${#lists.isEmpty(view.roomTypes)}" class="py-4 text-center text-sm text-muted-foreground">
                     No room data available.
                 </div>
 
-                <div th:if="${!#lists.isEmpty(roomTypes)}" class="flex flex-col gap-3">
-                    <div th:each="rt : ${roomTypes}" class="flex items-center gap-3">
+                <div th:if="${!#lists.isEmpty(view.roomTypes)}" class="flex flex-col gap-3">
+                    <div th:each="rt : ${view.roomTypes}" class="flex items-center gap-3">
                         <div class="flex-1 min-w-0">
                             <p class="text-sm font-medium text-foreground truncate" th:text="${rt.roomTypeName}">Deluxe Double</p>
                             <p class="text-xs text-muted-foreground" th:text="|${rt.occupiedRooms} / ${rt.totalRooms} rooms|">8/12 rooms</p>
@@ -200,10 +200,10 @@
                     </div>
                 </div>
                 <div class="text-center">
-                    <div class="text-3xl font-bold text-primary" th:text="${hotelRating}">4.8</div>
+                    <div class="text-3xl font-bold text-primary" th:text="${view.hotelRating}">4.8</div>
                     <div class="mt-1 text-sm text-muted-foreground">Average Rating</div>
                     <div class="mt-2 text-sm">
-                        <span class="font-medium text-foreground" th:text="${hotelReviewCount}">0</span>
+                        <span class="font-medium text-foreground" th:text="${view.hotelReviewCount}">0</span>
                         <span class="text-muted-foreground"> reviews</span>
                     </div>
                 </div>
@@ -222,12 +222,12 @@
                     <a th:href="@{/notifications}" class="btn btn-primary btn-sm">View All</a>
                 </div>
 
-                <div th:if="${#lists.isEmpty(recentNotifications)}" class="py-8 text-center text-sm text-muted-foreground">
+                <div th:if="${#lists.isEmpty(view.recentNotifications)}" class="py-8 text-center text-sm text-muted-foreground">
                     No notifications yet.
                 </div>
 
-                <div th:if="${!#lists.isEmpty(recentNotifications)}" class="flex flex-col gap-2">
-                    <div th:each="n : ${recentNotifications}" class="flex items-start gap-3 rounded-lg border border-border/50 bg-background p-3">
+                <div th:if="${!#lists.isEmpty(view.recentNotifications)}" class="flex flex-col gap-2">
+                    <div th:each="n : ${view.recentNotifications}" class="flex items-start gap-3 rounded-lg border border-border/50 bg-background p-3">
                         <div class="mt-0.5 h-2 w-2 rounded-full bg-primary shrink-0"></div>
                         <div class="min-w-0 flex-1">
                             <p class="text-sm font-medium text-foreground truncate" th:text="${n.title}">Notification title</p>
