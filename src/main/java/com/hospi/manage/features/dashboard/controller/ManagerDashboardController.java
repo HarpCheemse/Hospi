@@ -1,12 +1,12 @@
 package com.hospi.manage.features.dashboard.controller;
 
 import com.hospi.manage.common.constant.Attributes;
+import com.hospi.manage.features.dashboard.mapper.ManagerDashboardMapper;
+import com.hospi.manage.features.hotel.service.HotelService;
 import com.hospi.manage.features.invoice.service.RevenueService;
 import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.service.ReservationService;
-import com.hospi.manage.features.room.enums.ConditionStatus;
-import com.hospi.manage.features.room.enums.OccupancyStatus;
 import com.hospi.manage.features.room.service.RoomService;
 import com.hospi.manage.core.security.session.AccountPrincipal;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 /** Controller for the manager dashboard with real-time hotel operations data. */
 @Controller
@@ -29,6 +30,7 @@ public class ManagerDashboardController {
     private final ReservationService reservationService;
     private final RoomService roomService;
     private final RevenueService revenueService;
+    private final HotelService hotelService;
     private final NotificationService notificationService;
 
     @GetMapping
@@ -36,56 +38,38 @@ public class ManagerDashboardController {
         model.addAttribute(Attributes.ACTIVE_SIDEBAR, "DASHBOARD");
 
         var today = LocalDate.now();
+        var confirmed = reservationService.findByStatus(ReservationStatus.CONFIRMED);
+        var checkedIn = reservationService.findByStatus(ReservationStatus.CHECKED_IN);
+        var pending = reservationService.findByStatus(ReservationStatus.PENDING);
+        var allRecent = reservationService.findByStatuses(List.of(
+                ReservationStatus.PENDING, ReservationStatus.CONFIRMED,
+                ReservationStatus.CHECKED_IN, ReservationStatus.CHECKED_OUT));
         var allRooms = roomService.findAll();
 
-        // KPIs
-        model.addAttribute("checkInsToday",
-                reservationService.findByStatus(ReservationStatus.CONFIRMED).stream()
-                        .filter(r -> r.getCheckInAt() != null && r.getCheckInAt().equals(today))
-                        .count());
-        model.addAttribute("checkOutsToday",
-                reservationService.findByStatus(ReservationStatus.CHECKED_IN).stream()
-                        .filter(r -> r.getCheckOutAt() != null && r.getCheckOutAt().equals(today))
-                        .count());
-        model.addAttribute("pendingCount",
-                reservationService.findByStatus(ReservationStatus.PENDING).size());
-
-        // Revenue this month
         var monthStart = today.withDayOfMonth(1);
         long daysSoFar = ChronoUnit.DAYS.between(monthStart, today) + 1;
-        var monthEnd = monthStart.plusDays(daysSoFar - 1);
-        var revenueView = revenueService.getRevenueView(monthStart, monthEnd, "this-month");
-        model.addAttribute("revenueThisMonth", revenueView.totalRevenue());
-        model.addAttribute("revenueChange", revenueView.changePercent());
+        var revenueView = revenueService.getRevenueView(
+                monthStart, monthStart.plusDays(daysSoFar - 1), "this-month");
 
-        // Room status
-        long totalRooms = allRooms.size();
-        long occupied = allRooms.stream().filter(r -> r.getOccupancyStatus() == OccupancyStatus.OCCUPIED).count();
-        long vacant = allRooms.stream().filter(r -> r.getOccupancyStatus() == OccupancyStatus.VACANT).count();
-        long dirty = allRooms.stream().filter(r -> r.getConditionStatus() == ConditionStatus.DIRTY).count();
-        long maintenance = allRooms.stream().filter(r -> r.getConditionStatus() == ConditionStatus.MAINTENANCE || !r.isActive()).count();
-        model.addAttribute("totalRooms", totalRooms);
-        model.addAttribute("occupiedRooms", occupied);
-        model.addAttribute("vacantRooms", vacant);
-        model.addAttribute("dirtyRooms", dirty);
-        model.addAttribute("maintenanceRooms", maintenance);
+        var hotel = hotelService.find();
 
-        // Recent reservations (last 5)
-        var recentReservations = new java.util.ArrayList<>(reservationService.findByStatuses(
-                java.util.List.of(ReservationStatus.PENDING, ReservationStatus.CONFIRMED,
-                        ReservationStatus.CHECKED_IN, ReservationStatus.CHECKED_OUT)));
-        recentReservations.sort((a, b) -> b.getCreatedAt() != null && a.getCreatedAt() != null
-                ? b.getCreatedAt().compareTo(a.getCreatedAt()) : 0);
-        model.addAttribute("recentReservations",
-                recentReservations.stream().limit(5).toList());
+        String staffName = null;
+        String staffRole = null;
+        int unreadNotificationCount = 0;
+        var recentNotifications = List.<com.hospi.manage.features.notification.dto.NotificationDTO>of();
 
-        // User info & notifications
         if (principal != null) {
-            model.addAttribute("staffName", principal.getAccount().getFullName());
-            model.addAttribute("staffRole", principal.getAccount().getRole().name());
-            model.addAttribute("unreadNotificationCount",
-                    notificationService.getUnreadCount(principal.getAccount().getId()));
+            var account = principal.getAccount();
+            staffName = account.getFullName();
+            staffRole = account.getRole().name();
+            unreadNotificationCount = notificationService.getUnreadCount(account.getId());
+            recentNotifications = notificationService.getNotifications(
+                    account.getId(), PageRequest.of(0, 4)).getContent();
         }
+
+        model.addAttribute(Attributes.VIEW, ManagerDashboardMapper.toView(
+                today, confirmed, checkedIn, pending, allRecent, revenueView,
+                allRooms, hotel, staffName, staffRole, unreadNotificationCount, recentNotifications));
 
         return "manager/dashboard";
     }
