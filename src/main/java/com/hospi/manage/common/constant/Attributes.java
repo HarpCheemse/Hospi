@@ -77,5 +77,6 @@ public class Attributes {
     public static final String STAFF_NAME = "staffName";
     public static final String STAFF_ROLE = "staffRole";
     public static final String UNREAD_NOTIFICATION_COUNT = "unreadNotificationCount";
+    public static final String RECENT_NOTIFICATIONS = "recentNotifications";
 
 }

@@ -10,6 +10,7 @@ import com.hospi.manage.features.room.enums.OccupancyStatus;
 import com.hospi.manage.features.room.service.RoomService;
 import com.hospi.manage.core.security.session.AccountPrincipal;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -96,9 +97,13 @@ public class ManagerDashboardController {
 
     private void addUserInfo(Model model, AccountPrincipal principal) {
         if (principal == null) return;
-        model.addAttribute(Attributes.STAFF_NAME, principal.getAccount().getFullName());
-        model.addAttribute(Attributes.STAFF_ROLE, principal.getAccount().getRole().name());
+        var account = principal.getAccount();
+        model.addAttribute(Attributes.STAFF_NAME, account.getFullName());
+        model.addAttribute(Attributes.STAFF_ROLE, account.getRole().name());
         model.addAttribute(Attributes.UNREAD_NOTIFICATION_COUNT,
-                notificationService.getUnreadCount(principal.getAccount().getId()));
+                notificationService.getUnreadCount(account.getId()));
+        model.addAttribute(Attributes.RECENT_NOTIFICATIONS,
+                notificationService.getNotifications(account.getId(), PageRequest.of(0, 4))
+                        .getContent());
     }
 }
