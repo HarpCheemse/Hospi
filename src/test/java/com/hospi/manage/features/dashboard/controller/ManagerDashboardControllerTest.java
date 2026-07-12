@@ -74,13 +74,18 @@ class ManagerDashboardControllerTest {
                 .andExpect(model().attributeExists("recentReservations"))
                 .andExpect(model().attributeExists("hotelRating"))
                 .andExpect(model().attributeExists("hotelReviewCount"))
+                .andExpect(model().attributeExists("roomTypes"))
                 .andExpect(content().string(containsString("Manager Dashboard")))
                 .andExpect(content().string(containsString("0%")));
     }
 
     @Test
     void dashboard_shouldShowOccupancyRate() throws Exception {
+        var roomType = new com.hospi.manage.features.room.entity.RoomType();
+        roomType.setName("DELUXE DOUBLE");
+
         var room = new com.hospi.manage.features.room.entity.Room();
+        room.setRoomType(roomType);
         room.setOccupancyStatus(com.hospi.manage.features.room.enums.OccupancyStatus.OCCUPIED);
         room.setConditionStatus(com.hospi.manage.features.room.enums.ConditionStatus.CLEAN);
         room.setActive(true);
@@ -103,6 +108,8 @@ class ManagerDashboardControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("manager/dashboard"))
                 .andExpect(content().string(containsString("100%")))
-                .andExpect(content().string(containsString("$1000")));
+                .andExpect(model().attributeExists("roomTypes"))
+                .andExpect(content().string(containsString("$1000")))
+                .andExpect(content().string(containsString("DELUXE DOUBLE")));
     }
 }

@@ -8,6 +8,8 @@ import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.room.enums.ConditionStatus;
 import com.hospi.manage.features.room.enums.OccupancyStatus;
+import com.hospi.manage.features.room.dto.response.RoomTypeOccupancyView;
+import com.hospi.manage.features.room.entity.Room;
 import com.hospi.manage.features.room.service.RoomService;
 import com.hospi.manage.core.security.session.AccountPrincipal;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +47,7 @@ public class ManagerDashboardController {
 
         addKpis(model, today, allRooms);
         addRoomStats(model, allRooms);
+        addRoomTypeOccupancy(model, allRooms);
         addRecentReservations(model);
         addHotelRating(model);
         addUserInfo(model, principal);
@@ -87,6 +90,24 @@ public class ManagerDashboardController {
                 allRooms.stream().filter(r -> ((com.hospi.manage.features.room.entity.Room) r)
                         .getConditionStatus() == ConditionStatus.MAINTENANCE
                         || !((com.hospi.manage.features.room.entity.Room) r).isActive()).count());
+    }
+
+    private void addRoomTypeOccupancy(Model model, List<?> allRooms) {
+        var byType = new java.util.LinkedHashMap<String, int[]>();
+        for (var r : allRooms) {
+            var room = (Room) r;
+            var name = room.getRoomType() != null ? room.getRoomType().getName() : "Unknown";
+            byType.computeIfAbsent(name, k -> new int[2]);
+            byType.get(name)[0]++;
+            if (room.getOccupancyStatus() == OccupancyStatus.OCCUPIED) {
+                byType.get(name)[1]++;
+            }
+        }
+        var views = byType.entrySet().stream()
+                .map(e -> new RoomTypeOccupancyView(e.getKey(), e.getValue()[0], e.getValue()[1]))
+                .sorted((a, b) -> b.totalRooms() - a.totalRooms())
+                .toList();
+        model.addAttribute(Attributes.ROOM_TYPES, views);
     }
 
     private void addRecentReservations(Model model) {

@@ -151,43 +151,49 @@
         <!-- RIGHT -->
         <section class="col-span-4 flex flex-col gap-4">
 
-            <!-- Room Availability -->
+            <!-- Room Distribution -->
             <section class="card-panel">
                 <div class="mb-4 flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <img th:src="@{/assets/icons/door-open.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
                         <div>
-                            <h2 class="text-lg font-semibold text-foreground">Room Availability</h2>
-                            <p class="text-sm text-muted-foreground">Current occupancy overview</p>
+                            <h2 class="text-lg font-semibold text-foreground">Room Distribution</h2>
+                            <p class="text-sm text-muted-foreground">Per type occupancy overview</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2">
-                    <div class="rounded-lg bg-primary/10 p-3">
-                        <p class="text-xs text-primary font-medium">Occupied</p>
-                        <p class="text-xl font-bold text-primary" th:text="${occupiedRooms}">0</p>
-                    </div>
-                    <div class="rounded-lg bg-success/10 p-3">
-                        <p class="text-xs text-success font-medium">Vacant</p>
-                        <p class="text-xl font-bold text-success" th:text="${vacantRooms}">0</p>
-                    </div>
-                    <div class="rounded-lg bg-warning/10 p-3">
-                        <p class="text-xs text-warning font-medium">Dirty</p>
-                        <p class="text-xl font-bold text-warning" th:text="${dirtyRooms}">0</p>
-                    </div>
-                    <div class="rounded-lg bg-danger/10 p-3">
-                        <p class="text-xs text-danger font-medium">Maintenance</p>
-                        <p class="text-xl font-bold text-danger" th:text="${maintenanceRooms}">0</p>
+                <div th:if="${#lists.isEmpty(roomTypes)}" class="py-4 text-center text-sm text-muted-foreground">
+                    No room data available.
+                </div>
+
+                <div th:if="${!#lists.isEmpty(roomTypes)}" class="flex flex-col gap-3">
+                    <div th:each="rt : ${roomTypes}" class="flex items-center gap-3">
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-foreground truncate" th:text="${rt.roomTypeName}">Deluxe Double</p>
+                            <p class="text-xs text-muted-foreground" th:text="|${rt.occupiedRooms} / ${rt.totalRooms} rooms|">8/12 rooms</p>
+                        </div>
+                        <div class="w-28">
+                            <div class="h-2 rounded-full bg-muted">
+                                <div class="h-2 rounded-full bg-primary"
+                                     th:style="'width: ' + ${rt.occupancyPercent()} + '%'"></div>
+                            </div>
+                        </div>
+                        <span class="w-8 text-right text-xs font-medium text-foreground"
+                              th:text="|${rt.occupancyPercent()}%|">67%</span>
                     </div>
                 </div>
 
+                <a th:href="@{/manager/rooms}"
+                   class="mt-4 flex items-center justify-center gap-1 rounded-lg border border-border py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition">
+                    View All Rooms &rarr;
+                </a>
             </section>
 
             <!-- Hotel Rating -->
             <section class="card-panel">
                 <div class="mb-4 flex items-center gap-2">
-                    <img th:src="@{/assets/icons/shield-check.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <img th:src="@{/assets/icons/star.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
                     <div>
                         <h2 class="text-lg font-semibold text-foreground">Hotel Rating</h2>
                         <p class="text-sm text-muted-foreground">Guest satisfaction</p>
