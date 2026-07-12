@@ -62,4 +62,20 @@ public class Attributes {
     /** Model attribute key for the selected month filter. */
     public static final String SELECTED_MONTH = "selectedMonth";
 
+    /** Dashboard model attribute keys. */
+    public static final String CHECK_INS_TODAY = "checkInsToday";
+    public static final String CHECK_OUTS_TODAY = "checkOutsToday";
+    public static final String PENDING_COUNT = "pendingCount";
+    public static final String REVENUE_THIS_MONTH = "revenueThisMonth";
+    public static final String REVENUE_CHANGE = "revenueChange";
+    public static final String TOTAL_ROOMS = "totalRooms";
+    public static final String OCCUPIED_ROOMS = "occupiedRooms";
+    public static final String VACANT_ROOMS = "vacantRooms";
+    public static final String DIRTY_ROOMS = "dirtyRooms";
+    public static final String MAINTENANCE_ROOMS = "maintenanceRooms";
+    public static final String RECENT_RESERVATIONS = "recentReservations";
+    public static final String STAFF_NAME = "staffName";
+    public static final String STAFF_ROLE = "staffRole";
+    public static final String UNREAD_NOTIFICATION_COUNT = "unreadNotificationCount";
+
 }

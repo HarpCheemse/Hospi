@@ -20,52 +20,62 @@
     <div th:replace="~{fragments/components/toast :: toast}"></div>
 
     <!-- HEADER -->
-    <header class="staff-page-header">
+    <div class="staff-page-header">
         <div class="flex items-center gap-4">
             <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                 <img th:src="@{/assets/icons/layout-grid.svg}" alt="">
             </div>
-            <section>
+            <div>
                 <h1 class="staff-page-title">Manager Dashboard</h1>
                 <p class="page-description">
                     Monitor reservations, room availability, and hotel operations today
                 </p>
-            </section>
+            </div>
         </div>
 
-        <section>
-            <div class="user-pill" th:if="${staffName != null}">
-                <div class="avatar" th:text="${#strings.substring(staffName, 0, 1)}">J</div>
-                <div>
-                    <p class="text-sm font-medium text-foreground" th:text="${staffName}">John Doe</p>
-                    <p class="text-xs text-muted-foreground" th:text="${staffRole}">Manager</p>
-                </div>
+        <div class="user-pill" th:if="${staffName != null}">
+            <div class="avatar" th:text="${#strings.substring(staffName, 0, 1)}">J</div>
+            <div>
+                <p class="text-sm font-medium text-foreground" th:text="${staffName}">John Doe</p>
+                <p class="text-xs text-muted-foreground" th:text="${staffRole}">Manager</p>
             </div>
-        </section>
-    </header>
+        </div>
+    </div>
 
     <!-- KPI -->
     <section class="mb-6 grid grid-cols-4 gap-4">
 
         <div class="card-compact">
-            <p class="text-sm text-muted-foreground">Occupancy Rate</p>
-            <p class="mt-1 text-2xl font-bold text-foreground"
+            <div class="flex items-center gap-2 mb-1">
+                <img th:src="@{/assets/icons/building-2.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                <p class="text-sm text-muted-foreground">Occupancy Rate</p>
+            </div>
+            <p class="text-2xl font-bold text-foreground"
                th:text="${totalRooms > 0 ? #numbers.formatDecimal(occupiedRooms * 100 / totalRooms, 0, 0) + '%' : '0%'}">0%</p>
         </div>
 
         <div class="card-compact">
-            <p class="text-sm text-muted-foreground">Dirty Rooms</p>
-            <p class="mt-1 text-2xl font-bold text-foreground" th:text="${dirtyRooms}">0</p>
+            <div class="flex items-center gap-2 mb-1">
+                <img th:src="@{/assets/icons/list-todo.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                <p class="text-sm text-muted-foreground">Dirty Rooms</p>
+            </div>
+            <p class="text-2xl font-bold text-foreground" th:text="${dirtyRooms}">0</p>
         </div>
 
         <div class="card-compact">
-            <p class="text-sm text-muted-foreground">Pending</p>
-            <p class="mt-1 text-2xl font-bold text-foreground" th:text="${pendingCount}">0</p>
+            <div class="flex items-center gap-2 mb-1">
+                <img th:src="@{/assets/icons/clock.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                <p class="text-sm text-muted-foreground">Pending</p>
+            </div>
+            <p class="text-2xl font-bold text-foreground" th:text="${pendingCount}">0</p>
         </div>
 
         <div class="card-compact">
-            <p class="text-sm text-muted-foreground">Revenue This Month</p>
-            <p class="mt-1 text-2xl font-bold text-foreground"
+            <div class="flex items-center gap-2 mb-1">
+                <img th:src="@{/assets/icons/circle-dollar-sign.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                <p class="text-sm text-muted-foreground">Revenue This Month</p>
+            </div>
+            <p class="text-2xl font-bold text-foreground"
                th:text="|$${#numbers.formatDecimal(revenueThisMonth, 1, 0)}|">$0</p>
         </div>
 
@@ -80,9 +90,12 @@
             <!-- Recent Reservations -->
             <section class="card-panel">
                 <div class="mb-4 flex items-center justify-between">
-                    <div>
-                        <h2 class="text-lg font-semibold text-foreground">Recent Reservations</h2>
-                        <p class="text-sm text-muted-foreground">Latest bookings and stays</p>
+                    <div class="flex items-center gap-2">
+                        <img th:src="@{/assets/icons/calendar-check.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                        <div>
+                            <h2 class="text-lg font-semibold text-foreground">Recent Reservations</h2>
+                            <p class="text-sm text-muted-foreground">Latest bookings and stays</p>
+                        </div>
                     </div>
                     <a th:href="@{/manager/reservations}" class="btn btn-primary btn-sm">View All</a>
                 </div>

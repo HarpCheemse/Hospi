@@ -10,7 +10,6 @@ import com.hospi.manage.features.room.enums.OccupancyStatus;
 import com.hospi.manage.features.room.service.RoomService;
 import com.hospi.manage.core.security.session.AccountPrincipal;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,6 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 /** Controller for the manager dashboard with real-time hotel operations data. */
 @Controller
@@ -38,55 +40,65 @@ public class ManagerDashboardController {
         var today = LocalDate.now();
         var allRooms = roomService.findAll();
 
-        // KPIs
-        model.addAttribute("checkInsToday",
+        addKpis(model, today, allRooms);
+        addRoomStats(model, allRooms);
+        addRecentReservations(model);
+        addUserInfo(model, principal);
+
+        return "manager/dashboard";
+    }
+
+    private void addKpis(Model model, LocalDate today, List<?> allRooms) {
+        model.addAttribute(Attributes.CHECK_INS_TODAY,
                 reservationService.findByStatus(ReservationStatus.CONFIRMED).stream()
                         .filter(r -> r.getCheckInAt() != null && r.getCheckInAt().equals(today))
                         .count());
-        model.addAttribute("checkOutsToday",
+        model.addAttribute(Attributes.CHECK_OUTS_TODAY,
                 reservationService.findByStatus(ReservationStatus.CHECKED_IN).stream()
                         .filter(r -> r.getCheckOutAt() != null && r.getCheckOutAt().equals(today))
                         .count());
-        model.addAttribute("pendingCount",
+        model.addAttribute(Attributes.PENDING_COUNT,
                 reservationService.findByStatus(ReservationStatus.PENDING).size());
 
-        // Revenue this month
         var monthStart = today.withDayOfMonth(1);
         long daysSoFar = ChronoUnit.DAYS.between(monthStart, today) + 1;
-        var monthEnd = monthStart.plusDays(daysSoFar - 1);
-        var revenueView = revenueService.getRevenueView(monthStart, monthEnd, "this-month");
-        model.addAttribute("revenueThisMonth", revenueView.totalRevenue());
-        model.addAttribute("revenueChange", revenueView.changePercent());
+        var revenueView = revenueService.getRevenueView(
+                monthStart, monthStart.plusDays(daysSoFar - 1), "this-month");
+        model.addAttribute(Attributes.REVENUE_THIS_MONTH, revenueView.totalRevenue());
+        model.addAttribute(Attributes.REVENUE_CHANGE, revenueView.changePercent());
+    }
 
-        // Room status
-        long totalRooms = allRooms.size();
-        long occupied = allRooms.stream().filter(r -> r.getOccupancyStatus() == OccupancyStatus.OCCUPIED).count();
-        long vacant = allRooms.stream().filter(r -> r.getOccupancyStatus() == OccupancyStatus.VACANT).count();
-        long dirty = allRooms.stream().filter(r -> r.getConditionStatus() == ConditionStatus.DIRTY).count();
-        long maintenance = allRooms.stream().filter(r -> r.getConditionStatus() == ConditionStatus.MAINTENANCE || !r.isActive()).count();
-        model.addAttribute("totalRooms", totalRooms);
-        model.addAttribute("occupiedRooms", occupied);
-        model.addAttribute("vacantRooms", vacant);
-        model.addAttribute("dirtyRooms", dirty);
-        model.addAttribute("maintenanceRooms", maintenance);
+    private void addRoomStats(Model model, List<?> allRooms) {
+        model.addAttribute(Attributes.TOTAL_ROOMS, allRooms.size());
+        model.addAttribute(Attributes.OCCUPIED_ROOMS,
+                allRooms.stream().filter(r -> ((com.hospi.manage.features.room.entity.Room) r)
+                        .getOccupancyStatus() == OccupancyStatus.OCCUPIED).count());
+        model.addAttribute(Attributes.VACANT_ROOMS,
+                allRooms.stream().filter(r -> ((com.hospi.manage.features.room.entity.Room) r)
+                        .getOccupancyStatus() == OccupancyStatus.VACANT).count());
+        model.addAttribute(Attributes.DIRTY_ROOMS,
+                allRooms.stream().filter(r -> ((com.hospi.manage.features.room.entity.Room) r)
+                        .getConditionStatus() == ConditionStatus.DIRTY).count());
+        model.addAttribute(Attributes.MAINTENANCE_ROOMS,
+                allRooms.stream().filter(r -> ((com.hospi.manage.features.room.entity.Room) r)
+                        .getConditionStatus() == ConditionStatus.MAINTENANCE
+                        || !((com.hospi.manage.features.room.entity.Room) r).isActive()).count());
+    }
 
-        // Recent reservations (last 5)
-        var recentReservations = new java.util.ArrayList<>(reservationService.findByStatuses(
-                java.util.List.of(ReservationStatus.PENDING, ReservationStatus.CONFIRMED,
+    private void addRecentReservations(Model model) {
+        var all = new ArrayList<>(reservationService.findByStatuses(
+                List.of(ReservationStatus.PENDING, ReservationStatus.CONFIRMED,
                         ReservationStatus.CHECKED_IN, ReservationStatus.CHECKED_OUT)));
-        recentReservations.sort((a, b) -> b.getCreatedAt() != null && a.getCreatedAt() != null
+        all.sort((a, b) -> b.getCreatedAt() != null && a.getCreatedAt() != null
                 ? b.getCreatedAt().compareTo(a.getCreatedAt()) : 0);
-        model.addAttribute("recentReservations",
-                recentReservations.stream().limit(5).toList());
+        model.addAttribute(Attributes.RECENT_RESERVATIONS, all.stream().limit(5).toList());
+    }
 
-        // User info & notifications
-        if (principal != null) {
-            model.addAttribute("staffName", principal.getAccount().getFullName());
-            model.addAttribute("staffRole", principal.getAccount().getRole().name());
-            model.addAttribute("unreadNotificationCount",
-                    notificationService.getUnreadCount(principal.getAccount().getId()));
-        }
-
-        return "manager/dashboard";
+    private void addUserInfo(Model model, AccountPrincipal principal) {
+        if (principal == null) return;
+        model.addAttribute(Attributes.STAFF_NAME, principal.getAccount().getFullName());
+        model.addAttribute(Attributes.STAFF_ROLE, principal.getAccount().getRole().name());
+        model.addAttribute(Attributes.UNREAD_NOTIFICATION_COUNT,
+                notificationService.getUnreadCount(principal.getAccount().getId()));
     }
 }
