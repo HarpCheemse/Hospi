@@ -9,6 +9,7 @@ import com.hospi.manage.features.credential.dto.ChangePasswordForm;
 import com.hospi.manage.features.credential.dto.CredentialView;
 import com.hospi.manage.features.credential.service.CredentialService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -19,11 +20,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-/**
- * Controller for viewing and changing the current user's credentials.
- */
+/** Controller for viewing and changing the current user's credentials. */
 @Controller
 @RequestMapping("/credentials")
+@RequiredArgsConstructor
 public class CredentialController {
 
     private final CredentialService credentialService;
@@ -31,21 +31,9 @@ public class CredentialController {
     private final PasswordEncoder passwordEncoder;
     private final AuditService auditService;
 
-    public CredentialController(CredentialService credentialService, AccountValidator accountValidator,
-                                PasswordEncoder passwordEncoder, AuditService auditService) {
-        this.credentialService = credentialService;
-        this.accountValidator = accountValidator;
-        this.passwordEncoder = passwordEncoder;
-        this.auditService = auditService;
-    }
-
-    /**
-     * Set the active sidebar highlight for this feature.
-     */
     @ModelAttribute
     void addCommonAttributes(Model model) {
-        model.addAttribute("activeSidebar",
-                "CREDENTIALS");
+        model.addAttribute(Attributes.ACTIVE_SIDEBAR, "CREDENTIALS");
     }
 
     private String credentialViewPath(Role role) {
@@ -64,7 +52,7 @@ public class CredentialController {
     public String credentials(@AuthenticationPrincipal AccountPrincipal principal, Model model) {
         CredentialView view = credentialService.getCredentialView(principal.getAccount().getId());
 
-        model.addAttribute("view",
+        model.addAttribute(Attributes.VIEW,
                 view);
 
         return credentialViewPath(principal.getAccount().getRole());
