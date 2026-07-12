@@ -56,24 +56,43 @@
 
         </div>
 
-        <div class="flex items-center gap-2">
-            <label class="text-sm font-medium text-muted-foreground">Year</label>
-            <select onchange="window.location.href = '/manager/revenues?year=' + this.value + (selectedMonth ? '&month=' + selectedMonth : '')"
-                    class="input input-sm">
-                <option th:each="y : ${#numbers.sequence(2022, 2027)}"
-                        th:value="${y}"
-                        th:selected="${y == selectedYear}"
-                        th:text="${y}">2026</option>
-            </select>
-            <label class="text-sm font-medium text-muted-foreground">Month</label>
-            <select onchange="window.location.href = '/manager/revenues?year=' + selectedYear + '&month=' + this.value"
-                    class="input input-sm">
-                <option value="" th:selected="${selectedMonth == null}">All</option>
-                <option th:each="m : ${#numbers.sequence(1, 12)}"
-                        th:value="${m}"
-                        th:selected="${m == selectedMonth}"
-                        th:text="${m}">1</option>
-            </select>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-muted-foreground">Year</label>
+                <select onchange="window.location.href = '/manager/revenues?year=' + this.value + (selectedMonth ? '&month=' + selectedMonth : '')"
+                        class="input input-sm w-20">
+                    <option th:each="y : ${#numbers.sequence(2022, 2027)}"
+                            th:value="${y}"
+                            th:selected="${y == selectedYear}"
+                            th:text="${y}">2026</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-1">
+                <a th:if="${selectedMonth == null}"
+                   class="btn btn-primary btn-sm">All</a>
+                <a th:if="${selectedMonth != null}"
+                   th:href="@{/manager/revenues(year=${selectedYear})}"
+                   class="btn btn-ghost btn-sm">All</a>
+                <a th:each="m : ${#numbers.sequence(1, 12)}"
+                   th:href="@{/manager/revenues(year=${selectedYear}, month=${m})}"
+                   th:classappend="${m == selectedMonth} ? 'btn-primary' : 'btn-ghost'"
+                   class="btn btn-sm">
+                    <span th:switch="${m}">
+                        <span th:case="1">Jan</span>
+                        <span th:case="2">Feb</span>
+                        <span th:case="3">Mar</span>
+                        <span th:case="4">Apr</span>
+                        <span th:case="5">May</span>
+                        <span th:case="6">Jun</span>
+                        <span th:case="7">Jul</span>
+                        <span th:case="8">Aug</span>
+                        <span th:case="9">Sep</span>
+                        <span th:case="10">Oct</span>
+                        <span th:case="11">Nov</span>
+                        <span th:case="12">Dec</span>
+                    </span>
+                </a>
+            </div>
         </div>
 
     </div>
