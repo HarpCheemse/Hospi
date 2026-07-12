@@ -56,4 +56,10 @@ public class Attributes {
     /** Payment type constant for online booking. */
     public static final String ONLINE_BOOKING = "ONLINE_BOOKING";
 
+    /** Model attribute key for the selected year filter. */
+    public static final String SELECTED_YEAR = "selectedYear";
+
+    /** Model attribute key for the selected month filter. */
+    public static final String SELECTED_MONTH = "selectedMonth";
+
 }

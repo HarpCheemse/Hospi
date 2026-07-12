@@ -6,7 +6,6 @@ import com.hospi.manage.features.invoice.entity.InvoiceItem;
 import com.hospi.manage.features.invoice.enums.InvoiceItemType;
 import com.hospi.manage.features.invoice.enums.InvoiceStatus;
 import com.hospi.manage.features.invoice.repository.InvoiceRepository;
-import com.hospi.manage.features.payment.entity.Payment;
 import com.hospi.manage.features.payment.repository.PaymentRepository;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
@@ -41,45 +40,25 @@ public class RevenueService {
         List<Invoice> invoices = invoiceRepository
                 .findWithItemsByStatusAndCreatedAtBetween(InvoiceStatus.PAID, start, end);
 
-        BigDecimal totalRevenue = invoices.stream()
-                .map(Invoice::getTotalAmount)
-                .filter(Objects::nonNull)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal taxCollected = invoices.stream()
-                .map(Invoice::getTaxAmount)
-                .filter(Objects::nonNull)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
+        BigDecimal totalRevenue = sumAmounts(invoices);
+        BigDecimal taxCollected = sumTax(invoices);
         int totalBookings = invoices.size();
         BigDecimal averagePerBooking = totalBookings > 0
                 ? totalRevenue.divide(BigDecimal.valueOf(totalBookings), 2, RoundingMode.HALF_UP)
                 : BigDecimal.ZERO;
-
-        int totalRoomNights = invoices.stream()
-                .flatMap(inv -> inv.getItems().stream())
-                .filter(item -> item.getItemType() == InvoiceItemType.ROOM)
-                .map(InvoiceItem::getQuantity)
-                .filter(Objects::nonNull)
-                .reduce(0, Integer::sum);
+        int totalRoomNights = sumRoomNights(invoices);
 
         long daysBetween = ChronoUnit.DAYS.between(startDate, endDate) + 1;
-        LocalDate previousStart = startDate.minusDays(daysBetween);
-        LocalDate previousEnd = startDate.minusDays(1);
-        BigDecimal previousPeriodRevenue = computeRevenueBetween(previousStart, previousEnd);
+        BigDecimal previousPeriodRevenue = computeRevenueBetween(
+                startDate.minusDays(daysBetween), startDate.minusDays(1));
 
         List<RevenueChartPoint> chartData = buildChartData(invoices);
-
-        // -- Breakdowns --
         List<RoomTypeRevenue> roomTypeBreakdown = buildRoomTypeBreakdown(invoices, totalRevenue);
         List<PaymentMethodRevenue> paymentBreakdown = buildPaymentBreakdown(invoices, totalRevenue);
         List<BookingSourceRevenue> sourceBreakdown = buildSourceBreakdown(invoices, totalRevenue);
 
-        // Daily chart: only for ranges < 62 days to keep the chart readable
         long totalDays = ChronoUnit.DAYS.between(startDate, endDate) + 1;
-        List<DailyRevenuePoint> dailyData = totalDays < 62
-                ? buildDailyData(invoices)
-                : List.of();
+        List<DailyRevenuePoint> dailyData = totalDays < 62 ? buildDailyData(invoices) : List.of();
 
         return new RevenueView(totalRevenue, totalBookings, averagePerBooking, taxCollected,
                 totalRoomNights, previousPeriodRevenue, chartData, roomTypeBreakdown,
@@ -88,29 +67,39 @@ public class RevenueService {
 
     private BigDecimal computeRevenueBetween(LocalDate start, LocalDate end) {
         if (start.isAfter(end)) return BigDecimal.ZERO;
-        List<Invoice> invoices = invoiceRepository
-                .findByStatusAndCreatedAtBetween(InvoiceStatus.PAID,
-                        start.atStartOfDay(), end.atTime(LocalTime.MAX));
+        return sumAmounts(invoiceRepository.findByStatusAndCreatedAtBetween(
+                InvoiceStatus.PAID, start.atStartOfDay(), end.atTime(LocalTime.MAX)));
+    }
+
+    // -- Helpers --
+
+    private BigDecimal sumAmounts(List<Invoice> invoices) {
         return invoices.stream()
                 .map(Invoice::getTotalAmount)
                 .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    /** Resolve the date range from a period key. */
-    public LocalDate[] resolveDateRange(String period, LocalDate customStart, LocalDate customEnd) {
-        LocalDate today = LocalDate.now();
-        return switch (period) {
-            case "this-week" -> new LocalDate[]{
-                    today.with(java.time.DayOfWeek.MONDAY), today};
-            case "this-year" -> new LocalDate[]{
-                    today.with(java.time.Month.JANUARY).withDayOfMonth(1), today};
-            case "custom" -> new LocalDate[]{
-                    customStart != null ? customStart : today.withDayOfMonth(1),
-                    customEnd != null ? customEnd : today};
-            default -> // "this-month"
-                    new LocalDate[]{today.withDayOfMonth(1), today};
-        };
+    private BigDecimal sumTax(List<Invoice> invoices) {
+        return invoices.stream()
+                .map(Invoice::getTaxAmount)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private int sumRoomNights(List<Invoice> invoices) {
+        return invoices.stream()
+                .flatMap(inv -> inv.getItems().stream())
+                .filter(item -> item.getItemType() == InvoiceItemType.ROOM)
+                .map(InvoiceItem::getQuantity)
+                .filter(Objects::nonNull)
+                .reduce(0, Integer::sum);
+    }
+
+    private static BigDecimal computePercentage(BigDecimal part, BigDecimal total) {
+        if (total.compareTo(BigDecimal.ZERO) <= 0) return BigDecimal.ZERO;
+        return part.multiply(BigDecimal.valueOf(100))
+                .divide(total, 1, RoundingMode.HALF_UP);
     }
 
     // -- Monthly chart --
@@ -122,16 +111,13 @@ public class RevenueService {
                 .collect(Collectors.groupingBy(inv ->
                         YearMonth.from(inv.getCreatedAt().toLocalDate())));
 
-        List<RevenueChartPoint> points = new ArrayList<>();
-        for (var entry : byMonth.entrySet()) {
-            BigDecimal rev = sumAmounts(entry.getValue());
-            points.add(new RevenueChartPoint(
-                    entry.getKey().format(DateTimeFormatter.ofPattern("MMM yyyy")),
-                    rev, entry.getValue().size()));
-        }
-        points.sort(Comparator.comparing(p ->
-                YearMonth.parse(p.label(), DateTimeFormatter.ofPattern("MMM yyyy"))));
-        return points;
+        return byMonth.entrySet().stream()
+                .map(e -> new RevenueChartPoint(
+                        e.getKey().format(DateTimeFormatter.ofPattern("MMM yyyy")),
+                        sumAmounts(e.getValue()), e.getValue().size()))
+                .sorted(Comparator.comparing(p ->
+                        YearMonth.parse(p.label(), DateTimeFormatter.ofPattern("MMM yyyy"))))
+                .toList();
     }
 
     // -- Room type breakdown --
@@ -140,27 +126,23 @@ public class RevenueService {
         Map<String, List<InvoiceItem>> byType = new HashMap<>();
         for (var inv : invoices) {
             for (var item : inv.getItems()) {
-                if (item.getItemType() == InvoiceItemType.ROOM && item.getDescription() != null) {
-                    String type = item.getDescription().contains(" x")
-                            ? item.getDescription().substring(0, item.getDescription().indexOf(" x"))
-                            : item.getDescription();
-                    byType.computeIfAbsent(type, k -> new ArrayList<>()).add(item);
-                }
+                if (item.getItemType() != InvoiceItemType.ROOM || item.getDescription() == null) continue;
+                String type = item.getDescription().contains(" x")
+                        ? item.getDescription().substring(0, item.getDescription().indexOf(" x"))
+                        : item.getDescription();
+                byType.computeIfAbsent(type, k -> new ArrayList<>()).add(item);
             }
         }
-        List<RoomTypeRevenue> result = new ArrayList<>();
-        for (var entry : byType.entrySet()) {
-            BigDecimal rev = entry.getValue().stream()
-                    .map(InvoiceItem::getAmount).filter(Objects::nonNull)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-            int count = entry.getValue().size();
-            BigDecimal pct = totalRevenue.compareTo(BigDecimal.ZERO) > 0
-                    ? rev.multiply(BigDecimal.valueOf(100)).divide(totalRevenue, 1, RoundingMode.HALF_UP)
-                    : BigDecimal.ZERO;
-            result.add(new RoomTypeRevenue(entry.getKey(), rev, count, pct));
-        }
-        result.sort((a, b) -> b.revenue().compareTo(a.revenue()));
-        return result;
+        return byType.entrySet().stream()
+                .map(e -> {
+                    BigDecimal rev = e.getValue().stream()
+                            .map(InvoiceItem::getAmount).filter(Objects::nonNull)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                    return new RoomTypeRevenue(e.getKey(), rev, e.getValue().size(),
+                            computePercentage(rev, totalRevenue));
+                })
+                .sorted((a, b) -> b.revenue().compareTo(a.revenue()))
+                .toList();
     }
 
     // -- Payment method breakdown --
@@ -168,26 +150,19 @@ public class RevenueService {
     private List<PaymentMethodRevenue> buildPaymentBreakdown(List<Invoice> invoices, BigDecimal totalRevenue) {
         if (invoices.isEmpty()) return List.of();
 
-        List<Long> bookingIds = invoices.stream()
-                .map(Invoice::getBookingId).toList();
-        List<Payment> payments = paymentRepository.findByReservationIdIn(bookingIds);
-
         Map<String, BigDecimal> byMethod = new HashMap<>();
-        for (var p : payments) {
+        for (var p : paymentRepository
+                .findByReservationIdIn(invoices.stream().map(Invoice::getBookingId).toList())) {
             if (p.getAmount() != null) {
                 byMethod.merge(p.getPaymentMethod().name(), p.getAmount(), BigDecimal::add);
             }
         }
-        List<PaymentMethodRevenue> result = new ArrayList<>();
-        for (var entry : byMethod.entrySet()) {
-            BigDecimal pct = totalRevenue.compareTo(BigDecimal.ZERO) > 0
-                    ? entry.getValue().multiply(BigDecimal.valueOf(100))
-                    .divide(totalRevenue, 1, RoundingMode.HALF_UP)
-                    : BigDecimal.ZERO;
-            result.add(new PaymentMethodRevenue(entry.getKey(), entry.getValue(), pct));
-        }
-        result.sort((a, b) -> b.revenue().compareTo(a.revenue()));
-        return result;
+
+        return byMethod.entrySet().stream()
+                .map(e -> new PaymentMethodRevenue(e.getKey(), e.getValue(),
+                        computePercentage(e.getValue(), totalRevenue)))
+                .sorted((a, b) -> b.revenue().compareTo(a.revenue()))
+                .toList();
     }
 
     // -- Booking source breakdown --
@@ -195,12 +170,10 @@ public class RevenueService {
     private List<BookingSourceRevenue> buildSourceBreakdown(List<Invoice> invoices, BigDecimal totalRevenue) {
         if (invoices.isEmpty()) return List.of();
 
-        List<Long> bookingIds = invoices.stream()
-                .map(Invoice::getBookingId).toList();
-        List<Reservation> reservations = reservationRepository.findByIdIn(bookingIds);
-        Map<Long, String> idToSource = reservations.stream()
-                .collect(Collectors.toMap(Reservation::getId,
-                        r -> r.getSource().name()));
+        Map<Long, String> idToSource = reservationRepository
+                .findByIdIn(invoices.stream().map(Invoice::getBookingId).toList())
+                .stream()
+                .collect(Collectors.toMap(Reservation::getId, r -> r.getSource().name()));
 
         Map<String, BigDecimal> bySource = new HashMap<>();
         for (var inv : invoices) {
@@ -209,16 +182,12 @@ public class RevenueService {
                 bySource.merge(src, inv.getTotalAmount(), BigDecimal::add);
             }
         }
-        List<BookingSourceRevenue> result = new ArrayList<>();
-        for (var entry : bySource.entrySet()) {
-            BigDecimal pct = totalRevenue.compareTo(BigDecimal.ZERO) > 0
-                    ? entry.getValue().multiply(BigDecimal.valueOf(100))
-                    .divide(totalRevenue, 1, RoundingMode.HALF_UP)
-                    : BigDecimal.ZERO;
-            result.add(new BookingSourceRevenue(entry.getKey(), entry.getValue(), pct));
-        }
-        result.sort((a, b) -> b.revenue().compareTo(a.revenue()));
-        return result;
+
+        return bySource.entrySet().stream()
+                .map(e -> new BookingSourceRevenue(e.getKey(), e.getValue(),
+                        computePercentage(e.getValue(), totalRevenue)))
+                .sorted((a, b) -> b.revenue().compareTo(a.revenue()))
+                .toList();
     }
 
     // -- Daily chart data --
@@ -226,25 +195,13 @@ public class RevenueService {
     private List<DailyRevenuePoint> buildDailyData(List<Invoice> invoices) {
         if (invoices.isEmpty()) return List.of();
 
-        Map<LocalDate, List<Invoice>> byDay = invoices.stream()
-                .collect(Collectors.groupingBy(inv ->
-                        inv.getCreatedAt().toLocalDate()));
-
-        List<DailyRevenuePoint> points = new ArrayList<>();
-        for (var entry : byDay.entrySet()) {
-            BigDecimal rev = sumAmounts(entry.getValue());
-            points.add(new DailyRevenuePoint(
-                    entry.getKey().format(DateTimeFormatter.ofPattern("MMM d")),
-                    rev, entry.getValue().size()));
-        }
-        points.sort(Comparator.comparing(DailyRevenuePoint::label));
-        return points;
-    }
-
-    private BigDecimal sumAmounts(List<Invoice> invoices) {
         return invoices.stream()
-                .map(Invoice::getTotalAmount)
-                .filter(Objects::nonNull)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .collect(Collectors.groupingBy(inv -> inv.getCreatedAt().toLocalDate()))
+                .entrySet().stream()
+                .map(e -> new DailyRevenuePoint(
+                        e.getKey().format(DateTimeFormatter.ofPattern("MMM d")),
+                        sumAmounts(e.getValue()), e.getValue().size()))
+                .sorted(Comparator.comparing(DailyRevenuePoint::label))
+                .toList();
     }
 }

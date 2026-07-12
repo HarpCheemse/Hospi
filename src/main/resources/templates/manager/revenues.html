@@ -39,34 +39,76 @@
     <div th:replace="~{fragments/components/toast :: toast}"></div>
 
     <!-- HEADER -->
-    <header class="staff-page-header">
-        <section>
-            <h1 class="staff-page-title">Revenue Reports</h1>
-            <p class="page-description">
-                Annual revenue breakdown and analysis
-            </p>
-        </section>
+    <div class="staff-page-header">
 
-        <section class="flex items-center gap-2">
-            <label class="text-sm font-medium text-muted-foreground">Year</label>
-            <select onchange="window.location.href = '/manager/revenues?year=' + this.value"
-                    class="input input-sm">
-                <option th:each="y : ${#numbers.sequence(2022, 2027)}"
-                        th:value="${y}"
-                        th:selected="${y == selectedYear}"
-                        th:text="${y}">2026</option>
-            </select>
-        </section>
-    </header>
+        <div class="flex items-center gap-4">
+
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/circle-dollar-sign.svg}" alt="">
+            </div>
+
+            <div>
+                <h1 class="staff-page-title">Revenue Reports</h1>
+                <p class="page-description">
+                    Annual revenue breakdown and analysis
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FILTERS -->
+    <div class="mb-4 flex items-center gap-4">
+
+        <select onchange="window.location.href = '/manager/revenues?year=' + this.value"
+                class="input input-sm w-20">
+            <option th:each="y : ${#numbers.sequence(2022, 2027)}"
+                    th:value="${y}"
+                    th:selected="${y == selectedYear}"
+                    th:text="${y}">2026</option>
+        </select>
+
+        <div class="flex items-center gap-1">
+            <a th:if="${selectedMonth == null}"
+               class="btn btn-primary btn-sm">All</a>
+            <a th:if="${selectedMonth != null}"
+               th:href="@{/manager/revenues(year=${selectedYear})}"
+               class="btn btn-ghost btn-sm">All</a>
+            <a th:each="m : ${#numbers.sequence(1, 12)}"
+               th:href="@{/manager/revenues(year=${selectedYear}, month=${m})}"
+               th:classappend="${m == selectedMonth} ? 'btn-primary' : 'btn-ghost'"
+               class="btn btn-sm">
+                <span th:switch="${m}">
+                    <span th:case="1">Jan</span>
+                    <span th:case="2">Feb</span>
+                    <span th:case="3">Mar</span>
+                    <span th:case="4">Apr</span>
+                    <span th:case="5">May</span>
+                    <span th:case="6">Jun</span>
+                    <span th:case="7">Jul</span>
+                    <span th:case="8">Aug</span>
+                    <span th:case="9">Sep</span>
+                    <span th:case="10">Oct</span>
+                    <span th:case="11">Nov</span>
+                    <span th:case="12">Dec</span>
+                </span>
+            </a>
+        </div>
+
+    </div>
 
     <!-- BENTO GRID -->
     <section class="mb-4 grid grid-cols-3 gap-4">
 
         <!-- Revenue Trend — hero -->
         <div class="col-span-2 row-span-2 card-panel">
-            <div class="mb-3">
-                <h2 class="text-lg font-semibold text-foreground">Revenue Trend</h2>
-                <p class="text-sm text-muted-foreground">Monthly revenue breakdown</p>
+            <div class="mb-3 flex items-center gap-2">
+                <img th:src="@{/assets/icons/circle-dollar-sign.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                <div>
+                    <h2 class="text-lg font-semibold text-foreground">Revenue Trend</h2>
+                    <p class="text-sm text-muted-foreground">Monthly revenue breakdown</p>
+                </div>
             </div>
             <canvas id="revenueChart" class="h-64 w-full"></canvas>
         </div>
@@ -134,9 +176,12 @@
 
     <!-- ROOM TYPE DETAIL -->
     <section class="mb-6 card-panel" th:if="${not #lists.isEmpty(view.roomTypeBreakdown())}">
-        <div class="mb-4">
-            <h2 class="text-lg font-semibold text-foreground">Room Type Detail</h2>
-            <p class="text-sm text-muted-foreground">Revenue, bookings, and share by room type</p>
+        <div class="mb-4 flex items-center gap-2">
+            <img th:src="@{/assets/icons/bed-double.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+            <div>
+                <h2 class="text-lg font-semibold text-foreground">Room Type Detail</h2>
+                <p class="text-sm text-muted-foreground">Revenue, bookings, and share by room type</p>
+            </div>
         </div>
         <div class="divide-y divide-border">
             <div th:each="r, stat : ${view.roomTypeBreakdown()}"
