@@ -203,17 +203,56 @@
                     <tr>
                         <td colspan="8" class="px-5 py-3">
                             <div class="flex items-center justify-between">
-                                <span class="text-sm text-muted-foreground">
-                                    Page <span th:text="${view.page() + 1}">1</span>
-                                    of <span th:text="${view.totalPages()}">1</span>
-                                </span>
                                 <div class="flex items-center gap-2">
                                     <a th:href="@{/manager/reservations(scope=${activeScope}, status=${activeStatus}, search=${view.filterSearch()}, page=${view.page() - 1})}"
                                        th:classappend="${view.page() == 0} ? 'pointer-events-none opacity-50' : ''"
-                                       class="btn btn-ghost btn-sm">Prev</a>
+                                       class="btn btn-ghost btn-sm">&larr; Prev</a>
+
+                                    <div class="flex items-center gap-1">
+                                        <a th:href="@{/manager/reservations(scope=${activeScope}, status=${activeStatus}, search=${view.filterSearch()}, page=0)}"
+                                           th:classappend="${view.page() == 0} ? 'btn-primary' : 'btn-ghost'"
+                                           class="btn btn-sm w-8 justify-center">1</a>
+
+                                        <span th:if="${view.page() > 2}"
+                                              class="px-1 text-xs text-muted-foreground">&hellip;</span>
+
+                                        <a th:each="p : ${#numbers.sequence(1, view.totalPages() - 2)}"
+                                           th:if="${p >= view.page() - 1 and p <= view.page() + 1}"
+                                           th:href="@{/manager/reservations(scope=${activeScope}, status=${activeStatus}, search=${view.filterSearch()}, page=${p})}"
+                                           th:classappend="${p == view.page()} ? 'btn-primary' : 'btn-ghost'"
+                                           class="btn btn-sm w-8 justify-center"
+                                           th:text="${p + 1}">2</a>
+
+                                        <span th:if="${view.page() < view.totalPages() - 3}"
+                                              class="px-1 text-xs text-muted-foreground">&hellip;</span>
+
+                                        <a th:href="@{/manager/reservations(scope=${activeScope}, status=${activeStatus}, search=${view.filterSearch()}, page=${view.totalPages() - 1})}"
+                                           th:classappend="${view.page() == view.totalPages() - 1} ? 'btn-primary' : 'btn-ghost'"
+                                           class="btn btn-sm w-8 justify-center"
+                                           th:text="${view.totalPages()}">10</a>
+                                    </div>
+
                                     <a th:href="@{/manager/reservations(scope=${activeScope}, status=${activeStatus}, search=${view.filterSearch()}, page=${view.page() + 1})}"
                                        th:classappend="${view.page() >= view.totalPages() - 1} ? 'pointer-events-none opacity-50' : ''"
-                                       class="btn btn-ghost btn-sm">Next</a>
+                                       class="btn btn-ghost btn-sm">Next &rarr;</a>
+                                </div>
+
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm text-muted-foreground">
+                                        Page <span th:text="${view.page() + 1}">1</span>/<span th:text="${view.totalPages()}">1</span>
+                                    </span>
+
+                                    <form th:action="@{/manager/reservations(scope=${activeScope}, status=${activeStatus}, search=${view.filterSearch()})}"
+                                          method="get" class="flex items-center gap-1"
+                                          onsubmit="const input = this.querySelector('[name=page]'); input.value = parseInt(input.value) - 1 || 0;">
+                                        <input type="hidden" name="scope" th:value="${activeScope}">
+                                        <input type="hidden" name="status" th:value="${activeStatus}">
+                                        <input type="hidden" name="search" th:value="${view.filterSearch()}">
+                                        <input type="number" name="page" min="1" th:max="${view.totalPages()}"
+                                               class="input input-sm w-16 text-center" placeholder="#"
+                                               th:value="${view.page() + 1}">
+                                        <button type="submit" class="btn btn-ghost btn-sm px-2">Go</button>
+                                    </form>
                                 </div>
                             </div>
                         </td>
