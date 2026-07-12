@@ -1,16 +1,16 @@
 package com.hospi.manage.features.account.controller;
 
 import com.hospi.manage.common.constant.Attributes;
+import com.hospi.manage.common.utils.SecurityUtils;
 import com.hospi.manage.features.account.dto.AccountCreateForm;
 import com.hospi.manage.features.account.dto.AccountEditForm;
 import com.hospi.manage.features.account.dto.AccountView;
+import com.hospi.manage.features.account.dto.response.AccountCreateView;
+import com.hospi.manage.features.account.dto.response.AccountListView;
 import com.hospi.manage.features.account.enums.Role;
 import com.hospi.manage.features.account.service.AccountService;
 import com.hospi.manage.features.account.validator.AccountValidator;
 import com.hospi.manage.features.audit.service.AuditService;
-import com.hospi.manage.core.security.session.AccountPrincipal;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -19,12 +19,11 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Controller for admin account management (CRUD for staff accounts).
- */
+/** Controller for admin account management (CRUD for staff accounts). */
 @Controller
 @RequestMapping("/admin/accounts")
 @RequiredArgsConstructor
@@ -33,17 +32,11 @@ public class AccountController {
     private final AccountValidator accountValidator;
     private final AuditService auditService;
 
-    /**
-     * Set the active sidebar highlight for this feature.
-     */
     @ModelAttribute
     public void addCommonAttributes(Model model) {
         model.addAttribute(Attributes.ACTIVE_SIDEBAR, "STAFF_ACCOUNTS");
     }
 
-    /**
-     * Show the account list page with optional filtering by search text and role.
-     */
     @GetMapping
     public String list(@RequestParam(required = false) String search,
                        @RequestParam(required = false) Role role,
@@ -60,45 +53,19 @@ public class AccountController {
                     .filter(a -> a.role() == role)
                     .collect(Collectors.toList());
         }
-        model.addAttribute("accounts", all);
-        model.addAttribute("roles", Role.values());
+        model.addAttribute(Attributes.VIEW, new AccountListView(
+                all, Arrays.asList(Role.values()),
+                role != null ? role.name() : null, search));
         return "account/list";
     }
 
-    /**
-     * Show the account creation form.
-     */
     @GetMapping("/create")
     String create(Model model) {
-        model.addAttribute(Attributes.FORM, new AccountCreateForm(null, null, null, null, null));
-        model.addAttribute("roles", Role.values());
+        model.addAttribute(Attributes.FORM, new AccountCreateForm(null, null, null, null));
+        model.addAttribute(Attributes.VIEW, new AccountCreateView(availableRoles()));
         return "account/create";
     }
 
-    /**
-     * Show details for a single account.
-     */
-    @GetMapping("/{id}")
-    String detail(@PathVariable Long id, Model model) {
-        model.addAttribute("account", accountService.getAccountView(id));
-        return "account/detail";
-    }
-
-    /**
-     * Show the account edit form pre-populated with current values.
-     */
-    @GetMapping("/{id}/edit")
-    public String edit(@PathVariable Long id, Model model) {
-        model.addAttribute(Attributes.FORM, accountService.getEditForm(id));
-        model.addAttribute("roles", Role.values());
-        model.addAttribute("accountId", id);
-        return "account/edit";
-    }
-
-    /**
-     * Create a new staff account. Validates input, persists the account, then
-     * redirects to the account list.
-     */
     @PostMapping("/create")
     public String createAccount(@Valid @ModelAttribute(Attributes.FORM) AccountCreateForm form,
                                 BindingResult bindingResult,
@@ -107,21 +74,31 @@ public class AccountController {
         accountValidator.validateCreate(form, bindingResult);
 
         if (bindingResult.hasErrors()) {
-            model.addAttribute("roles", Role.values());
+            model.addAttribute(Attributes.VIEW, new AccountCreateView(availableRoles()));
             return "account/create";
         }
 
         accountService.createAccount(form);
-        auditService.log(null, currentStaffName(), "CREATE", "ACCOUNT", null,
+        auditService.log(null, SecurityUtils.currentStaffName(), "CREATE", "ACCOUNT", null,
                 "Created account: " + form.email());
-        redirectAttributes.addFlashAttribute(Attributes.SUCCESS, "Account created successfully");
+        redirectAttributes.addFlashAttribute(Attributes.SUCCESS, "Account created. Login credentials sent via email.");
         return "redirect:/admin/accounts";
     }
 
-    /**
-     * Update an existing staff account. Validates input, persists changes, then
-     * redirects to the account list.
-     */
+    @GetMapping("/{id}")
+    String detail(@PathVariable Long id, Model model) {
+        model.addAttribute("account", accountService.getAccountView(id));
+        return "account/detail";
+    }
+
+    @GetMapping("/{id}/edit")
+    public String edit(@PathVariable Long id, Model model) {
+        model.addAttribute(Attributes.FORM, accountService.getEditForm(id));
+        model.addAttribute("roles", availableRoles());
+        model.addAttribute("accountId", id);
+        return "account/edit";
+    }
+
     @PostMapping("/{id}/edit")
     public String updateAccount(@PathVariable Long id,
                                 @Valid @ModelAttribute(Attributes.FORM) AccountEditForm form,
@@ -141,27 +118,24 @@ public class AccountController {
         accountValidator.validateUpdate(id, form, bindingResult);
 
         if (bindingResult.hasErrors()) {
-            model.addAttribute("roles", Role.values());
+            model.addAttribute("roles", availableRoles());
             model.addAttribute("accountId", id);
             return "account/edit";
         }
 
         accountService.updateAccount(id, form);
-        auditService.log(null, currentStaffName(), "UPDATE", "ACCOUNT", id,
+        auditService.log(null, SecurityUtils.currentStaffName(), "UPDATE", "ACCOUNT", id,
                 "Updated account: " + form.email());
         redirectAttributes.addFlashAttribute(Attributes.SUCCESS, "Account updated successfully");
         return "redirect:/admin/accounts";
     }
 
-    /**
-     * Soft-delete a staff account. Only non-admin accounts can be deleted.
-     */
     @PostMapping("/delete/{id}")
     public String deleteAccount(@PathVariable Long id,
                                 RedirectAttributes redirectAttributes) {
         try {
             accountService.softDelete(id);
-            auditService.log(null, currentStaffName(), "DELETE", "ACCOUNT", id, "Deleted account");
+            auditService.log(null, SecurityUtils.currentStaffName(), "DELETE", "ACCOUNT", id, "Deleted account");
         } catch (IllegalStateException e) {
             redirectAttributes.addFlashAttribute(Attributes.ERROR, e.getMessage());
             return "redirect:/admin/accounts/" + id;
@@ -170,11 +144,7 @@ public class AccountController {
         return "redirect:/admin/accounts";
     }
 
-    private String currentStaffName() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.getPrincipal() instanceof AccountPrincipal p) {
-            return p.getAccount().getFullName();
-        }
-        return "System";
+    private List<Role> availableRoles() {
+        return Arrays.stream(Role.values()).filter(r -> r != Role.ADMIN).toList();
     }
 }

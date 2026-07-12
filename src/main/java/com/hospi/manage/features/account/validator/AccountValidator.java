@@ -117,10 +117,6 @@ public class AccountValidator {
         validateEmail(form.email(),
                 bindingResult);
 
-        validatePassword(form.password(),
-                "password",
-                bindingResult);
-
         if (form.role() == Role.ADMIN) {
             bindingResult.rejectValue("role",
                     "role.not.allowed",

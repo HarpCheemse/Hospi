@@ -67,7 +67,7 @@ class AccountControllerTest {
         mockMvc.perform(get("/admin/accounts"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("account/list"))
-                .andExpect(model().attributeExists("accounts"))
+                .andExpect(model().attributeExists("view"))
                 .andExpect(content().string(containsString("Staff Accounts")));
     }
 
@@ -76,7 +76,7 @@ class AccountControllerTest {
         mockMvc.perform(get("/admin/accounts/create"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("account/create"))
-                .andExpect(model().attributeExists("roles"))
+                .andExpect(model().attributeExists("view"))
                 .andExpect(model().attributeExists(FORM))
                 .andExpect(content().string(containsString("Create Account")));
     }
@@ -105,7 +105,7 @@ class AccountControllerTest {
                 .andExpect(model().attributeExists("roles"))
                 .andExpect(model().attributeExists("accountId"))
                 .andExpect(content().string(containsString("Edit Account")))
-                .andExpect(content().string(containsString("Modify user information")));
+                .andExpect(content().string(containsString("account information")));
     }
 
     @Test
@@ -113,7 +113,7 @@ class AccountControllerTest {
         mockMvc.perform(post("/admin/accounts/create")
                         .param("fullName", "Test User")
                         .param("email", "test@test.com")
-                        .param("password", "Password1")
+                        .param("phone", "1234567890")
                         .param("role", "RECEPTIONIST"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/accounts"))
@@ -127,7 +127,7 @@ class AccountControllerTest {
         mockMvc.perform(post("/admin/accounts/create"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("account/create"))
-                .andExpect(model().attributeExists("roles"));
+                .andExpect(model().attributeExists("view"));
     }
 
     @Test
@@ -145,7 +145,7 @@ class AccountControllerTest {
                         .param("role", "RECEPTIONIST"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("account/create"))
-                .andExpect(model().attributeExists("roles"));
+                .andExpect(model().attributeExists("view"));
     }
 
     @Test
@@ -156,6 +156,7 @@ class AccountControllerTest {
         mockMvc.perform(post("/admin/accounts/1/edit")
                         .param("fullName", "Test User")
                         .param("email", "test@test.com")
+                        .param("phone", "1234567890")
                         .param("role", "RECEPTIONIST"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/accounts"))
@@ -190,6 +191,7 @@ class AccountControllerTest {
         mockMvc.perform(post("/admin/accounts/1/edit")
                         .param("fullName", "Test User")
                         .param("email", "test@test.com")
+                        .param("phone", "1234567890")
                         .param("role", "RECEPTIONIST"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("account/edit"))

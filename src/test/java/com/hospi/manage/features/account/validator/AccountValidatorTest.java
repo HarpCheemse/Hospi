@@ -51,7 +51,6 @@ class AccountValidatorTest {
         AccountCreateForm form = new AccountCreateForm(
                 "John Doe",
                 "john@hospi.com",
-                "Password123",
                 "0123456789",
                 Role.MANAGER
         );
@@ -72,7 +71,6 @@ class AccountValidatorTest {
         AccountCreateForm form = new AccountCreateForm(
                 "John Doe",
                 "john@hospi.com",
-                "Password123",
                 "0123456789",
                 Role.MANAGER
         );
@@ -88,69 +86,11 @@ class AccountValidatorTest {
     }
 
     @Test
-    void shouldRejectWhenPasswordIsTooWeak() {
-
-        AccountCreateForm form = new AccountCreateForm(
-                "John Doe",
-                "john@hospi.com",
-                "abc12",
-                "0123456789",
-                Role.MANAGER
-        );
-
-        BindingResult br = binding(form);
-
-        accountValidator.validateCreate(form,
-                br);
-
-        assertTrue(br.hasFieldErrors("password"));
-    }
-
-    @Test
-    void shouldRejectWhenPasswordHasNoDigit() {
-
-        AccountCreateForm form = new AccountCreateForm(
-                "John Doe",
-                "john@hospi.com",
-                "PasswordOnly",
-                "0123456789",
-                Role.MANAGER
-        );
-
-        BindingResult br = binding(form);
-
-        accountValidator.validateCreate(form,
-                br);
-
-        assertTrue(br.hasFieldErrors("password"));
-    }
-
-    @Test
-    void shouldRejectWhenPasswordHasNoLetter() {
-
-        AccountCreateForm form = new AccountCreateForm(
-                "John Doe",
-                "john@hospi.com",
-                "12345678",
-                "0123456789",
-                Role.MANAGER
-        );
-
-        BindingResult br = binding(form);
-
-        accountValidator.validateCreate(form,
-                br);
-
-        assertTrue(br.hasFieldErrors("password"));
-    }
-
-    @Test
     void shouldRejectWhenRoleIsAdmin() {
 
         AccountCreateForm form = new AccountCreateForm(
                 "John Doe",
                 "john@hospi.com",
-                "Password123",
                 "0123456789",
                 Role.ADMIN
         );
@@ -169,7 +109,6 @@ class AccountValidatorTest {
         AccountCreateForm form = new AccountCreateForm(
                 "John Doe",
                 "john@hospi.com",
-                "Password123",
                 "0123456789",
                 Role.MANAGER
         );
