@@ -66,7 +66,12 @@ class HotelControllerTest {
     @Test
     void updateDetail_shouldRedirectWithSuccessFlash() throws Exception {
         mockMvc.perform(post("/manager/details/edit")
-                        .param("name", "Updated"))
+                        .param("name", "Updated Hotel")
+                        .param("address", "123 Main St")
+                        .param("phone", "+1234567890")
+                        .param("checkInTime", "14:00")
+                        .param("checkOutTime", "11:00")
+                        .param("status", "ACTIVE"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/manager/details"))
                 .andExpect(flash().attribute(Attributes.SUCCESS, "Hotel details updated."));
@@ -78,7 +83,12 @@ class HotelControllerTest {
                 .when(hotelService).update(any(), any(), any(), any());
 
         mockMvc.perform(post("/manager/details/edit")
-                        .param("name", "Updated"))
+                        .param("name", "Updated Hotel")
+                        .param("address", "123 Main St")
+                        .param("phone", "+1234567890")
+                        .param("checkInTime", "14:00")
+                        .param("checkOutTime", "11:00")
+                        .param("status", "ACTIVE"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/"))
                 .andExpect(flash().attribute(Attributes.ERROR, "Update failed"));
