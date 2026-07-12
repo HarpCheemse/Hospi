@@ -94,8 +94,8 @@
         <div class="flex gap-3">
 
             <a th:href="@{/manager/rooms/create}"
-               class="btn btn-primary btn-lg">
-                Add Room
+               class="btn btn-primary">
+                + Room
             </a>
         </div>
 
@@ -176,15 +176,6 @@
                      class="group relative cursor-pointer overflow-hidden rounded-2xl border border-border bg-background p-4 text-left shadow-sm transition hover:shadow-md"
                      th:attr="data-room-id=${room.id}"
                      x-on:click="openRoom($el.dataset.roomId)">
-
-                    <!-- COLORED LEFT ACCENT -->
-                    <div th:classappend="
-                            ${room.occupancyStatus?.name() == 'OCCUPIED'} ? 'bg-primary' :
-                            (${room.conditionStatus?.name() == 'DIRTY'} ? 'bg-warning' :
-                            (${room.conditionStatus?.name() == 'MAINTENANCE'} ? 'bg-danger' :
-                            'bg-success'))"
-                         class="absolute left-0 top-0 h-full w-1">
-                    </div>
 
                     <!-- ROOM NUMBER + EDIT -->
                     <div class="flex items-center justify-between pl-2">
