@@ -59,10 +59,12 @@ public class ManagerDashboardController {
         model.addAttribute("revenueChange", revenueView.changePercent());
 
         // Room status
+        long totalRooms = allRooms.size();
         long occupied = allRooms.stream().filter(r -> r.getOccupancyStatus() == OccupancyStatus.OCCUPIED).count();
         long vacant = allRooms.stream().filter(r -> r.getOccupancyStatus() == OccupancyStatus.VACANT).count();
         long dirty = allRooms.stream().filter(r -> r.getConditionStatus() == ConditionStatus.DIRTY).count();
         long maintenance = allRooms.stream().filter(r -> r.getConditionStatus() == ConditionStatus.MAINTENANCE || !r.isActive()).count();
+        model.addAttribute("totalRooms", totalRooms);
         model.addAttribute("occupiedRooms", occupied);
         model.addAttribute("vacantRooms", vacant);
         model.addAttribute("dirtyRooms", dirty);

@@ -21,19 +21,24 @@
 
     <!-- HEADER -->
     <header class="staff-page-header">
-        <section>
-            <h1 class="staff-page-title">Manager Dashboard</h1>
-            <p class="page-description">
-                Monitor reservations, room availability, and hotel operations today
-            </p>
-        </section>
+        <div class="flex items-center gap-4">
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/layout-grid.svg}" alt="">
+            </div>
+            <section>
+                <h1 class="staff-page-title">Manager Dashboard</h1>
+                <p class="page-description">
+                    Monitor reservations, room availability, and hotel operations today
+                </p>
+            </section>
+        </div>
 
         <section>
             <div class="user-pill" th:if="${staffName != null}">
-                <div class="avatar" th:text="${#strings.abbreviate(staffName, 2)}">JD</div>
+                <div class="avatar" th:text="${#strings.substring(staffName, 0, 1)}">J</div>
                 <div>
                     <p class="text-sm font-medium text-foreground" th:text="${staffName}">John Doe</p>
-                    <p class="text-xs text-muted-foreground" th:text="|${staffRole}|">Manager</p>
+                    <p class="text-xs text-muted-foreground" th:text="${staffRole}">Manager</p>
                 </div>
             </div>
         </section>
@@ -43,33 +48,25 @@
     <section class="mb-6 grid grid-cols-4 gap-4">
 
         <div class="card-compact">
-            <p class="text-sm text-muted-foreground">Check-Ins Today</p>
-            <p class="mt-1 text-2xl font-bold text-foreground" th:text="${checkInsToday}">0</p>
-            <p class="mt-1 text-xs text-muted-foreground">Arriving today</p>
+            <p class="text-sm text-muted-foreground">Occupancy Rate</p>
+            <p class="mt-1 text-2xl font-bold text-foreground"
+               th:text="${totalRooms > 0 ? #numbers.formatDecimal(occupiedRooms * 100 / totalRooms, 0, 0) + '%' : '0%'}">0%</p>
         </div>
 
         <div class="card-compact">
-            <p class="text-sm text-muted-foreground">Check-Outs Today</p>
-            <p class="mt-1 text-2xl font-bold text-foreground" th:text="${checkOutsToday}">0</p>
-            <p class="mt-1 text-xs text-muted-foreground">Departing today</p>
+            <p class="text-sm text-muted-foreground">Dirty Rooms</p>
+            <p class="mt-1 text-2xl font-bold text-foreground" th:text="${dirtyRooms}">0</p>
         </div>
 
         <div class="card-compact">
             <p class="text-sm text-muted-foreground">Pending</p>
             <p class="mt-1 text-2xl font-bold text-foreground" th:text="${pendingCount}">0</p>
-            <p class="mt-1 text-xs text-muted-foreground">Awaiting action</p>
         </div>
 
         <div class="card-compact">
             <p class="text-sm text-muted-foreground">Revenue This Month</p>
             <p class="mt-1 text-2xl font-bold text-foreground"
                th:text="|$${#numbers.formatDecimal(revenueThisMonth, 1, 0)}|">$0</p>
-            <p th:if="${revenueChange >= 0}"
-               class="mt-1 pill-success text-xs"
-               th:text="|+${#numbers.formatDecimal(revenueChange, 1, 1)}%|">+0.0%</p>
-            <p th:if="${revenueChange < 0}"
-               class="mt-1 pill-danger text-xs"
-               th:text="|${#numbers.formatDecimal(revenueChange, 1, 1)}%|">-0.0%</p>
         </div>
 
     </section>
@@ -98,17 +95,19 @@
                     <div th:each="r : ${recentReservations}" class="flex items-center justify-between border-b border-border/50 pb-3 last:border-0 last:pb-0">
                         <div>
                             <p class="text-sm font-medium text-foreground" th:text="${r.guestName}">Jane Doe</p>
-                            <p class="text-xs text-muted-foreground"
-                               th:text="${#temporals.format(r.checkInAt, 'dd MMM')} + ' - ' + ${#temporals.format(r.checkOutAt, 'dd MMM')}">
-                                15 Jun - 18 Jun
+                            <p class="text-xs text-muted-foreground">
+                                <span th:text="${#temporals.format(r.checkInAt, 'dd MMM')}">15 Jun</span>
+                                <span> - </span>
+                                <span th:text="${#temporals.format(r.checkOutAt, 'dd MMM')}">18 Jun</span>
                             </p>
                         </div>
                         <div class="text-right">
-                            <span th:switch="${r.status}" class="text-xs font-medium">
+                            <span th:switch="${r.status.name()}" class="text-xs font-medium">
                                 <span th:case="'PENDING'" class="pill-warning">Pending</span>
                                 <span th:case="'CONFIRMED'" class="pill-muted">Confirmed</span>
                                 <span th:case="'CHECKED_IN'" class="pill-success">In House</span>
                                 <span th:case="'CHECKED_OUT'" class="pill-accent">Checked Out</span>
+                                <span th:case="*" class="pill-muted" th:text="${r.status.name()}">Other</span>
                             </span>
                             <p class="mt-1 text-xs text-muted-foreground"
                                th:text="|$${#numbers.formatDecimal(r.totalPrice, 1, 0)}|">$0</p>
@@ -150,17 +149,6 @@
                     </div>
                 </div>
 
-            </section>
-
-            <!-- Quick Links -->
-            <section class="card-panel">
-                <h2 class="mb-3 text-lg font-semibold text-foreground">Quick Links</h2>
-                <div class="flex flex-col gap-2">
-                    <a th:href="@{/manager/reservations}" class="btn btn-ghost btn-sm justify-start">Manage Reservations</a>
-                    <a th:href="@{/manager/rooms}" class="btn btn-ghost btn-sm justify-start">View Rooms</a>
-                    <a th:href="@{/manager/revenues}" class="btn btn-ghost btn-sm justify-start">Revenue Reports</a>
-                    <a th:href="@{/manager/room-types}" class="btn btn-ghost btn-sm justify-start">Room Types</a>
-                </div>
             </section>
 
         </section>
