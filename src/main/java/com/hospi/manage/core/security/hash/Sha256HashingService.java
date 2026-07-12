@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
+/** SHA-256 hashing service for OTP code storage and verification. */
 @Service
 public class Sha256HashingService implements HashingService {
 

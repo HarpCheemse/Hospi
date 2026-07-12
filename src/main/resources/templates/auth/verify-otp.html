@@ -11,17 +11,23 @@
 
 <body class="min-h-screen flex items-center justify-center bg-background">
 
-<div class="w-full max-w-md bg-surface p-8 rounded-2xl shadow-lg">
+    <div class="w-full max-w-md bg-surface p-8 rounded-2xl shadow-lg">
 
     <!-- OTP Form -->
     <form th:action="@{/auth/password/verify-otp}"
           th:object="${form}"
           method="post" class="space-y-4" novalidate>
-        <h1 class="text-2xl font-semibold mb-2">Verify OTP</h1>
-        <p class="text-sm text-muted-foreground mb-6">
-            We sent a 6-digit code to:
-            <span class="font-medium" th:text="*{email}"></span>
-        </p>
+
+        <div class="mb-6 text-center">
+            <div class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/shield-check.svg}" alt="" class="h-6 w-6">
+            </div>
+            <h1 class="text-2xl font-bold">Verify OTP</h1>
+            <p class="mt-1 text-sm text-muted-foreground">
+                We sent a 6-digit code to:
+                <span class="font-medium" th:text="*{email}"></span>
+            </p>
+        </div>
         <div>
             <label class="mb-2 block text-sm font-medium">
                 OTP Code <span class="text-danger">*</span>
@@ -30,7 +36,7 @@
                    th:field="*{otp}"
                    maxlength="6"
                    inputmode="numeric"
-                   class="w-full rounded-xl border border-border px-4 py-3 text-center tracking-widest text-lg"
+                   class="input text-center tracking-widest text-lg"
                    placeholder="123456"
                    required>
             <input type="hidden" th:field="*{email}">
@@ -42,13 +48,13 @@
 
             <!-- Verify -->
             <button type="submit"
-                    class="flex-1 bg-primary text-white py-3 rounded-xl hover:opacity-90">
+                    class="btn btn-primary flex-1">
                 Verify
             </button>
 
             <!-- Back -->
-            <a href="/auth/password/forgot"
-               class="flex-1 text-center border border-border py-3 rounded-xl hover:bg-surface">
+            <a th:href="@{/auth/password/forgot}"
+               class="btn btn-secondary flex-1">
                 Back
             </a>
 

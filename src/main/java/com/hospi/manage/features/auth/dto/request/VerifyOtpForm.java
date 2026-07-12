@@ -1,4 +1,4 @@
-package com.hospi.manage.features.auth.dto;
+package com.hospi.manage.features.auth.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
