@@ -18,17 +18,17 @@
     }
 
     .btn-primary {
-        background: #1a6452;
-        color: #F0F9F5;
+        background: var(--color-primary);
+        color: var(--color-primary-foreground);
         box-shadow: 0 1px 3px rgba(18, 60, 53, 0.25);
     }
 
     .btn-primary:hover {
-        background: #155444;
+        background: color-mix(in srgb, var(--color-primary) 85%, black);
     }
 
     .btn-primary:active {
-        background: #114639;
+        background: color-mix(in srgb, var(--color-primary) 70%, black);
     }
 
     .btn-accent {

@@ -305,12 +305,14 @@
                 <button type="button"
                         @click="deleteModalOpen = true"
                         class="btn btn-danger btn-lg">
+                    <img th:src="@{/assets/icons/trash-2.svg}" alt="" class="h-4 w-4 brightness-0 invert">
                     Delete
                 </button>
 
                 <button type="submit"
                         class="btn btn-primary btn-lg">
-                    Save Changes
+                    <img th:src="@{/assets/icons/save.svg}" alt="" class="h-4 w-4 brightness-0 invert">
+                    Save
                 </button>
 
                 <!-- DELETE MODAL -->
@@ -332,10 +334,17 @@
                          @click.stop
                          class="relative mx-4 w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl">
 
-                        <h2 class="text-lg font-semibold text-foreground">Delete Room Type</h2>
-                        <p class="mt-2 text-sm text-muted-foreground">
-                            Are you sure you want to delete this room type? This action cannot be undone.
-                        </p>
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-danger/10">
+                                <img th:src="@{/assets/icons/trash-2.svg}" alt="" class="h-5 w-5 opacity-60">
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-semibold text-foreground">Delete Room Type</h2>
+                                <p class="text-sm text-muted-foreground">
+                                    Are you sure you want to delete this room type? This action cannot be undone.
+                                </p>
+                            </div>
+                        </div>
 
                         <div class="mt-6 flex justify-end gap-3">
                             <button type="button"
@@ -346,6 +355,7 @@
                             <button type="submit"
                                     form="deleteForm"
                                     class="btn btn-danger">
+                                <img th:src="@{/assets/icons/trash-2.svg}" alt="" class="h-4 w-4 brightness-0 invert">
                                 Delete
                             </button>
                         </div>

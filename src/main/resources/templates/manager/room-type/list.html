@@ -35,7 +35,7 @@
 
         <a th:href="@{/manager/room-types/create}"
            class="btn btn-primary">
-            + Create Room Type
+            + Room Type
         </a>
 
     </div>
@@ -50,17 +50,20 @@
          class="grid grid-cols-3 gap-5">
 
         <!-- CARD -->
-        <section th:each="rt : ${view}"
-                 class="overflow-hidden card">
+        <div th:each="rt : ${view}"
+             role="button"
+             tabindex="0"
+             th:attr="data-detail-url=@{'/manager/room-types/' + ${rt.id}}"
+             onclick="window.location.href=this.getAttribute('data-detail-url')"
+             class="overflow-hidden card cursor-pointer transition hover:shadow-md">
 
             <!-- IMAGE -->
-            <a th:if="${rt.coverPictureId() != null}"
-               th:href="@{'/manager/room-types/' + ${rt.id}}"
-               class="flex h-48 items-center justify-center overflow-hidden border-b border-border bg-background">
+            <div th:if="${rt.coverPictureId() != null}"
+                 class="flex h-48 items-center justify-center overflow-hidden border-b border-border bg-background">
                 <img th:src="@{/room-type-picture/{id}(id=${rt.coverPictureId()})}"
                      alt=""
                      class="h-full w-full object-cover">
-            </a>
+            </div>
 
             <div th:if="${rt.coverPictureId() == null}"
                  class="flex h-48 items-center justify-center border-b border-border bg-background text-muted-foreground">
@@ -82,6 +85,12 @@
                             Bed · Area
                         </p>
                     </div>
+
+                    <a th:href="@{'/manager/room-types/{id}/edit'(id=${rt.id})}"
+                       onclick="event.stopPropagation()"
+                       class="btn btn-ghost btn-xs px-2">
+                        <img th:src="@{/assets/icons/pen.svg}" alt="Edit" class="h-4 w-4">
+                    </a>
                 </div>
 
                 <!-- STATS -->
@@ -105,24 +114,9 @@
 
                 </div>
 
-                <!-- ACTIONS -->
-                <div class="flex items-center gap-2 justify-end">
-
-                    <a th:href="@{'/manager/room-types/{id}'(id=${rt.id})}"
-                       class="btn btn-secondary btn-sm">
-                        View
-                    </a>
-
-                    <a th:href="@{'/manager/room-types/{id}/edit'(id=${rt.id})}"
-                       class="btn btn-primary btn-sm">
-                        Edit
-                    </a>
-
-                </div>
-
             </div>
 
-        </section>
+        </div>
 
     </div>
 

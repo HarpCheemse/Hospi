@@ -69,7 +69,10 @@
             <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-3">
 
                 <div class="flex flex-col gap-2">
-                    <label class="text-sm font-medium">Floor <span class="text-danger">*</span></label>
+                    <label class="text-sm font-medium">
+                        <img th:src="@{/assets/icons/building-2.svg}" class="mr-1.5 inline-block h-4 w-4 align-text-bottom opacity-70" alt="">
+                        Floor <span class="text-danger">*</span>
+                    </label>
                     <div th:replace="~{fragments/form-error :: error('floor')}"></div>
                     <select th:field="*{floor}" class="input"
                             th:classappend="${#fields.hasErrors('floor')} ? 'input-error' : ''">
@@ -81,7 +84,10 @@
                 </div>
 
                 <div class="flex flex-col gap-2">
-                    <label class="text-sm font-medium">Number of Rooms <span class="text-danger">*</span></label>
+                    <label class="text-sm font-medium">
+                        <img th:src="@{/assets/icons/layout-grid.svg}" class="mr-1.5 inline-block h-4 w-4 align-text-bottom opacity-70" alt="">
+                        Number of Rooms <span class="text-danger">*</span>
+                    </label>
                     <div th:replace="~{fragments/form-error :: error('numberOfRooms')}"></div>
                     <input type="number" min="1" max="99"
                            th:field="*{numberOfRooms}"
@@ -91,7 +97,10 @@
                 </div>
 
                 <div class="flex flex-col gap-2">
-                    <label class="text-sm font-medium">Default Room Type <span class="text-danger">*</span></label>
+                    <label class="text-sm font-medium">
+                        <img th:src="@{/assets/icons/bed-double.svg}" class="mr-1.5 inline-block h-4 w-4 align-text-bottom opacity-70" alt="">
+                        Default Room Type <span class="text-danger">*</span>
+                    </label>
                     <div th:replace="~{fragments/form-error :: error('roomTypeId')}"></div>
                     <select th:field="*{roomTypeId}" class="input"
                             th:classappend="${#fields.hasErrors('roomTypeId')} ? 'input-error' : ''">
