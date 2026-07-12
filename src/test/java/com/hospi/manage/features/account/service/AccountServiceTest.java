@@ -1,6 +1,7 @@
 package com.hospi.manage.features.account.service;
 
 import com.hospi.manage.common.exception.ResourceNotFoundException;
+import com.hospi.manage.common.interfaces.EmailService;
 import com.hospi.manage.features.account.dto.AccountCreateForm;
 import com.hospi.manage.features.account.dto.AccountEditForm;
 import com.hospi.manage.features.account.dto.AccountView;
@@ -24,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.times;
@@ -39,6 +41,9 @@ class AccountServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private EmailService emailService;
+
     @Captor
     private ArgumentCaptor<Account> accountCaptor;
 
@@ -46,7 +51,7 @@ class AccountServiceTest {
 
     @BeforeEach
     void setUp() {
-        accountService = new AccountService(accountRepository, passwordEncoder);
+        accountService = new AccountService(accountRepository, passwordEncoder, emailService);
     }
 
     @Test
@@ -126,9 +131,12 @@ class AccountServiceTest {
         AccountCreateForm form = new AccountCreateForm("John", "john@test.com", "555", Role.RECEPTIONIST);
         when(passwordEncoder.encode(anyString())).thenReturn("hashedValue");
 
-        accountService.createAccount(form);
+        String password = accountService.createAccount(form);
 
+        assertNotNull(password);
+        assertFalse(password.isBlank());
         verify(passwordEncoder).encode(anyString());
+        verify(emailService).send(anyString(), anyString(), anyString());
         verify(accountRepository).save(accountCaptor.capture());
         Account saved = accountCaptor.getValue();
         assertEquals("John", saved.getFullName());
