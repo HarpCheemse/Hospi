@@ -3,7 +3,6 @@ package com.hospi.manage.features.reservation.controller;
 import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.payment.entity.Payment;
-import com.hospi.manage.features.payment.repository.PaymentRepository;
 import com.hospi.manage.features.payment.service.PaymentService;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
@@ -21,6 +20,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -41,9 +41,6 @@ class ManagerReservationControllerTest {
 
     @MockitoBean
     private StayingGuestService stayingGuestService;
-
-    @MockitoBean
-    private PaymentRepository paymentRepository;
 
     @MockitoBean
     private PaymentService paymentService;
@@ -69,7 +66,7 @@ class ManagerReservationControllerTest {
     void list_shouldRender_whenDefault() throws Exception {
         when(reservationService.findFiltered(any(), any(), any(), any()))
                 .thenReturn(org.springframework.data.domain.Page.empty());
-        when(paymentRepository.findByReservationIdIn(any())).thenReturn(List.of());
+        when(paymentService.getPaymentsByReservationId(anyList())).thenReturn(List.of());
         mockCounts();
 
         mockMvc.perform(get("/manager/reservations").with(csrf()))
@@ -82,7 +79,7 @@ class ManagerReservationControllerTest {
     @Test
     void list_shouldRender_withScope() throws Exception {
         when(reservationService.findByStatuses(any())).thenReturn(List.of());
-        when(paymentRepository.findByReservationIdIn(any())).thenReturn(List.of());
+        when(paymentService.getPaymentsByReservationId(anyList())).thenReturn(List.of());
         mockCounts();
 
         mockMvc.perform(get("/manager/reservations?scope=today").with(csrf()))
@@ -94,7 +91,7 @@ class ManagerReservationControllerTest {
     @Test
     void list_shouldRender_withScopeAndStatus() throws Exception {
         when(reservationService.findByStatuses(any())).thenReturn(List.of());
-        when(paymentRepository.findByReservationIdIn(any())).thenReturn(List.of());
+        when(paymentService.getPaymentsByReservationId(anyList())).thenReturn(List.of());
         mockCounts();
 
         mockMvc.perform(get("/manager/reservations?scope=upcoming&status=PENDING").with(csrf()))
@@ -123,7 +120,7 @@ class ManagerReservationControllerTest {
         var reservation = aReservation(1L);
         when(reservationService.findById(1L)).thenReturn(reservation);
         when(stayingGuestService.getGuests(1L)).thenReturn(List.of());
-        when(paymentRepository.findAllByReservationId(1L)).thenReturn(List.of());
+        when(paymentService.getPaymentsByReservationId(1L)).thenReturn(List.of());
 
         mockMvc.perform(get("/manager/reservations/1").with(csrf()))
                 .andExpect(status().isOk())
@@ -150,7 +147,7 @@ class ManagerReservationControllerTest {
         payment.setId(1L);
         payment.setAmount(BigDecimal.valueOf(500));
         payment.setPaymentMethod(com.hospi.manage.features.payment.enums.PaymentMethod.CARD);
-        when(paymentRepository.findAllByReservationId(1L)).thenReturn(List.of(payment));
+        when(paymentService.getPaymentsByReservationId(1L)).thenReturn(List.of(payment));
         when(paymentService.calculateRefund(reservation)).thenReturn(BigDecimal.valueOf(350));
 
         mockMvc.perform(post("/manager/reservations/1/refund").with(csrf()))
@@ -167,7 +164,7 @@ class ManagerReservationControllerTest {
         var payment = new Payment();
         payment.setId(1L);
         payment.setAmount(BigDecimal.valueOf(500));
-        when(paymentRepository.findAllByReservationId(1L)).thenReturn(List.of(payment));
+        when(paymentService.getPaymentsByReservationId(1L)).thenReturn(List.of(payment));
         when(paymentService.calculateRefund(reservation)).thenReturn(BigDecimal.valueOf(350));
 
         mockMvc.perform(post("/manager/reservations/1/refund/offline").with(csrf()))
