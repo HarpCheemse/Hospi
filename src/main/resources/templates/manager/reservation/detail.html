@@ -27,14 +27,12 @@
 <main class="staff-page"
       x-data="{
           modalOpen: false,
-          modalAction: '',
           modalMsg: '',
           modalUrl: '',
 
           openModal(msg, url) {
               this.modalMsg = msg;
               this.modalUrl = url;
-              this.modalAction = 'confirm';
               this.modalOpen = true;
           },
 
@@ -56,12 +54,12 @@
             <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                 <img th:src="@{/assets/icons/calendar-check.svg}" alt="">
             </div>
-            <section>
+            <div>
                 <h1 class="staff-page-title" th:text="|Reservation #${reservation.id}|">Reservation #1</h1>
                 <p class="page-description">
-                    Guest: <span th:text="${reservation.guestName}">Jane Doe</span>
+                    Guest: <span class="font-medium" th:text="${reservation.guestName}">Jane Doe</span>
                 </p>
-            </section>
+            </div>
         </div>
 
         <div class="flex items-center gap-3">
@@ -83,8 +81,8 @@
                     x-on:click="openModal('Process offline refund and cancel? (Skips PayPal)', $el.dataset.url)">
                 Refund Offline
             </button>
-            <a th:href="@{/manager/reservations}" class="btn btn-ghost btn-lg">
-                &larr; Back
+            <a th:href="@{/manager/reservations}" class="btn btn-secondary">
+                Back
             </a>
         </div>
     </header>
@@ -93,15 +91,21 @@
 
         <!-- LEFT: Guest Info -->
         <section class="card-panel col-span-2">
-            <h2 class="mb-4 text-lg font-semibold text-foreground">Guest Information</h2>
-            <div class="grid grid-cols-2 gap-4 text-sm">
+            <div class="mb-4 flex items-center gap-2">
+                <img th:src="@{/assets/icons/user.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                <div>
+                    <h2 class="text-lg font-semibold text-foreground">Guest Information</h2>
+                    <p class="text-sm text-muted-foreground">Personal details and account status</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
                 <div>
                     <p class="text-muted-foreground">Name</p>
                     <p class="font-medium text-foreground" th:text="${reservation.guestName}">Jane Doe</p>
                 </div>
                 <div>
                     <p class="text-muted-foreground">Email</p>
-                    <p class="font-medium text-foreground" th:text="${reservation.guestEmail}">jane@email.com</p>
+                    <p class="font-medium text-foreground truncate" th:text="${reservation.guestEmail}">jane@email.com</p>
                 </div>
                 <div>
                     <p class="text-muted-foreground">Phone</p>
@@ -118,12 +122,18 @@
                 <div>
                     <p class="text-muted-foreground">Status</p>
                     <span th:switch="${reservation.status}"
-                          class="text-xs font-medium">
-                        <span th:case="'PENDING'" class="pill-warning">Pending</span>
-                        <span th:case="'CONFIRMED'" class="pill-muted">Confirmed</span>
-                        <span th:case="'CHECKED_IN'" class="pill-success">Checked In</span>
-                        <span th:case="'CHECKED_OUT'" class="pill-accent">Checked Out</span>
-                        <span th:case="'CANCELLED'" class="pill-danger">Cancelled</span>
+                          class="inline-block rounded-full px-3 py-1 text-xs font-medium"
+                          th:classappend="
+                              ${reservation.status.name() == 'PENDING'} ? 'bg-warning/10 text-warning' :
+                              (${reservation.status.name() == 'CONFIRMED'} ? 'bg-primary/10 text-primary' :
+                              (${reservation.status.name() == 'CHECKED_IN'} ? 'bg-success/10 text-success' :
+                              (${reservation.status.name() == 'CHECKED_OUT'} ? 'bg-muted text-muted-foreground' :
+                              'bg-danger/10 text-danger')))">
+                        <span th:case="'PENDING'">Pending</span>
+                        <span th:case="'CONFIRMED'">Confirmed</span>
+                        <span th:case="'CHECKED_IN'">Checked In</span>
+                        <span th:case="'CHECKED_OUT'">Checked Out</span>
+                        <span th:case="'CANCELLED'">Cancelled</span>
                     </span>
                 </div>
             </div>
@@ -131,63 +141,57 @@
 
         <!-- RIGHT: Booking Info -->
         <section class="card-panel">
-            <h2 class="mb-4 text-lg font-semibold text-foreground">Booking Details</h2>
+            <div class="mb-4 flex items-center gap-2">
+                <img th:src="@{/assets/icons/receipt.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                <div>
+                    <h2 class="text-lg font-semibold text-foreground">Booking Details</h2>
+                    <p class="text-sm text-muted-foreground">Dates, pricing, and source</p>
+                </div>
+            </div>
+
+            <div class="mb-3 text-center">
+                <p class="text-sm text-muted-foreground">
+                    <span th:text="${#temporals.format(reservation.checkInAt, 'dd MMM yyyy')}">15 Jun</span>
+                    <span class="mx-2 text-foreground/30">&rarr;</span>
+                    <span th:text="${#temporals.format(reservation.checkOutAt, 'dd MMM yyyy')}">18 Jun</span>
+                </p>
+                <p class="text-xs text-muted-foreground" th:text="|${nights} night${nights != 1 ? 's' : ''}|">3 nights</p>
+            </div>
+
             <div class="space-y-3 text-sm">
-                <div>
-                    <p class="text-muted-foreground">Check-In</p>
-                    <p class="font-medium text-foreground" th:text="${#temporals.format(reservation.checkInAt, 'dd MMM yyyy')}">15 Jun 2026</p>
+                <div class="flex justify-between">
+                    <span class="text-muted-foreground">Check-In</span>
+                    <span class="font-medium text-foreground" th:text="${#temporals.format(reservation.checkInAt, 'dd MMM yyyy')}">15 Jun 2026</span>
                 </div>
-                <div>
-                    <p class="text-muted-foreground">Check-Out</p>
-                    <p class="font-medium text-foreground" th:text="${#temporals.format(reservation.checkOutAt, 'dd MMM yyyy')}">18 Jun 2026</p>
+                <div class="flex justify-between">
+                    <span class="text-muted-foreground">Check-Out</span>
+                    <span class="font-medium text-foreground" th:text="${#temporals.format(reservation.checkOutAt, 'dd MMM yyyy')}">18 Jun 2026</span>
                 </div>
-                <div>
-                    <p class="text-muted-foreground">Source</p>
-                    <p class="font-medium text-foreground" th:text="${reservation.source}">ONLINE</p>
+                <div class="flex justify-between">
+                    <span class="text-muted-foreground">Source</span>
+                    <span class="font-medium text-foreground" th:text="${reservation.source}">ONLINE</span>
                 </div>
-                <div>
-                    <p class="text-muted-foreground">Total Price</p>
-                    <p class="text-lg font-bold text-foreground"
-                       th:text="|$${#numbers.formatDecimal(reservation.totalPrice, 1, 2)}|">$960.00</p>
+                <div class="flex justify-between items-center pt-2 border-t border-border">
+                    <span class="text-muted-foreground">Total Price</span>
+                    <span class="text-lg font-bold text-primary"
+                          th:text="|$${#numbers.formatDecimal(reservation.totalPrice, 1, 2)}|">$960.00</span>
                 </div>
-                <div th:if="${reservation.confirmationCode != null}">
-                    <p class="text-muted-foreground">Confirmation Code</p>
-                    <p class="font-medium text-foreground" th:text="${reservation.confirmationCode}">HSP-ABC123</p>
+                <div th:if="${reservation.confirmationCode != null}" class="flex justify-between">
+                    <span class="text-muted-foreground">Confirmation</span>
+                    <span class="font-mono text-xs font-medium text-foreground" th:text="${reservation.confirmationCode}">HSP-ABC123</span>
                 </div>
             </div>
         </section>
 
-        <!-- Room Details -->
-        <section class="card-panel col-span-3" th:if="${not #lists.isEmpty(reservation.details)}">
-            <h2 class="mb-4 text-lg font-semibold text-foreground">Rooms</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm">
-                    <thead>
-                        <tr class="border-b border-border text-muted-foreground">
-                            <th class="pb-2 font-medium">Room Type</th>
-                            <th class="pb-2 font-medium">Count</th>
-                            <th class="pb-2 font-medium">Base Price</th>
-                            <th class="pb-2 font-medium">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="d : ${reservation.details}"
-                            class="border-b border-border/50">
-                            <td class="py-2 font-medium text-foreground" th:text="${d.roomType.name}">Deluxe King</td>
-                            <td class="py-2 text-muted-foreground" th:text="${d.roomCount}">1</td>
-                            <td class="py-2 text-muted-foreground"
-                                th:text="|$${#numbers.formatDecimal(d.basePrice, 1, 2)}|">$145.00</td>
-                            <td class="py-2 font-medium text-foreground"
-                                th:text="|$${#numbers.formatDecimal(d.totalPrice, 1, 2)}|">$145.00</td>
-                        </tr>
-                    </tbody>
-                </table>
+        <!-- Staying Guests (left, wider) -->
+        <section class="card-panel col-span-2" th:if="${not #lists.isEmpty(guests)}">
+            <div class="mb-4 flex items-center gap-2">
+                <img th:src="@{/assets/icons/users.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                <div>
+                    <h2 class="text-lg font-semibold text-foreground">Staying Guests</h2>
+                    <p class="text-sm text-muted-foreground">Additional guests associated with this reservation</p>
+                </div>
             </div>
-        </section>
-
-        <!-- Staying Guests -->
-        <section class="card-panel col-span-3" th:if="${not #lists.isEmpty(guests)}">
-            <h2 class="mb-4 text-lg font-semibold text-foreground">Staying Guests</h2>
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
                     <thead>
@@ -198,8 +202,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="g : ${guests}"
-                            class="border-b border-border/50">
+                        <tr th:each="g : ${guests}" class="border-b border-border/50">
                             <td class="py-2 font-medium text-foreground" th:text="${g.guestName}">John Doe</td>
                             <td class="py-2 text-muted-foreground" th:text="${#temporals.format(g.dateOfBirth, 'dd MMM yyyy')}">15 Jun 1990</td>
                             <td class="py-2 text-muted-foreground" th:text="${g.nationality}">American</td>
@@ -209,32 +212,62 @@
             </div>
         </section>
 
-        <!-- Payments -->
-        <section class="card-panel col-span-3" th:if="${not #lists.isEmpty(payments)}">
-            <h2 class="mb-4 text-lg font-semibold text-foreground">Payments</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm">
-                    <thead>
-                        <tr class="border-b border-border text-muted-foreground">
-                            <th class="pb-2 font-medium">Amount</th>
-                            <th class="pb-2 font-medium">Method</th>
-                            <th class="pb-2 font-medium">Confirmed At</th>
-                            <th class="pb-2 font-medium">Confirmed By</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="p : ${payments}"
-                            class="border-b border-border/50">
-                            <td class="py-2 font-medium text-foreground"
-                                th:text="|$${#numbers.formatDecimal(p.amount, 1, 2)}|">$100.00</td>
-                            <td class="py-2 text-muted-foreground" th:text="${p.paymentMethod}">PAYPAL</td>
-                            <td class="py-2 text-muted-foreground" th:text="${#temporals.format(p.confirmedAt, 'dd MMM yyyy HH:mm')}">15 Jun 2026</td>
-                            <td class="py-2 text-muted-foreground" th:text="${p.confirmedBy}">Rita Receptionist</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+        <!-- Right column: Rooms + Payments stacked -->
+        <div class="col-span-1 flex flex-col gap-6">
+            <section class="card-panel" th:if="${not #lists.isEmpty(reservation.details)}">
+                <div class="mb-4 flex items-center gap-2">
+                    <img th:src="@{/assets/icons/bed-double.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div>
+                        <h2 class="text-lg font-semibold text-foreground">Rooms</h2>
+                        <p class="text-sm text-muted-foreground">Booked room types</p>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead>
+                            <tr class="border-b border-border text-muted-foreground">
+                                <th class="pb-2 font-medium">Type</th>
+                                <th class="pb-2 font-medium text-right">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="d : ${reservation.details}" class="border-b border-border/50">
+                                <td class="py-2 font-medium text-foreground" th:text="${d.roomType.name}">Deluxe King</td>
+                                <td class="py-2 font-medium text-foreground text-right"
+                                    th:text="|$${#numbers.formatDecimal(d.totalPrice, 1, 2)}|">$145.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="card-panel" th:if="${not #lists.isEmpty(payments)}">
+                <div class="mb-4 flex items-center gap-2">
+                    <img th:src="@{/assets/icons/credit-card.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div>
+                        <h2 class="text-lg font-semibold text-foreground">Payments</h2>
+                        <p class="text-sm text-muted-foreground">History and confirmation</p>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead>
+                            <tr class="border-b border-border text-muted-foreground">
+                                <th class="pb-2 font-medium">Amount</th>
+                                <th class="pb-2 font-medium">Method</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="p : ${payments}" class="border-b border-border/50">
+                                <td class="py-2 font-medium text-foreground"
+                                    th:text="|$${#numbers.formatDecimal(p.amount, 1, 2)}|">$100.00</td>
+                                <td class="py-2 text-muted-foreground" th:text="${p.paymentMethod}">PAYPAL</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
 
     </div>
 
