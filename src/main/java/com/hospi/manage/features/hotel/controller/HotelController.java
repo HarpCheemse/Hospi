@@ -3,9 +3,11 @@ package com.hospi.manage.features.hotel.controller;
 import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.features.hotel.dto.HotelForm;
 import com.hospi.manage.features.hotel.service.HotelService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -57,12 +59,20 @@ public class HotelController {
      * Update hotel details and manage images (cover, gallery additions, removals).
      */
     @PostMapping("/edit")
-    public String updateDetail(@ModelAttribute HotelForm form,
+    public String updateDetail(@Valid @ModelAttribute("hotelForm") HotelForm form,
+                                BindingResult bindingResult,
                                 @RequestParam(value = "coverImage", required = false) MultipartFile coverImage,
                                 @RequestParam(value = "newImages", required = false) MultipartFile[] newImages,
                                 @RequestParam(value = "removeImageIds", required = false) List<Long> removeImageIds,
+                                Model model,
                                 RedirectAttributes redirect)
             throws IOException {
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("hotel", hotelService.find());
+            return "hotel/edit";
+        }
+
         hotelService.update(form, coverImage, newImages, removeImageIds);
         redirect.addFlashAttribute(Attributes.SUCCESS, "Hotel details updated.");
         return "redirect:/manager/details";
