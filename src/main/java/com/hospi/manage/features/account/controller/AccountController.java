@@ -83,7 +83,7 @@ public class AccountController {
         accountService.createAccount(form);
         auditService.log(null, currentStaffName(), "CREATE", "ACCOUNT", null,
                 "Created account: " + form.email());
-        redirectAttributes.addFlashAttribute(Attributes.SUCCESS, "Account created successfully");
+        redirectAttributes.addFlashAttribute(Attributes.SUCCESS, "Account created. Login credentials sent via email.");
         return "redirect:/admin/accounts";
     }
 
