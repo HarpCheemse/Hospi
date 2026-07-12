@@ -2,7 +2,7 @@ package com.hospi.manage.features.hotel.service;
 
 import com.hospi.manage.common.constant.HotelConstants;
 import com.hospi.manage.common.exception.ResourceNotFoundException;
-import com.hospi.manage.common.utils.ImageUtils;
+import com.hospi.manage.common.service.ImageCompressionService;
 import com.hospi.manage.features.hotel.dto.HotelForm;
 import com.hospi.manage.features.hotel.entity.Hotel;
 import com.hospi.manage.features.hotel.entity.HotelPicture;
@@ -21,6 +21,7 @@ import java.util.List;
 public class HotelService {
     private final HotelRepository hotelRepository;
     private final HotelPictureRepository hotelPictureRepository;
+    private final ImageCompressionService imageCompressionService;
 
     /** Retrieve the single hotel entity. */
     public Hotel find() {
@@ -79,7 +80,7 @@ public class HotelService {
 
         // Replace cover image
         if (coverImage != null && !coverImage.isEmpty()) {
-            byte[] compressed = ImageUtils.compressWebP(coverImage, 720, 0.75f);
+            byte[] compressed = imageCompressionService.toWebp(coverImage, 720, 0.75f);
             HotelPicture cover = hotel.getPictures().stream()
                     .filter(p -> p.getSortOrder() != null && p.getSortOrder() == 0)
                     .findFirst()
@@ -102,7 +103,7 @@ public class HotelService {
 
             for (MultipartFile file : newImages) {
                 if (!file.isEmpty()) {
-                    byte[] compressed = ImageUtils.compressWebP(file, 720, 0.75f);
+                    byte[] compressed = imageCompressionService.toWebp(file, 720, 0.75f);
                     HotelPicture pic = new HotelPicture();
                     pic.setHotel(hotel);
                     pic.setImageData(compressed);

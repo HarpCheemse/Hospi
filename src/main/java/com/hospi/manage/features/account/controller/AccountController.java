@@ -1,6 +1,7 @@
 package com.hospi.manage.features.account.controller;
 
 import com.hospi.manage.common.constant.Attributes;
+import com.hospi.manage.common.utils.SecurityUtils;
 import com.hospi.manage.features.account.dto.AccountCreateForm;
 import com.hospi.manage.features.account.dto.AccountEditForm;
 import com.hospi.manage.features.account.dto.AccountView;
@@ -10,11 +11,8 @@ import com.hospi.manage.features.account.enums.Role;
 import com.hospi.manage.features.account.service.AccountService;
 import com.hospi.manage.features.account.validator.AccountValidator;
 import com.hospi.manage.features.audit.service.AuditService;
-import com.hospi.manage.core.security.session.AccountPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -81,7 +79,7 @@ public class AccountController {
         }
 
         accountService.createAccount(form);
-        auditService.log(null, currentStaffName(), "CREATE", "ACCOUNT", null,
+        auditService.log(null, SecurityUtils.currentStaffName(), "CREATE", "ACCOUNT", null,
                 "Created account: " + form.email());
         redirectAttributes.addFlashAttribute(Attributes.SUCCESS, "Account created. Login credentials sent via email.");
         return "redirect:/admin/accounts";
@@ -126,7 +124,7 @@ public class AccountController {
         }
 
         accountService.updateAccount(id, form);
-        auditService.log(null, currentStaffName(), "UPDATE", "ACCOUNT", id,
+        auditService.log(null, SecurityUtils.currentStaffName(), "UPDATE", "ACCOUNT", id,
                 "Updated account: " + form.email());
         redirectAttributes.addFlashAttribute(Attributes.SUCCESS, "Account updated successfully");
         return "redirect:/admin/accounts";
@@ -137,7 +135,7 @@ public class AccountController {
                                 RedirectAttributes redirectAttributes) {
         try {
             accountService.softDelete(id);
-            auditService.log(null, currentStaffName(), "DELETE", "ACCOUNT", id, "Deleted account");
+            auditService.log(null, SecurityUtils.currentStaffName(), "DELETE", "ACCOUNT", id, "Deleted account");
         } catch (IllegalStateException e) {
             redirectAttributes.addFlashAttribute(Attributes.ERROR, e.getMessage());
             return "redirect:/admin/accounts/" + id;
@@ -148,13 +146,5 @@ public class AccountController {
 
     private List<Role> availableRoles() {
         return Arrays.stream(Role.values()).filter(r -> r != Role.ADMIN).toList();
-    }
-
-    private String currentStaffName() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.getPrincipal() instanceof AccountPrincipal p) {
-            return p.getAccount().getFullName();
-        }
-        return "System";
     }
 }
