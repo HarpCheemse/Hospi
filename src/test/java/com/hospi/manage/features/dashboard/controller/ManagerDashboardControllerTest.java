@@ -61,20 +61,7 @@ class ManagerDashboardControllerTest {
         mockMvc.perform(get("/manager"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("manager/dashboard"))
-                .andExpect(model().attributeExists("checkInsToday"))
-                .andExpect(model().attributeExists("checkOutsToday"))
-                .andExpect(model().attributeExists("pendingCount"))
-                .andExpect(model().attributeExists("revenueThisMonth"))
-                .andExpect(model().attributeExists("revenueChange"))
-                .andExpect(model().attributeExists("totalRooms"))
-                .andExpect(model().attributeExists("occupiedRooms"))
-                .andExpect(model().attributeExists("vacantRooms"))
-                .andExpect(model().attributeExists("dirtyRooms"))
-                .andExpect(model().attributeExists("maintenanceRooms"))
-                .andExpect(model().attributeExists("recentReservations"))
-                .andExpect(model().attributeExists("hotelRating"))
-                .andExpect(model().attributeExists("hotelReviewCount"))
-                .andExpect(model().attributeExists("roomTypes"))
+                .andExpect(model().attributeExists("view"))
                 .andExpect(content().string(containsString("Manager Dashboard")))
                 .andExpect(content().string(containsString("0%")));
     }
@@ -107,8 +94,8 @@ class ManagerDashboardControllerTest {
         mockMvc.perform(get("/manager"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("manager/dashboard"))
+                .andExpect(model().attributeExists("view"))
                 .andExpect(content().string(containsString("100%")))
-                .andExpect(model().attributeExists("roomTypes"))
                 .andExpect(content().string(containsString("$1000")))
                 .andExpect(content().string(containsString("DELUXE DOUBLE")));
     }
