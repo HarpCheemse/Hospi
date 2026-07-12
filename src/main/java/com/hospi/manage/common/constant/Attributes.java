@@ -59,4 +59,7 @@ public class Attributes {
     /** Model attribute key for the selected year filter. */
     public static final String SELECTED_YEAR = "selectedYear";
 
+    /** Model attribute key for the selected month filter. */
+    public static final String SELECTED_MONTH = "selectedMonth";
+
 }

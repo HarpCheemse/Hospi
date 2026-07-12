@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 /** Controller for the manager revenue reports page. */
 @Controller
@@ -25,14 +27,28 @@ public class ManagerRevenueController {
         model.addAttribute(Attributes.ACTIVE_SIDEBAR, "REVENUES");
     }
 
-    /** Show the revenue reports page filtered by year. */
+    /** Show the revenue reports page filtered by year and optionally month. */
     @GetMapping
-    String revenue(@RequestParam(required = false) Integer year, Model model) {
+    String revenue(@RequestParam(required = false) Integer year,
+                   @RequestParam(required = false) Integer month,
+                   Model model) {
         int y = year != null ? year : LocalDate.now().getYear();
-        LocalDate start = LocalDate.of(y, 1, 1);
-        LocalDate end = LocalDate.of(y, 12, 31);
-        model.addAttribute(Attributes.VIEW, revenueService.getRevenueView(start, end, String.valueOf(y)));
+        LocalDate start, end;
+        String period;
+
+        if (month != null) {
+            start = LocalDate.of(y, month, 1);
+            end = start.withDayOfMonth(start.lengthOfMonth());
+            period = start.format(DateTimeFormatter.ofPattern("MMM yyyy", Locale.ENGLISH));
+        } else {
+            start = LocalDate.of(y, 1, 1);
+            end = LocalDate.of(y, 12, 31);
+            period = String.valueOf(y);
+        }
+
+        model.addAttribute(Attributes.VIEW, revenueService.getRevenueView(start, end, period));
         model.addAttribute(Attributes.SELECTED_YEAR, y);
+        model.addAttribute(Attributes.SELECTED_MONTH, month);
         return "manager/revenues";
     }
 }
