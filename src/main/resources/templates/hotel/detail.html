@@ -23,30 +23,29 @@
         <!-- HEADER -->
         <div class="staff-page-header">
 
-            <div>
-                <h1 class="staff-page-title"
-                    th:text="${hotel.name}">
-                    Hotel Name
-                </h1>
+            <div class="flex items-center gap-4">
 
-                <p class="page-description">
-                    View hotel profile, contact information, operations, and settings.
-                </p>
-            </div>
+                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    <img th:src="@{/assets/icons/building-2.svg}" alt="">
+                </div>
 
-            <div class="flex items-center gap-3">
+                <div>
+                    <h1 class="staff-page-title"
+                        th:text="${hotel.name}">
+                        Hotel Name
+                    </h1>
 
-                <a th:href="@{/manager/details/edit}"
-                   class="btn btn-primary">
-                    Edit Hotel
-                </a>
-
-                <a th:href="@{/manager}"
-                   class="btn btn-secondary">
-                    Back
-                </a>
+                    <p class="page-description">
+                        View hotel profile, contact information, operations, and settings.
+                    </p>
+                </div>
 
             </div>
+
+            <a th:href="@{/manager/details/edit}"
+               class="btn btn-primary">
+                Edit
+            </a>
 
         </div>
 
@@ -102,8 +101,13 @@
 
                 <!-- OVERVIEW -->
                 <section class="card">
-                    <div class="border-b border-border p-5">
-                        <h2 class="text-lg font-semibold">Overview</h2>
+                    <div class="border-b border-border px-6 py-5">
+                        <div class="flex items-center gap-3">
+                            <img th:src="@{/assets/icons/file-text.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                            <div><h2 class="text-lg font-semibold">Overview</h2>
+                                <p class="mt-1 text-sm text-muted-foreground">Hotel description and general information.</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="p-5">
@@ -116,8 +120,13 @@
 
                 <!-- FEATURES -->
                 <section class="card">
-                    <div class="border-b border-border p-5">
-                        <h2 class="text-lg font-semibold">Features & Amenities</h2>
+                    <div class="border-b border-border px-6 py-5">
+                        <div class="flex items-center gap-3">
+                            <img th:src="@{/assets/icons/list-todo.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                            <div><h2 class="text-lg font-semibold">Features &amp; Amenities</h2>
+                                <p class="mt-1 text-sm text-muted-foreground">Available services and facilities.</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="p-5 flex flex-wrap gap-3">
@@ -130,9 +139,13 @@
 
                 <!-- GALLERY -->
                 <section class="card">
-                    <div class="border-b border-border p-5">
-                        <h2 class="text-lg font-semibold">Gallery</h2>
-                        <p class="mt-1 text-sm text-muted-foreground">Additional hotel photos.</p>
+                    <div class="border-b border-border px-6 py-5">
+                        <div class="flex items-center gap-3">
+                            <img th:src="@{/assets/icons/layout-grid.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                            <div><h2 class="text-lg font-semibold">Gallery</h2>
+                                <p class="mt-1 text-sm text-muted-foreground">Additional hotel photos.</p>
+                            </div>
+                        </div>
                     </div>
                     <div class="flex flex-wrap gap-3 p-5">
                         <div th:each="pic, stat : ${hotel.pictures}"
@@ -156,8 +169,13 @@
 
                 <!-- CONTACT -->
                 <section class="card">
-                    <div class="border-b border-border p-5">
-                        <h2 class="text-lg font-semibold">Contact</h2>
+                    <div class="border-b border-border px-6 py-5">
+                        <div class="flex items-center gap-3">
+                            <img th:src="@{/assets/icons/phone.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                            <div><h2 class="text-lg font-semibold">Contact</h2>
+                                <p class="mt-1 text-sm text-muted-foreground">Contact details visible to guests.</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="flex flex-col gap-4 p-5 text-sm">
@@ -182,8 +200,13 @@
 
                 <!-- OPERATIONS -->
                 <section class="card">
-                    <div class="border-b border-border p-5">
-                        <h2 class="text-lg font-semibold">Operations</h2>
+                    <div class="border-b border-border px-6 py-5">
+                        <div class="flex items-center gap-3">
+                            <img th:src="@{/assets/icons/clock.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                            <div><h2 class="text-lg font-semibold">Operations</h2>
+                                <p class="mt-1 text-sm text-muted-foreground">Operating hours and floor count.</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="flex flex-col gap-4 p-5 text-sm">
@@ -217,8 +240,13 @@
 
                 <!-- RATINGS -->
                 <section class="card">
-                    <div class="border-b border-border p-5">
-                        <h2 class="text-lg font-semibold">Ratings</h2>
+                    <div class="border-b border-border px-6 py-5">
+                        <div class="flex items-center gap-3">
+                            <img th:src="@{/assets/icons/circle-dollar-sign.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                            <div><h2 class="text-lg font-semibold">Ratings</h2>
+                                <p class="mt-1 text-sm text-muted-foreground">Guest satisfaction scores.</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="p-5 text-center">
