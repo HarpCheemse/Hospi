@@ -12,6 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.List;
 
 /** Business logic for staff account management (create, update, list). */
@@ -46,21 +48,20 @@ public class AccountService {
                         account.getRole())).toList();
     }
 
-    /** Create a new staff account with a hashed password. */
+    /** Create a new staff account with an auto-generated password. */
     @Transactional
     public void createAccount(AccountCreateForm form) {
         Account account = new Account();
-
         account.setFullName(form.fullName());
         account.setEmail(form.email());
         account.setPhone(form.phone());
 
-        String passwordHash = passwordEncoder.encode(form.password());
-
-        account.setPasswordHash(passwordHash);
+        byte[] randomBytes = new byte[12];
+        new SecureRandom().nextBytes(randomBytes);
+        String rawPassword = Base64.getEncoder().encodeToString(randomBytes);
+        account.setPasswordHash(passwordEncoder.encode(rawPassword));
 
         account.setRole(form.role());
-
         accountRepository.save(account);
     }
 
