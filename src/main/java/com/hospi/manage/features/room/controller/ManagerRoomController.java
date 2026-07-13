@@ -25,7 +25,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/manager/rooms")
 @RequiredArgsConstructor
-public class RoomController {
+public class ManagerRoomController {
     private final HotelService hotelService;
     private final RoomTypeService roomTypeService;
     private final RoomService roomService;

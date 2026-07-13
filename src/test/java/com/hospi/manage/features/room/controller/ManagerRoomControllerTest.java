@@ -31,9 +31,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(RoomController.class)
+@WebMvcTest(ManagerRoomController.class)
 @AutoConfigureMockMvc(addFilters = false)
-class RoomControllerTest {
+class ManagerRoomControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
