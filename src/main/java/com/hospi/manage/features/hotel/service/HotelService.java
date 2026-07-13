@@ -8,12 +8,15 @@ import com.hospi.manage.features.hotel.entity.Hotel;
 import com.hospi.manage.features.hotel.entity.HotelPicture;
 import com.hospi.manage.features.hotel.repository.HotelPictureRepository;
 import com.hospi.manage.features.hotel.repository.HotelRepository;
+import com.hospi.manage.features.reservation.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Service
@@ -22,12 +25,23 @@ public class HotelService {
     private final HotelRepository hotelRepository;
     private final HotelPictureRepository hotelPictureRepository;
     private final ImageCompressionService imageCompressionService;
+    private final ReviewRepository reviewRepository;
 
     /** Retrieve the single hotel entity. */
     public Hotel find() {
         return hotelRepository.findById(HotelConstants.HOTEL_ID).orElseThrow(
                 () -> new ResourceNotFoundException("Hotel")
         );
+    }
+
+    /** Recalculate average rating and review count from all reviews and persist to the hotel. */
+    @Transactional
+    public void recalculateRating() {
+        Hotel hotel = find();
+        BigDecimal avg = reviewRepository.findAverageRating().orElse(BigDecimal.ZERO);
+        hotel.setAverageRating(avg.setScale(2, RoundingMode.HALF_UP));
+        hotel.setReviewCount(reviewRepository.countReviews());
+        hotelRepository.save(hotel);
     }
 
     /** Return the hotel edit form populated with current values. */

@@ -1,6 +1,7 @@
 package com.hospi.manage.features.guest.service;
 
 import com.hospi.manage.common.exception.ResourceNotFoundException;
+import com.hospi.manage.features.hotel.service.HotelService;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.Review;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
@@ -22,6 +23,7 @@ public class BookingTrackerService {
 
     private final ReservationRepository reservationRepository;
     private final ReviewRepository reviewRepository;
+    private final HotelService hotelService;
 
     /** Find a reservation by guest email and confirmation code. */
     @Transactional(readOnly = true)
@@ -30,10 +32,16 @@ public class BookingTrackerService {
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
     }
 
-    /** Resolve multiple reservations by their confirmation codes. */
+    /** Resolve multiple reservations by email:code pairs. */
     @Transactional(readOnly = true)
-    public List<Reservation> resolveByCodes(Set<String> codes) {
-        return reservationRepository.findByConfirmationCodeIn(codes);
+    public List<Reservation> resolveByCodes(Set<String> entries) {
+        return entries.stream()
+                .map(e -> e.split(":", 2))
+                .filter(p -> p.length == 2)
+                .map(p -> reservationRepository.findByGuestEmailAndConfirmationCode(p[0], p[1]))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
     }
 
     /** Build a map of reservation ID to existing review for a list of reservations. */
@@ -69,11 +77,13 @@ public class BookingTrackerService {
             throw new IllegalStateException("Reviews are only available for completed stays.");
         }
 
-        Review review = new Review();
-        review.setReservation(reservation);
-        review.setRating(rating);
-        return reviewRepository.save(review);
-    }
+    Review review = new Review();
+    review.setReservation(reservation);
+    review.setRating(rating);
+    review = reviewRepository.save(review);
+    hotelService.recalculateRating();
+    return review;
+}
 
     private static String pillClass(ReservationStatus status) {
         if (status == CHECKED_OUT || status == CHECKED_IN) return "pill-success";

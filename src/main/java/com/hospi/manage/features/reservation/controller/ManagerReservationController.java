@@ -3,6 +3,7 @@ package com.hospi.manage.features.reservation.controller;
 import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.features.payment.service.PaymentService;
 import com.hospi.manage.features.reservation.dto.response.ActiveBookingsView;
+import com.hospi.manage.features.reservation.dto.response.ReservationSummaryView;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.mapper.ManagerReservationMapper;
@@ -118,7 +119,7 @@ public class ManagerReservationController {
     @GetMapping("/{id}")
     String detail(@PathVariable Long id, Model model) {
         var reservation = reservationService.findById(id);
-        model.addAttribute(Attributes.RESERVATION, reservation);
+        model.addAttribute(Attributes.RESERVATION, ReservationSummaryView.from(reservation));
         model.addAttribute(Attributes.GUESTS, stayingGuestService.getGuests(id));
         model.addAttribute(Attributes.PAYMENTS, paymentService.getPaymentsByReservationId(id));
         model.addAttribute(Attributes.NIGHTS, reservation.getCheckInAt() != null && reservation.getCheckOutAt() != null
