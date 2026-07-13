@@ -40,7 +40,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(ReceptionistReservationController.class)
+@WebMvcTest({ReceptionistBookingController.class, ReceptionistStayController.class})
 @AutoConfigureMockMvc(addFilters = false)
 class ReceptionistReservationControllerTest {
 
@@ -119,7 +119,7 @@ class ReceptionistReservationControllerTest {
                 List.of(reservation), PageRequest.of(0, 10), 1);
         when(reservationService.findFiltered(anyList(), any(), any(), any())).thenReturn(page);
 
-        mockMvc.perform(get("/receptionist/reservations"))
+        mockMvc.perform(get("/receptionist/bookings"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("receptionist/reservation/active"))
                 .andExpect(model().attributeExists(VIEW))
@@ -135,7 +135,7 @@ class ReceptionistReservationControllerTest {
                 List.of(reservation), PageRequest.of(0, 10), 1);
         when(reservationService.findCheckedInFiltered(any(), any())).thenReturn(page);
 
-        mockMvc.perform(get("/receptionist/reservations/stays"))
+        mockMvc.perform(get("/receptionist/stays"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("receptionist/reservation/stays"))
                 .andExpect(model().attributeExists(VIEW))
@@ -146,7 +146,7 @@ class ReceptionistReservationControllerTest {
 
     @Test
     void create_shouldRender() throws Exception {
-        mockMvc.perform(get("/receptionist/reservations/create"))
+        mockMvc.perform(get("/receptionist/bookings/create"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("receptionist/reservation/create"))
                 .andExpect(model().attributeExists(FORM));
@@ -161,7 +161,7 @@ class ReceptionistReservationControllerTest {
         when(roomAvailabilityService.getAvailability(any(), any()))
                 .thenReturn(List.of(availability));
 
-        mockMvc.perform(get("/receptionist/reservations/create/details")
+        mockMvc.perform(get("/receptionist/bookings/create/details")
                         .param("checkInAt", "2026-07-01")
                         .param("checkOutAt", "2026-07-05"))
                 .andExpect(status().isOk())
@@ -172,9 +172,9 @@ class ReceptionistReservationControllerTest {
 
     @Test
     void createDetails_shouldRedirect_whenDatesMissing() throws Exception {
-        mockMvc.perform(get("/receptionist/reservations/create/details"))
+        mockMvc.perform(get("/receptionist/bookings/create/details"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/receptionist/reservations/create"));
+                .andExpect(redirectedUrl("/receptionist/bookings/create"));
     }
 
     // ========== GET /{id}/manage ==========
@@ -184,7 +184,7 @@ class ReceptionistReservationControllerTest {
         var reservation = createReservation(ReservationStatus.CHECKED_IN);
         mockManageView(reservation);
 
-        mockMvc.perform(get("/receptionist/reservations/1/manage"))
+        mockMvc.perform(get("/receptionist/stays/1/manage"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("receptionist/reservation/manage"))
                 .andExpect(model().attributeExists(VIEW, FORM))
@@ -196,9 +196,9 @@ class ReceptionistReservationControllerTest {
         var reservation = createReservation(ReservationStatus.CONFIRMED);
         when(reservationService.findById(1L)).thenReturn(reservation);
 
-        mockMvc.perform(get("/receptionist/reservations/1/manage"))
+        mockMvc.perform(get("/receptionist/stays/1/manage"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/receptionist/reservations/stays"));
+                .andExpect(redirectedUrl("/receptionist/stays"));
     }
 
     // ========== POST /create (searchDates) ==========
@@ -207,17 +207,17 @@ class ReceptionistReservationControllerTest {
     void searchDates_shouldRedirectToDetails_whenValid() throws Exception {
         doNothing().when(dateSearchValidator).validate(any(), any());
 
-        mockMvc.perform(post("/receptionist/reservations/create")
+        mockMvc.perform(post("/receptionist/bookings/create")
                         .param("checkInAt", "2026-07-01")
                         .param("checkOutAt", "2026-07-05"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(
-                        "/receptionist/reservations/create/details?checkInAt=2026-07-01&checkOutAt=2026-07-05"));
+                        "/receptionist/bookings/create/details?checkInAt=2026-07-01&checkOutAt=2026-07-05"));
     }
 
     @Test
     void searchDates_shouldReRender_whenValidationFails() throws Exception {
-        mockMvc.perform(post("/receptionist/reservations/create")
+        mockMvc.perform(post("/receptionist/bookings/create")
                         .param("checkInAt", "")
                         .param("checkOutAt", ""))
                 .andExpect(status().isOk())
@@ -231,7 +231,7 @@ class ReceptionistReservationControllerTest {
         doNothing().when(offlineBookingFormValidator).validate(any(), any());
         when(reservationService.createReservation(any())).thenReturn(new Reservation());
 
-        mockMvc.perform(post("/receptionist/reservations/create/details")
+        mockMvc.perform(post("/receptionist/bookings/create/details")
                         .param("checkInAt", "2026-07-01")
                         .param("checkOutAt", "2026-07-05")
                         .param("guestName", "John Doe")
@@ -240,7 +240,7 @@ class ReceptionistReservationControllerTest {
                         .param("guestDateOfBirth", "1990-01-01")
                         .param("guestNationality", "US"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/receptionist/reservations"))
+                .andExpect(redirectedUrl("/receptionist/bookings"))
                 .andExpect(flash().attributeExists(SUCCESS));
     }
 
@@ -251,7 +251,7 @@ class ReceptionistReservationControllerTest {
         when(roomAvailabilityService.getAvailability(any(), any()))
                 .thenReturn(List.of(availability));
 
-        mockMvc.perform(post("/receptionist/reservations/create/details")
+        mockMvc.perform(post("/receptionist/bookings/create/details")
                         .param("checkInAt", "2026-07-01")
                         .param("checkOutAt", "2026-07-05")
                         .param("guestName", "")
@@ -271,12 +271,12 @@ class ReceptionistReservationControllerTest {
     void addGuest_shouldRedirect_whenValid() throws Exception {
         when(stayingGuestService.addGuest(anyLong(), any())).thenReturn(null);
 
-        mockMvc.perform(post("/receptionist/reservations/1/manage/guests")
+        mockMvc.perform(post("/receptionist/stays/1/manage/guests")
                         .param("guestName", "Jane Doe")
                         .param("dateOfBirth", "1990-01-01")
                         .param("nationality", "US"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/receptionist/reservations/1/manage"))
+                .andExpect(redirectedUrl("/receptionist/stays/1/manage"))
                 .andExpect(flash().attributeExists(SUCCESS));
 
         verify(stayingGuestService).addGuest(eq(1L), any(StayingGuestForm.class));
@@ -287,7 +287,7 @@ class ReceptionistReservationControllerTest {
         var reservation = createReservation(ReservationStatus.CHECKED_IN);
         mockManageView(reservation);
 
-        mockMvc.perform(post("/receptionist/reservations/1/manage/guests")
+        mockMvc.perform(post("/receptionist/stays/1/manage/guests")
                         .param("guestName", "")
                         .param("dateOfBirth", "")
                         .param("nationality", ""))
@@ -299,12 +299,12 @@ class ReceptionistReservationControllerTest {
 
     @Test
     void editGuest_shouldRedirect_whenValid() throws Exception {
-        mockMvc.perform(post("/receptionist/reservations/1/manage/guests/5")
+        mockMvc.perform(post("/receptionist/stays/1/manage/guests/5")
                         .param("guestName", "Jane Doe")
                         .param("dateOfBirth", "1990-01-01")
                         .param("nationality", "US"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/receptionist/reservations/1/manage"))
+                .andExpect(redirectedUrl("/receptionist/stays/1/manage"))
                 .andExpect(flash().attributeExists(SUCCESS));
 
         verify(stayingGuestService).updateGuest(eq(1L), eq(5L), any(StayingGuestForm.class));
@@ -315,7 +315,7 @@ class ReceptionistReservationControllerTest {
         var reservation = createReservation(ReservationStatus.CHECKED_IN);
         mockManageView(reservation);
 
-        mockMvc.perform(post("/receptionist/reservations/1/manage/guests/5")
+        mockMvc.perform(post("/receptionist/stays/1/manage/guests/5")
                         .param("guestName", "")
                         .param("dateOfBirth", "")
                         .param("nationality", ""))
@@ -329,9 +329,9 @@ class ReceptionistReservationControllerTest {
     void deleteGuest_shouldRedirect_whenValid() throws Exception {
         doNothing().when(stayingGuestService).deleteGuest(1L, 5L);
 
-        mockMvc.perform(post("/receptionist/reservations/1/manage/guests/5/delete"))
+        mockMvc.perform(post("/receptionist/stays/1/manage/guests/5/delete"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/receptionist/reservations/1/manage"))
+                .andExpect(redirectedUrl("/receptionist/stays/1/manage"))
                 .andExpect(flash().attributeExists(SUCCESS));
 
         verify(stayingGuestService).deleteGuest(1L, 5L);
@@ -343,10 +343,10 @@ class ReceptionistReservationControllerTest {
     void assignRoom_shouldRedirect_whenValid() throws Exception {
         when(roomAssignmentService.assignRoom(1L, 1L)).thenReturn(null);
 
-        mockMvc.perform(post("/receptionist/reservations/1/manage/rooms")
+        mockMvc.perform(post("/receptionist/stays/1/manage/rooms")
                         .param("roomId", "1"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/receptionist/reservations/1/manage"))
+                .andExpect(redirectedUrl("/receptionist/stays/1/manage"))
                 .andExpect(flash().attributeExists(SUCCESS));
     }
 
@@ -355,7 +355,7 @@ class ReceptionistReservationControllerTest {
         var reservation = createReservation(ReservationStatus.CHECKED_IN);
         mockManageView(reservation);
 
-        mockMvc.perform(post("/receptionist/reservations/1/manage/rooms"))
+        mockMvc.perform(post("/receptionist/stays/1/manage/rooms"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("receptionist/reservation/manage"));
     }
@@ -365,10 +365,10 @@ class ReceptionistReservationControllerTest {
         when(roomAssignmentService.assignRoom(anyLong(), anyLong()))
                 .thenThrow(new IllegalStateException("Room is not vacant"));
 
-        mockMvc.perform(post("/receptionist/reservations/1/manage/rooms")
+        mockMvc.perform(post("/receptionist/stays/1/manage/rooms")
                         .param("roomId", "1"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/receptionist/reservations/1/manage"))
+                .andExpect(redirectedUrl("/receptionist/stays/1/manage"))
                 .andExpect(flash().attributeExists(ERROR));
     }
 
@@ -378,9 +378,9 @@ class ReceptionistReservationControllerTest {
     void removeRoom_shouldRedirect_whenValid() throws Exception {
         doNothing().when(roomAssignmentService).removeAssignment(1L, 2L);
 
-        mockMvc.perform(post("/receptionist/reservations/1/manage/rooms/2/remove"))
+        mockMvc.perform(post("/receptionist/stays/1/manage/rooms/2/remove"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/receptionist/reservations/1/manage"))
+                .andExpect(redirectedUrl("/receptionist/stays/1/manage"))
                 .andExpect(flash().attributeExists(SUCCESS));
 
         verify(roomAssignmentService).removeAssignment(1L, 2L);
@@ -392,10 +392,10 @@ class ReceptionistReservationControllerTest {
     void extendStay_shouldRedirect_whenValid() throws Exception {
         when(reservationService.extendStay(1L, 2)).thenReturn(new Reservation());
 
-        mockMvc.perform(post("/receptionist/reservations/1/manage/extend")
+        mockMvc.perform(post("/receptionist/stays/1/manage/extend")
                         .param("extraDays", "2"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/receptionist/reservations/1/manage"))
+                .andExpect(redirectedUrl("/receptionist/stays/1/manage"))
                 .andExpect(flash().attributeExists(SUCCESS));
     }
 
@@ -404,7 +404,7 @@ class ReceptionistReservationControllerTest {
         var reservation = createReservation(ReservationStatus.CHECKED_IN);
         mockManageView(reservation);
 
-        mockMvc.perform(post("/receptionist/reservations/1/manage/extend"))
+        mockMvc.perform(post("/receptionist/stays/1/manage/extend"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("receptionist/reservation/manage"));
     }
@@ -414,10 +414,10 @@ class ReceptionistReservationControllerTest {
         when(reservationService.extendStay(anyLong(), anyInt()))
                 .thenThrow(new IllegalStateException("Only checked-in reservations can be extended"));
 
-        mockMvc.perform(post("/receptionist/reservations/1/manage/extend")
+        mockMvc.perform(post("/receptionist/stays/1/manage/extend")
                         .param("extraDays", "2"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/receptionist/reservations/1/manage"))
+                .andExpect(redirectedUrl("/receptionist/stays/1/manage"))
                 .andExpect(flash().attributeExists(ERROR));
     }
 }
