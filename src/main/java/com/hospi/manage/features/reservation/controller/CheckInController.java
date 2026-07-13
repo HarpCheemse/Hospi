@@ -2,14 +2,12 @@ package com.hospi.manage.features.reservation.controller;
 
 import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.core.security.session.AccountPrincipal;
+import com.hospi.manage.features.audit.service.AuditService;
 import com.hospi.manage.features.reservation.dto.request.CheckInForm;
-import com.hospi.manage.features.reservation.dto.response.CheckInView;
-import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -24,39 +22,18 @@ import java.time.LocalDate;
 public class CheckInController {
 
     private final ReservationService reservationService;
+    private final AuditService auditService;
 
-    /**
-     * Set the active sidebar highlight for this feature.
-     */
     @ModelAttribute
-    void addCommonAttributes(Model model) {
-        model.addAttribute(Attributes.ACTIVE_SIDEBAR,
-                "RESERVATIONS");
+    void addCommonAttributes(org.springframework.ui.Model model) {
+        model.addAttribute(Attributes.ACTIVE_SIDEBAR, "ACTIVE_BOOKINGS");
     }
 
-    /**
-     * Show the check-in form for a confirmed reservation. Redirect to the
-     * reservation list if the reservation is not in CONFIRMED status.
-     */
     @GetMapping("/{id}/checkin")
-    String checkInForm(@PathVariable Long id, Model model) {
-        var reservation = reservationService.findById(id);
-
-        if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
-            return "redirect:/receptionist/reservations";
-        }
-
-        model.addAttribute(Attributes.VIEW,
-                CheckInView.from(reservation));
-        model.addAttribute(Attributes.FORM,
-                new CheckInForm(null));
-        return "receptionist/reservation/checkin";
+    String checkInForm(@PathVariable Long id) {
+        return "redirect:/receptionist/bookings/" + id;
     }
 
-    /**
-     * Process the check-in. Validate the booking code, update the reservation
-     * status to CHECKED_IN, and redirect to the reservation list.
-     */
     @PostMapping("/{id}/checkin")
     String confirmCheckIn(@PathVariable Long id,
                           @ModelAttribute(Attributes.FORM) CheckInForm form,
@@ -67,6 +44,8 @@ public class CheckInController {
                     LocalDate.now(),
                     form.bookingCode(),
                     principal.getUsername());
+            auditService.log(principal.getId(), principal.getUsername(), "CHECKIN", "RESERVATION", id,
+                    "Guest checked in");
             redirect.addFlashAttribute(Attributes.SUCCESS,
                     "Guest checked in successfully.");
         } catch (IllegalStateException | IllegalArgumentException e) {
@@ -74,6 +53,6 @@ public class CheckInController {
                     e.getMessage());
         }
 
-        return "redirect:/receptionist/reservations";
+        return "redirect:/receptionist/bookings";
     }
 }

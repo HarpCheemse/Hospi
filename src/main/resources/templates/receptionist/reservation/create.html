@@ -33,14 +33,14 @@
 
         </div>
 
-        <a th:href="@{/receptionist/reservations}"
-           class="btn btn-secondary btn-lg">
-            Back to Reservations
+        <a th:href="@{/receptionist/bookings}"
+           class="btn btn-secondary">
+            Back
         </a>
 
     </header>
 
-    <form th:action="@{/receptionist/reservations/create}"
+    <form th:action="@{/receptionist/bookings/create}"
           th:object="${form}"
           method="post"
           class="flex flex-col gap-6"

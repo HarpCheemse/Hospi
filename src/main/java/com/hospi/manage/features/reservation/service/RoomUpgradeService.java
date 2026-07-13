@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 /** Service for room swaps — change one unit of a room type to a higher-tier type. */
 @Service
@@ -28,6 +29,22 @@ public class RoomUpgradeService {
     private final RoomTypeRepository roomTypeRepository;
     private final RoomRepository roomRepository;
     private final RoomAssignmentRepository roomAssignmentRepository;
+
+    /** Return room types available for upgrade from the given current type. */
+    public List<RoomType> getUpgradeOptions(Reservation reservation, Long currentRoomTypeId) {
+        var detail = reservation.getDetails().stream()
+                .filter(d -> d.getRoomType().getId().equals(currentRoomTypeId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Room type not found on reservation"));
+
+        return roomTypeRepository.findByActiveTrue().stream()
+                .filter(rt -> rt.getBasePrice().compareTo(detail.getBasePrice()) > 0)
+                .filter(rt -> !rt.getId().equals(currentRoomTypeId))
+                .filter(rt -> !roomRepository
+                        .findByRoomTypeIdAndOccupancyStatusAndActiveTrue(rt.getId(), OccupancyStatus.VACANT)
+                        .isEmpty())
+                .toList();
+    }
 
     /** Swap one unit from currentRoomType to newRoomType. Splits the detail if roomCount > 1. */
     @Transactional

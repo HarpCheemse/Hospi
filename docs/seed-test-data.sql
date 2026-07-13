@@ -190,40 +190,40 @@ VALUES ('Nguyen Van An', 'an.nguyen@email.com', '+84 912 100 001', '1985-03-12',
         CURRENT_DATE - 2, CURRENT_DATE + 2, 'CHECKED_IN', 'OFFLINE', NULL,
         0, CURRENT_TIMESTAMP - INTERVAL '2 days', 'Rita Receptionist', NOW(), NOW()),
        ('John Smith', 'john.smith@email.com', '+1 555 010 003', '1982-11-05', 'British',
-        CURRENT_DATE - 1, CURRENT_DATE + 3, 'CHECKED_IN', 'ONLINE', 'HSP-A7K2M9',
+        CURRENT_DATE - 1, CURRENT_DATE + 3, 'CHECKED_IN', 'ONLINE', 'HSP-000000',
         0, CURRENT_TIMESTAMP - INTERVAL '1 day', 'Rita Receptionist', NOW(), NOW()),
        ('Tanaka Yuki', 'yuki.tanaka@email.com', '+81 90 1234 0004', '1988-02-14', 'Japanese',
-        CURRENT_DATE - 4, CURRENT_DATE + 0, 'CHECKED_IN', 'ONLINE', 'HSP-B3R8N1',
+        CURRENT_DATE - 4, CURRENT_DATE + 0, 'CHECKED_IN', 'ONLINE', 'HSP-000000',
         0, CURRENT_TIMESTAMP - INTERVAL '4 days', 'Rita Receptionist', NOW(), NOW()),
        ('Pham Minh Chau', 'chau.pham@email.com', '+84 912 100 005', '1992-09-30', 'Vietnamese',
         CURRENT_DATE - 5, CURRENT_DATE - 1, 'CHECKED_IN', 'OFFLINE', NULL,
         0, CURRENT_TIMESTAMP - INTERVAL '5 days', 'Leo Leader', NOW(), NOW()),
        ('Emily Johnson', 'emily.j@email.com', '+1 555 010 006', '1995-06-18', 'American',
-        CURRENT_DATE - 2, CURRENT_DATE + 4, 'CHECKED_IN', 'ONLINE', 'HSP-C5X1P7',
+        CURRENT_DATE - 2, CURRENT_DATE + 4, 'CHECKED_IN', 'ONLINE', 'HSP-000000',
         0, CURRENT_TIMESTAMP - INTERVAL '2 days', 'Rita Receptionist', NOW(), NOW()),
        ('Le Hoang Nam', 'nam.le@email.com', '+84 912 100 007', '1980-01-22', 'Vietnamese',
         CURRENT_DATE - 6, CURRENT_DATE - 2, 'CHECKED_IN', 'OFFLINE', NULL,
         0, CURRENT_TIMESTAMP - INTERVAL '6 days', 'Rita Receptionist', NOW(), NOW()),
        ('Maria Garcia', 'maria.garcia@email.com', '+34 612 345 008', '1987-08-09', 'Spanish',
-        CURRENT_DATE - 3, CURRENT_DATE + 1, 'CHECKED_IN', 'ONLINE', 'HSP-D9W4K2',
+        CURRENT_DATE - 3, CURRENT_DATE + 1, 'CHECKED_IN', 'ONLINE', 'HSP-000000',
         0, CURRENT_TIMESTAMP - INTERVAL '3 days', 'Rita Receptionist', NOW(), NOW()),
        ('Doan Thi Lan', 'lan.doan@email.com', '+84 912 100 009', '1993-12-01', 'Vietnamese',
         CURRENT_DATE - 7, CURRENT_DATE - 3, 'CHECKED_IN', 'OFFLINE', NULL,
         0, CURRENT_TIMESTAMP - INTERVAL '7 days', 'Rita Receptionist', NOW(), NOW()),
        ('Chen Wei', 'wei.chen@email.com', '+86 138 0011 010', '1984-04-17', 'Chinese',
-        CURRENT_DATE - 1, CURRENT_DATE + 5, 'CHECKED_IN', 'ONLINE', 'HSP-E2T5V8',
+        CURRENT_DATE - 1, CURRENT_DATE + 5, 'CHECKED_IN', 'ONLINE', 'HSP-000000',
         0, CURRENT_TIMESTAMP - INTERVAL '1 day', 'Rita Receptionist', NOW(), NOW()),
        ('Bui Thanh Tung', 'tung.bui@email.com', '+84 912 100 011', '1991-05-28', 'Vietnamese',
         CURRENT_DATE - 8, CURRENT_DATE - 4, 'CHECKED_IN', 'OFFLINE', NULL,
         0, CURRENT_TIMESTAMP - INTERVAL '8 days', 'Leo Leader', NOW(), NOW()),
        ('Sarah Williams', 'sarah.w@email.com', '+44 7700 900012', '1979-10-03', 'British',
-        CURRENT_DATE - 4, CURRENT_DATE + 0, 'CHECKED_IN', 'ONLINE', 'HSP-F1U3C9',
+        CURRENT_DATE - 4, CURRENT_DATE + 0, 'CHECKED_IN', 'ONLINE', 'HSP-000000',
         0, CURRENT_TIMESTAMP - INTERVAL '4 days', 'Rita Receptionist', NOW(), NOW()),
        ('Hoang Minh Duc', 'duc.hoang@email.com', '+84 912 100 013', '1986-07-15', 'Vietnamese',
         CURRENT_DATE - 9, CURRENT_DATE - 5, 'CHECKED_IN', 'OFFLINE', NULL,
         0, CURRENT_TIMESTAMP - INTERVAL '9 days', 'Rita Receptionist', NOW(), NOW()),
        ('Kim Soo-Jin', 'soojin.kim@email.com', '+82 10 8765 0014', '1994-03-22', 'Korean',
-        CURRENT_DATE - 5, CURRENT_DATE - 1, 'CHECKED_IN', 'ONLINE', 'HSP-G4H7W3',
+        CURRENT_DATE - 5, CURRENT_DATE - 1, 'CHECKED_IN', 'ONLINE', 'HSP-000000',
         0, CURRENT_TIMESTAMP - INTERVAL '5 days', 'Rita Receptionist', NOW(), NOW()),
        ('Vu Thi Hong', 'hong.vu@email.com', '+84 912 100 015', '1983-11-08', 'Vietnamese',
         CURRENT_DATE - 2, CURRENT_DATE + 2, 'CHECKED_IN', 'OFFLINE', NULL,
@@ -234,35 +234,35 @@ INSERT INTO reservations (guest_name, guest_email, guest_phone, guest_date_of_bi
                           guest_nationality, check_in_at, check_out_at, status, source, confirmation_code,
                           total_price, created_at, updated_at)
 VALUES ('David Brown', 'david.b@email.com', '+1 555 010 101', '1975-08-20', 'American',
-        CURRENT_DATE + 1, CURRENT_DATE + 4, 'CONFIRMED', 'ONLINE', 'HSP-H8J1R5', 0, NOW(), NOW()),
+        CURRENT_DATE + 0, CURRENT_DATE + 4, 'CONFIRMED', 'ONLINE', 'HSP-000000', 0, NOW(), NOW()),
        ('Nguyen Thi Mai', 'mai.nguyen@email.com', '+84 912 100 102', '1989-12-12', 'Vietnamese',
         CURRENT_DATE + 0, CURRENT_DATE + 3, 'CONFIRMED', 'OFFLINE', NULL, 0, NOW(), NOW()),
        ('Alexandre Dupont', 'alex.d@email.com', '+33 6 12 34 103', '1981-04-05', 'French',
-        CURRENT_DATE + 2, CURRENT_DATE + 7, 'CONFIRMED', 'ONLINE', 'HSP-J9K3T7', 0, NOW(), NOW()),
+        CURRENT_DATE + 2, CURRENT_DATE + 7, 'CONFIRMED', 'ONLINE', 'HSP-000000', 0, NOW(), NOW()),
        ('Ly Thi Ca', 'ca.ly@email.com', '+84 912 100 104', '1996-09-19', 'Vietnamese',
         CURRENT_DATE + 0, CURRENT_DATE + 2, 'CONFIRMED', 'OFFLINE', NULL, 0, NOW(), NOW()),
        ('James Wilson', 'james.w@email.com', '+61 400 123 105', '1970-02-28', 'Australian',
-        CURRENT_DATE + 3, CURRENT_DATE + 6, 'CONFIRMED', 'ONLINE', 'HSP-K1L5M9', 0, NOW(), NOW()),
+        CURRENT_DATE + 3, CURRENT_DATE + 6, 'CONFIRMED', 'ONLINE', 'HSP-000000', 0, NOW(), NOW()),
        ('Truong Van Hieu', 'hieu.truong@email.com', '+84 912 100 106', '1987-10-10', 'Vietnamese',
         CURRENT_DATE + 1, CURRENT_DATE + 5, 'CONFIRMED', 'OFFLINE', NULL, 0, NOW(), NOW()),
        ('Lisa Anderson', 'lisa.a@email.com', '+46 70 123 0107', '1992-06-15', 'Swedish',
-        CURRENT_DATE + 4, CURRENT_DATE + 8, 'CONFIRMED', 'ONLINE', 'HSP-L2M3N8', 0, NOW(), NOW()),
+        CURRENT_DATE + 4, CURRENT_DATE + 8, 'CONFIRMED', 'ONLINE', 'HSP-000000', 0, NOW(), NOW()),
        ('Dang Hoang Phuc', 'phuc.dang@email.com', '+84 912 100 108', '1984-01-30', 'Vietnamese',
         CURRENT_DATE + 0, CURRENT_DATE + 4, 'CONFIRMED', 'OFFLINE', NULL, 0, NOW(), NOW()),
        ('Rachel Green', 'rachel.g@email.com', '+1 555 010 109', '1993-05-22', 'American',
-        CURRENT_DATE + 5, CURRENT_DATE + 7, 'CONFIRMED', 'ONLINE', 'HSP-M3N4P9', 0, NOW(), NOW()),
+        CURRENT_DATE + 5, CURRENT_DATE + 7, 'CONFIRMED', 'ONLINE', 'HSP-000000', 0, NOW(), NOW()),
        ('Ngo Bao Khanh', 'khanh.ngo@email.com', '+84 912 100 110', '1990-08-14', 'Vietnamese',
         CURRENT_DATE + 2, CURRENT_DATE + 6, 'CONFIRMED', 'OFFLINE', NULL, 0, NOW(), NOW()),
        ('Peter Mueller', 'peter.m@email.com', '+49 170 123 111', '1978-11-03', 'German',
-        CURRENT_DATE + 6, CURRENT_DATE + 10, 'CONFIRMED', 'ONLINE', 'HSP-N4O5Q1', 0, NOW(), NOW()),
+        CURRENT_DATE + 6, CURRENT_DATE + 10, 'CONFIRMED', 'ONLINE', 'HSP-000000', 0, NOW(), NOW()),
        ('Phung Thi Hue', 'hue.phung@email.com', '+84 912 100 112', '1995-02-07', 'Vietnamese',
         CURRENT_DATE + 0, CURRENT_DATE + 3, 'CONFIRMED', 'OFFLINE', NULL, 0, NOW(), NOW()),
        ('Sofia Rossi', 'sofia.r@email.com', '+39 320 123 113', '1986-07-19', 'Italian',
-        CURRENT_DATE + 3, CURRENT_DATE + 8, 'CONFIRMED', 'ONLINE', 'HSP-O5P6R2', 0, NOW(), NOW()),
+        CURRENT_DATE + 3, CURRENT_DATE + 8, 'CONFIRMED', 'ONLINE', 'HSP-000000', 0, NOW(), NOW()),
        ('Ha Anh Tuan', 'tuan.ha@email.com', '+84 912 100 114', '1982-12-25', 'Vietnamese',
         CURRENT_DATE + 1, CURRENT_DATE + 2, 'CONFIRMED', 'OFFLINE', NULL, 0, NOW(), NOW()),
        ('Olivia Taylor', 'olivia.t@email.com', '+44 7700 900115', '1991-04-11', 'British',
-        CURRENT_DATE + 7, CURRENT_DATE + 11, 'CONFIRMED', 'ONLINE', 'HSP-P6Q7S3', 0, NOW(), NOW());
+        CURRENT_DATE + 7, CURRENT_DATE + 11, 'CONFIRMED', 'ONLINE', 'HSP-000000', 0, NOW(), NOW());
 
 -- PENDING (10)
 INSERT INTO reservations (guest_name, guest_email, guest_phone, guest_date_of_birth,
@@ -271,42 +271,42 @@ INSERT INTO reservations (guest_name, guest_email, guest_phone, guest_date_of_bi
 VALUES ('Mai Thanh Thuy', 'thuy.mai@email.com', '+84 912 100 201', '1994-03-17', 'Vietnamese',
         CURRENT_DATE + 5, CURRENT_DATE + 8, 'PENDING', 'OFFLINE', NULL, 0, NOW(), NOW()),
        ('Tom Harris', 'tom.h@email.com', '+1 555 010 202', '1983-09-02', 'American',
-        CURRENT_DATE + 8, CURRENT_DATE + 10, 'PENDING', 'ONLINE', 'HSP-Q7R8T4', 0, NOW(), NOW()),
+        CURRENT_DATE + 8, CURRENT_DATE + 10, 'PENDING', 'ONLINE', 'HSP-000000', 0, NOW(), NOW()),
        ('Luong Van Minh', 'minh.luong@email.com', '+84 912 100 203', '1988-06-21', 'Vietnamese',
         CURRENT_DATE + 3, CURRENT_DATE + 7, 'PENDING', 'OFFLINE', NULL, 0, NOW(), NOW()),
        ('Natalie Kumar', 'natalie.k@email.com', '+91 98765 4204', '1990-10-30', 'Indian',
-        CURRENT_DATE + 10, CURRENT_DATE + 14, 'PENDING', 'ONLINE', 'HSP-R8S9U5', 0, NOW(), NOW()),
+        CURRENT_DATE + 10, CURRENT_DATE + 14, 'PENDING', 'ONLINE', 'HSP-000000', 0, NOW(), NOW()),
        ('Trinh Quoc Bao', 'bao.trinh@email.com', '+84 912 100 205', '1985-05-09', 'Vietnamese',
         CURRENT_DATE + 2, CURRENT_DATE + 4, 'PENDING', 'OFFLINE', NULL, 0, NOW(), NOW()),
        ('Emma Wilson', 'emma.w@email.com', '+61 400 234 206', '1996-12-15', 'Australian',
-        CURRENT_DATE + 6, CURRENT_DATE + 9, 'PENDING', 'ONLINE', 'HSP-S9T1V6', 0, NOW(), NOW()),
+        CURRENT_DATE + 6, CURRENT_DATE + 9, 'PENDING', 'ONLINE', 'HSP-000000', 0, NOW(), NOW()),
        ('Dao Thi Huong', 'huong.dao@email.com', '+84 912 100 207', '1992-08-25', 'Vietnamese',
         CURRENT_DATE + 4, CURRENT_DATE + 8, 'PENDING', 'OFFLINE', NULL, 0, NOW(), NOW()),
        ('Carlos Mendez', 'carlos.m@email.com', '+52 55 1234 208', '1980-01-12', 'Mexican',
-        CURRENT_DATE + 9, CURRENT_DATE + 13, 'PENDING', 'ONLINE', 'HSP-T1U2W7', 0, NOW(), NOW()),
+        CURRENT_DATE + 9, CURRENT_DATE + 13, 'PENDING', 'ONLINE', 'HSP-000000', 0, NOW(), NOW()),
        ('La Thi Gam', 'gam.la@email.com', '+84 912 100 209', '1987-04-03', 'Vietnamese',
         CURRENT_DATE + 1, CURRENT_DATE + 4, 'PENDING', 'OFFLINE', NULL, 0, NOW(), NOW()),
        ('Daniel Lee', 'daniel.l@email.com', '+82 10 9876 210', '1993-11-28', 'Korean',
-        CURRENT_DATE + 11, CURRENT_DATE + 15, 'PENDING', 'ONLINE', 'HSP-U2V3X8', 0, NOW(), NOW());
+        CURRENT_DATE + 11, CURRENT_DATE + 15, 'PENDING', 'ONLINE', 'HSP-000000', 0, NOW(), NOW());
 
 -- CHECKED_OUT (5)
 INSERT INTO reservations (guest_name, guest_email, guest_phone, guest_date_of_birth,
                           guest_nationality, check_in_at, check_out_at, status, source, confirmation_code,
                           total_price, checked_in_at, checked_in_by, created_at, updated_at)
 VALUES ('Robert Johnson', 'robert.j@email.com', '+1 555 010 301', '1976-06-14', 'American',
-        CURRENT_DATE - 14, CURRENT_DATE - 10, 'CHECKED_OUT', 'ONLINE', 'HSP-V3W4Y9',
+        CURRENT_DATE - 14, CURRENT_DATE - 10, 'CHECKED_OUT', 'ONLINE', 'HSP-000000',
         0, CURRENT_TIMESTAMP - INTERVAL '14 days', 'Rita Receptionist', NOW(), NOW()),
        ('Tran Tien Dung', 'dung.tran@email.com', '+84 912 100 302', '1988-08-22', 'Vietnamese',
         CURRENT_DATE - 12, CURRENT_DATE - 8, 'CHECKED_OUT', 'OFFLINE', NULL,
         0, CURRENT_TIMESTAMP - INTERVAL '12 days', 'Rita Receptionist', NOW(), NOW()),
        ('Yoshida Haruki', 'haruki.y@email.com', '+81 80 1234 303', '1991-01-09', 'Japanese',
-        CURRENT_DATE - 10, CURRENT_DATE - 6, 'CHECKED_OUT', 'ONLINE', 'HSP-W4X5Z1',
+        CURRENT_DATE - 10, CURRENT_DATE - 6, 'CHECKED_OUT', 'ONLINE', 'HSP-000000',
         0, CURRENT_TIMESTAMP - INTERVAL '10 days', 'Rita Receptionist', NOW(), NOW()),
        ('Pham Hoang Long', 'long.pham@email.com', '+84 912 100 304', '1983-05-30', 'Vietnamese',
         CURRENT_DATE - 16, CURRENT_DATE - 12, 'CHECKED_OUT', 'OFFLINE', NULL,
         0, CURRENT_TIMESTAMP - INTERVAL '16 days', 'Leo Leader', NOW(), NOW()),
        ('Kate Brown', 'kate.b@email.com', '+44 7700 900305', '1985-09-17', 'British',
-        CURRENT_DATE - 8, CURRENT_DATE - 4, 'CHECKED_OUT', 'ONLINE', 'HSP-X5Y6A2',
+        CURRENT_DATE - 8, CURRENT_DATE - 4, 'CHECKED_OUT', 'ONLINE', 'HSP-000000',
         0, CURRENT_TIMESTAMP - INTERVAL '8 days', 'Rita Receptionist', NOW(), NOW());
 
 -- CANCELLED (5)
@@ -314,15 +314,15 @@ INSERT INTO reservations (guest_name, guest_email, guest_phone, guest_date_of_bi
                           guest_nationality, check_in_at, check_out_at, status, source, confirmation_code,
                           total_price, created_at, updated_at)
 VALUES ('Ahmed Hassan', 'ahmed.h@email.com', '+20 100 123 401', '1978-12-20', 'Egyptian',
-        CURRENT_DATE + 2, CURRENT_DATE + 5, 'CANCELLED', 'ONLINE', 'HSP-Y6Z7B3', 0, NOW(), NOW()),
+        CURRENT_DATE + 2, CURRENT_DATE + 5, 'CANCELLED', 'ONLINE', 'HSP-000000', 0, NOW(), NOW()),
        ('Vu Kim Ngan', 'ngan.vu@email.com', '+84 912 100 402', '1995-07-13', 'Vietnamese',
         CURRENT_DATE + 0, CURRENT_DATE + 3, 'CANCELLED', 'OFFLINE', NULL, 0, NOW(), NOW()),
        ('Michael Scott', 'michael.s@email.com', '+1 555 010 403', '1965-03-09', 'American',
-        CURRENT_DATE + 4, CURRENT_DATE + 8, 'CANCELLED', 'ONLINE', 'HSP-Z7A8C4', 0, NOW(), NOW()),
+        CURRENT_DATE + 4, CURRENT_DATE + 8, 'CANCELLED', 'ONLINE', 'HSP-000000', 0, NOW(), NOW()),
        ('Ly Minh Tri', 'tri.ly@email.com', '+84 912 100 404', '1989-10-05', 'Vietnamese',
         CURRENT_DATE + 1, CURRENT_DATE + 6, 'CANCELLED', 'OFFLINE', NULL, 0, NOW(), NOW()),
        ('Priya Sharma', 'priya.s@email.com', '+91 98765 43405', '1992-04-28', 'Indian',
-        CURRENT_DATE + 6, CURRENT_DATE + 10, 'CANCELLED', 'ONLINE', 'HSP-A8B9D5', 0, NOW(), NOW());
+        CURRENT_DATE + 6, CURRENT_DATE + 10, 'CANCELLED', 'ONLINE', 'HSP-000000', 0, NOW(), NOW());
 
 -- ────────────────────────────────────────────────────────────────────────────
 -- 8. Reservation Details
@@ -458,7 +458,7 @@ SELECT r.id,
                THEN r.checked_in_by
            ELSE r.guest_email
            END,
-       CASE WHEN r.source = 'ONLINE' THEN COALESCE(r.confirmation_code, 'HSP-' || UPPER(SUBSTR(MD5(r.id::TEXT || 'pay'), 1, 8))) ELSE NULL END
+       CASE WHEN r.source = 'ONLINE' THEN COALESCE(r.confirmation_code, 'HSP-000000') ELSE NULL END
 FROM reservations r
 WHERE r.status IN ('CHECKED_IN', 'CONFIRMED', 'CHECKED_OUT');
 
@@ -606,7 +606,7 @@ $$
             VALUES (names[guest_idx], emails[guest_idx], phones[guest_idx], dobs[guest_idx],
                     nationalities[nat_idx], check_in, check_out, 'CHECKED_OUT', source,
                     CASE WHEN source = 'ONLINE'
-                             THEN 'HSP-' || UPPER(SUBSTR(MD5(i::TEXT || 'S'), 1, 6))
+                             THEN 'HSP-000000'
                          ELSE NULL END,
                     total_price,
                     check_in::TIMESTAMP, 'Rita Receptionist',
@@ -620,7 +620,7 @@ $$
             INSERT INTO payments (reservation_id, amount, payment_method, confirmed_at, confirmed_by, order_id)
             VALUES (r_id, CASE WHEN source = 'ONLINE' THEN deposit ELSE total_price END,
                     pay_method, check_in::TIMESTAMP, 'Rita Receptionist',
-                    CASE WHEN source = 'ONLINE' THEN 'HSP-' || UPPER(SUBSTR(MD5(i::TEXT || 'S'), 1, 8)) ELSE NULL END);
+                    CASE WHEN source = 'ONLINE' THEN 'HSP-000000' ELSE NULL END);
 
             INSERT INTO staying_guests (reservation_id, guest_name, date_of_birth, nationality, created_at)
             VALUES (r_id, names[guest_idx], dobs[guest_idx], nationalities[nat_idx],
@@ -673,7 +673,7 @@ $$
             VALUES (names[guest_idx], emails[guest_idx], phones[guest_idx], dobs[guest_idx],
                     nationalities[nat_idx], check_in, check_out, 'CHECKED_IN', source,
                     CASE WHEN source = 'ONLINE'
-                             THEN 'HSP-' || UPPER(SUBSTR(MD5(i::TEXT || 'C'), 1, 6))
+                             THEN 'HSP-000000'
                          ELSE NULL END,
                     total_price,
                     check_in::TIMESTAMP, 'Rita Receptionist', NOW() - INTERVAL '1 day',
@@ -685,7 +685,7 @@ $$
 
             INSERT INTO payments (reservation_id, amount, payment_method, confirmed_at, confirmed_by, order_id)
             VALUES (r_id, deposit, pay_method, check_in::TIMESTAMP, 'Rita Receptionist',
-                    CASE WHEN source = 'ONLINE' THEN 'HSP-' || UPPER(SUBSTR(MD5(i::TEXT || 'C'), 1, 8)) ELSE NULL END);
+                    CASE WHEN source = 'ONLINE' THEN 'HSP-000000' ELSE NULL END);
 
             INSERT INTO staying_guests (reservation_id, guest_name, date_of_birth, nationality, created_at)
             VALUES (r_id, names[guest_idx], dobs[guest_idx], nationalities[nat_idx], NOW());
@@ -724,7 +724,7 @@ $$
             VALUES (names[guest_idx], emails[guest_idx], phones[guest_idx], dobs[guest_idx],
                     nationalities[nat_idx], check_in, check_out, 'CONFIRMED', source,
                     CASE WHEN source = 'ONLINE'
-                             THEN 'HSP-' || UPPER(SUBSTR(MD5(i::TEXT || 'F'), 1, 6))
+                             THEN 'HSP-000000'
                          ELSE NULL END,
                     total_price, NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days')
             RETURNING id INTO r_id;
@@ -734,7 +734,7 @@ $$
 
             INSERT INTO payments (reservation_id, amount, payment_method, confirmed_at, confirmed_by, order_id)
             VALUES (r_id, deposit, pay_method, NOW() - INTERVAL '2 days', 'Rita Receptionist',
-                    CASE WHEN source = 'ONLINE' THEN 'HSP-' || UPPER(SUBSTR(MD5(i::TEXT || 'F'), 1, 8)) ELSE NULL END);
+                    CASE WHEN source = 'ONLINE' THEN 'HSP-000000' ELSE NULL END);
         END LOOP;
 
         -- ====================================================================
@@ -778,7 +778,7 @@ $$
                                   guest_nationality, check_in_at, check_out_at, status, source,
                                   confirmation_code, total_price, created_at, updated_at)
         VALUES ('Sarah Cancelled', 'sarah.c@email.com', '+1 555 999 001', '1990-03-15', 'American',
-                CURRENT_DATE + 5, CURRENT_DATE + 8, 'CONFIRMED', 'ONLINE', 'HSP-CXL-TST1',
+                CURRENT_DATE + 5, CURRENT_DATE + 8, 'CONFIRMED', 'ONLINE', 'HSP-000000',
                 255.00, NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days')
         RETURNING id INTO cid;
 
@@ -786,7 +786,7 @@ $$
         VALUES (cid, rt, 1, 85.00, 255.00);
 
         INSERT INTO payments (reservation_id, amount, payment_method, confirmed_at, confirmed_by, order_id)
-        VALUES (cid, 76.50, 'PAYPAL', NOW() - INTERVAL '2 days', 'Rita Receptionist', 'HSP-CXL-TST1');
+        VALUES (cid, 76.50, 'PAYPAL', NOW() - INTERVAL '2 days', 'Rita Receptionist', 'HSP-000000');
 
         UPDATE reservations SET status = 'CANCELLED' WHERE id = cid;
     END

@@ -3,6 +3,7 @@ package com.hospi.manage.features.reservation.controller;
 import com.hospi.manage.features.account.entity.Account;
 import com.hospi.manage.features.account.enums.Role;
 import com.hospi.manage.core.security.session.AccountPrincipal;
+import com.hospi.manage.features.audit.service.AuditService;
 import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
@@ -41,6 +42,9 @@ class CheckInControllerTest {
     @MockitoBean
     private NotificationService notificationService;
 
+    @MockitoBean
+    private AuditService auditService;
+
     private Reservation createReservation(ReservationStatus status) {
         Reservation r = new Reservation();
         r.setId(1L);
@@ -77,10 +81,8 @@ class CheckInControllerTest {
         when(reservationService.findById(1L)).thenReturn(reservation);
 
         mockMvc.perform(get("/receptionist/reservations/1/checkin"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("receptionist/reservation/checkin"))
-                .andExpect(model().attributeExists(VIEW, FORM))
-                .andExpect(content().string(containsString("John Doe")));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/receptionist/bookings/1"));
     }
 
     @Test
@@ -90,7 +92,7 @@ class CheckInControllerTest {
 
         mockMvc.perform(get("/receptionist/reservations/1/checkin"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/receptionist/reservations"));
+                .andExpect(redirectedUrl("/receptionist/bookings/1"));
     }
 
     // --- POST /{id}/checkin ---
@@ -100,7 +102,7 @@ class CheckInControllerTest {
         mockMvc.perform(post("/receptionist/reservations/1/checkin")
                         .param("bookingCode", ""))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/receptionist/reservations"))
+                .andExpect(redirectedUrl("/receptionist/bookings"))
                 .andExpect(flash().attributeExists(SUCCESS));
 
         verify(reservationService).checkIn(eq(1L), any(LocalDate.class), eq(""), eq("receptionist@test.com"));
@@ -114,7 +116,7 @@ class CheckInControllerTest {
         mockMvc.perform(post("/receptionist/reservations/1/checkin")
                         .param("bookingCode", ""))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/receptionist/reservations"))
+                .andExpect(redirectedUrl("/receptionist/bookings"))
                 .andExpect(flash().attributeExists(ERROR));
     }
 }

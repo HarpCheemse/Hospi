@@ -1,9 +1,11 @@
 package com.hospi.manage.features.reservation.dto.response;
 
-import com.hospi.manage.features.reservation.entity.Reservation;
-
+/**
+ * View model for the checkout page.
+ * No JPA entities are exposed.
+ */
 public record CheckoutView(
-        Reservation reservation,
+        ReservationSummaryView reservation,
         CheckoutCalculation calc,
         int adultGuests
 ) {}

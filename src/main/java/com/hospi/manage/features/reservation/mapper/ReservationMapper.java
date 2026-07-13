@@ -1,9 +1,14 @@
 package com.hospi.manage.features.reservation.mapper;
 
 import com.hospi.manage.features.reservation.dto.response.ActiveBookingsView;
+import com.hospi.manage.features.reservation.dto.response.AvailableRoomView;
 import com.hospi.manage.features.reservation.dto.response.CurrentStaysView;
 import com.hospi.manage.features.reservation.dto.response.ManageReservationView;
+import com.hospi.manage.features.reservation.dto.response.ReservationDetailView;
 import com.hospi.manage.features.reservation.dto.response.ReservationListItemView;
+import com.hospi.manage.features.reservation.dto.response.ReservationSummaryView;
+import com.hospi.manage.features.reservation.dto.response.RoomAssignmentView;
+import com.hospi.manage.features.reservation.dto.response.StayingGuestView;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.RoomAssignment;
 import com.hospi.manage.features.reservation.entity.StayingGuest;
@@ -43,7 +48,11 @@ public class ReservationMapper {
                         Collectors.summingInt(a -> 1)));
 
         return new ManageReservationView(
-                reservation, guests, assignedRooms, availableRooms, assignedCounts);
+                ReservationSummaryView.from(reservation),
+                guests.stream().map(StayingGuestView::from).toList(),
+                assignedRooms.stream().map(RoomAssignmentView::from).toList(),
+                availableRooms.stream().map(AvailableRoomView::from).toList(),
+                assignedCounts);
     }
 
     /**
@@ -117,7 +126,7 @@ public class ReservationMapper {
                 r.getTotalPrice(),
                 r.getStatus(),
                 r.getSource(),
-                r.getDetails(),
+                r.getDetails().stream().map(ReservationDetailView::from).toList(),
                 r.getStatus() == ReservationStatus.PENDING && r.getSource() == BookingSource.OFFLINE,
                 r.getStatus() == ReservationStatus.CONFIRMED,
                 r.getStatus() == ReservationStatus.PENDING && r.getSource() == BookingSource.ONLINE

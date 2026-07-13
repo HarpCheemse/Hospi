@@ -2,15 +2,13 @@ package com.hospi.manage.features.reservation.controller;
 
 import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.core.security.session.AccountPrincipal;
+import com.hospi.manage.features.audit.service.AuditService;
 import com.hospi.manage.features.payment.enums.PaymentMethod;
 import com.hospi.manage.features.payment.service.PaymentService;
-import com.hospi.manage.features.reservation.dto.response.PaymentConfirmationView;
-import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -24,37 +22,18 @@ public class PaymentController {
 
     private final ReservationService reservationService;
     private final PaymentService paymentService;
+    private final AuditService auditService;
 
-    /**
-     * Set the active sidebar highlight for this feature.
-     */
     @ModelAttribute
-    void addCommonAttributes(Model model) {
-        model.addAttribute(Attributes.ACTIVE_SIDEBAR,
-                "RESERVATIONS");
+    void addCommonAttributes(org.springframework.ui.Model model) {
+        model.addAttribute(Attributes.ACTIVE_SIDEBAR, "ACTIVE_BOOKINGS");
     }
 
-    /**
-     * Show the payment confirmation form for a PENDING reservation. Redirect to
-     * the reservation list if the status is not PENDING.
-     */
     @GetMapping("/{id}/payment")
-    String paymentForm(@PathVariable Long id, Model model) {
-        var reservation = reservationService.findById(id);
-
-        if (reservation.getStatus() != ReservationStatus.PENDING) {
-            return "redirect:/receptionist/reservations";
-        }
-
-        model.addAttribute(Attributes.VIEW,
-                PaymentConfirmationView.from(reservation));
-        return "receptionist/reservation/confirm-payment";
+    String paymentForm(@PathVariable Long id) {
+        return "redirect:/receptionist/bookings/" + id;
     }
 
-    /**
-     * Confirm payment for a PENDING reservation. Updates the reservation status to
-     * CONFIRMED and redirects to the reservation list.
-     */
     @PostMapping("/{id}/payment")
     String confirmPayment(@PathVariable Long id,
                           @RequestParam PaymentMethod paymentMethod,
@@ -64,6 +43,8 @@ public class PaymentController {
             paymentService.confirmPayment(id,
                     paymentMethod,
                     principal.getUsername());
+            auditService.log(principal.getId(), principal.getUsername(), "PAYMENT", "RESERVATION", id,
+                    "Payment method: " + paymentMethod);
             redirect.addFlashAttribute(Attributes.SUCCESS,
                     "Payment confirmed successfully. Booking is now confirmed.");
         } catch (IllegalStateException | IllegalArgumentException e) {
@@ -71,6 +52,6 @@ public class PaymentController {
                     e.getMessage());
         }
 
-        return "redirect:/receptionist/reservations";
+        return "redirect:/receptionist/bookings";
     }
 }

@@ -1,6 +1,6 @@
 package com.hospi.manage.features.receptionist.dto;
 
-import com.hospi.manage.features.reservation.dto.response.CheckoutForm;
+import com.hospi.manage.features.reservation.dto.request.CheckoutForm;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
