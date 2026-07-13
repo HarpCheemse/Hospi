@@ -51,36 +51,51 @@
                 </div>
             </div>
 
-            <table class="w-full text-sm mb-5">
-                <thead>
-                <tr class="border-b border-border text-muted-foreground">
-                    <th class="pb-2 text-left font-medium">Description</th>
-                    <th class="pb-2 text-right font-medium">Amount</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr class="border-b border-border/50">
-                    <td class="py-2">Total Room Charges</td>
-                    <td class="py-2 text-right" th:text="|$${#numbers.formatDecimal(view.reservation.totalPrice, 0, 2)}|">$1000.00</td>
-                </tr>
-                <tr class="border-b border-border/50 text-success">
-                    <td class="py-2">Deposit Paid</td>
-                    <td class="py-2 text-right">-<span th:text="|$${#numbers.formatDecimal(view.depositPaid, 0, 2)}|">$200.00</span></td>
-                </tr>
-                <tr class="border-b border-border/50" th:if="${view.reservation.lateCheckoutFeeApplied != null and view.reservation.lateCheckoutFeeApplied.signum() == 1}">
-                    <td class="py-2">Late Checkout Fee</td>
-                    <td class="py-2 text-right" th:text="|$${#numbers.formatDecimal(view.reservation.lateCheckoutFeeApplied, 0, 2)}|">$50.00</td>
-                </tr>
-                <tr class="border-b border-border/50" th:if="${view.reservation.extraGuestFeeApplied != null and view.reservation.extraGuestFeeApplied.signum() == 1}">
-                    <td class="py-2">Extra Guest Fee</td>
-                    <td class="py-2 text-right" th:text="|$${#numbers.formatDecimal(view.reservation.extraGuestFeeApplied, 0, 2)}|">$25.00</td>
-                </tr>
-                <tr class="font-bold text-base">
-                    <td class="py-3">Total Paid</td>
-                    <td class="py-3 text-right" th:text="|$${#numbers.formatDecimal(view.totalPaid, 0, 2)}|">$875.00</td>
-                </tr>
-                </tbody>
-            </table>
+            <!-- CHARGES -->
+            <div class="mb-6">
+                <h3 class="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">Charges</h3>
+                <table class="w-full text-sm mb-3">
+                    <tbody>
+                    <tr class="border-b border-border/50">
+                        <td class="py-2 text-muted-foreground">Room Charges</td>
+                        <td class="py-2 text-right font-medium text-foreground" th:text="|$${#numbers.formatDecimal(view.roomCharges, 0, 2)}|">$1000.00</td>
+                    </tr>
+                    <tr class="border-b border-border/50" th:if="${view.lateCheckoutFee.signum() == 1}">
+                        <td class="py-2 text-muted-foreground">Late Check-Out Fee</td>
+                        <td class="py-2 text-right font-medium text-foreground" th:text="|$${#numbers.formatDecimal(view.lateCheckoutFee, 0, 2)}|">$50.00</td>
+                    </tr>
+                    <tr class="border-b border-border/50" th:if="${view.extraGuestFee.signum() == 1}">
+                        <td class="py-2 text-muted-foreground">Extra Guest Fee</td>
+                        <td class="py-2 text-right font-medium text-foreground" th:text="|$${#numbers.formatDecimal(view.extraGuestFee, 0, 2)}|">$25.00</td>
+                    </tr>
+                    <tr class="font-bold text-base">
+                        <td class="py-3 text-foreground">Total Cost</td>
+                        <td class="py-3 text-right text-foreground" th:text="|$${#numbers.formatDecimal(view.totalCharges, 0, 2)}|">$1075.00</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PAYMENTS -->
+            <div>
+                <h3 class="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">Payments</h3>
+                <table class="w-full text-sm mb-3">
+                    <tbody>
+                    <tr class="border-b border-border/50" th:if="${view.depositPaid.signum() == 1}">
+                        <td class="py-2 text-muted-foreground">Deposit Paid</td>
+                        <td class="py-2 text-right font-medium text-foreground" th:text="|$${#numbers.formatDecimal(view.depositPaid, 0, 2)}|">$200.00</td>
+                    </tr>
+                    <tr class="border-b border-border/50">
+                        <td class="py-2 text-muted-foreground">Paid at Check-Out</td>
+                        <td class="py-2 text-right font-medium text-foreground" th:text="|$${#numbers.formatDecimal(view.checkoutPayment, 0, 2)}|">$875.00</td>
+                    </tr>
+                    <tr class="font-bold text-base">
+                        <td class="py-3 text-foreground">Total Paid</td>
+                        <td class="py-3 text-right text-foreground" th:text="|$${#numbers.formatDecimal(view.totalPaid, 0, 2)}|">$1075.00</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
 
             <div class="text-center text-sm text-muted-foreground pt-5 border-t border-border">
                 <p>Thank you for staying with us!</p>
