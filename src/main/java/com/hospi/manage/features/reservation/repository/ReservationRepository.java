@@ -26,6 +26,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByStatusInOrderByCheckInAtDesc(List<ReservationStatus> statuses);
 
+    List<Reservation> findByStatusAndCheckInAt(ReservationStatus status, LocalDate checkInAt);
+
+    List<Reservation> findByStatusAndCheckOutAt(ReservationStatus status, LocalDate checkOutAt);
+
     /**
      * Find non-cancelled reservations whose stay periods overlap the given date range.
      */

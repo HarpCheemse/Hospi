@@ -118,4 +118,12 @@ public class RoomAssignmentService {
 
         roomAssignmentRepository.delete(assignment);
     }
+
+    /** Find all assignments for the given reservation IDs. */
+    public List<RoomAssignment> findAssignmentsByReservationIds(List<Long> reservationIds) {
+        if (reservationIds == null || reservationIds.isEmpty()) {
+            return List.of();
+        }
+        return roomAssignmentRepository.findByReservationIdIn(reservationIds);
+    }
 }

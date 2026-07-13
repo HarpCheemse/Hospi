@@ -25,4 +25,7 @@ public interface RoomAssignmentRepository extends JpaRepository<RoomAssignment, 
     long countByReservationId(Long reservationId);
 
     void deleteByReservationId(Long reservationId);
+
+    /** Find all assignments for the given reservation IDs. */
+    List<RoomAssignment> findByReservationIdIn(List<Long> reservationIds);
 }

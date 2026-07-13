@@ -53,25 +53,25 @@
         <!-- QUICK ACTIONS -->
         <section class="mb-6 grid grid-cols-4 gap-4">
 
-            <button class="btn btn-primary flex items-center gap-3 p-4">
+            <a th:href="@{/receptionist/reservations}" class="btn btn-primary flex items-center gap-3 p-4">
                 <img class="h-8 w-8" th:src="@{/assets/icons/door-open.svg}" alt=""/>
                 <span class="font-semibold">New Check-In</span>
-            </button>
+            </a>
 
-            <button class="btn btn-secondary flex items-center gap-3 p-4">
+            <a th:href="@{/receptionist/reservations/stays}" class="btn btn-secondary flex items-center gap-3 p-4">
                 <img class="h-8 w-8" th:src="@{/assets/icons/key-round.svg}" alt=""/>
                 <span class="font-semibold">Check-Out</span>
-            </button>
+            </a>
 
-            <button class="btn btn-secondary flex items-center gap-3 p-4">
+            <a th:href="@{/receptionist/reservations/create}" class="btn btn-secondary flex items-center gap-3 p-4">
                 <img class="h-8 w-8" th:src="@{/assets/icons/user-plus.svg}" alt=""/>
                 <span class="font-semibold">Walk-In Guest</span>
-            </button>
+            </a>
 
-            <button class="btn btn-secondary flex items-center gap-3 p-4">
+            <a th:href="@{/receptionist/reservations}" class="btn btn-secondary flex items-center gap-3 p-4">
                 <img class="h-8 w-8" th:src="@{/assets/icons/search.svg}" alt=""/>
                 <span class="font-semibold">Find Booking</span>
-            </button>
+            </a>
 
         </section>
 
@@ -80,26 +80,26 @@
 
             <div class="card-compact">
                 <p class="text-sm text-muted-foreground">Arrivals Today</p>
-                <p class="mt-1 text-2xl font-bold text-foreground">48</p>
-                <p class="mt-1 pill-success">31 already checked in</p>
+                <p class="mt-1 text-2xl font-bold text-foreground" th:text="${view.arrivalsToday}">48</p>
+                <p class="mt-1 pill-success" th:text="|${view.checkedInToday} already checked in|">31 already checked in</p>
             </div>
 
             <div class="card-compact">
                 <p class="text-sm text-muted-foreground">Departures Today</p>
-                <p class="mt-1 text-2xl font-bold text-foreground">26</p>
-                <p class="mt-1 pill-muted">9 waiting for checkout</p>
+                <p class="mt-1 text-2xl font-bold text-foreground" th:text="${view.departuresToday}">26</p>
+                <p class="mt-1 pill-muted" th:text="|${view.departuresToday - view.waitingCheckoutToday} checked out, ${view.waitingCheckoutToday} waiting|">9 waiting for checkout</p>
             </div>
 
             <div class="card-compact">
                 <p class="text-sm text-muted-foreground">Available Rooms</p>
-                <p class="mt-1 text-2xl font-bold text-foreground">32</p>
-                <p class="mt-1 pill-success">12 cleaned and ready</p>
+                <p class="mt-1 text-2xl font-bold text-foreground" th:text="${view.availableRooms}">32</p>
+                <p class="mt-1 pill-success" th:text="|${view.cleanedReadyRooms} cleaned and ready|">12 cleaned and ready</p>
             </div>
 
             <div class="card-compact">
-                <p class="text-sm text-muted-foreground">Pending Payments</p>
-                <p class="mt-1 text-2xl font-bold text-foreground">$4,820</p>
-                <p class="mt-1 pill-danger">6 invoices need follow-up</p>
+                <p class="text-sm text-muted-foreground">Payments Due Today</p>
+                <p class="mt-1 text-2xl font-bold text-foreground" th:text="'$' + ${#numbers.formatDecimal(view.pendingPaymentsAmount, 1, 'COMMA', 0, 'POINT')}">$4,820</p>
+                <p class="mt-1 pill-danger" th:text="|${view.invoicesNeedFollowUp} bookings pending pay|">6 invoices need follow-up</p>
             </div>
 
         </section>
@@ -122,114 +122,42 @@
                             </p>
                         </div>
 
-                        <button class="btn btn-secondary btn-sm">
+                        <a th:href="@{/receptionist/reservations}" class="btn btn-secondary btn-sm">
                             View All
-                        </button>
+                        </a>
 
                     </div>
 
                     <div class="flex flex-col gap-2">
 
-                        <!-- ROW -->
-                        <div class="grid grid-cols-12 items-center gap-3 rounded-lg border border-border bg-background p-3 text-sm">
-
-                            <div class="col-span-4">
-                                <p class="font-semibold text-foreground">Nguyen Minh Anh</p>
-                                <p class="text-xs text-muted-foreground">Booking #BK-1048</p>
-                            </div>
-
-                            <p class="col-span-2 text-muted-foreground">Room 204</p>
-                            <p class="col-span-2 text-muted-foreground">14:00</p>
-
-                            <span class="col-span-2 font-medium text-success">Check-In</span>
-
-                            <button class="col-span-2 rounded-lg bg-primary px-3 py-1 text-white">
-                                Open
-                            </button>
-
+                        <!-- Empty State -->
+                        <div th:if="${#lists.isEmpty(view.todayQueue)}" class="p-6 text-center text-muted-foreground">
+                            No tasks in queue for today.
                         </div>
 
                         <!-- ROW -->
-                        <div class="grid grid-cols-12 items-center gap-3 rounded-lg border border-border bg-background p-3 text-sm">
+                        <div th:each="item : ${view.todayQueue}" class="grid grid-cols-12 items-center gap-3 rounded-lg border border-border bg-background p-3 text-sm">
 
                             <div class="col-span-4">
-                                <p class="font-semibold text-foreground">Tran Bao Long</p>
-                                <p class="text-xs text-muted-foreground">Booking #BK-1052</p>
+                                <p class="font-semibold text-foreground" th:text="${item.guestName}">Nguyen Minh Anh</p>
+                                <p class="text-xs text-muted-foreground" th:text="|Booking #${item.confirmationCode}|">Booking #BK-1048</p>
                             </div>
 
-                            <p class="col-span-2 text-muted-foreground">Room 418</p>
-                            <p class="col-span-2 text-muted-foreground">11:30</p>
+                            <p class="col-span-2 text-muted-foreground" th:text="${item.roomNumbers}">Room 204</p>
+                            <p class="col-span-2 text-muted-foreground" th:text="${item.time}">14:00</p>
 
-                            <span class="col-span-2 font-medium text-danger">Payment</span>
+                            <span class="col-span-2 font-medium"
+                                  th:classappend="${item.actionType == 'Check-In' ? 'text-success' : 'text-muted-foreground'}"
+                                  th:text="${item.actionType}">Check-In</span>
 
-                            <button class="col-span-2 rounded-lg bg-primary px-3 py-1 text-white">
+                            <a th:href="@{|/receptionist/reservations/${item.reservationId}/${item.actionType == 'Check-In' ? 'checkin' : 'checkout'}|}"
+                               class="col-span-2 rounded-lg bg-primary px-3 py-1 text-white text-center hover:bg-primary/95 transition">
                                 Open
-                            </button>
-
-                        </div>
-
-                        <!-- ROW -->
-                        <div class="grid grid-cols-12 items-center gap-3 rounded-lg border border-border bg-background p-3 text-sm">
-
-                            <div class="col-span-4">
-                                <p class="font-semibold text-foreground">Lena Parker</p>
-                                <p class="text-xs text-muted-foreground">Booking #BK-1057</p>
-                            </div>
-
-                            <p class="col-span-2 text-muted-foreground">Room 305</p>
-                            <p class="col-span-2 text-muted-foreground">12:00</p>
-
-                            <span class="col-span-2 font-medium text-muted-foreground">Check-Out</span>
-
-                            <button class="col-span-2 rounded-lg bg-primary px-3 py-1 text-white">
-                                Open
-                            </button>
+                            </a>
 
                         </div>
 
                     </div>
-                </section>
-
-                <!-- GUEST REQUESTS -->
-                <section class="card-panel">
-
-                    <div class="mb-4 flex items-center justify-between">
-
-                        <div>
-                            <h2 class="text-lg font-semibold text-foreground">Guest Requests</h2>
-                            <p class="text-sm text-muted-foreground">
-                                Active service calls from occupied rooms
-                            </p>
-                        </div>
-
-                        <button class="btn btn-secondary btn-sm">
-                            Assign Staff
-                        </button>
-
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-3 text-sm">
-
-                        <div class="rounded-lg border border-border bg-background p-3">
-                            <p class="font-semibold text-foreground">Extra towels</p>
-                            <p class="mt-1 text-muted-foreground">Room 512</p>
-                            <p class="mt-4 text-xs text-danger">Waiting 18 min</p>
-                        </div>
-
-                        <div class="rounded-lg border border-border bg-background p-3">
-                            <p class="font-semibold text-foreground">Airport pickup</p>
-                            <p class="mt-1 text-muted-foreground">Lobby desk</p>
-                            <p class="mt-4 text-xs text-muted-foreground">Scheduled 16:30</p>
-                        </div>
-
-                        <div class="rounded-lg border border-border bg-background p-3">
-                            <p class="font-semibold text-foreground">Late checkout</p>
-                            <p class="mt-1 text-muted-foreground">Room 208</p>
-                            <p class="mt-4 text-xs text-success">Approved</p>
-                        </div>
-
-                    </div>
-
                 </section>
 
             </section>
@@ -255,58 +183,18 @@
 
                         <div class="flex items-center justify-between rounded-lg bg-background p-3">
                             <span class="text-foreground">Cleaned</span>
-                            <span class="font-semibold text-success">12</span>
-                        </div>
-
-                        <div class="flex items-center justify-between rounded-lg bg-background p-3">
-                            <span class="text-foreground">Inspection</span>
-                            <span class="font-semibold text-foreground">8</span>
+                            <span class="font-semibold text-success" th:text="${view.cleanedCount}">12</span>
                         </div>
 
                         <div class="flex items-center justify-between rounded-lg bg-background p-3">
                             <span class="text-foreground">Dirty</span>
-                            <span class="font-semibold text-danger">14</span>
+                            <span class="font-semibold text-danger" th:text="${view.dirtyCount}">14</span>
                         </div>
 
                         <div class="flex items-center justify-between rounded-lg bg-background p-3">
                             <span class="text-foreground">Out of Service</span>
-                            <span class="font-semibold text-foreground">3</span>
+                            <span class="font-semibold text-foreground" th:text="${view.maintenanceCount}">3</span>
                         </div>
-
-                    </div>
-
-                </section>
-
-                <!-- CONTACTS -->
-                <section class="card-panel">
-
-                    <div class="mb-4 flex items-center gap-3">
-
-                        <img class="h-8 w-8" th:src="@{/assets/icons/phone.svg}" alt=""/>
-
-                        <div>
-                            <h2 class="text-lg font-semibold text-foreground">Quick Contacts</h2>
-                            <p class="text-sm text-muted-foreground">Internal hotel lines</p>
-                        </div>
-
-                    </div>
-
-                    <div class="flex flex-col gap-2 text-sm">
-
-                        <button class="flex w-full items-center justify-between rounded-lg border border-border bg-background p-3">
-                            <span class="text-foreground">Housekeeping</span>
-                            <span class="text-muted-foreground">102</span>
-                        </button>
-
-                        <button class="flex w-full items-center justify-between rounded-lg border border-border bg-background p-3">
-                            <span class="text-foreground">Security</span>
-                            <span class="text-muted-foreground">113</span>
-                        </button>
-
-                        <button class="flex w-full items-center justify-between rounded-lg border border-border bg-background p-3">
-                            <span class="text-foreground">Manager</span>
-                            <span class="text-muted-foreground">201</span>
-                        </button>
 
                     </div>
 
