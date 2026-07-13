@@ -53,13 +53,17 @@ class BookingTrackerServiceTest {
         Reservation r1 = new Reservation();
         r1.setConfirmationCode("C1");
         r1.setId(1L);
+        r1.setGuestEmail("a@b.com");
         Reservation r2 = new Reservation();
         r2.setConfirmationCode("C2");
         r2.setId(2L);
-        when(reservationRepository.findByConfirmationCodeIn(Set.of("C1", "C2")))
-                .thenReturn(List.of(r1, r2));
+        r2.setGuestEmail("c@d.com");
+        when(reservationRepository.findByGuestEmailAndConfirmationCode("a@b.com", "C1"))
+                .thenReturn(Optional.of(r1));
+        when(reservationRepository.findByGuestEmailAndConfirmationCode("c@d.com", "C2"))
+                .thenReturn(Optional.of(r2));
 
-        List<Reservation> result = service.resolveByCodes(Set.of("C1", "C2"));
+        List<Reservation> result = service.resolveByCodes(Set.of("a@b.com:C1", "c@d.com:C2"));
 
         assertEquals(2, result.size());
     }
@@ -124,11 +128,13 @@ class BookingTrackerServiceTest {
         Reservation reservation = new Reservation();
         reservation.setId(1L);
         reservation.setStatus(ReservationStatus.CHECKED_OUT);
-        when(reservationRepository.findByConfirmationCodeIn(Set.of("CODE")))
-                .thenReturn(List.of(reservation));
+        reservation.setGuestEmail("a@b.com");
+        reservation.setConfirmationCode("CODE");
+        when(reservationRepository.findByGuestEmailAndConfirmationCode("a@b.com", "CODE"))
+                .thenReturn(Optional.of(reservation));
         when(reviewRepository.existsByReservationId(1L)).thenReturn(false);
 
-        service.submitReview(1L, 4, Set.of("CODE"));
+        service.submitReview(1L, 4, Set.of("a@b.com:CODE"));
 
         verify(reviewRepository).save(any(Review.class));
     }
@@ -137,32 +143,38 @@ class BookingTrackerServiceTest {
     void submitReview_shouldThrow_whenAlreadyReviewed() {
         Reservation reservation = new Reservation();
         reservation.setId(1L);
-        when(reservationRepository.findByConfirmationCodeIn(Set.of("CODE")))
-                .thenReturn(List.of(reservation));
+        reservation.setGuestEmail("a@b.com");
+        reservation.setConfirmationCode("CODE");
+        when(reservationRepository.findByGuestEmailAndConfirmationCode("a@b.com", "CODE"))
+                .thenReturn(Optional.of(reservation));
         when(reviewRepository.existsByReservationId(1L)).thenReturn(true);
 
-        assertThrows(IllegalStateException.class, () -> service.submitReview(1L, 4, Set.of("CODE")));
+        assertThrows(IllegalStateException.class, () -> service.submitReview(1L, 4, Set.of("a@b.com:CODE")));
     }
 
     @Test
     void submitReview_shouldThrow_whenNotCheckedOut() {
         Reservation reservation = new Reservation();
         reservation.setId(1L);
+        reservation.setGuestEmail("a@b.com");
+        reservation.setConfirmationCode("CODE");
         reservation.setStatus(ReservationStatus.CONFIRMED);
-        when(reservationRepository.findByConfirmationCodeIn(Set.of("CODE")))
-                .thenReturn(List.of(reservation));
+        when(reservationRepository.findByGuestEmailAndConfirmationCode("a@b.com", "CODE"))
+                .thenReturn(Optional.of(reservation));
         when(reviewRepository.existsByReservationId(1L)).thenReturn(false);
 
-        assertThrows(IllegalStateException.class, () -> service.submitReview(1L, 4, Set.of("CODE")));
+        assertThrows(IllegalStateException.class, () -> service.submitReview(1L, 4, Set.of("a@b.com:CODE")));
     }
 
     @Test
     void submitReview_shouldThrow_whenNotOwned() {
         Reservation reservation = new Reservation();
         reservation.setId(2L);
-        when(reservationRepository.findByConfirmationCodeIn(Set.of("CODE")))
-                .thenReturn(List.of(reservation));
+        reservation.setGuestEmail("a@b.com");
+        reservation.setConfirmationCode("CODE");
+        when(reservationRepository.findByGuestEmailAndConfirmationCode("a@b.com", "CODE"))
+                .thenReturn(Optional.of(reservation));
 
-        assertThrows(IllegalStateException.class, () -> service.submitReview(1L, 4, Set.of("CODE")));
+        assertThrows(IllegalStateException.class, () -> service.submitReview(1L, 4, Set.of("a@b.com:CODE")));
     }
 }

@@ -30,10 +30,16 @@ public class BookingTrackerService {
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
     }
 
-    /** Resolve multiple reservations by their confirmation codes. */
+    /** Resolve multiple reservations by email:code pairs. */
     @Transactional(readOnly = true)
-    public List<Reservation> resolveByCodes(Set<String> codes) {
-        return reservationRepository.findByConfirmationCodeIn(codes);
+    public List<Reservation> resolveByCodes(Set<String> entries) {
+        return entries.stream()
+                .map(e -> e.split(":", 2))
+                .filter(p -> p.length == 2)
+                .map(p -> reservationRepository.findByGuestEmailAndConfirmationCode(p[0], p[1]))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
     }
 
     /** Build a map of reservation ID to existing review for a list of reservations. */

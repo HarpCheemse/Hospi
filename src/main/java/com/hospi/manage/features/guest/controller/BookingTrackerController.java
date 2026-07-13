@@ -193,7 +193,7 @@ public class BookingTrackerController {
             redirect.addFlashAttribute(ERROR, "Too many tracked bookings. Please clear your list first.");
             return "redirect:/my-booking";
         }
-        codes.add(pendingCode);
+        codes.add(email + ":" + pendingCode);
         session.setAttribute(TRACKED_BOOKING_CODES, codes);
 
         session.removeAttribute(PENDING_CODE);

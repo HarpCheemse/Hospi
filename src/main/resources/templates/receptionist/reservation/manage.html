@@ -205,10 +205,17 @@
                      x-data="{ removeModal: false, removeAction: '' }">
 
                     <!-- expected vs assigned summary -->
-                    <div class="mb-4 flex flex-wrap gap-3 text-sm">
+                    <div class="mb-4 flex flex-wrap gap-2 text-sm">
                         <th:block th:each="detail : ${view.reservation().details}">
-                            <span th:text="${view.assignedCount(detail.roomTypeId)} + '/' + ${detail.roomCount} + ' ' + ${detail.roomTypeName}">
-                                0/2 Deluxe
+                            <span th:if="${view.assignedCount(detail.roomTypeId)} != ${detail.roomCount}"
+                                  class="inline-flex items-center gap-1.5 rounded-full bg-warning/10 px-3 py-1 text-xs font-medium text-warning">
+                                <span th:text="${view.assignedCount(detail.roomTypeId)} + '/' + ${detail.roomCount}">0/2</span>
+                                <span th:text="${detail.roomTypeName}">Deluxe</span>
+                            </span>
+                            <span th:if="${view.assignedCount(detail.roomTypeId)} == ${detail.roomCount}"
+                                  class="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1 text-xs font-medium text-success">
+                                <span th:text="${view.assignedCount(detail.roomTypeId)} + '/' + ${detail.roomCount}">2/2</span>
+                                <span th:text="${detail.roomTypeName}">Deluxe</span>
                             </span>
                         </th:block>
                     </div>
