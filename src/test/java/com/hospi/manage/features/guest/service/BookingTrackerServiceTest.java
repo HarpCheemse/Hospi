@@ -1,6 +1,7 @@
 package com.hospi.manage.features.guest.service;
 
 import com.hospi.manage.common.exception.ResourceNotFoundException;
+import com.hospi.manage.features.hotel.service.HotelService;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.Review;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
@@ -25,6 +26,9 @@ class BookingTrackerServiceTest {
 
     @Mock
     private ReviewRepository reviewRepository;
+
+    @Mock
+    private HotelService hotelService;
 
     @InjectMocks
     private BookingTrackerService service;
