@@ -83,7 +83,7 @@ class CheckoutServiceTest {
 
         when(paymentRepository.findAllByReservationId(1L)).thenReturn(List.of());
 
-        CheckoutCalculation calc = checkoutService.calculate(r, null, 2);
+        CheckoutCalculation calc = checkoutService.calculate(r, false, 2);
 
         assertEquals(BigDecimal.valueOf(1000), calc.totalPrice());
         assertEquals(BigDecimal.ZERO, calc.depositPaid());
@@ -116,9 +116,7 @@ class CheckoutServiceTest {
 
         when(paymentRepository.findAllByReservationId(2L)).thenReturn(List.of());
 
-        LocalDateTime lateTime = LocalDateTime.of(LocalDate.of(2026, 6, 18), LocalTime.of(14, 0));
-
-        CheckoutCalculation calc = checkoutService.calculate(r, lateTime, 4);
+        CheckoutCalculation calc = checkoutService.calculate(r, true, 4);
 
         assertEquals(BigDecimal.ZERO, calc.depositPaid());
         assertTrue(calc.isLate());
@@ -151,7 +149,7 @@ class CheckoutServiceTest {
         depositPayment.setAmount(BigDecimal.valueOf(200));
         when(paymentRepository.findAllByReservationId(3L)).thenReturn(List.of(depositPayment));
 
-        CheckoutCalculation calc = checkoutService.calculate(r, null, 2);
+        CheckoutCalculation calc = checkoutService.calculate(r, false, 2);
 
         assertEquals(BigDecimal.valueOf(200), calc.depositPaid());
         assertEquals(BigDecimal.valueOf(800), calc.remainingBalance());
@@ -186,7 +184,7 @@ class CheckoutServiceTest {
         );
 
         Reservation result = checkoutService.complete(1L, calc,
-                PaymentMethod.CASH, "receptionist", null, false);
+                PaymentMethod.CASH, "receptionist", false);
 
         assertEquals(ReservationStatus.CHECKED_OUT, result.getStatus());
         assertNotNull(result.getCheckedOutAt());
@@ -235,7 +233,7 @@ class CheckoutServiceTest {
                 0
         );
 
-        checkoutService.complete(1L, calc, PaymentMethod.CASH, "receptionist", null, false);
+        checkoutService.complete(1L, calc, PaymentMethod.CASH, "receptionist", false);
 
         verify(invoiceRepository).save(any());
     }
@@ -267,7 +265,7 @@ class CheckoutServiceTest {
         );
 
         Reservation result = checkoutService.complete(3L, calc,
-                PaymentMethod.CARD, "receptionist", null, false);
+                PaymentMethod.CARD, "receptionist", false);
 
         assertEquals(ReservationStatus.CHECKED_OUT, result.getStatus());
         assertNotNull(result.getCheckedInAt());

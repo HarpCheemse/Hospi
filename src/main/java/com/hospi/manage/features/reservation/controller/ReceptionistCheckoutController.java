@@ -58,7 +58,7 @@ public class ReceptionistCheckoutController {
         }
 
         int adultGuests = stayingGuestService.getAdultGuestCount(id, reservation.getCheckInAt());
-        CheckoutCalculation calc = checkoutService.calculate(reservation, null, adultGuests);
+        CheckoutCalculation calc = checkoutService.calculate(reservation, false, adultGuests);
 
         model.addAttribute(Attributes.VIEW, new CheckoutView(ReservationSummaryView.from(reservation), calc, adultGuests));
         model.addAttribute("config", systemConfigService.getConfig());
@@ -77,13 +77,13 @@ public class ReceptionistCheckoutController {
             int adultGuests = stayingGuestService.getAdultGuestCount(id, reservation.getCheckInAt());
 
             boolean applyLateFee = Boolean.TRUE.equals(form.applyLateFee());
-            LocalDateTime actualTime = applyLateFee ? form.actualCheckoutTime() : null;
-            CheckoutCalculation calc = checkoutService.calculate(reservation, actualTime, adultGuests);
+            CheckoutCalculation calc = checkoutService.calculate(reservation, applyLateFee, adultGuests);
 
             PaymentMethod method = PaymentMethod.valueOf(form.paymentMethod());
 
             checkoutService.complete(id, calc, method,
                     principal.getUsername(), form.actualCheckoutTime(),
+                    principal.getName(),
                     applyLateFee);
 
             auditService.log(principal.getId(), principal.getUsername(), "CHECKOUT", "RESERVATION", id,

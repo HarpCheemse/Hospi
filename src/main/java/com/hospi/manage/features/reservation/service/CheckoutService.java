@@ -36,7 +36,7 @@ public class CheckoutService {
     private final SystemConfigService systemConfigService;
     private final InvoiceRepository invoiceRepository;
 
-    public CheckoutCalculation calculate(Reservation reservation, LocalDateTime actualCheckoutTime, int adultGuestCount) {
+    public CheckoutCalculation calculate(Reservation reservation, boolean applyLateFee, int adultGuestCount) {
         var config = systemConfigService.getConfig();
         BigDecimal totalPrice = reservation.getTotalPrice();
 
@@ -53,15 +53,10 @@ public class CheckoutService {
             remainingBalance = BigDecimal.ZERO;
         }
 
-        boolean isLate = false;
+        boolean isLate = applyLateFee;
         BigDecimal lateCheckoutFee = BigDecimal.ZERO;
-        if (actualCheckoutTime != null) {
-            LocalTime standardCheckoutTime = LocalTime.of(11, 0);
-            LocalDateTime standardCheckout = LocalDateTime.of(reservation.getCheckOutAt(), standardCheckoutTime);
-            isLate = actualCheckoutTime.isAfter(standardCheckout);
-            if (isLate) {
-                lateCheckoutFee = config.getLateCheckoutFee();
-            }
+        if (applyLateFee) {
+            lateCheckoutFee = config.getLateCheckoutFee();
         }
 
         int totalRoomCapacity = reservation.getDetails().stream()
@@ -81,7 +76,7 @@ public class CheckoutService {
 
     @Transactional
     public Reservation complete(Long reservationId, CheckoutCalculation calc,
-                                 PaymentMethod method, String principal, LocalDateTime actualCheckoutTime,
+                                 PaymentMethod method, String principal,
                                  boolean applyLateFee) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
