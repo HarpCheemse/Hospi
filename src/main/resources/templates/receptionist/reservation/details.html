@@ -35,7 +35,7 @@
         </div>
 
         <a th:href="@{/receptionist/bookings/create}"
-           class="btn btn-secondary btn-lg">
+           class="btn btn-secondary">
             Change Dates
         </a>
 
@@ -129,30 +129,14 @@
 
                 <table class="w-full">
 
-                    <thead class="bg-muted">
-
-                    <tr>
-                        <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">
-                            Room Type
-                        </th>
-
-                        <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">
-                            Price / Night
-                        </th>
-
-                        <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">
-                            Max Guests
-                        </th>
-
-                        <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">
-                            Available
-                        </th>
-
-                        <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">
-                            Quantity
-                        </th>
+                    <thead>
+                    <tr class="border-b border-border text-muted-foreground">
+                        <th class="px-5 py-4 text-left text-sm font-medium">Room Type</th>
+                        <th class="px-5 py-4 text-left text-sm font-medium">Price / Night</th>
+                        <th class="px-5 py-4 text-left text-sm font-medium">Max Guests</th>
+                        <th class="px-5 py-4 text-left text-sm font-medium">Available</th>
+                        <th class="px-5 py-4 text-left text-sm font-medium">Quantity</th>
                     </tr>
-
                     </thead>
 
                     <tbody>
@@ -287,13 +271,13 @@
         <section class="card">
             <div class="flex items-center justify-end gap-3 p-5">
 
-                <a th:href="@{/receptionist/reservations}"
-                   class="btn btn-secondary btn-lg">
+                <a th:href="@{/receptionist/bookings}"
+                   class="btn btn-secondary">
                     Cancel
                 </a>
 
                 <button type="submit"
-                        class="btn btn-primary btn-lg">
+                        class="btn btn-primary">
                     Create Booking
                 </button>
 
