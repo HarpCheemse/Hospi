@@ -52,7 +52,7 @@
                     <label class="mb-1 block text-sm font-medium text-muted-foreground">Rooms</label>
                     <div class="flex flex-wrap gap-1">
                         <th:block th:each="detail : ${view.reservation.details}">
-                            <span class="pill-muted text-sm" th:text="${detail.roomType.name} + ' x' + ${detail.roomCount}">Deluxe x2</span>
+                            <span class="pill-muted text-sm" th:text="${detail.roomTypeName} + ' x' + ${detail.roomCount}">Deluxe x2</span>
                         </th:block>
                     </div>
                 </div>

@@ -6,11 +6,16 @@ import com.hospi.manage.features.reservation.entity.Reservation;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * View model for the check-out receipt page.
+ * No JPA entities are exposed.
+ */
 public record ReceiptView(
-        Reservation reservation,
+        ReservationSummaryView reservation,
         BigDecimal depositPaid,
         BigDecimal totalPaid
 ) {
+    /** Create from JPA entities — converts to view models internally. */
     public static ReceiptView from(Reservation reservation, List<Payment> payments) {
         BigDecimal depositPaid = payments.stream()
                 .map(Payment::getAmount)
@@ -24,6 +29,6 @@ public record ReceiptView(
             totalPaid = totalPaid.add(reservation.getExtraGuestFeeApplied());
         }
 
-        return new ReceiptView(reservation, depositPaid, totalPaid);
+        return new ReceiptView(ReservationSummaryView.from(reservation), depositPaid, totalPaid);
     }
 }

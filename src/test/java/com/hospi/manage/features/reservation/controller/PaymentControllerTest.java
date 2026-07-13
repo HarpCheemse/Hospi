@@ -3,6 +3,7 @@ package com.hospi.manage.features.reservation.controller;
 import com.hospi.manage.features.account.entity.Account;
 import com.hospi.manage.features.account.enums.Role;
 import com.hospi.manage.core.security.session.AccountPrincipal;
+import com.hospi.manage.features.audit.service.AuditService;
 import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.payment.enums.PaymentMethod;
 import com.hospi.manage.features.payment.service.PaymentService;
@@ -45,6 +46,9 @@ class PaymentControllerTest {
 
     @MockitoBean
     private NotificationService notificationService;
+
+    @MockitoBean
+    private AuditService auditService;
 
     private Reservation createReservation(ReservationStatus status) {
         Reservation r = new Reservation();

@@ -1,11 +1,17 @@
 package com.hospi.manage.features.reservation.controller;
 
+import com.hospi.manage.features.account.entity.Account;
+import com.hospi.manage.features.account.enums.Role;
+import com.hospi.manage.core.security.session.AccountPrincipal;
+import com.hospi.manage.features.audit.service.AuditService;
+import com.hospi.manage.features.config.service.SystemConfigService;
 import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.payment.service.PaymentService;
 import com.hospi.manage.features.reservation.dto.request.*;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.BookingSource;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
+import com.hospi.manage.features.reservation.service.CheckoutService;
 import com.hospi.manage.features.reservation.service.RoomUpgradeService;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.reservation.service.RoomAssignmentService;
@@ -18,6 +24,8 @@ import com.hospi.manage.features.reservation.validation.OfflineBookingFormValida
 import com.hospi.manage.features.room.dto.response.RoomTypeAvailability;
 import com.hospi.manage.features.room.entity.RoomType;
 import com.hospi.manage.features.room.enums.BedType;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -25,6 +33,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -81,6 +91,32 @@ class ReceptionistReservationControllerTest {
     @MockitoBean
     private PaymentService paymentService;
 
+    @MockitoBean
+    private CheckoutService checkoutService;
+
+    @MockitoBean
+    private SystemConfigService systemConfigService;
+
+    @MockitoBean
+    private AuditService auditService;
+
+    @BeforeEach
+    void setUpSecurityContext() {
+        Account account = new Account();
+        account.setEmail("receptionist@hospi.com");
+        account.setRole(Role.RECEPTIONIST);
+        account.setActive(true);
+        AccountPrincipal principal = new AccountPrincipal(account);
+        var auth = new UsernamePasswordAuthenticationToken(
+                principal, principal.getPassword(), principal.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    }
+
+    @AfterEach
+    void tearDownSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
+
     private Reservation createReservation(ReservationStatus status) {
         Reservation r = new Reservation();
         r.setId(1L);
@@ -110,8 +146,23 @@ class ReceptionistReservationControllerTest {
     private void mockManageView(Reservation reservation) {
         when(reservationService.findById(1L)).thenReturn(reservation);
         when(stayingGuestService.getGuests(1L)).thenReturn(List.of());
+        when(stayingGuestService.getAdultGuestCount(anyLong(), any())).thenReturn(2);
         when(roomAssignmentService.getAssignedRooms(1L)).thenReturn(List.of());
         when(roomAssignmentService.getAvailableRooms(1L)).thenReturn(List.of());
+        when(checkoutService.calculate(any(), any(), anyInt())).thenReturn(
+                new com.hospi.manage.features.reservation.dto.response.CheckoutCalculation(
+                        java.math.BigDecimal.valueOf(500),
+                        java.math.BigDecimal.valueOf(200),
+                        java.math.BigDecimal.valueOf(300),
+                        java.math.BigDecimal.ZERO,
+                        java.math.BigDecimal.ZERO,
+                        java.math.BigDecimal.valueOf(300),
+                        false,
+                        0));
+        var config = new com.hospi.manage.features.config.entity.SystemConfig();
+        config.setLateCheckoutFee(java.math.BigDecimal.valueOf(50));
+        config.setExtraGuestFee(java.math.BigDecimal.valueOf(25));
+        when(systemConfigService.getConfig()).thenReturn(config);
     }
 
     // ========== GET / ==========

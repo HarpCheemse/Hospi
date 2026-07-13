@@ -21,7 +21,14 @@
 
 <div th:replace="~{/fragments/receptionist-sidebar :: sidebar}"></div>
 
-<main class="staff-page">
+<main class="staff-page"
+      x-data="{
+          checkoutOpen: false,
+          checkoutConfirmed: false,
+          paymentMethod: 'CASH',
+          applyLateFee: false,
+          actualCheckoutTime: ''
+      }">
 
     <div th:replace="~{fragments/components/toast :: toast}"></div>
 
@@ -41,12 +48,28 @@
             </section>
         </div>
 
-        <a th:href="@{/receptionist/stays}"
-           class="btn btn-secondary">
-            Back
-        </a>
+        <div class="flex items-center gap-3">
+            <button th:if="${view.reservation().status.name() == 'CHECKED_IN'}"
+                    @click="checkoutOpen = true; checkoutConfirmed = false; applyLateFee = false; actualCheckoutTime = ''; paymentMethod = 'CASH'"
+                    class="btn btn-primary btn-lg"
+                    type="button">
+                Check Out
+            </button>
+            <a th:href="@{/receptionist/stays}"
+               class="btn btn-secondary">
+                Back
+            </a>
+        </div>
 
     </header>
+
+    <form id="checkoutForm"
+          th:action="@{/receptionist/stays/{id}/checkout(id=${view.reservation().id})}"
+          method="post" class="hidden">
+        <input type="hidden" name="paymentMethod" x-model="paymentMethod">
+        <input type="hidden" name="applyLateFee" x-model="applyLateFee">
+        <input type="hidden" name="actualCheckoutTime" x-model="actualCheckoutTime">
+    </form>
 
     <div class="grid grid-cols-3 gap-6">
 
@@ -178,12 +201,13 @@
                     </div>
                 </div>
 
-                <div class="p-6">
+                <div class="p-6"
+                     x-data="{ removeModal: false, removeAction: '' }">
 
                     <!-- expected vs assigned summary -->
                     <div class="mb-4 flex flex-wrap gap-3 text-sm">
                         <th:block th:each="detail : ${view.reservation().details}">
-                            <span th:text="${view.assignedCount(detail.roomType.id)} + '/' + ${detail.roomCount} + ' ' + ${detail.roomType.name}">
+                            <span th:text="${view.assignedCount(detail.roomTypeId)} + '/' + ${detail.roomCount} + ' ' + ${detail.roomTypeName}">
                                 0/2 Deluxe
                             </span>
                         </th:block>
@@ -205,24 +229,21 @@
                             <tr class="border-b border-border/50" th:each="a, stat : ${view.assignedRooms()}">
                                 <td class="py-3 pr-4 text-muted-foreground" th:text="${stat.count}">1</td>
                                 <td class="py-3 pr-4 font-medium text-foreground"
-                                    th:text="${a.room.roomNumber}">201
+                                    th:text="${a.roomNumber}">201
                                 </td>
                                 <td class="py-3 pr-4 text-muted-foreground"
-                                    th:text="${a.room.roomType.name}">Deluxe
+                                    th:text="${a.roomTypeName}">Deluxe
                                 </td>
                                 <td class="py-3 pr-4 text-muted-foreground"
-                                    th:text="${'Floor ' + a.room.floorNumber}">Floor 2
+                                    th:text="${'Floor ' + a.floorNumber}">Floor 2
                                 </td>
                                 <td class="py-3 text-right whitespace-nowrap">
-                                    <form th:action="@{/receptionist/stays/{id}/manage/rooms/{aid}/remove(id=${view.reservation().id}, aid=${a.id})}"
-                                          method="post"
-                                          class="inline"
-                                          novalidate
-                                          onsubmit="return confirm('Remove this room assignment?')">
-                                        <button type="submit" class="text-sm text-danger hover:opacity-80">
-                                            Remove
-                                        </button>
-                                    </form>
+                                    <button type="button"
+                                            th:attr="data-url=@{/receptionist/stays/{id}/manage/rooms/{aid}/remove(id=${view.reservation().id}, aid=${a.id})}"
+                                            @click="removeAction = $el.dataset.url; removeModal = true"
+                                            class="text-sm text-danger hover:opacity-80">
+                                        Remove
+                                    </button>
                                 </td>
                             </tr>
                             </tbody>
@@ -247,7 +268,7 @@
                                     <option value="">Select a room...</option>
                                     <option th:each="r : ${view.availableRooms()}"
                                             th:value="${r.id}"
-                                            th:text="${'Room ' + r.roomNumber + ' - ' + r.roomType.name + ' (Floor ' + r.floorNumber + ')'}">
+                                            th:text="${'Room ' + r.roomNumber + ' - ' + r.roomTypeName + ' (Floor ' + r.floorNumber + ')'}">
                                         Room 201 - Deluxe (Floor 2)
                                     </option>
                                 </select>
@@ -261,6 +282,40 @@
                     <p th:if="${#lists.isEmpty(view.availableRooms())}" class="mt-4 text-sm text-muted-foreground">
                         No vacant rooms available for this booking's room types.
                     </p>
+
+                    <!-- REMOVE ROOM MODAL -->
+                    <div x-show="removeModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
+                        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="removeModal = false"></div>
+                        <div x-show="removeModal"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100 scale-100"
+                             x-transition:leave-end="opacity-0 scale-95"
+                             @click.stop
+                             class="relative mx-4 w-full max-w-sm rounded-2xl border border-border bg-surface p-6 shadow-2xl">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-danger/10">
+                                    <img th:src="@{/assets/icons/alert-triangle.svg}" class="h-5 w-5 text-danger" alt="">
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-semibold text-foreground">Remove Room Assignment</h2>
+                                    <p class="text-sm text-muted-foreground">This action cannot be undone.</p>
+                                </div>
+                            </div>
+                            <p class="text-sm text-muted-foreground mb-5">
+                                Are you sure you want to remove this room assignment? The room will become available for reassignment.
+                            </p>
+                            <form method="post" :action="removeAction" novalidate>
+                                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <div class="flex justify-end gap-3">
+                                    <button type="button" @click="removeModal = false" class="btn btn-secondary">Cancel</button>
+                                    <button type="submit" class="btn btn-danger">Remove</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
 
                 </div>
 
@@ -333,7 +388,7 @@
                         <div class="flex flex-wrap gap-2">
                             <th:block th:each="room : ${view.reservation().details}">
                                 <span class="pill-muted"
-                                      th:text="${room.roomType.name} + ' x' + ${room.roomCount}">
+                                      th:text="${room.roomTypeName} + ' x' + ${room.roomCount}">
                                     Deluxe x2
                                 </span>
                             </th:block>
@@ -411,10 +466,10 @@
                         <tbody>
                             <tr th:each="d : ${view.reservation().details}"
                                 class="border-b border-border/50">
-                                <td class="px-4 py-2 font-medium text-foreground" th:text="${d.roomType.name}">Deluxe Double</td>
+                                <td class="px-4 py-2 font-medium text-foreground" th:text="${d.roomTypeName}">Deluxe Double</td>
                                 <td class="px-4 py-2 text-center text-muted-foreground" th:text="${d.roomCount}">2</td>
                                 <td class="px-4 py-2 text-right">
-                                    <a th:href="@{/receptionist/stays/{id}/swap(id=${view.reservation().id}, from=${d.roomType.id})}"
+                                    <a th:href="@{/receptionist/stays/{id}/swap(id=${view.reservation().id}, from=${d.roomTypeId})}"
                                        class="text-xs text-primary hover:underline">Swap</a>
                                 </td>
                             </tr>
@@ -425,6 +480,110 @@
 
         </div>
 
+    </div>
+
+    <!-- CHECKOUT MODAL -->
+    <div x-show="checkoutOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="checkoutOpen = false"></div>
+        <div x-show="checkoutOpen"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             @click.stop
+             class="relative mx-4 w-full max-w-lg rounded-2xl border border-border bg-surface p-6 shadow-2xl">
+
+            <div class="flex items-center gap-3 mb-4">
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                    <img th:src="@{/assets/icons/log-out.svg}" class="h-5 w-5 text-primary" alt="">
+                </div>
+                <div>
+                    <h2 class="text-lg font-semibold text-foreground">Confirm Check-Out</h2>
+                    <p class="text-sm text-muted-foreground" th:text="|${view.reservation().guestName}|">John Smith</p>
+                </div>
+            </div>
+
+            <!-- Financial breakdown -->
+            <div class="space-y-3 mb-5 text-sm">
+                <div class="flex justify-between py-1">
+                    <span class="text-muted-foreground">Total Price</span>
+                    <span class="font-medium" th:text="|$${#numbers.formatDecimal(checkoutCalc.totalPrice(), 0, 2)}|">$1,000.00</span>
+                </div>
+                <div class="flex justify-between py-1">
+                    <span class="text-muted-foreground">Deposit Paid</span>
+                    <span class="font-medium text-success" th:text="|$${#numbers.formatDecimal(checkoutCalc.depositPaid(), 0, 2)}|">$200.00</span>
+                </div>
+                <div class="flex justify-between py-2 border-t border-border">
+                    <span class="font-medium">Remaining Balance</span>
+                    <span class="font-medium" th:text="|$${#numbers.formatDecimal(checkoutCalc.remainingBalance(), 0, 2)}|">$800.00</span>
+                </div>
+
+                <!-- Late checkout -->
+                <div class="border-t border-border pt-3">
+                    <div class="flex items-center gap-3 mb-3">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" x-model="applyLateFee" class="rounded border-border">
+                            <span class="text-sm font-medium">Apply Late Checkout Fee</span>
+                        </label>
+                    </div>
+                    <div x-show="applyLateFee" class="mb-3">
+                        <label class="mb-1 block text-sm text-muted-foreground">Actual check-out time</label>
+                        <input type="datetime-local" x-model="actualCheckoutTime"
+                               class="input w-full"
+                               :disabled="!applyLateFee">
+                        <p class="mt-1 text-xs text-muted-foreground">
+                            Fee: <strong th:text="|$${#numbers.formatDecimal(config.lateCheckoutFee, 0, 2)}|">$50.00</strong>
+                        </p>
+                    </div>
+                    <div th:if="${checkoutCalc.extraGuestCount() > 0}" class="text-sm text-muted-foreground">
+                        <span th:text="|Extra guest fee: ${checkoutCalc.extraGuestCount()} guest(s) = $${#numbers.formatDecimal(checkoutCalc.extraGuestFee(), 0, 2)}|">
+                            Extra guest fee: 1 guest(s) = $25.00
+                        </span>
+                    </div>
+                </div>
+
+                <div class="flex justify-between py-3 border-t-2 border-border text-lg font-bold">
+                    <span>Total Due</span>
+                    <span th:text="|$${#numbers.formatDecimal(checkoutCalc.totalDue(), 0, 2)}|">$800.00</span>
+                </div>
+            </div>
+
+            <!-- Payment method -->
+            <div class="mb-4">
+                <label class="mb-2 block text-sm font-medium text-foreground">Payment Method</label>
+                <div class="flex gap-3">
+                    <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-border px-4 py-3 has-[:checked]:border-primary has-[:checked]:bg-primary/5 transition-colors">
+                        <input type="radio" name="pm" value="CASH" x-model="paymentMethod" class="h-4 w-4 accent-primary">
+                        <span class="text-sm font-medium text-foreground">Cash</span>
+                    </label>
+                    <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-border px-4 py-3 has-[:checked]:border-primary has-[:checked]:bg-primary/5 transition-colors">
+                        <input type="radio" name="pm" value="CARD" x-model="paymentMethod" class="h-4 w-4 accent-primary">
+                        <span class="text-sm font-medium text-foreground">Card</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Confirm checkbox -->
+            <div class="rounded-xl border border-border bg-background p-4 mb-5">
+                <label class="flex items-start gap-3 cursor-pointer">
+                    <input type="checkbox" x-model="checkoutConfirmed" class="mt-0.5 h-4 w-4 accent-primary rounded">
+                    <span class="text-sm text-foreground">
+                        I confirm that I have settled the bill and checked out the guest.
+                    </span>
+                </label>
+            </div>
+
+            <div class="flex justify-end gap-3">
+                <button type="button" @click="checkoutOpen = false" class="btn btn-secondary">Cancel</button>
+                <button type="submit" form="checkoutForm"
+                        :disabled="!checkoutConfirmed"
+                        :class="checkoutConfirmed ? 'btn btn-primary' : 'btn btn-primary opacity-50 cursor-not-allowed'">
+                    Complete Check-Out
+                </button>
+            </div>
+        </div>
     </div>
 
 </main>

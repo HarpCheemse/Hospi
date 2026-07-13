@@ -5,6 +5,7 @@ import com.hospi.manage.features.payment.service.PaymentService;
 import com.hospi.manage.features.reservation.dto.request.DateSearchForm;
 import com.hospi.manage.features.reservation.dto.request.OfflineBookingForm;
 import com.hospi.manage.features.reservation.dto.response.CreateDetailsView;
+import com.hospi.manage.features.reservation.dto.response.ReservationSummaryView;
 import com.hospi.manage.features.reservation.dto.response.RoomTypeAvailabilityView;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.mapper.ReservationMapper;
@@ -110,7 +111,7 @@ public class ReceptionistBookingController {
     @GetMapping("/{id}")
     String detail(@PathVariable Long id, Model model) {
         var reservation = reservationService.findById(id);
-        model.addAttribute(RESERVATION, reservation);
+        model.addAttribute(RESERVATION, ReservationSummaryView.from(reservation));
         model.addAttribute(GUESTS, stayingGuestService.getGuests(id));
         model.addAttribute(PAYMENTS, paymentService.getPaymentsByReservationId(id));
         model.addAttribute(NIGHTS, reservation.getCheckInAt() != null && reservation.getCheckOutAt() != null

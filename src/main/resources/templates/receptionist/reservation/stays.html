@@ -86,7 +86,7 @@
                         <div class="flex flex-wrap gap-1">
                             <th:block th:each="detail : ${g.details}">
                                 <span class="pill-muted"
-                                      th:text="${detail.roomType.name} + ' x' + ${detail.roomCount}">
+                                      th:text="${detail.roomTypeName} + ' x' + ${detail.roomCount}">
                                     Deluxe x2
                                 </span>
                             </th:block>

@@ -172,7 +172,7 @@
                     </thead>
                     <tbody>
                         <tr th:each="d : ${reservation.details}" class="border-b border-border/50">
-                            <td class="py-2 font-medium text-foreground" th:text="${d.roomType.name}">Deluxe King</td>
+                            <td class="py-2 font-medium text-foreground" th:text="${d.roomTypeName}">Deluxe King</td>
                             <td class="py-2 text-muted-foreground" th:text="${d.roomCount}">1</td>
                             <td class="py-2 text-muted-foreground"
                                 th:text="|$${#numbers.formatDecimal(d.basePrice, 1, 2)}|">$145.00</td>
