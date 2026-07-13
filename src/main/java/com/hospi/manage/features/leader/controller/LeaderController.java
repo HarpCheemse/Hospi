@@ -27,7 +27,9 @@ public class LeaderController {
     @GetMapping
     public String dashboard(Model model) {
         List<Room> allRooms = roomService.findAll();
-        long totalRooms = allRooms.size();
+        long totalRooms = allRooms.stream()
+                .filter(room -> room.getConditionStatus() != ConditionStatus.MAINTENANCE)
+                .count();
         long cleanRooms = allRooms.stream()
                 .filter(room -> room.getConditionStatus() == ConditionStatus.CLEAN)
                 .count();
