@@ -76,4 +76,13 @@ public class Attributes {
     public static final String FLOORS = "floors";
     public static final String SELECTED_FLOOR = "selectedFloor";
 
+    public static final String EDIT_GUEST_ID = "editGuestId";
+    public static final String ROOM_FORM = "roomForm";
+    public static final String EXTEND_FORM = "extendForm";
+    public static final String FROM_TYPE_ID = "fromTypeId";
+    public static final String OPTIONS = "options";
+    public static final String CURRENT_TYPE = "currentType";
+    public static final String REMAINING_NIGHTS = "remainingNights";
+    public static final String TOTAL_NIGHTS = "totalNights";
+
 }
