@@ -73,4 +73,7 @@ public class Attributes {
     public static final String GUESTS = "guests";
     public static final String PAYMENTS = "payments";
 
+    public static final String FLOORS = "floors";
+    public static final String SELECTED_FLOOR = "selectedFloor";
+
 }
