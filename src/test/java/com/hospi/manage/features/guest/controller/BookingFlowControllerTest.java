@@ -1,6 +1,7 @@
 package com.hospi.manage.features.guest.controller;
 
 import com.hospi.manage.common.exception.ResourceNotFoundException;
+import com.hospi.manage.common.interfaces.EmailService;
 import com.hospi.manage.features.auth.service.OtpService;
 import com.hospi.manage.features.guest.dto.BookingDraft;
 import com.hospi.manage.features.guest.service.BookingFlowService;
@@ -53,6 +54,9 @@ class BookingFlowControllerTest {
 
     @MockitoBean
     private NotificationService notificationService;
+
+    @MockitoBean
+    private EmailService emailService;
 
     @Test
     void createPayPalOrder_shouldRedirectToVerify_whenNoDraft() throws Exception {

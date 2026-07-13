@@ -51,4 +51,28 @@ public final class EmailTemplates {
                 """.formatted(code)
         );
     }
+
+    /** Booking confirmation sent after successful PayPal payment. */
+    public static EmailTemplate bookingConfirmation(String guestName, String code, String checkIn, String checkOut) {
+        return new EmailTemplate(
+                "Booking Confirmed - Hospi Hotel",
+                """
+                Hello %s,
+
+                Your booking at Hospi Hotel has been confirmed!
+
+                Booking Code: %s
+
+                Check-In:  %s
+                Check-Out: %s
+
+                Please present your booking code at the front desk during check-in.
+
+                We look forward to welcoming you!
+
+                Regards,
+                Hospi Hotel
+                """.formatted(guestName, code, checkIn, checkOut)
+        );
+    }
 }

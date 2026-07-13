@@ -1,6 +1,8 @@
 package com.hospi.manage.features.guest.controller;
 
 import com.hospi.manage.common.exception.ResourceNotFoundException;
+import com.hospi.manage.common.interfaces.EmailService;
+import com.hospi.manage.common.interfaces.EmailTemplates;
 import com.hospi.manage.features.auth.service.OtpService;
 import com.hospi.manage.features.guest.dto.BookingDraft;
 import com.hospi.manage.features.guest.dto.GuestDetailForm;
@@ -46,6 +48,7 @@ public class BookingFlowController {
     private final OtpService otpService;
     private final BookingDateValidator bookingDateValidator;
     private final PaymentService paymentService;
+    private final EmailService emailService;
 
     /** Step 1 — show date form. Resume check: skip to /book/pay if OTP verified + draft complete.
      *  Pending cleanup: cancel abandoned PENDING reservation. Otherwise: full reset. */
@@ -369,6 +372,17 @@ public class BookingFlowController {
                 draft.getRooms().depositAmount(), ONLINE_BOOKING, orderId);
 
         String confirmationCode = reservation.getConfirmationCode();
+
+        try {
+            var template = EmailTemplates.bookingConfirmation(
+                    reservation.getGuestName(),
+                    confirmationCode,
+                    reservation.getCheckInAt().toString(),
+                    reservation.getCheckOutAt().toString());
+            emailService.send(reservation.getGuestEmail(), template.subject(), template.content());
+        } catch (Exception e) {
+            log.warn("Failed to send confirmation email to {}: {}", reservation.getGuestEmail(), e.getMessage());
+        }
 
         session.removeAttribute(BOOKING_DRAFT);
         session.removeAttribute(OTP_TOKEN);

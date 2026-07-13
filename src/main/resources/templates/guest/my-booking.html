@@ -27,8 +27,7 @@
                 </div>
                 <div class="text-left">
                     <h1 class="text-4xl md:text-5xl font-bold font-display text-text">My Booking</h1>
-                    <p class="mt-1 text-sm text-muted-foreground">View your booking details and share your
-                        experience.</p>
+                    <p class="mt-1 text-sm text-muted-foreground">View your booking details and share your experience.</p>
                 </div>
             </div>
         </div>
@@ -44,8 +43,7 @@
                     <img th:src="@{/assets/icons/search.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
                     <div>
                         <h2 class="text-xl font-semibold">Track Your Booking</h2>
-                        <p class="mt-1 text-sm text-muted-foreground">Enter your email and booking code to look up your
-                            reservation.</p>
+                        <p class="mt-1 text-sm text-muted-foreground">Enter your email and booking code to look up your reservation.</p>
                     </div>
                 </div>
             </div>
@@ -53,35 +51,27 @@
             <form th:action="@{/my-booking/lookup}" th:object="${form}" method="post" class="flex flex-col gap-5 p-6" novalidate>
 
                 <div class="flex flex-col gap-2">
-                    <label class="text-sm font-medium" for="email">Email Address <span
-                            class="text-danger">*</span></label>
+                    <label class="text-sm font-medium" for="email">Email Address <span class="text-danger">*</span></label>
                     <div th:replace="~{fragments/form-error :: error('email')}"></div>
                     <input type="email" id="email" th:field="*{email}"
-                           placeholder="example@email.com"
-                           class="input"
-                           th:classappend="${#fields.hasErrors('email')} ? 'input-error' : ''"
-                           required>
+                           placeholder="example@email.com" class="input"
+                           th:classappend="${#fields.hasErrors('email')} ? 'input-error' : ''" required>
                 </div>
 
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium" for="bookingCode">Booking Code <span class="text-danger">*</span></label>
                     <div th:replace="~{fragments/form-error :: error('bookingCode')}"></div>
                     <input type="text" id="bookingCode" th:field="*{bookingCode}"
-                           placeholder="HSP-XXXXXX"
-                           class="input"
-                           th:classappend="${#fields.hasErrors('bookingCode')} ? 'input-error' : ''"
-                           required>
+                           placeholder="HSP-XXXXXX" class="input"
+                           th:classappend="${#fields.hasErrors('bookingCode')} ? 'input-error' : ''" required>
                 </div>
 
                 <div class="flex items-center justify-end gap-3 pt-2">
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        Send Verification Code
-                    </button>
+                    <button type="submit" class="btn btn-primary btn-lg">Send Verification Code</button>
                 </div>
             </form>
 
         </section>
-
 
     </section>
 
@@ -96,35 +86,34 @@
         </div>
 
         <div class="flex flex-col gap-6">
-            <div th:each="reservation : ${reservations}"
-                 class="card p-8">
+            <div th:each="r : ${reservations}" class="card p-8">
 
                 <!-- Header -->
-                <div class="flex items-start justify-between mb-4">
+                <div class="flex items-start justify-between mb-5">
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-widest text-accent"
-                           th:text="${reservation.confirmationCode}">HSP-A1B2C3</p>
-                        <h3 class="text-xl font-bold font-display text-text mt-1"
-                            th:text="${reservation.guestName}">Nguyen Van A</h3>
+                           th:text="${r.confirmationCode}">HSP-A1B2C3</p>
+                        <h3 class="text-xl font-bold font-display text-text mt-1" th:text="${r.guestName}">Nguyen Van A</h3>
                     </div>
-                    <span th:classappend="${pillClasses.get(reservation.id)}"
-                          class="text-xs font-semibold px-3 py-1 rounded-full"
-                          th:text="${reservation.status.name()}">
-              CONFIRMED
-            </span>
+                    <div class="flex items-center gap-2">
+                        <span class="pill-muted text-xs" th:text="${r.source.name()}">ONLINE</span>
+                        <span th:classappend="${pillClasses.get(r.id)}" class="text-xs font-semibold px-3 py-1 rounded-full"
+                              th:text="${r.status.name()}">CONFIRMED</span>
+                    </div>
                 </div>
 
-                <!-- Details Grid -->
-                <div class="grid grid-cols-2 gap-4 text-sm mb-4">
+                <!-- Dates -->
+                <div class="grid grid-cols-2 gap-4 text-sm mb-5">
                     <div>
                         <span class="text-muted-foreground">Check-In</span>
-                        <p class="font-medium text-foreground"
-                           th:text="${#temporals.format(reservation.checkInAt, 'dd MMM yyyy')}">15 Jun 2026</p>
+                        <p class="font-medium text-foreground" th:text="${#temporals.format(r.checkInAt, 'dd MMM yyyy')}">15 Jun 2026</p>
                     </div>
                     <div>
                         <span class="text-muted-foreground">Check-Out</span>
-                        <p class="font-medium text-foreground"
-                           th:text="${#temporals.format(reservation.checkOutAt, 'dd MMM yyyy')}">18 Jun 2026</p>
+                        <p class="font-medium text-foreground" th:text="${#temporals.format(r.checkOutAt, 'dd MMM yyyy')}">18 Jun 2026</p>
+                    </div>
+                    <div class="col-span-2 -mt-1">
+                        <span class="text-xs text-muted-foreground" th:text="|${r.nights()} night${r.nights() != 1 ? 's' : ''}|">3 nights</span>
                     </div>
                 </div>
 
@@ -132,36 +121,33 @@
                 <div class="mb-4">
                     <span class="text-xs text-muted-foreground">Rooms</span>
                     <div class="flex flex-wrap gap-2 mt-1">
-                        <th:block th:each="detail : ${reservation.details}">
-                <span class="inline-block rounded-full bg-background border border-border/60 px-3 py-1 text-xs text-foreground"
-                      th:text="${detail.roomType.name} + ' x' + ${detail.roomCount}">
-                  Deluxe x2
-                </span>
+                        <th:block th:each="detail : ${r.details}">
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-background border border-border/60 px-3 py-1 text-xs text-foreground"
+                                  th:text="${detail.roomTypeName} + ' x' + ${detail.roomCount}">
+                                Deluxe x2
+                            </span>
                         </th:block>
                     </div>
                 </div>
 
                 <!-- Review Section (only for CHECKED_OUT) -->
-                <div th:if="${checkedOut.get(reservation.id)}" class="mt-6 pt-4 border-t border-border/60">
+                <div th:if="${checkedOut.get(r.id)}" class="mt-6 pt-4 border-t border-border/60">
 
                     <!-- Already reviewed -->
-                    <div th:if="${reviewMap.containsKey(reservation.id)}" class="flex items-center gap-2">
+                    <div th:if="${reviewMap.containsKey(r.id)}" class="flex items-center gap-2">
                         <span class="text-sm text-muted-foreground">Your rating:</span>
                         <span th:each="i : ${#numbers.sequence(1, 5)}"
-                              th:text="${i <= reviewMap.get(reservation.id).rating} ? '★' : '☆'"
+                              th:text="${i <= reviewMap.get(r.id).rating} ? '★' : '☆'"
                               class="text-lg"
-                              th:classappend="${i <= reviewMap.get(reservation.id).rating} ? 'text-amber-400' : 'text-muted-foreground'">
-                ★
-              </span>
+                              th:classappend="${i <= reviewMap.get(r.id).rating} ? 'text-amber-400' : 'text-muted-foreground'">★</span>
                     </div>
 
                     <!-- Not yet reviewed -->
-                    <div th:if="${!reviewMap.containsKey(reservation.id)}" class="flex items-center gap-3">
+                    <div th:if="${!reviewMap.containsKey(r.id)}" class="flex items-center gap-3">
                         <span class="text-sm text-muted-foreground">Rate your stay:</span>
                         <form th:action="@{/my-booking/review}" method="post" class="flex items-center gap-2" novalidate>
-                            <input type="hidden" name="reservationId" th:value="${reservation.id}"/>
-                            <label class="text-sm font-medium" for="rating">Rating <span class="text-danger">*</span></label>
-                            <select name="rating" id="rating" required class="input">
+                            <input type="hidden" name="reservationId" th:value="${r.id}"/>
+                            <select name="rating" required class="input">
                                 <option value="">Rate...</option>
                                 <option value="1">1 - Poor</option>
                                 <option value="2">2 - Fair</option>

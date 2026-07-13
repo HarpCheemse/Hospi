@@ -3,6 +3,7 @@ package com.hospi.manage.features.guest.controller;
 import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.common.interfaces.EmailService;
 import com.hospi.manage.features.auth.enums.OtpType;
+import com.hospi.manage.features.reservation.dto.response.ReservationSummaryView;
 import com.hospi.manage.features.auth.service.OtpService;
 import com.hospi.manage.features.guest.dto.BookingTrackForm;
 import com.hospi.manage.features.guest.dto.OtpForm;
@@ -253,7 +254,8 @@ public class BookingTrackerController {
 
     private void buildMyBookingModel(Set<String> codes, Model model, String error) {
         List<Reservation> reservations = bookingTrackerService.resolveByCodes(codes);
-        model.addAttribute(RESERVATIONS, reservations);
+        model.addAttribute(RESERVATIONS,
+                reservations.stream().map(ReservationSummaryView::from).toList());
         model.addAttribute(REVIEW_MAP, bookingTrackerService.buildReviewMap(reservations));
         model.addAttribute(PILL_CLASSES, bookingTrackerService.buildPillClasses(reservations));
         addCheckedOutMap(model, reservations);
