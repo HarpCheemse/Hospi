@@ -168,7 +168,7 @@
                         <td class="px-4 py-3 text-sm text-muted-foreground">
                             <th:block th:if="${not #lists.isEmpty(b.details())}">
                                 <span th:each="d, stat : ${b.details()}"
-                                      th:text="${d.roomType?.name != null ? d.roomType.name : 'N/A'}">Deluxe</span>
+                                      th:text="${d.roomTypeName}">Deluxe</span>
                             </th:block>
                             <span th:if="${#lists.isEmpty(b.details())}">—</span>
                         </td>
