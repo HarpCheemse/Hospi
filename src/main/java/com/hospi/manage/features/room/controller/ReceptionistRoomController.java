@@ -28,9 +28,9 @@ public class ReceptionistRoomController {
     /** Show the room status overview page with floor-organized room grid. */
     @GetMapping
     String roomStatus(@RequestParam(required = false) Integer floor, Model model) {
-        model.addAttribute("hotel", hotelService.find());
-        model.addAttribute("floors", roomService.getFloorViews(floor));
-        model.addAttribute("selectedFloor", floor);
+        model.addAttribute(Attributes.HOTEL, hotelService.find());
+        model.addAttribute(Attributes.FLOORS, roomService.getFloorViews(floor));
+        model.addAttribute(Attributes.SELECTED_FLOOR, floor);
         return "receptionist/room-status";
     }
 

@@ -5,6 +5,7 @@ import com.hospi.manage.features.hotel.dto.HotelForm;
 import com.hospi.manage.features.hotel.entity.Hotel;
 import com.hospi.manage.features.hotel.service.HotelService;
 import com.hospi.manage.features.notification.service.NotificationService;
+import java.util.ArrayList;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -65,8 +66,17 @@ class HotelControllerTest {
 
     @Test
     void updateDetail_shouldRedirectWithSuccessFlash() throws Exception {
+        Hotel hotel = new Hotel();
+        hotel.setPictures(new ArrayList<>());
+        when(hotelService.find()).thenReturn(hotel);
+
         mockMvc.perform(post("/manager/details/edit")
-                        .param("name", "Updated"))
+                        .param("name", "Updated Hotel")
+                        .param("address", "123 Main St")
+                        .param("phone", "+1234567890")
+                        .param("checkInTime", "14:00")
+                        .param("checkOutTime", "11:00")
+                        .param("status", "ACTIVE"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/manager/details"))
                 .andExpect(flash().attribute(Attributes.SUCCESS, "Hotel details updated."));
@@ -74,11 +84,20 @@ class HotelControllerTest {
 
     @Test
     void updateDetail_shouldRedirectWithErrorFlash_whenIllegalState() throws Exception {
+        Hotel hotel = new Hotel();
+        hotel.setPictures(new ArrayList<>());
+        when(hotelService.find()).thenReturn(hotel);
+
         doThrow(new IllegalStateException("Update failed"))
                 .when(hotelService).update(any(), any(), any(), any());
 
         mockMvc.perform(post("/manager/details/edit")
-                        .param("name", "Updated"))
+                        .param("name", "Updated Hotel")
+                        .param("address", "123 Main St")
+                        .param("phone", "+1234567890")
+                        .param("checkInTime", "14:00")
+                        .param("checkOutTime", "11:00")
+                        .param("status", "ACTIVE"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/"))
                 .andExpect(flash().attribute(Attributes.ERROR, "Update failed"));
