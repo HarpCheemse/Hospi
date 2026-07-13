@@ -43,43 +43,88 @@
 
     </header>
 
+    <!-- SUMMARY BAR -->
+    <section class="mb-6 grid grid-cols-4 gap-4">
+        <div class="card-compact">
+            <div class="flex items-center gap-2 mb-1">
+                <img th:src="@{/assets/icons/clock.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                <p class="text-sm text-muted-foreground">Pending</p>
+            </div>
+            <p class="text-xl font-bold text-foreground" th:text="${pendingCount}">0</p>
+        </div>
+        <div class="card-compact">
+            <div class="flex items-center gap-2 mb-1">
+                <img th:src="@{/assets/icons/clipboard-check.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                <p class="text-sm text-muted-foreground">Confirmed</p>
+            </div>
+            <p class="text-xl font-bold text-foreground" th:text="${confirmedCount}">0</p>
+        </div>
+        <div class="card-compact">
+            <div class="flex items-center gap-2 mb-1">
+                <img th:src="@{/assets/icons/calendar-check.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                <p class="text-sm text-muted-foreground">Arriving Today</p>
+            </div>
+            <p class="text-xl font-bold text-foreground" th:text="${arrivingToday}">0</p>
+        </div>
+        <div class="card-compact">
+            <div class="flex items-center gap-2 mb-1">
+                <img th:src="@{/assets/icons/bed-double.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                <p class="text-sm text-muted-foreground">Active Total</p>
+            </div>
+            <p class="text-xl font-bold text-foreground" th:text="${pendingCount + confirmedCount}">0</p>
+        </div>
+    </section>
+
     <section class="overflow-hidden card">
 
-        <!-- FILTERS -->
+        <!-- SCOPE + SOURCE TABS -->
+        <div class="flex items-center justify-between border-b border-border px-5 pt-3 pb-0">
+            <div class="flex gap-1">
+                <a th:href="@{/receptionist/bookings(search=${view.filterSearch()}, source=${activeSource}, status=${view.filterStatus()})}"
+                   th:classappend="${activeScope == 'all'} ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'"
+                   class="px-3 py-2 text-sm font-medium border-b-2 transition">All</a>
+                <a th:href="@{/receptionist/bookings(scope='today', search=${view.filterSearch()}, source=${activeSource}, status=${view.filterStatus()})}"
+                   th:classappend="${activeScope == 'today'} ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'"
+                   class="px-3 py-2 text-sm font-medium border-b-2 transition">Today</a>
+            </div>
+            <div class="flex gap-1">
+                <a th:href="@{/receptionist/bookings(status=${view.filterStatus()}, search=${view.filterSearch()}, scope=${activeScope})}"
+                   th:classappend="${activeSource == null || activeSource == ''} ? 'border-primary/40 text-muted-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'"
+                   class="px-3 py-2 text-xs font-medium border-b-2 transition">All Sources</a>
+                <a th:href="@{/receptionist/bookings(source='ONLINE', status=${view.filterStatus()}, search=${view.filterSearch()}, scope=${activeScope})}"
+                   th:classappend="${activeSource == 'ONLINE'} ? 'border-primary/40 text-muted-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'"
+                   class="px-3 py-2 text-xs font-medium border-b-2 transition">Online</a>
+                <a th:href="@{/receptionist/bookings(source='OFFLINE', status=${view.filterStatus()}, search=${view.filterSearch()}, scope=${activeScope})}"
+                   th:classappend="${activeSource == 'OFFLINE'} ? 'border-primary/40 text-muted-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'"
+                   class="px-3 py-2 text-xs font-medium border-b-2 transition">Offline</a>
+            </div>
+        </div>
+
+        <!-- STATUS TABS -->
+        <div class="flex gap-1 border-b border-border px-5 pt-3 pb-0">
+            <a th:href="@{/receptionist/bookings(scope=${activeScope}, search=${view.filterSearch()}, source=${activeSource})}"
+               th:classappend="${view.filterStatus() == null || view.filterStatus() == ''} ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'"
+               class="px-3 py-2 text-sm font-medium border-b-2 transition">All</a>
+            <a th:href="@{/receptionist/bookings(scope=${activeScope}, status='PENDING', search=${view.filterSearch()}, source=${activeSource})}"
+               th:classappend="${view.filterStatus() == 'PENDING'} ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'"
+               class="px-3 py-2 text-sm font-medium border-b-2 transition">Pending</a>
+            <a th:href="@{/receptionist/bookings(scope=${activeScope}, status='CONFIRMED', search=${view.filterSearch()}, source=${activeSource})}"
+               th:classappend="${view.filterStatus() == 'CONFIRMED'} ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'"
+               class="px-3 py-2 text-sm font-medium border-b-2 transition">Confirmed</a>
+        </div>
+
+        <!-- SEARCH -->
         <form th:action="@{/receptionist/bookings}"
               method="get"
-              class="flex w-full items-end gap-4 border-b border-border p-5"
+              class="flex items-center gap-4 border-b border-border p-5"
               novalidate>
-
-            <div class="flex-1 flex flex-col gap-2">
-                <label class="text-sm font-medium">Status</label>
-                <select name="status" class="input">
-                    <option value="" th:selected="${view.filterStatus() == null}">All Statuses</option>
-                    <option value="PENDING" th:selected="${view.filterStatus() == 'PENDING'}">Pending</option>
-                    <option value="CONFIRMED" th:selected="${view.filterStatus() == 'CONFIRMED'}">Confirmed</option>
-                </select>
-            </div>
-
-            <div class="flex-1 flex flex-col gap-2">
-                <label class="text-sm font-medium">Date</label>
-                <input type="date" name="date" class="input"
-                       th:value="${view.filterDate()}">
-            </div>
-
-            <div class="flex-1 flex flex-col gap-2">
-                <label class="text-sm font-medium">Search</label>
-                <input type="text" name="search" placeholder="Search by guest name..." class="input"
-                       th:value="${view.filterSearch()}">
-            </div>
-
-            <div class="flex items-center gap-3">
-                <button type="submit"
-                        class="btn btn-primary btn-sm">Filter
-                </button>
-                <a th:href="@{/receptionist/bookings}"
-                   class="btn btn-secondary btn-sm">Clear</a>
-            </div>
-
+            <input type="hidden" name="status" th:value="${view.filterStatus()}">
+            <input type="hidden" name="source" th:value="${activeSource}">
+            <input type="hidden" name="scope" th:value="${activeScope}">
+            <input type="text" name="search" placeholder="Search by guest name..." class="input flex-1"
+                   th:value="${view.filterSearch()}">
+            <button type="submit" class="btn btn-primary btn-sm">Search</button>
+            <a th:href="@{/receptionist/bookings}" class="btn btn-ghost btn-sm">Clear</a>
         </form>
 
         <!-- TABLE -->
@@ -87,91 +132,65 @@
 
             <table class="w-full">
 
-                <thead class="bg-muted">
-
-                <tr>
-                    <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">
-                        Guest Name
-                    </th>
-
-                    <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">
-                        Status
-                    </th>
-
-                    <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">
-                        Check-In
-                    </th>
-
-                    <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">
-                        Check-Out
-                    </th>
-
-                    <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">
-                        Total
-                    </th>
-
-                    <th class="px-5 py-4 text-right text-sm font-medium text-muted-foreground">
-                        Actions
-                    </th>
-                </tr>
-
+                <thead>
+                    <tr class="border-b border-border text-muted-foreground">
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">RSV</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Guest</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Status</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Stay</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Total</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Source</th>
+                    </tr>
                 </thead>
 
                 <tbody>
 
                 <tr th:each="b : ${view.bookings()}"
-                    class="border-t border-border">
+                    th:attr="data-id=${b.id}"
+                    x-data
+                    x-on:click="window.location.href = '/receptionist/bookings/' + $el.dataset.id"
+                    class="border-t border-border hover:bg-muted/50 cursor-pointer">
 
-                    <td class="px-5 py-4">
-                        <p class="font-medium text-foreground"
-                           th:text="${b.guestName}">
-                            Jane Doe
-                        </p>
-                        <p class="text-sm text-muted-foreground max-w-[200px] truncate"
-                           th:text="${b.guestEmail}">
-                            jane@hospi.com
-                        </p>
+                    <td class="px-4 py-3 text-xs text-muted-foreground font-mono">
+                        #<span th:text="${b.id}">00152</span>
                     </td>
 
-                    <td class="px-5 py-4">
+                    <td class="px-4 py-3">
+                        <span class="font-medium text-foreground" th:text="${b.guestName}">Jane Doe</span>
+                        <p class="text-xs text-muted-foreground truncate max-w-[180px]"
+                           th:text="${b.guestEmail}">jane@hospi.com</p>
+                    </td>
+
+                    <td class="px-4 py-3">
                         <span th:switch="${b.status}"
                               class="text-xs font-medium">
-                            <span th:case="'PENDING'"
-                                  class="pill-warning">Pending</span>
-                            <span th:case="'CONFIRMED'"
-                                  class="pill-muted">Confirmed</span>
-                            <span th:case="*"
-                                  class="pill-muted"
-                                  th:text="${b.status}">Unknown</span>
+                            <span th:case="'PENDING'" class="pill-warning">Pending</span>
+                            <span th:case="'CONFIRMED'" class="pill-muted">Confirmed</span>
+                            <span th:case="*" class="pill-muted" th:text="${b.status}">Unknown</span>
                         </span>
                     </td>
 
-                    <td class="px-5 py-4 text-sm text-muted-foreground"
-                        th:text="${#temporals.format(b.checkInAt, 'dd MMM yyyy')}">
-                        15 Jun 2026
+                    <td class="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
+                        <span th:text="${#temporals.format(b.checkInAt, 'dd MMM')}">15 Jun</span>
+                        <span class="mx-1">-</span>
+                        <span th:text="${#temporals.format(b.checkOutAt, 'dd MMM')}">18 Jun</span>
                     </td>
 
-                    <td class="px-5 py-4 text-sm text-muted-foreground"
-                        th:text="${#temporals.format(b.checkOutAt, 'dd MMM yyyy')}">
-                        18 Jun 2026
-                    </td>
-
-                    <td class="px-5 py-4 text-sm font-medium text-foreground"
-                        th:text="|$ ${#numbers.formatDecimal(b.totalPrice, 0, 2)}|">
+                    <td class="px-4 py-3 text-sm font-medium text-foreground"
+                        th:text="|$${#numbers.formatDecimal(b.totalPrice, 0, 2)}|">
                         $960.00
                     </td>
 
-                    <td class="px-5 py-4 text-right">
-                        <a th:if="${b.showPayButton()}"
-                           th:href="@{/receptionist/reservations/{id}/payment(id=${b.id})}"
-                           class="btn btn-accent btn-sm">Pay</a>
-                        <a th:if="${b.showCheckInButton()}"
-                           th:href="@{/receptionist/reservations/{id}/checkin(id=${b.id})}"
-                           class="btn btn-primary btn-sm">Check-In</a>
-                        <a th:if="${b.showViewButton()}"
-                           class="btn btn-ghost btn-sm">View</a>
-                    </td>
+                    <td class="px-4 py-3 text-sm text-muted-foreground" th:text="${b.source}">ONLINE</td>
 
+                </tr>
+
+                <!-- EMPTY STATE -->
+                <tr th:if="${#lists.isEmpty(view.bookings())}">
+                    <td colspan="6" class="px-5 py-16 text-center">
+                        <p class="text-sm text-muted-foreground">No bookings found.</p>
+                        <p class="text-xs text-muted-foreground mt-1">Try adjusting your search or filters.</p>
+                    </td>
                 </tr>
 
                 </tbody>
@@ -180,21 +199,58 @@
                     <tr>
                         <td colspan="6" class="px-5 py-3">
                             <div class="flex items-center justify-between">
-                                <span class="text-sm text-muted-foreground">
-                                    Page <span th:text="${view.page() + 1}">1</span>
-                                    of <span th:text="${view.totalPages()}">1</span>
-                                </span>
                                 <div class="flex items-center gap-2">
-                                    <a th:href="@{/receptionist/bookings(status=${view.filterStatus()}, date=${view.filterDate()}, search=${view.filterSearch()}, page=${view.page() - 1})}"
+                                    <a th:href="@{/receptionist/bookings(scope=${activeScope}, source=${activeSource}, status=${view.filterStatus()}, search=${view.filterSearch()}, page=${view.page() - 1})}"
                                        th:classappend="${view.page() == 0} ? 'pointer-events-none opacity-50' : ''"
-                                       class="btn btn-ghost btn-sm">Prev</a>
-                                    <input type="number" x-data
-                                           @keydown.enter="const p = new URLSearchParams(window.location.search); p.set('page', Math.max(0, (parseInt($event.target.value) || 1) - 1)); window.location.href = '?' + p.toString();"
-                                           min="1" th:max="${view.totalPages()}"
-                                           class="input w-16 text-center" placeholder="#">
-                                    <a th:href="@{/receptionist/bookings(status=${view.filterStatus()}, date=${view.filterDate()}, search=${view.filterSearch()}, page=${view.page() + 1})}"
+                                       class="btn btn-ghost btn-sm">&larr; Prev</a>
+
+                                    <div class="flex items-center gap-1">
+                                        <a th:href="@{/receptionist/bookings(scope=${activeScope}, source=${activeSource}, status=${view.filterStatus()}, search=${view.filterSearch()}, page=0)}"
+                                           th:classappend="${view.page() == 0} ? 'btn-primary' : 'btn-ghost'"
+                                           class="btn btn-sm w-8 justify-center">1</a>
+
+                                        <span th:if="${view.page() > 2}"
+                                              class="px-1 text-xs text-muted-foreground">&hellip;</span>
+
+                                        <div th:if="${view.totalPages() > 2}"
+                                             class="flex items-center gap-1">
+                                            <a th:each="p : ${#numbers.sequence(1, view.totalPages() - 2)}"
+                                               th:if="${p >= view.page() - 1 and p <= view.page() + 1}"
+                                               th:href="@{/receptionist/bookings(scope=${activeScope}, source=${activeSource}, status=${view.filterStatus()}, search=${view.filterSearch()}, page=${p})}"
+                                               th:classappend="${p == view.page()} ? 'btn-primary' : 'btn-ghost'"
+                                               class="btn btn-sm w-8 justify-center"
+                                               th:text="${p + 1}">2</a>
+                                        </div>
+
+                                        <span th:if="${view.page() < view.totalPages() - 3}"
+                                              class="px-1 text-xs text-muted-foreground">&hellip;</span>
+
+                                        <a th:href="@{/receptionist/bookings(scope=${activeScope}, source=${activeSource}, status=${view.filterStatus()}, search=${view.filterSearch()}, page=${view.totalPages() - 1})}"
+                                           th:classappend="${view.page() == view.totalPages() - 1} ? 'btn-primary' : 'btn-ghost'"
+                                           class="btn btn-sm w-8 justify-center"
+                                           th:text="${view.totalPages()}">10</a>
+                                    </div>
+
+                                    <a th:href="@{/receptionist/bookings(scope=${activeScope}, source=${activeSource}, status=${view.filterStatus()}, search=${view.filterSearch()}, page=${view.page() + 1})}"
                                        th:classappend="${view.page() >= view.totalPages() - 1} ? 'pointer-events-none opacity-50' : ''"
-                                       class="btn btn-ghost btn-sm">Next</a>
+                                       class="btn btn-ghost btn-sm">Next &rarr;</a>
+                                </div>
+
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm text-muted-foreground">
+                                        Page <span th:text="${view.page() + 1}">1</span>/<span th:text="${view.totalPages()}">1</span>
+                                    </span>
+
+                                    <form th:action="@{/receptionist/bookings(scope=${activeScope}, source=${activeSource}, status=${view.filterStatus()}, search=${view.filterSearch()})}"
+                                          method="get" class="flex items-center gap-1"
+                                          onsubmit="const input = this.querySelector('[name=page]'); input.value = parseInt(input.value) - 1 || 0;">
+                                        <input type="hidden" name="status" th:value="${view.filterStatus()}">
+                                        <input type="hidden" name="scope" th:value="${activeScope}"><input type="hidden" name="search" th:value="${view.filterSearch()}">
+                                        <input type="number" name="page" min="1" th:max="${view.totalPages()}"
+                                               class="input input-sm w-16 text-center" placeholder="#"
+                                               th:value="${view.page() + 1}">
+                                        <button type="submit" class="btn btn-ghost btn-sm px-2">Go</button>
+                                    </form>
                                 </div>
                             </div>
                         </td>
