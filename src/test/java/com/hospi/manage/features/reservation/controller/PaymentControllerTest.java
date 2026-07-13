@@ -82,10 +82,8 @@ class PaymentControllerTest {
         when(reservationService.findById(1L)).thenReturn(reservation);
 
         mockMvc.perform(get("/receptionist/reservations/1/payment"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("receptionist/reservation/confirm-payment"))
-                .andExpect(model().attributeExists(VIEW))
-                .andExpect(content().string(containsString("John Doe")));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/receptionist/bookings/1"));
     }
 
     @Test
@@ -95,7 +93,7 @@ class PaymentControllerTest {
 
         mockMvc.perform(get("/receptionist/reservations/1/payment"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/receptionist/reservations"));
+                .andExpect(redirectedUrl("/receptionist/bookings/1"));
     }
 
     // --- POST /{id}/payment ---
@@ -105,7 +103,7 @@ class PaymentControllerTest {
         mockMvc.perform(post("/receptionist/reservations/1/payment")
                         .param("paymentMethod", "CASH"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/receptionist/reservations"))
+                .andExpect(redirectedUrl("/receptionist/bookings"))
                 .andExpect(flash().attributeExists(SUCCESS));
 
         verify(paymentService).confirmPayment(eq(1L), eq(PaymentMethod.CASH), eq("receptionist@test.com"));
@@ -119,7 +117,7 @@ class PaymentControllerTest {
         mockMvc.perform(post("/receptionist/reservations/1/payment")
                         .param("paymentMethod", "CARD"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/receptionist/reservations"))
+                .andExpect(redirectedUrl("/receptionist/bookings"))
                 .andExpect(flash().attributeExists(ERROR));
     }
 }

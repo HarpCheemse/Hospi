@@ -1,6 +1,7 @@
 package com.hospi.manage.features.reservation.controller;
 
 import com.hospi.manage.features.notification.service.NotificationService;
+import com.hospi.manage.features.payment.service.PaymentService;
 import com.hospi.manage.features.reservation.dto.request.*;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.BookingSource;
@@ -76,6 +77,9 @@ class ReceptionistReservationControllerTest {
 
     @MockitoBean
     private NotificationService notificationService;
+
+    @MockitoBean
+    private PaymentService paymentService;
 
     private Reservation createReservation(ReservationStatus status) {
         Reservation r = new Reservation();

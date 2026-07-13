@@ -122,7 +122,7 @@ class ReceptionistCheckoutControllerTest {
 
         mockMvc.perform(get("/receptionist/reservations/1/checkout"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/receptionist/reservations"));
+                .andExpect(redirectedUrl("/receptionist/bookings"));
     }
 
     @Test
@@ -226,6 +226,6 @@ class ReceptionistCheckoutControllerTest {
 
         mockMvc.perform(get("/receptionist/reservations/1/receipt"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/receptionist/reservations"));
+                .andExpect(redirectedUrl("/receptionist/bookings"));
     }
 }
