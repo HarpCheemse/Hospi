@@ -52,7 +52,7 @@ public class ReceptionistStayController {
         return "receptionist/reservation/stays";
     }
 
-    @GetMapping("/{id}/manage")
+    @GetMapping("/{id}")
     String manage(@PathVariable Long id, @RequestParam(required = false) Long edit, Model model) {
         var reservation = reservationService.findById(id);
         if (reservation.getStatus() != ReservationStatus.CHECKED_IN) {
@@ -86,7 +86,7 @@ public class ReceptionistStayController {
         }
         stayingGuestService.addGuest(id, form);
         redirect.addFlashAttribute(Attributes.SUCCESS, "Guest added successfully.");
-        return "redirect:/receptionist/stays/" + id + "/manage";
+        return "redirect:/receptionist/stays/" + id + "";
     }
 
     @PostMapping("/{id}/manage/guests/{guestId}")
@@ -102,14 +102,14 @@ public class ReceptionistStayController {
         }
         stayingGuestService.updateGuest(id, guestId, form);
         redirect.addFlashAttribute(Attributes.SUCCESS, "Guest updated successfully.");
-        return "redirect:/receptionist/stays/" + id + "/manage";
+        return "redirect:/receptionist/stays/" + id + "";
     }
 
     @PostMapping("/{id}/manage/guests/{guestId}/delete")
     String deleteGuest(@PathVariable Long id, @PathVariable Long guestId, RedirectAttributes redirect) {
         stayingGuestService.deleteGuest(id, guestId);
         redirect.addFlashAttribute(Attributes.SUCCESS, "Guest removed successfully.");
-        return "redirect:/receptionist/stays/" + id + "/manage";
+        return "redirect:/receptionist/stays/" + id + "";
     }
 
     @PostMapping("/{id}/manage/rooms")
@@ -127,14 +127,14 @@ public class ReceptionistStayController {
         } catch (IllegalStateException e) {
             redirect.addFlashAttribute(Attributes.ERROR, e.getMessage());
         }
-        return "redirect:/receptionist/stays/" + id + "/manage";
+        return "redirect:/receptionist/stays/" + id + "";
     }
 
     @PostMapping("/{id}/manage/rooms/{assignmentId}/remove")
     String removeRoom(@PathVariable Long id, @PathVariable Long assignmentId, RedirectAttributes redirect) {
         roomAssignmentService.removeAssignment(id, assignmentId);
         redirect.addFlashAttribute(Attributes.SUCCESS, "Room assignment removed successfully.");
-        return "redirect:/receptionist/stays/" + id + "/manage";
+        return "redirect:/receptionist/stays/" + id + "";
     }
 
     @PostMapping("/{id}/manage/extend")
@@ -152,10 +152,10 @@ public class ReceptionistStayController {
         } catch (IllegalStateException | IllegalArgumentException e) {
             redirect.addFlashAttribute(Attributes.ERROR, e.getMessage());
         }
-        return "redirect:/receptionist/stays/" + id + "/manage";
+        return "redirect:/receptionist/stays/" + id + "";
     }
 
-    @GetMapping("/{id}/manage/swap")
+    @GetMapping("/{id}/swap")
     String swapForm(@PathVariable Long id, @RequestParam Long from, Model model) {
         var reservation = reservationService.findById(id);
         if (reservation.getStatus() != ReservationStatus.CHECKED_IN) {
@@ -179,7 +179,7 @@ public class ReceptionistStayController {
         return "receptionist/reservation/swap";
     }
 
-    @PostMapping("/{id}/manage/swap")
+    @PostMapping("/{id}/swap")
     String swapRoom(@PathVariable Long id, @RequestParam Long roomTypeId,
                     @RequestParam Long from, RedirectAttributes redirect) {
         try {
@@ -188,7 +188,7 @@ public class ReceptionistStayController {
         } catch (IllegalStateException | IllegalArgumentException e) {
             redirect.addFlashAttribute(Attributes.ERROR, e.getMessage());
         }
-        return "redirect:/receptionist/stays/" + id + "/manage";
+        return "redirect:/receptionist/stays/" + id + "";
     }
 
     private ManageReservationView buildManageView(Long id, Reservation reservation) {

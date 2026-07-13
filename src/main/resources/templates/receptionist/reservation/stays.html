@@ -68,7 +68,7 @@
                 <tr th:each="g : ${view.guests()}"
                     th:attr="data-id=${g.id}"
                     x-data
-                    x-on:click="window.location.href = '/receptionist/stays/' + $el.dataset.id + '/manage'"
+                    x-on:click="window.location.href = '/receptionist/stays/' + $el.dataset.id"
                     class="border-t border-border hover:bg-muted/50 cursor-pointer">
 
                     <td class="px-5 py-4">

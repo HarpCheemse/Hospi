@@ -64,7 +64,7 @@
             </section>
         </div>
 
-        <a th:href="@{/receptionist/stays/{id}/manage(id=${reservation.id})}"
+        <a th:href="@{/receptionist/stays/{id}(id=${reservation.id})}"
            class="btn btn-secondary btn-lg">
             &larr; Back
         </a>
@@ -115,7 +115,7 @@
 
             <div class="mt-auto">
                 <button class="btn btn-primary w-full"
-                        th:attr="data-url='/receptionist/stays/' + ${reservation.id} + '/manage/swap?roomTypeId=' + ${opt.id} + '&amp;from=' + ${fromTypeId}"
+                        th:attr="data-url='/receptionist/stays/' + ${reservation.id} + '/swap?roomTypeId=' + ${opt.id} + '&amp;from=' + ${fromTypeId}"
                         x-on:click="openModal($el.dataset.url)">
                     Swap 1× <span th:text="${currentType.name}">Deluxe</span> → <span th:text="${opt.name}">Suite</span>
                 </button>
