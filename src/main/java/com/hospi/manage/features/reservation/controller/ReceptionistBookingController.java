@@ -1,6 +1,7 @@
 package com.hospi.manage.features.reservation.controller;
 
 import com.hospi.manage.common.constant.Attributes;
+import com.hospi.manage.features.payment.service.PaymentService;
 import com.hospi.manage.features.reservation.dto.request.DateSearchForm;
 import com.hospi.manage.features.reservation.dto.request.OfflineBookingForm;
 import com.hospi.manage.features.reservation.dto.response.CreateDetailsView;
@@ -9,6 +10,7 @@ import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.mapper.ReservationMapper;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.reservation.service.RoomAvailabilityService;
+import com.hospi.manage.features.reservation.service.StayingGuestService;
 import com.hospi.manage.features.reservation.validation.DateSearchValidator;
 import com.hospi.manage.features.reservation.validation.OfflineBookingFormValidator;
 import com.hospi.manage.features.room.dto.response.RoomSelection;
@@ -27,6 +29,11 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import static com.hospi.manage.common.constant.Attributes.GUESTS;
+import static com.hospi.manage.common.constant.Attributes.NIGHTS;
+import static com.hospi.manage.common.constant.Attributes.PAYMENTS;
+import static com.hospi.manage.common.constant.Attributes.RESERVATION;
+
 /** Controller for the receptionist active bookings listing and creation flow. */
 @Controller
 @RequestMapping("/receptionist/bookings")
@@ -37,6 +44,8 @@ public class ReceptionistBookingController {
     private final OfflineBookingFormValidator offlineBookingFormValidator;
     private final DateSearchValidator dateSearchValidator;
     private final RoomAvailabilityService roomAvailabilityService;
+    private final PaymentService paymentService;
+    private final StayingGuestService stayingGuestService;
 
     private static final int PAGE_SIZE = 10;
 
@@ -45,19 +54,69 @@ public class ReceptionistBookingController {
         model.addAttribute(Attributes.ACTIVE_SIDEBAR, Attributes.ACTIVE_BOOKINGS);
     }
 
+    private static final String PENDING_COUNT = "pendingCount";
+    private static final String CONFIRMED_COUNT = "confirmedCount";
+    private static final String ARRIVING_TODAY = "arrivingToday";
+
+    private static final String ACTIVE_SOURCE = "activeSource";
+    private static final String ACTIVE_SCOPE = "activeScope";
+
     @GetMapping
     String activeBookings(@RequestParam(required = false) String status,
                           @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
                           @RequestParam(required = false) String search,
+                          @RequestParam(required = false) String source,
+                          @RequestParam(name = "scope", required = false) String scope,
                           @RequestParam(name = "page", defaultValue = "0") int page, Model model) {
         List<ReservationStatus> statuses = (status != null && !status.isBlank())
                 ? List.of(ReservationStatus.valueOf(status))
                 : List.of(ReservationStatus.PENDING, ReservationStatus.CONFIRMED);
 
+        var paged = reservationService.findFiltered(statuses, search, date, PageRequest.of(page, PAGE_SIZE));
+
+        var today = LocalDate.now();
+
+        if (source != null && !source.isBlank()) {
+            var filtered = paged.getContent().stream()
+                    .filter(r -> r.getSource() != null && r.getSource().name().equals(source))
+                    .toList();
+            paged = new org.springframework.data.domain.PageImpl<>(
+                    filtered, PageRequest.of(page, PAGE_SIZE), filtered.size());
+        }
+
+        if ("today".equals(scope)) {
+            var filtered = paged.getContent().stream()
+                    .filter(r -> r.getCheckInAt() != null && r.getCheckInAt().equals(today))
+                    .toList();
+            paged = new org.springframework.data.domain.PageImpl<>(
+                    filtered, PageRequest.of(page, PAGE_SIZE), filtered.size());
+        }
+
         model.addAttribute(Attributes.VIEW,
-                ReservationMapper.toActiveBookingsView(reservationService.findFiltered(
-                        statuses, search, date, PageRequest.of(page, PAGE_SIZE)), status, date, search));
+                ReservationMapper.toActiveBookingsView(paged, status, date, search));
+        model.addAttribute(ACTIVE_SOURCE, source);
+        model.addAttribute(ACTIVE_SCOPE, scope != null ? scope : "all");
+
+        model.addAttribute(PENDING_COUNT, reservationService.findByStatus(ReservationStatus.PENDING).size());
+        model.addAttribute(CONFIRMED_COUNT, reservationService.findByStatus(ReservationStatus.CONFIRMED).size());
+        model.addAttribute(ARRIVING_TODAY,
+                reservationService.findByStatus(ReservationStatus.CONFIRMED).stream()
+                        .filter(r -> r.getCheckInAt() != null && r.getCheckInAt().equals(today))
+                        .count());
+
         return "receptionist/reservation/active";
+    }
+
+    @GetMapping("/{id}")
+    String detail(@PathVariable Long id, Model model) {
+        var reservation = reservationService.findById(id);
+        model.addAttribute(RESERVATION, reservation);
+        model.addAttribute(GUESTS, stayingGuestService.getGuests(id));
+        model.addAttribute(PAYMENTS, paymentService.getPaymentsByReservationId(id));
+        model.addAttribute(NIGHTS, reservation.getCheckInAt() != null && reservation.getCheckOutAt() != null
+                ? ChronoUnit.DAYS.between(reservation.getCheckInAt(), reservation.getCheckOutAt())
+                : 0);
+        return "receptionist/reservation/detail";
     }
 
     @GetMapping("/create")

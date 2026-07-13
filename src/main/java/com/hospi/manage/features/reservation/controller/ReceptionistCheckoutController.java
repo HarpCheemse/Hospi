@@ -49,7 +49,7 @@ public class ReceptionistCheckoutController {
         Reservation reservation = reservationService.findById(id);
         if (reservation.getStatus() != ReservationStatus.CHECKED_IN
                 && reservation.getStatus() != ReservationStatus.CONFIRMED) {
-            return "redirect:/receptionist/reservations";
+            return "redirect:/receptionist/bookings";
         }
 
         int adultGuests = stayingGuestService.getAdultGuestCount(id, reservation.getCheckInAt());
@@ -94,7 +94,7 @@ public class ReceptionistCheckoutController {
     String receipt(@PathVariable Long id, Model model) {
         Reservation reservation = reservationService.findById(id);
         if (reservation.getStatus() != ReservationStatus.CHECKED_OUT) {
-            return "redirect:/receptionist/reservations";
+            return "redirect:/receptionist/bookings";
         }
 
         List<Payment> payments = paymentRepository.findAllByReservationId(id);
