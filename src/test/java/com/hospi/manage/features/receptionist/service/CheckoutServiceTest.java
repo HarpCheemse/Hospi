@@ -184,7 +184,7 @@ class CheckoutServiceTest {
         );
 
         Reservation result = checkoutService.complete(1L, calc,
-                PaymentMethod.CASH, "receptionist", false);
+                PaymentMethod.CASH, "receptionist");
 
         assertEquals(ReservationStatus.CHECKED_OUT, result.getStatus());
         assertNotNull(result.getCheckedOutAt());
@@ -233,7 +233,7 @@ class CheckoutServiceTest {
                 0
         );
 
-        checkoutService.complete(1L, calc, PaymentMethod.CASH, "receptionist", false);
+        checkoutService.complete(1L, calc, PaymentMethod.CASH, "receptionist");
 
         verify(invoiceRepository).save(any());
     }
@@ -265,7 +265,7 @@ class CheckoutServiceTest {
         );
 
         Reservation result = checkoutService.complete(3L, calc,
-                PaymentMethod.CARD, "receptionist", false);
+                PaymentMethod.CARD, "receptionist");
 
         assertEquals(ReservationStatus.CHECKED_OUT, result.getStatus());
         assertNotNull(result.getCheckedInAt());

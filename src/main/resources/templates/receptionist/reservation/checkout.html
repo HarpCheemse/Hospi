@@ -70,7 +70,9 @@
             <h2 class="text-lg font-semibold text-foreground">Financial Breakdown</h2>
         </div>
         <div class="p-5" x-data="checkoutCalc()">
-            <div class="space-y-4">
+            <form th:action="@{/receptionist/reservations/{id}/checkout(id=${view.reservation.id})}"
+                  method="post"
+                  class="space-y-4">
                 <div class="flex justify-between py-2">
                     <span class="text-muted-foreground">Total Price</span>
                     <span class="font-medium" th:text="|$${#numbers.formatDecimal(view.calc.totalPrice, 0, 2)}|">$1000.00</span>
@@ -115,14 +117,11 @@
 
                 <div class="flex justify-between py-3 border-t-2 border-border text-lg font-bold">
                     <span>Total Due</span>
-                    <span th:text="|$${#numbers.formatDecimal(view.calc.totalDue, 0, 2)}|">$800.00</span>
+                    <span x-text="formatPrice(totalDue())" th:text="|$${#numbers.formatDecimal(view.calc.totalDue, 0, 2)}|">$800.00</span>
                 </div>
-            </div>
 
-            <!-- PAYMENT FORM -->
-            <form th:action="@{/receptionist/reservations/{id}/checkout(id=${view.reservation.id})}"
-                  method="post"
-                  class="mt-6 border-t border-border pt-6">
+            <!-- PAYMENT DETAILS -->
+            <div class="mt-6 border-t border-border pt-6">
 
                 <div class="flex items-end gap-4">
                     <div class="w-48">
@@ -137,7 +136,7 @@
                     <button type="button"
                             @click="if ($el.form.reportValidity()) checkoutModalOpen = true"
                             class="btn btn-primary btn-lg">
-                        Complete Check-Out &mdash; <span th:text="|$${#numbers.formatDecimal(view.calc.totalDue, 0, 2)}|">$800.00</span>
+                        Complete Check-Out &mdash; <span x-text="formatPrice(totalDue())" th:text="|$${#numbers.formatDecimal(view.calc.totalDue, 0, 2)}|">$800.00</span>
                     </button>
                 </div>
 
@@ -169,7 +168,7 @@
 
                         <p class="mt-4 text-sm text-muted-foreground">
                             You are about to complete the check-out for this booking. By confirming, you certify that the remaining balance of
-                            <strong class="text-foreground" th:text="|$${#numbers.formatDecimal(view.calc.totalDue, 0, 2)}|">$800.00</strong>
+                            <strong class="text-foreground" x-text="formatPrice(totalDue())" th:text="|$${#numbers.formatDecimal(view.calc.totalDue, 0, 2)}|">$800.00</strong>
                             has been collected from the guest.
                         </p>
 
@@ -210,12 +209,21 @@
 
 </main>
 
-<script>
+<script th:inline="javascript">
     function checkoutCalc() {
         return {
             applyLateFee: false,
             checkoutModalOpen: false,
-            checkoutConfirmed: false
+            checkoutConfirmed: false,
+            remainingBalance: /*[[${view.calc.remainingBalance}]]*/ 0.0,
+            lateCheckoutFee: /*[[${config.lateCheckoutFee}]]*/ 0.0,
+            extraGuestFee: /*[[${view.calc.extraGuestFee}]]*/ 0.0,
+            totalDue() {
+                return this.remainingBalance + (this.applyLateFee ? this.lateCheckoutFee : 0) + this.extraGuestFee;
+            },
+            formatPrice(val) {
+                return '$' + Number(val).toFixed(2);
+            }
         }
     }
 </script>

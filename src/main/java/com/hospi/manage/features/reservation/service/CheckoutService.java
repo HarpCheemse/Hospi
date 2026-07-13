@@ -76,8 +76,7 @@ public class CheckoutService {
 
     @Transactional
     public Reservation complete(Long reservationId, CheckoutCalculation calc,
-                                 PaymentMethod method, String principal,
-                                 boolean applyLateFee) {
+                                 PaymentMethod method, String principal) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
 
@@ -102,7 +101,7 @@ public class CheckoutService {
         payment.setConfirmedBy(principal);
         paymentRepository.save(payment);
 
-        BigDecimal appliedLateFee = applyLateFee ? calc.lateCheckoutFee() : BigDecimal.ZERO;
+        BigDecimal appliedLateFee = calc.isLate() ? calc.lateCheckoutFee() : BigDecimal.ZERO;
         BigDecimal appliedExtraGuestFee = calc.extraGuestFee();
 
         // Create invoice

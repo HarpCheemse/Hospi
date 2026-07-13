@@ -35,6 +35,13 @@ public record ReceiptView(
             LocalDateTime checkedOutAt = reservation.getCheckedOutAt();
             if (checkedOutAt != null) {
                 for (Payment p : payments) {
+                    /**
+                     * Heuristic: Distinguish checkout payment from deposit using a 5-second buffer.
+                     * Since the payment and checkout completion are distinct database operations occurring
+                     * near-simultaneously during the checkout flow, payments confirmed within 5 seconds before
+                     * or after the checkout completion time are classified as checkout payments. Any older
+                     * payments are classified as deposits.
+                     */
                     if (p.getConfirmedAt() != null && p.getConfirmedAt().isAfter(checkedOutAt.minusSeconds(5))) {
                         checkoutPayment = checkoutPayment.add(p.getAmount());
                     } else {
