@@ -20,6 +20,9 @@
         .btn-success:hover {
             background-color: #24633e;
         }
+        .stroke-success {
+            stroke: var(--color-success, #2F7D4F);
+        }
     </style>
 
     <script th:inline="javascript">
@@ -51,50 +54,77 @@
             </div>
         </header>
 
-        <!-- CONTAINER FOR TASK PANEL -->
-        <!-- CONTAINER FOR TASK PANEL -->
-        <section class="card-panel mt-6" th:x-data="|{ count: ${dirtyRooms.size()}, confirmOpen: false, selectedRoomId: null, selectedRoomNum: null, cleanedRooms: [] }|">
-            <div class="mb-4 flex items-center justify-between">
+        <!-- CONTAINER FOR TASK PANEL WITH GRID -->
+        <div class="grid grid-cols-12 gap-6 mt-6" th:x-data="|{ count: ${dirtyRooms.size()}, confirmOpen: false, selectedRoomId: null, selectedRoomNum: null, cleanedRooms: [], total: ${totalRooms}, clean: ${cleanRooms}, percent() { return this.total > 0 ? Math.round((this.clean / this.total) * 100) : 0; } }|">
+            
+            <!-- LEFT COLUMN: ACTIVE TASKS -->
+            <section class="card-panel col-span-12 lg:col-span-8">
+                <div class="mb-4 flex items-center justify-between">
+                    <div>
+                        <h2 class="text-lg font-semibold text-foreground">Active Tasks</h2>
+                        <p class="text-sm text-muted-foreground">Rooms requiring cleaning</p>
+                    </div>
+                </div>
+
+                <!-- EMPTY STATE -->
+                <div class="p-8 text-center text-muted-foreground" x-show="count === 0" x-cloak>
+                    <p class="text-lg font-medium">All tasks completed!</p>
+                    <p class="text-sm mt-1">No dirty rooms remaining.</p>
+                </div>
+
+                <!-- TASK LIST -->
+                <div class="flex flex-col gap-2" x-show="count > 0">
+                    <div th:each="room : ${dirtyRooms}" 
+                         th:x-data="|{ roomId: ${room.id}, roomNum: '${room.roomNumber}' }|"
+                         x-show="!cleanedRooms.includes(roomId)" 
+                         class="grid grid-cols-12 items-center gap-3 rounded-lg border border-border bg-background p-4 text-sm shadow-sm">
+                        
+                        <div class="col-span-3">
+                            <p class="font-bold text-foreground text-base" th:text="'Room ' + ${room.roomNumber}">Room 101</p>
+                            <p class="text-xs text-muted-foreground" th:text="${room.roomType?.name}">Standard Room</p>
+                        </div>
+
+                        <div class="col-span-3 text-muted-foreground">
+                            <span class="font-medium">Floor: </span><span th:text="${room.floorNumber}">1</span>
+                        </div>
+
+                        <div class="col-span-3">
+                            <span class="pill-danger">Dirty</span>
+                        </div>
+
+                        <div class="col-span-3 flex justify-end">
+                            <button class="btn btn-success" 
+                                    @click="selectedRoomId = roomId; selectedRoomNum = roomNum; confirmOpen = true">
+                                Mark Done
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT COLUMN: CLEANLINESS OVERVIEW STATS -->
+            <section class="card-panel col-span-12 lg:col-span-4 flex flex-col items-center justify-center p-6 text-center">
+                <div class="mb-4">
+                    <h2 class="text-lg font-semibold text-foreground">Cleanliness Overview</h2>
+                    <p class="text-sm text-muted-foreground">Overall room status</p>
+                </div>
+                
+                <div class="relative flex items-center justify-center my-6">
+                    <svg class="h-36 w-36 -rotate-90 transform" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="40" stroke="currentColor" stroke-width="8" class="text-border" fill="none" />
+                        <circle cx="50" cy="50" r="40" stroke-width="8" class="stroke-success transition-all duration-500 ease-out" fill="none"
+                                stroke-dasharray="251.2"
+                                :stroke-dashoffset="251.2 - (251.2 * percent() / 100)"
+                                stroke-linecap="round" />
+                    </svg>
+                    <div class="absolute text-3xl font-extrabold text-foreground" x-text="percent() + '%'"></div>
+                </div>
+
                 <div>
-                    <h2 class="text-lg font-semibold text-foreground">Active Tasks</h2>
-                    <p class="text-sm text-muted-foreground">Rooms requiring cleaning</p>
+                    <p class="text-base font-semibold text-foreground" x-text="clean + ' of ' + total + ' rooms clean'"></p>
+                    <p class="text-xs text-muted-foreground mt-1">Updated in real-time</p>
                 </div>
-            </div>
-
-            <!-- EMPTY STATE -->
-            <div class="p-8 text-center text-muted-foreground" x-show="count === 0" x-cloak>
-                <p class="text-lg font-medium">All tasks completed!</p>
-                <p class="text-sm mt-1">No dirty rooms remaining.</p>
-            </div>
-
-            <!-- TASK LIST -->
-            <div class="flex flex-col gap-2" x-show="count > 0">
-                <div th:each="room : ${dirtyRooms}" 
-                     th:x-data="|{ roomId: ${room.id}, roomNum: '${room.roomNumber}' }|"
-                     x-show="!cleanedRooms.includes(roomId)" 
-                     class="grid grid-cols-12 items-center gap-3 rounded-lg border border-border bg-background p-4 text-sm shadow-sm">
-                    
-                    <div class="col-span-3">
-                        <p class="font-bold text-foreground text-base" th:text="'Room ' + ${room.roomNumber}">Room 101</p>
-                        <p class="text-xs text-muted-foreground" th:text="${room.roomType?.name}">Standard Room</p>
-                    </div>
-
-                    <div class="col-span-3 text-muted-foreground">
-                        <span class="font-medium">Floor: </span><span th:text="${room.floorNumber}">1</span>
-                    </div>
-
-                    <div class="col-span-3">
-                        <span class="pill-danger">Dirty</span>
-                    </div>
-
-                    <div class="col-span-3 flex justify-end">
-                        <button class="btn btn-success" 
-                                @click="selectedRoomId = roomId; selectedRoomNum = roomNum; confirmOpen = true">
-                            Mark Done
-                        </button>
-                    </div>
-                </div>
-            </div>
+            </section>
 
             <!-- CONFIRMATION MODAL -->
             <div x-show="confirmOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
@@ -130,6 +160,7 @@
                                 if (response.ok) {
                                     cleanedRooms.push(selectedRoomId);
                                     count--;
+                                    clean++;
                                     confirmOpen = false;
                                 } else {
                                     alert('Error completing task for Room ' + selectedRoomNum);
@@ -143,7 +174,7 @@
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
 
     </main>
 
