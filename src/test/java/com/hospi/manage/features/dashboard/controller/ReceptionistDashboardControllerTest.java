@@ -37,6 +37,9 @@ class ReceptionistDashboardControllerTest {
     @MockitoBean
     private RoomAssignmentService roomAssignmentService;
 
+    @MockitoBean
+    private com.hospi.manage.features.notification.service.NotificationService notificationService;
+
     @Test
     void dashboard_shouldRender() throws Exception {
         when(reservationService.findByStatus(ReservationStatus.CONFIRMED)).thenReturn(List.of());

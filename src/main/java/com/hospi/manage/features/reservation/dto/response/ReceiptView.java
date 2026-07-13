@@ -4,6 +4,7 @@ import com.hospi.manage.features.payment.entity.Payment;
 import com.hospi.manage.features.reservation.entity.Reservation;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -11,24 +12,47 @@ import java.util.List;
  * No JPA entities are exposed.
  */
 public record ReceiptView(
-        ReservationSummaryView reservation,
+        Reservation reservation,
+        BigDecimal roomCharges,
+        BigDecimal lateCheckoutFee,
+        BigDecimal extraGuestFee,
+        BigDecimal totalCharges,
         BigDecimal depositPaid,
+        BigDecimal checkoutPayment,
         BigDecimal totalPaid
 ) {
     /** Create from JPA entities — converts to view models internally. */
     public static ReceiptView from(Reservation reservation, List<Payment> payments) {
-        BigDecimal depositPaid = payments.stream()
-                .map(Payment::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal roomCharges = reservation.getTotalPrice();
+        BigDecimal lateCheckoutFee = reservation.getLateCheckoutFeeApplied() != null ? reservation.getLateCheckoutFeeApplied() : BigDecimal.ZERO;
+        BigDecimal extraGuestFee = reservation.getExtraGuestFeeApplied() != null ? reservation.getExtraGuestFeeApplied() : BigDecimal.ZERO;
+        BigDecimal totalCharges = roomCharges.add(lateCheckoutFee).add(extraGuestFee);
 
-        BigDecimal totalPaid = depositPaid;
-        if (reservation.getLateCheckoutFeeApplied() != null) {
-            totalPaid = totalPaid.add(reservation.getLateCheckoutFeeApplied());
-        }
-        if (reservation.getExtraGuestFeeApplied() != null) {
-            totalPaid = totalPaid.add(reservation.getExtraGuestFeeApplied());
+        BigDecimal depositPaid = BigDecimal.ZERO;
+        BigDecimal checkoutPayment = BigDecimal.ZERO;
+
+        if (payments != null && !payments.isEmpty()) {
+            LocalDateTime checkedOutAt = reservation.getCheckedOutAt();
+            if (checkedOutAt != null) {
+                for (Payment p : payments) {
+                    if (p.getConfirmedAt() != null && p.getConfirmedAt().isAfter(checkedOutAt.minusSeconds(5))) {
+                        checkoutPayment = checkoutPayment.add(p.getAmount());
+                    } else {
+                        depositPaid = depositPaid.add(p.getAmount());
+                    }
+                }
+            } else {
+                depositPaid = payments.stream()
+                        .map(Payment::getAmount)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+            }
         }
 
-        return new ReceiptView(ReservationSummaryView.from(reservation), depositPaid, totalPaid);
+        BigDecimal totalPaid = depositPaid.add(checkoutPayment);
+
+        return new ReceiptView(
+                reservation, roomCharges, lateCheckoutFee, extraGuestFee, totalCharges,
+                depositPaid, checkoutPayment, totalPaid
+        );
     }
 }
