@@ -28,7 +28,7 @@
         </a>
 
         <!-- ACTIVE BOOKINGS -->
-        <a th:href="@{/receptionist/reservations}"
+        <a th:href="@{/receptionist/bookings}"
            class="flex items-center gap-3 rounded-lg p-2"
            th:classappend="${activeSidebar == 'ACTIVE_BOOKINGS'}
                  ? ' bg-primary/10 text-primary font-medium'
@@ -40,7 +40,7 @@
         </a>
 
         <!-- CURRENT STAYS -->
-        <a th:href="@{/receptionist/reservations/stays}"
+        <a th:href="@{/receptionist/stays}"
            class="flex items-center gap-3 rounded-lg p-2"
            th:classappend="${activeSidebar == 'CURRENT_STAYS'}
                  ? ' bg-primary/10 text-primary font-medium'

@@ -37,7 +37,7 @@
 
         </div>
 
-        <a th:href="@{/receptionist/reservations/create}" class="btn btn-primary btn-lg">
+        <a th:href="@{/receptionist/bookings/create}" class="btn btn-primary btn-lg">
             + Add Offline Booking
         </a>
 
@@ -46,7 +46,7 @@
     <section class="overflow-hidden card">
 
         <!-- FILTERS -->
-        <form th:action="@{/receptionist/reservations}"
+        <form th:action="@{/receptionist/bookings}"
               method="get"
               class="flex w-full items-end gap-4 border-b border-border p-5"
               novalidate>
@@ -76,7 +76,7 @@
                 <button type="submit"
                         class="btn btn-primary btn-sm">Filter
                 </button>
-                <a th:href="@{/receptionist/reservations}"
+                <a th:href="@{/receptionist/bookings}"
                    class="btn btn-secondary btn-sm">Clear</a>
             </div>
 
@@ -185,14 +185,14 @@
                                     of <span th:text="${view.totalPages()}">1</span>
                                 </span>
                                 <div class="flex items-center gap-2">
-                                    <a th:href="@{/receptionist/reservations(status=${view.filterStatus()}, date=${view.filterDate()}, search=${view.filterSearch()}, page=${view.page() - 1})}"
+                                    <a th:href="@{/receptionist/bookings(status=${view.filterStatus()}, date=${view.filterDate()}, search=${view.filterSearch()}, page=${view.page() - 1})}"
                                        th:classappend="${view.page() == 0} ? 'pointer-events-none opacity-50' : ''"
                                        class="btn btn-ghost btn-sm">Prev</a>
                                     <input type="number" x-data
                                            @keydown.enter="const p = new URLSearchParams(window.location.search); p.set('page', Math.max(0, (parseInt($event.target.value) || 1) - 1)); window.location.href = '?' + p.toString();"
                                            min="1" th:max="${view.totalPages()}"
                                            class="input w-16 text-center" placeholder="#">
-                                    <a th:href="@{/receptionist/reservations(status=${view.filterStatus()}, date=${view.filterDate()}, search=${view.filterSearch()}, page=${view.page() + 1})}"
+                                    <a th:href="@{/receptionist/bookings(status=${view.filterStatus()}, date=${view.filterDate()}, search=${view.filterSearch()}, page=${view.page() + 1})}"
                                        th:classappend="${view.page() >= view.totalPages() - 1} ? 'pointer-events-none opacity-50' : ''"
                                        class="btn btn-ghost btn-sm">Next</a>
                                 </div>

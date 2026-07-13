@@ -49,11 +49,11 @@
                         <p class="mt-1 text-sm text-muted-foreground">Manage active guest stays</p>
                     </div>
                 </div>
-                <form th:action="@{/receptionist/reservations/stays}" method="get" class="flex items-center gap-2" novalidate>
+                <form th:action="@{/receptionist/stays/stays}" method="get" class="flex items-center gap-2" novalidate>
                     <input type="text" name="search" placeholder="Search by name or phone..."
                            class="input" th:value="${view.checkedInSearch()}">
                     <button type="submit" class="btn btn-primary btn-sm">Filter</button>
-                    <a th:href="@{/receptionist/reservations/stays}" class="btn btn-secondary btn-sm">Clear</a>
+                    <a th:href="@{/receptionist/stays/stays}" class="btn btn-secondary btn-sm">Clear</a>
                 </form>
             </div>
         </div>
@@ -130,9 +130,9 @@
                     </td>
 
                     <td class="px-5 py-4 text-right">
-                        <a th:href="@{/receptionist/reservations/{id}/manage(id=${g.id})}"
+                        <a th:href="@{/receptionist/stays/{id}/manage(id=${g.id})}"
                            class="btn btn-primary btn-sm">Manage</a>
-                        <a th:href="@{/receptionist/reservations/{id}/checkout(id=${g.id})}"
+                        <a th:href="@{/receptionist/stays/{id}/checkout(id=${g.id})}"
                            class="btn btn-secondary btn-sm">Check-Out</a>
                     </td>
 
@@ -149,14 +149,14 @@
                                     of <span th:text="${view.totalPages()}">1</span>
                                 </span>
                                 <div class="flex items-center gap-2">
-                                    <a th:href="@{/receptionist/reservations/stays(search=${view.checkedInSearch()}, page=${view.page() - 1})}"
+                                    <a th:href="@{/receptionist/stays/stays(search=${view.checkedInSearch()}, page=${view.page() - 1})}"
                                        th:classappend="${view.page() == 0} ? 'pointer-events-none opacity-50' : ''"
                                        class="btn btn-ghost btn-sm">Prev</a>
                                     <input type="number" x-data
                                            @keydown.enter="const p = new URLSearchParams(window.location.search); p.set('page', Math.max(0, (parseInt($event.target.value) || 1) - 1)); window.location.href = '?' + p.toString();"
                                            min="1" th:max="${view.totalPages()}"
                                            class="input w-16 text-center" placeholder="#">
-                                    <a th:href="@{/receptionist/reservations/stays(search=${view.checkedInSearch()}, page=${view.page() + 1})}"
+                                    <a th:href="@{/receptionist/stays/stays(search=${view.checkedInSearch()}, page=${view.page() + 1})}"
                                        th:classappend="${view.page() >= view.totalPages() - 1} ? 'pointer-events-none opacity-50' : ''"
                                        class="btn btn-ghost btn-sm">Next</a>
                                 </div>

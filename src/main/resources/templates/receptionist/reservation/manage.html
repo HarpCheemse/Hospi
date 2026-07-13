@@ -90,9 +90,9 @@
                             </td>
                             <td class="py-3 pr-4 text-muted-foreground" th:text="${guest.nationality}">Vietnamese</td>
                             <td class="py-3 text-right">
-                                <a th:href="@{/receptionist/reservations/{id}/manage(id=${view.reservation().id}, edit=${guest.id})}"
+                                <a th:href="@{/receptionist/stays/{id}/manage(id=${view.reservation().id}, edit=${guest.id})}"
                                    class="text-sm text-primary hover:opacity-80 mr-3">Edit</a>
-                                <form th:action="@{/receptionist/reservations/{id}/manage/guests/{gid}/delete(id=${view.reservation().id}, gid=${guest.id})}"
+                                <form th:action="@{/receptionist/stays/{id}/manage/guests/{gid}/delete(id=${view.reservation().id}, gid=${guest.id})}"
                                       method="post"
                                       class="inline"
                                       novalidate
@@ -113,8 +113,8 @@
                 </div>
 
                 <form th:action="${editGuestId} != null
-                        ? @{/receptionist/reservations/{id}/manage/guests/{gid}(id=${view.reservation().id}, gid=${editGuestId})}
-                        : @{/receptionist/reservations/{id}/manage/guests(id=${view.reservation().id})}"
+                        ? @{/receptionist/stays/{id}/manage/guests/{gid}(id=${view.reservation().id}, gid=${editGuestId})}
+                        : @{/receptionist/stays/{id}/manage/guests(id=${view.reservation().id})}"
                       th:object="${form}"
                       method="post"
                       class="p-6"
@@ -158,7 +158,7 @@
                                 th:text="${editGuestId} != null ? 'Update Guest' : 'Add Guest'">Add Guest
                         </button>
                         <a th:if="${editGuestId} != null"
-                           th:href="@{/receptionist/reservations/{id}/manage(id=${view.reservation().id})}"
+                           th:href="@{/receptionist/stays/{id}/manage(id=${view.reservation().id})}"
                            class="btn btn-secondary btn-lg">Cancel</a>
                     </div>
 
@@ -214,7 +214,7 @@
                                     th:text="${'Floor ' + a.room.floorNumber}">Floor 2
                                 </td>
                                 <td class="py-3 text-right whitespace-nowrap">
-                                    <form th:action="@{/receptionist/reservations/{id}/manage/rooms/{aid}/remove(id=${view.reservation().id}, aid=${a.id})}"
+                                    <form th:action="@{/receptionist/stays/{id}/manage/rooms/{aid}/remove(id=${view.reservation().id}, aid=${a.id})}"
                                           method="post"
                                           class="inline"
                                           novalidate
@@ -235,7 +235,7 @@
 
                     <!-- assign room form -->
                     <div th:if="${!#lists.isEmpty(view.availableRooms())}" class="mt-4">
-                        <form th:action="@{/receptionist/reservations/{id}/manage/rooms(id=${view.reservation().id})}"
+                        <form th:action="@{/receptionist/stays/{id}/manage/rooms(id=${view.reservation().id})}"
                               th:object="${roomForm}"
                               method="post"
                               class="flex items-end gap-3"
@@ -361,7 +361,7 @@
 
                 <div class="p-6">
 
-                    <form th:action="@{/receptionist/reservations/{id}/manage/extend(id=${view.reservation().id})}"
+                    <form th:action="@{/receptionist/stays/{id}/manage/extend(id=${view.reservation().id})}"
                           th:object="${extendForm}"
                           method="post"
                           class="flex items-end gap-4"
@@ -414,7 +414,7 @@
                                 <td class="px-4 py-2 font-medium text-foreground" th:text="${d.roomType.name}">Deluxe Double</td>
                                 <td class="px-4 py-2 text-center text-muted-foreground" th:text="${d.roomCount}">2</td>
                                 <td class="px-4 py-2 text-right">
-                                    <a th:href="@{/receptionist/reservations/{id}/manage/swap(id=${view.reservation().id}, from=${d.roomType.id})}"
+                                    <a th:href="@{/receptionist/stays/{id}/manage/swap(id=${view.reservation().id}, from=${d.roomType.id})}"
                                        class="text-xs text-primary hover:underline">Swap</a>
                                 </td>
                             </tr>
