@@ -64,8 +64,13 @@ class LeaderControllerTest {
         room4.setRoomNumber("104");
         room4.setConditionStatus(ConditionStatus.CLEAN);
 
+        Room room5 = new Room();
+        room5.setId(5L);
+        room5.setRoomNumber("105");
+        room5.setConditionStatus(ConditionStatus.MAINTENANCE);
+
         when(roomService.getActiveDirtyRooms()).thenReturn(List.of(room1, room2));
-        when(roomService.findAll()).thenReturn(List.of(room1, room2, room3, room4));
+        when(roomService.findAll()).thenReturn(List.of(room1, room2, room3, room4, room5));
 
         mockMvc.perform(get("/leader"))
                 .andExpect(status().isOk())

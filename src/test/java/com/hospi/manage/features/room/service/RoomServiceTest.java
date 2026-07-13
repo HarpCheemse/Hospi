@@ -354,6 +354,37 @@ class RoomServiceTest {
     }
 
     @Test
+    void shouldNotifyLeader_whenConditionDirty_inUpdateRoom() {
+        Room room = new Room();
+        room.setId(1L);
+        room.setActive(true);
+        room.setFloorNumber((short) 1);
+        room.setRoomNumber("101");
+        room.setConditionStatus(ConditionStatus.CLEAN);
+
+        RoomType roomType = new RoomType();
+        roomType.setId(2L);
+        roomType.setActive(true);
+
+        RoomEditForm form = new RoomEditForm("101", 2L, ConditionStatus.DIRTY);
+
+        when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
+        when(roomTypeRepository.findById(2L)).thenReturn(Optional.of(roomType));
+
+        roomService.updateRoom(1L, form);
+
+        assertEquals(ConditionStatus.DIRTY, room.getConditionStatus());
+        verify(roomRepository).save(room);
+        verify(notificationService).notifyRole(
+                eq(Role.LEADER),
+                eq("Room Dirty"),
+                eq("Room 101 needs cleaning"),
+                eq("ROOM"),
+                eq("1")
+        );
+    }
+
+    @Test
     void shouldReturnFilteredFloorViews_whenFloorSpecified() {
         Room room1 = new Room();
         room1.setId(1L);
@@ -526,6 +557,29 @@ class RoomServiceTest {
                 Role.RECEPTIONIST,
                 "Room Ready",
                 "Room 101 is now clean and available",
+                "ROOM",
+                "1"
+            );
+    }
+
+    @Test
+    void updateConditionStatus_shouldNotifyLeader_whenRoomBecomesDirty() {
+        Room room = new Room();
+        room.setId(1L);
+        room.setActive(true);
+        room.setRoomNumber("101");
+        room.setConditionStatus(ConditionStatus.CLEAN);
+
+        when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
+
+        roomService.updateConditionStatus(1L, ConditionStatus.DIRTY);
+
+        assertEquals(ConditionStatus.DIRTY, room.getConditionStatus());
+        verify(roomRepository).save(room);
+        verify(notificationService).notifyRole(
+                Role.LEADER,
+                "Room Dirty",
+                "Room 101 needs cleaning",
                 "ROOM",
                 "1"
         );
