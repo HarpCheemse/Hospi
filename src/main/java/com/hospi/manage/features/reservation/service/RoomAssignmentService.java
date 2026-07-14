@@ -33,6 +33,11 @@ public class RoomAssignmentService {
         return roomAssignmentRepository.findByReservationIdOrderByAssignedAtAsc(reservationId);
     }
 
+    /** Return the total number of assigned rooms for a reservation. */
+    public int getAssignedRoomCount(Long reservationId) {
+        return (int) roomAssignmentRepository.countByReservationId(reservationId);
+    }
+
     /** Return all vacant rooms matching the reservation's room types. */
     public List<Room> getAvailableRooms(Long reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
@@ -76,6 +81,17 @@ public class RoomAssignmentService {
 
         if (room.getOccupancyStatus() != OccupancyStatus.VACANT) {
             throw new IllegalStateException("Room is not vacant");
+        }
+
+        Long roomTypeId = room.getRoomType().getId();
+        ReservationDetail detail = reservation.getDetails().stream()
+                .filter(d -> d.getRoomType().getId().equals(roomTypeId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Room type not requested in this reservation"));
+
+        long assignedCount = roomAssignmentRepository.countByReservationIdAndRoom_RoomTypeId(reservationId, roomTypeId);
+        if (assignedCount >= detail.getRoomCount()) {
+            throw new IllegalStateException("Cannot assign more rooms of type " + room.getRoomType().getName());
         }
 
         room.setOccupancyStatus(OccupancyStatus.OCCUPIED);

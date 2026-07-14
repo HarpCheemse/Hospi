@@ -163,7 +163,7 @@ class ReservationMapperTest {
         r.setDetails(List.of(createDetail(t, 2)));
 
         Page<Reservation> page = new PageImpl<>(List.of(r), PageRequest.of(0, 10), 1);
-        var view = ReservationMapper.toCurrentStaysView(page, "search-term");
+        var view = ReservationMapper.toCurrentStaysView(page, "search-term", "all");
 
         assertEquals(1, view.guests().size());
         assertEquals("search-term", view.checkedInSearch());

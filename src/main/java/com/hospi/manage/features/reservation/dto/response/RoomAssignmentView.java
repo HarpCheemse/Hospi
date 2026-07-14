@@ -9,6 +9,7 @@ import com.hospi.manage.features.reservation.entity.RoomAssignment;
 public record RoomAssignmentView(
         Long id,
         String roomNumber,
+        Long roomTypeId,
         String roomTypeName,
         Short floorNumber
 ) {
@@ -17,6 +18,7 @@ public record RoomAssignmentView(
         return new RoomAssignmentView(
                 assignment.getId(),
                 assignment.getRoom().getRoomNumber(),
+                assignment.getRoom().getRoomType().getId(),
                 assignment.getRoom().getRoomType().getName(),
                 assignment.getRoom().getFloorNumber()
         );

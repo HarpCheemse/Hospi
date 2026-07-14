@@ -11,6 +11,7 @@ import com.hospi.manage.features.reservation.dto.request.CheckoutForm;
 import com.hospi.manage.features.reservation.dto.request.ExtendStayForm;
 import com.hospi.manage.features.reservation.dto.request.StayingGuestForm;
 import com.hospi.manage.features.reservation.dto.response.CheckoutCalculation;
+import com.hospi.manage.features.reservation.dto.response.CurrentStaysView;
 import com.hospi.manage.features.reservation.dto.response.ManageReservationView;
 import com.hospi.manage.features.reservation.dto.response.ReservationSummaryView;
 import com.hospi.manage.features.reservation.entity.Reservation;
@@ -34,6 +35,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
 
 /** Controller for the receptionist current stays management (manage, guests, rooms, extend, swap). */
 @Controller
@@ -58,10 +61,31 @@ public class ReceptionistStayController {
 
     @GetMapping
     String currentStays(@RequestParam(name = "search", required = false) String search,
+                        @RequestParam(name = "scope", required = false) String scope,
                         @RequestParam(name = "page", defaultValue = "0") int page, Model model) {
-        model.addAttribute(Attributes.VIEW,
-                ReservationMapper.toCurrentStaysView(reservationService.findCheckedInFiltered(
-                        search, PageRequest.of(page, PAGE_SIZE)), search));
+        var paged = reservationService.findCheckedInFiltered(search, PageRequest.of(page, PAGE_SIZE));
+
+        var today = LocalDate.now();
+        if ("today".equals(scope)) {
+            var filtered = paged.getContent().stream()
+                    .filter(r -> r.getCheckOutAt() != null && r.getCheckOutAt().equals(today))
+                    .toList();
+            paged = new org.springframework.data.domain.PageImpl<>(
+                    filtered, PageRequest.of(page, PAGE_SIZE), filtered.size());
+        }
+
+        var view = ReservationMapper.toCurrentStaysView(paged, search, scope != null ? scope : "all");
+
+        var guestCounts = new HashMap<Long, Integer>();
+        var assignedCounts = new HashMap<Long, Integer>();
+        for (var g : paged.getContent()) {
+            guestCounts.put(g.getId(), stayingGuestService.getGuestCount(g.getId()));
+            assignedCounts.put(g.getId(), roomAssignmentService.getAssignedRoomCount(g.getId()));
+        }
+        model.addAttribute("guestCounts", guestCounts);
+        model.addAttribute("assignedCounts", assignedCounts);
+        model.addAttribute("activeScope", scope != null ? scope : "all");
+        model.addAttribute(Attributes.VIEW, view);
         return "receptionist/reservation/stays";
     }
 

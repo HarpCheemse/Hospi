@@ -9,6 +9,7 @@ import com.hospi.manage.features.room.entity.Room;
 public record AvailableRoomView(
         Long id,
         String roomNumber,
+        Long roomTypeId,
         String roomTypeName,
         Short floorNumber
 ) {
@@ -17,6 +18,7 @@ public record AvailableRoomView(
         return new AvailableRoomView(
                 room.getId(),
                 room.getRoomNumber(),
+                room.getRoomType().getId(),
                 room.getRoomType().getName(),
                 room.getFloorNumber()
         );

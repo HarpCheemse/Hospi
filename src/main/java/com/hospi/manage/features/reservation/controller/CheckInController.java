@@ -53,6 +53,9 @@ public class CheckInController {
                     e.getMessage());
         }
 
-        return "redirect:/receptionist/bookings";
+        if (redirect.getFlashAttributes().containsKey(Attributes.ERROR)) {
+            return "redirect:/receptionist/bookings/" + id;
+        }
+        return "redirect:/receptionist/stays/" + id;
     }
 }

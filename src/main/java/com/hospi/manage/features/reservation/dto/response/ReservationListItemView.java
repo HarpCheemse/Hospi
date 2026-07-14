@@ -24,5 +24,16 @@ public record ReservationListItemView(
     List<ReservationDetailView> details,
     boolean showPayButton,
     boolean showCheckInButton,
-    boolean showViewButton
-) {}
+    boolean showViewButton,
+    Integer registeredGuestCount,
+    Integer assignedRoomCount,
+    Integer totalRoomCount
+) {
+    public static ReservationListItemView withCounts(ReservationListItemView base, int guests, int assigned, int total) {
+        return new ReservationListItemView(
+                base.id(), base.guestName(), base.guestEmail(), base.guestPhone(),
+                base.checkInAt(), base.checkOutAt(), base.totalPrice(), base.status(),
+                base.source(), base.details(), base.showPayButton(), base.showCheckInButton(),
+                base.showViewButton(), guests, assigned, total);
+    }
+}

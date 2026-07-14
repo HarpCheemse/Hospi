@@ -3,13 +3,9 @@ package com.hospi.manage.features.reservation.service;
 import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.ReservationDetail;
-import com.hospi.manage.features.reservation.entity.RoomAssignment;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
-import com.hospi.manage.features.reservation.repository.RoomAssignmentRepository;
-import com.hospi.manage.features.room.entity.Room;
 import com.hospi.manage.features.room.entity.RoomType;
-import com.hospi.manage.features.room.enums.OccupancyStatus;
 import com.hospi.manage.features.room.repository.RoomRepository;
 import com.hospi.manage.features.room.repository.RoomTypeRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,9 +36,6 @@ class RoomUpgradeServiceTest {
 
     @Mock
     private RoomRepository roomRepository;
-
-    @Mock
-    private RoomAssignmentRepository roomAssignmentRepository;
 
     @InjectMocks
     private RoomUpgradeService service;
@@ -136,40 +129,6 @@ class RoomUpgradeServiceTest {
                 .filter(d -> d.getRoomType().getId().equals(2L))
                 .findFirst().orElseThrow();
         assertEquals(2, merged.getRoomCount());
-    }
-
-    @Test
-    void swapOne_shouldReassignRooms_whenCheckedIn() {
-        reservation.setStatus(ReservationStatus.CHECKED_IN);
-        detail.setRoomCount(1);
-
-        var oldRoom = new Room();
-        oldRoom.setId(1L);
-        var oldRoomType = new RoomType();
-        oldRoomType.setId(1L);
-        oldRoom.setRoomType(oldRoomType);
-        oldRoom.setOccupancyStatus(OccupancyStatus.OCCUPIED);
-
-        var assignment = new RoomAssignment();
-        assignment.setRoom(oldRoom);
-
-        var newRoom = new Room();
-        newRoom.setId(2L);
-        newRoom.setOccupancyStatus(OccupancyStatus.VACANT);
-
-        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
-        when(roomTypeRepository.findById(2L)).thenReturn(Optional.of(deluxeDouble));
-        when(roomAssignmentRepository.findByReservationIdOrderByAssignedAtAsc(1L))
-                .thenReturn(List.of(assignment));
-        when(roomRepository.findByRoomTypeIdAndOccupancyStatusAndActiveTrue(2L, OccupancyStatus.VACANT))
-                .thenReturn(List.of(newRoom));
-        when(reservationRepository.save(any())).thenReturn(reservation);
-
-        service.swapOne(1L, 1L, 2L);
-
-        assertEquals(OccupancyStatus.VACANT, oldRoom.getOccupancyStatus());
-        assertEquals(OccupancyStatus.OCCUPIED, newRoom.getOccupancyStatus());
-        verify(roomAssignmentRepository).save(any(RoomAssignment.class));
     }
 
     @Test

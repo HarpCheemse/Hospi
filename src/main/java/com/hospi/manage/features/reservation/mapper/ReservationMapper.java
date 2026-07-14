@@ -84,17 +84,20 @@ public class ReservationMapper {
      *
      * @param guests          paged reservation data for currently checked-in guests
      * @param checkedInSearch active search term
+     * @param checkoutFilter  active checkout date filter ("all" or "today")
      * @return a paginated current-stays view model
      */
     public static CurrentStaysView toCurrentStaysView(
             Page<Reservation> guests,
-            String checkedInSearch) {
+            String checkedInSearch,
+            String checkoutFilter) {
         return new CurrentStaysView(
                 toListItemViews(guests.getContent()),
                 checkedInSearch,
                 guests.getNumber(),
                 guests.getTotalPages(),
-                guests.getTotalElements());
+                guests.getTotalElements(),
+                checkoutFilter);
     }
 
     /**
@@ -129,7 +132,8 @@ public class ReservationMapper {
                 r.getDetails().stream().map(ReservationDetailView::from).toList(),
                 r.getStatus() == ReservationStatus.PENDING && r.getSource() == BookingSource.OFFLINE,
                 r.getStatus() == ReservationStatus.CONFIRMED,
-                r.getStatus() == ReservationStatus.PENDING && r.getSource() == BookingSource.ONLINE
+                r.getStatus() == ReservationStatus.PENDING && r.getSource() == BookingSource.ONLINE,
+                null, null, null
         );
     }
 }

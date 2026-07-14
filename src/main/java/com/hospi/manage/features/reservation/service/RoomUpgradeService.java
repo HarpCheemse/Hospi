@@ -3,10 +3,8 @@ package com.hospi.manage.features.reservation.service;
 import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.ReservationDetail;
-import com.hospi.manage.features.reservation.entity.RoomAssignment;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
-import com.hospi.manage.features.reservation.repository.RoomAssignmentRepository;
 import com.hospi.manage.features.room.entity.RoomType;
 import com.hospi.manage.features.room.enums.OccupancyStatus;
 import com.hospi.manage.features.room.repository.RoomRepository;
@@ -28,7 +26,6 @@ public class RoomUpgradeService {
     private final ReservationRepository reservationRepository;
     private final RoomTypeRepository roomTypeRepository;
     private final RoomRepository roomRepository;
-    private final RoomAssignmentRepository roomAssignmentRepository;
 
     /** Return room types available for upgrade from the given current type. */
     public List<RoomType> getUpgradeOptions(Reservation reservation, Long currentRoomTypeId) {
@@ -115,33 +112,6 @@ public class RoomUpgradeService {
         }
 
         reservation.setTotalPrice(reservation.getTotalPrice().add(delta));
-
-        if (reservation.getStatus() == ReservationStatus.CHECKED_IN) {
-            var oldAssignments = roomAssignmentRepository
-                    .findByReservationIdOrderByAssignedAtAsc(reservationId);
-            for (var a : oldAssignments) {
-                if (a.getRoom().getRoomType().getId().equals(currentRoomTypeId)) {
-                    var room = a.getRoom();
-                    room.setOccupancyStatus(OccupancyStatus.VACANT);
-                    roomRepository.save(room);
-                    roomAssignmentRepository.delete(a);
-                }
-            }
-
-            var vacantRooms = roomRepository
-                    .findByRoomTypeIdAndOccupancyStatusAndActiveTrue(newRoomTypeId, OccupancyStatus.VACANT);
-            if (vacantRooms.isEmpty()) {
-                throw new IllegalStateException("No vacant rooms available of type " + newRoomType.getName());
-            }
-            var newRoom = vacantRooms.get(0);
-            newRoom.setOccupancyStatus(OccupancyStatus.OCCUPIED);
-            roomRepository.save(newRoom);
-
-            var assignment = new RoomAssignment();
-            assignment.setReservation(reservation);
-            assignment.setRoom(newRoom);
-            roomAssignmentRepository.save(assignment);
-        }
 
         reservationRepository.save(reservation);
     }

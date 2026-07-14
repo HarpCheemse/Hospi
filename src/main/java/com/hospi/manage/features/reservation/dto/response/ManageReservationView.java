@@ -21,4 +21,17 @@ public record ManageReservationView(
     public long nights() {
         return reservation.nights();
     }
+
+    /** True if the room type has assigned rooms but no matching reservation detail. */
+    public boolean isOrphanedAssignment(Long roomTypeId) {
+        return reservation.details().stream()
+                .noneMatch(d -> d.roomTypeId().equals(roomTypeId));
+    }
+
+    /** True if there are any assigned rooms whose room type no longer exists on the reservation. */
+    public boolean hasOrphanedAssignments() {
+        return assignedRooms.stream()
+                .anyMatch(a -> reservation.details().stream()
+                        .noneMatch(d -> d.roomTypeId().equals(a.roomTypeId())));
+    }
 }

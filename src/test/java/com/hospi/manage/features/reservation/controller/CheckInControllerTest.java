@@ -98,11 +98,11 @@ class CheckInControllerTest {
     // --- POST /{id}/checkin ---
 
     @Test
-    void confirmCheckIn_shouldRedirectWithSuccess() throws Exception {
+    void confirmCheckIn_shouldRedirectToStays_whenSuccess() throws Exception {
         mockMvc.perform(post("/receptionist/reservations/1/checkin")
                         .param("bookingCode", ""))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/receptionist/bookings"))
+                .andExpect(redirectedUrl("/receptionist/stays/1"))
                 .andExpect(flash().attributeExists(SUCCESS));
 
         verify(reservationService).checkIn(eq(1L), any(LocalDate.class), eq(""), eq("receptionist@test.com"));
@@ -116,7 +116,7 @@ class CheckInControllerTest {
         mockMvc.perform(post("/receptionist/reservations/1/checkin")
                         .param("bookingCode", ""))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/receptionist/bookings"))
+                .andExpect(redirectedUrl("/receptionist/bookings/1"))
                 .andExpect(flash().attributeExists(ERROR));
     }
 }

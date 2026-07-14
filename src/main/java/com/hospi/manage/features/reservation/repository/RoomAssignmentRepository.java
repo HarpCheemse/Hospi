@@ -20,5 +20,9 @@ public interface RoomAssignmentRepository extends JpaRepository<RoomAssignment, 
 
     boolean existsByReservationIdAndRoomId(Long reservationId, Long roomId);
 
+    long countByReservationIdAndRoom_RoomTypeId(Long reservationId, Long roomTypeId);
+
+    long countByReservationId(Long reservationId);
+
     void deleteByReservationId(Long reservationId);
 }

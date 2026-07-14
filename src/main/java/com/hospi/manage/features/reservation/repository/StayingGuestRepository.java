@@ -12,5 +12,7 @@ public interface StayingGuestRepository extends JpaRepository<StayingGuest, Long
 
     List<StayingGuest> findByReservationIdOrderByCreatedAtAsc(Long reservationId);
 
+    long countByReservationId(Long reservationId);
+
     void deleteByReservationId(Long reservationId);
 }
