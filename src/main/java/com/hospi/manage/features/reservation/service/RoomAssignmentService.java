@@ -78,6 +78,17 @@ public class RoomAssignmentService {
             throw new IllegalStateException("Room is not vacant");
         }
 
+        Long roomTypeId = room.getRoomType().getId();
+        ReservationDetail detail = reservation.getDetails().stream()
+                .filter(d -> d.getRoomType().getId().equals(roomTypeId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Room type not requested in this reservation"));
+
+        long assignedCount = roomAssignmentRepository.countByReservationIdAndRoom_RoomTypeId(reservationId, roomTypeId);
+        if (assignedCount >= detail.getRoomCount()) {
+            throw new IllegalStateException("Cannot assign more rooms of type " + room.getRoomType().getName());
+        }
+
         room.setOccupancyStatus(OccupancyStatus.OCCUPIED);
         roomRepository.save(room);
 
