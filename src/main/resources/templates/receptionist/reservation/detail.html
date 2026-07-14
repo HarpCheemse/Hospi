@@ -144,10 +144,6 @@
                     <span class="text-lg font-bold text-primary"
                           th:text="|$${#numbers.formatDecimal(reservation.totalPrice, 1, 2)}|">$960.00</span>
                 </div>
-                <div th:if="${reservation.confirmationCode != null}" class="flex justify-between">
-                    <span class="text-muted-foreground">Confirmation</span>
-                    <span class="font-mono text-xs font-medium text-foreground" th:text="${reservation.confirmationCode}">HSP-ABC123</span>
-                </div>
             </div>
         </section>
 
