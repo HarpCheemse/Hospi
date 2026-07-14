@@ -84,10 +84,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     /**
      * Find reservations matching the given statuses and guest name pattern.
      */
-    @Query("""
+    @Query(value = """
                 SELECT r FROM Reservation r
                 WHERE r.status IN :statuses
-                AND LOWER(r.guestName) LIKE :guestName
+                AND (LOWER(r.guestName) LIKE :guestName OR r.guestPhone LIKE :guestName OR LOWER(r.confirmationCode) LIKE :guestName)
                 ORDER BY r.checkInAt DESC
             """)
     List<Reservation> findFiltered(@Param("statuses") List<ReservationStatus> statuses,
@@ -99,13 +99,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query(value = """
                 SELECT r FROM Reservation r
                 WHERE r.status IN :statuses
-                AND LOWER(r.guestName) LIKE :guestName
+                AND (LOWER(r.guestName) LIKE :guestName OR r.guestPhone LIKE :guestName OR LOWER(r.confirmationCode) LIKE :guestName)
                 AND NOT (r.status = 'PENDING' AND r.source = 'ONLINE')
             """,
             countQuery = """
                 SELECT COUNT(r) FROM Reservation r
                 WHERE r.status IN :statuses
-                AND LOWER(r.guestName) LIKE :guestName
+                AND (LOWER(r.guestName) LIKE :guestName OR r.guestPhone LIKE :guestName OR LOWER(r.confirmationCode) LIKE :guestName)
                 AND NOT (r.status = 'PENDING' AND r.source = 'ONLINE')
             """)
     Page<Reservation> findFiltered(@Param("statuses") List<ReservationStatus> statuses,
@@ -118,7 +118,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("""
                 SELECT r FROM Reservation r
                 WHERE r.status IN :statuses
-                AND LOWER(r.guestName) LIKE :guestName
+                AND (LOWER(r.guestName) LIKE :guestName OR r.guestPhone LIKE :guestName OR LOWER(r.confirmationCode) LIKE :guestName)
                 AND r.checkInAt <= :date
                 AND r.checkOutAt >= :date
                 ORDER BY r.checkInAt DESC
@@ -133,7 +133,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query(value = """
                 SELECT r FROM Reservation r
                 WHERE r.status IN :statuses
-                AND LOWER(r.guestName) LIKE :guestName
+                AND (LOWER(r.guestName) LIKE :guestName OR r.guestPhone LIKE :guestName OR LOWER(r.confirmationCode) LIKE :guestName)
                 AND r.checkInAt <= :date
                 AND r.checkOutAt >= :date
                 AND NOT (r.status = 'PENDING' AND r.source = 'ONLINE')
@@ -141,7 +141,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             countQuery = """
                 SELECT COUNT(r) FROM Reservation r
                 WHERE r.status IN :statuses
-                AND LOWER(r.guestName) LIKE :guestName
+                AND (LOWER(r.guestName) LIKE :guestName OR r.guestPhone LIKE :guestName OR LOWER(r.confirmationCode) LIKE :guestName)
                 AND r.checkInAt <= :date
                 AND r.checkOutAt >= :date
                 AND NOT (r.status = 'PENDING' AND r.source = 'ONLINE')
