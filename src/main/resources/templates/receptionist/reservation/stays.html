@@ -68,6 +68,7 @@
                     <th class="px-5 py-4 text-left text-sm font-medium">Guest</th>
                     <th class="px-5 py-4 text-left text-sm font-medium">Registered</th>
                     <th class="px-5 py-4 text-left text-sm font-medium">Rooms</th>
+                    <th class="px-5 py-4 text-left text-sm font-medium">Room Types</th>
                     <th class="px-5 py-4 text-left text-sm font-medium">Check-In</th>
                     <th class="px-5 py-4 text-left text-sm font-medium">Check-Out</th>
                 </tr>
@@ -86,7 +87,7 @@
                            th:text="${g.guestName}">
                             John Smith
                         </p>
-                        <p class="text-sm text-muted-foreground max-w-[200px] truncate"
+                        <p class="text-sm text-muted-foreground truncate max-w-[200px]"
                            th:text="${g.guestPhone}">
                             +84 912 345 678
                         </p>
@@ -101,6 +102,15 @@
                         <span class="text-sm text-muted-foreground">
                             <span th:text="${assignedCounts.get(g.id)} ?: 0">1</span>/<span th:text="${#aggregates.sum(g.details.![roomCount()])}">2</span>
                         </span>
+                    </td>
+
+                    <td class="px-5 py-4 max-w-[200px]">
+                        <div class="truncate">
+                            <span class="pill-muted text-xs" th:each="d : ${g.details}"
+                                  th:text="${d.roomTypeName} + ' x' + ${d.roomCount}">
+                                Deluxe x2
+                            </span>
+                        </div>
                     </td>
 
                     <td class="px-5 py-4 text-sm text-muted-foreground"
@@ -119,7 +129,7 @@
 
                 <tfoot th:if="${view.totalPages() > 1}">
                     <tr>
-                        <td colspan="5" class="px-5 py-3">
+                        <td colspan="6" class="px-5 py-3">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-2">
                                     <a th:href="@{/receptionist/stays(scope=${activeScope}, search=${view.checkedInSearch()}, page=${view.page() - 1})}"
