@@ -33,6 +33,11 @@ public class RoomAssignmentService {
         return roomAssignmentRepository.findByReservationIdOrderByAssignedAtAsc(reservationId);
     }
 
+    /** Return the total number of assigned rooms for a reservation. */
+    public int getAssignedRoomCount(Long reservationId) {
+        return (int) roomAssignmentRepository.countByReservationId(reservationId);
+    }
+
     /** Return all vacant rooms matching the reservation's room types. */
     public List<Room> getAvailableRooms(Long reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)

@@ -41,9 +41,19 @@
 
     <section class="overflow-hidden card">
 
+        <div class="flex gap-1 border-b border-border px-5 pt-3 pb-0">
+            <a th:href="@{/receptionist/stays(search=${view.checkedInSearch})}"
+               th:classappend="${activeScope == 'all'} ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'"
+               class="px-3 py-2 text-sm font-medium border-b-2 transition">All</a>
+            <a th:href="@{/receptionist/stays(scope='today', search=${view.checkedInSearch})}"
+               th:classappend="${activeScope == 'today'} ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'"
+               class="px-3 py-2 text-sm font-medium border-b-2 transition">Today</a>
+        </div>
+
         <form th:action="@{/receptionist/stays}" method="get"
               class="flex items-center gap-4 border-b border-border px-5 py-4" novalidate>
-            <input type="text" name="search" placeholder="Search by name or phone..."
+            <input type="hidden" name="scope" th:value="${activeScope}">
+            <input type="text" name="search" placeholder="Search by name, phone or booking code..."
                    class="input flex-1" th:value="${view.checkedInSearch()}">
             <button type="submit" class="btn btn-primary btn-sm">Search</button>
             <a th:href="@{/receptionist/stays}" class="btn btn-ghost btn-sm">Clear</a>
@@ -55,11 +65,11 @@
 
                 <thead>
                 <tr class="border-b border-border text-muted-foreground">
-                    <th class="px-5 py-4 text-left text-sm font-medium">Guest Name</th>
-                    <th class="px-5 py-4 text-left text-sm font-medium">Room(s)</th>
+                    <th class="px-5 py-4 text-left text-sm font-medium">Guest</th>
+                    <th class="px-5 py-4 text-left text-sm font-medium">Registered</th>
+                    <th class="px-5 py-4 text-left text-sm font-medium">Rooms</th>
                     <th class="px-5 py-4 text-left text-sm font-medium">Check-In</th>
                     <th class="px-5 py-4 text-left text-sm font-medium">Check-Out</th>
-                    <th class="px-5 py-4 text-left text-sm font-medium">Phone</th>
                 </tr>
                 </thead>
 
@@ -77,39 +87,30 @@
                             John Smith
                         </p>
                         <p class="text-sm text-muted-foreground max-w-[200px] truncate"
-                           th:text="${g.guestEmail}">
-                            john@hospi.com
+                           th:text="${g.guestPhone}">
+                            +84 912 345 678
                         </p>
                     </td>
 
+                    <td class="px-5 py-4 text-sm text-muted-foreground"
+                        th:text="${guestCounts.get(g.id)} ?: '0'">
+                        3
+                    </td>
+
                     <td class="px-5 py-4">
-                        <div class="flex flex-wrap gap-1">
-                            <th:block th:each="detail : ${g.details}">
-                                <span class="pill-muted"
-                                      th:text="${detail.roomTypeName} + ' x' + ${detail.roomCount}">
-                                    Deluxe x2
-                                </span>
-                            </th:block>
-                            <span th:if="${#lists.isEmpty(g.details)}"
-                                  class="text-sm text-muted-foreground">
-                                —
-                            </span>
-                        </div>
+                        <span class="text-sm text-muted-foreground">
+                            <span th:text="${assignedCounts.get(g.id)} ?: 0">1</span>/<span th:text="${#aggregates.sum(g.details.![roomCount()])}">2</span>
+                        </span>
                     </td>
 
                     <td class="px-5 py-4 text-sm text-muted-foreground"
-                        th:text="${#temporals.format(g.checkInAt, 'dd MMM yyyy')}">
-                        15 Jun 2026
+                        th:text="${#temporals.format(g.checkInAt, 'dd/MM')}">
+                        15/06
                     </td>
 
                     <td class="px-5 py-4 text-sm text-muted-foreground"
-                        th:text="${#temporals.format(g.checkOutAt, 'dd MMM yyyy')}">
-                        18 Jun 2026
-                    </td>
-
-                    <td class="px-5 py-4 text-sm text-foreground"
-                        th:text="${g.guestPhone}">
-                        +84 912 345 678
+                        th:text="${#temporals.format(g.checkOutAt, 'dd/MM')}">
+                        18/06
                     </td>
 
                 </tr>
@@ -118,38 +119,41 @@
 
                 <tfoot th:if="${view.totalPages() > 1}">
                     <tr>
-                        <td colspan="4" class="px-5 py-3">
+                        <td colspan="5" class="px-5 py-3">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-2">
-                                    <a th:href="@{/receptionist/stays(search=${view.checkedInSearch()}, page=${view.page() - 1})}"
+                                    <a th:href="@{/receptionist/stays(scope=${activeScope}, search=${view.checkedInSearch()}, page=${view.page() - 1})}"
                                        th:classappend="${view.page() == 0} ? 'pointer-events-none opacity-50' : ''"
                                        class="btn btn-ghost btn-sm">&larr; Prev</a>
 
                                     <div class="flex items-center gap-1">
-                                        <a th:href="@{/receptionist/stays(search=${view.checkedInSearch()}, page=0)}"
+                                        <a th:href="@{/receptionist/stays(scope=${activeScope}, search=${view.checkedInSearch()}, page=0)}"
                                            th:classappend="${view.page() == 0} ? 'btn-primary' : 'btn-ghost'"
                                            class="btn btn-sm w-8 justify-center">1</a>
 
-                                        <span th:if="${view.page() > 2}" class="px-1 text-xs text-muted-foreground">&hellip;</span>
+                                        <span th:if="${view.page() > 2}"
+                                              class="px-1 text-xs text-muted-foreground">&hellip;</span>
 
-                                        <div th:if="${view.totalPages() > 2}" class="flex items-center gap-1">
+                                        <div th:if="${view.totalPages() > 2}"
+                                             class="flex items-center gap-1">
                                             <a th:each="p : ${#numbers.sequence(1, view.totalPages() - 2)}"
                                                th:if="${p >= view.page() - 1 and p <= view.page() + 1}"
-                                               th:href="@{/receptionist/stays(search=${view.checkedInSearch()}, page=${p})}"
+                                               th:href="@{/receptionist/stays(scope=${activeScope}, search=${view.checkedInSearch()}, page=${p})}"
                                                th:classappend="${p == view.page()} ? 'btn-primary' : 'btn-ghost'"
                                                class="btn btn-sm w-8 justify-center"
                                                th:text="${p + 1}">2</a>
                                         </div>
 
-                                        <span th:if="${view.page() < view.totalPages() - 3}" class="px-1 text-xs text-muted-foreground">&hellip;</span>
+                                        <span th:if="${view.page() < view.totalPages() - 3}"
+                                              class="px-1 text-xs text-muted-foreground">&hellip;</span>
 
-                                        <a th:href="@{/receptionist/stays(search=${view.checkedInSearch()}, page=${view.totalPages() - 1})}"
+                                        <a th:href="@{/receptionist/stays(scope=${activeScope}, search=${view.checkedInSearch()}, page=${view.totalPages() - 1})}"
                                            th:classappend="${view.page() == view.totalPages() - 1} ? 'btn-primary' : 'btn-ghost'"
                                            class="btn btn-sm w-8 justify-center"
                                            th:text="${view.totalPages()}">10</a>
                                     </div>
 
-                                    <a th:href="@{/receptionist/stays(search=${view.checkedInSearch()}, page=${view.page() + 1})}"
+                                    <a th:href="@{/receptionist/stays(scope=${activeScope}, search=${view.checkedInSearch()}, page=${view.page() + 1})}"
                                        th:classappend="${view.page() >= view.totalPages() - 1} ? 'pointer-events-none opacity-50' : ''"
                                        class="btn btn-ghost btn-sm">Next &rarr;</a>
                                 </div>
@@ -159,10 +163,11 @@
                                         Page <span th:text="${view.page() + 1}">1</span>/<span th:text="${view.totalPages()}">1</span>
                                     </span>
 
-                                    <form th:action="@{/receptionist/stays(search=${view.checkedInSearch()})}"
+                                    <form th:action="@{/receptionist/stays(scope=${activeScope}, search=${view.checkedInSearch()})}"
                                           method="get" class="flex items-center gap-1"
                                           onsubmit="const input = this.querySelector('[name=page]'); input.value = parseInt(input.value) - 1 || 0;">
                                         <input type="hidden" name="search" th:value="${view.checkedInSearch()}">
+                                        <input type="hidden" name="scope" th:value="${activeScope}">
                                         <input type="number" name="page" min="1" th:max="${view.totalPages()}"
                                                class="input input-sm w-16 text-center" placeholder="#"
                                                th:value="${view.page() + 1}">

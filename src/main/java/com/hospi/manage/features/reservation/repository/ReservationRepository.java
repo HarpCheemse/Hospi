@@ -56,12 +56,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByConfirmationCodeIn(Set<String> confirmationCodes);
 
     /**
-     * Find checked-in reservations matching a guest name or phone search.
+     * Find checked-in reservations matching a guest name, phone, or booking code search.
      */
     @Query("""
                 SELECT r FROM Reservation r
                 WHERE r.status = 'CHECKED_IN'
-                AND (LOWER(r.guestName) LIKE :search OR r.guestPhone LIKE :search)
+                AND (LOWER(r.guestName) LIKE :search OR r.guestPhone LIKE :search OR LOWER(r.confirmationCode) LIKE :search)
                 ORDER BY r.checkInAt DESC
             """)
     List<Reservation> findCheckedInFiltered(@Param("search") String search);
@@ -72,12 +72,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query(value = """
                 SELECT r FROM Reservation r
                 WHERE r.status = 'CHECKED_IN'
-                AND (LOWER(r.guestName) LIKE :search OR r.guestPhone LIKE :search)
+                AND (LOWER(r.guestName) LIKE :search OR r.guestPhone LIKE :search OR LOWER(r.confirmationCode) LIKE :search)
             """,
             countQuery = """
                 SELECT COUNT(r) FROM Reservation r
                 WHERE r.status = 'CHECKED_IN'
-                AND (LOWER(r.guestName) LIKE :search OR r.guestPhone LIKE :search)
+                AND (LOWER(r.guestName) LIKE :search OR r.guestPhone LIKE :search OR LOWER(r.confirmationCode) LIKE :search)
             """)
     Page<Reservation> findCheckedInFiltered(@Param("search") String search, Pageable pageable);
 

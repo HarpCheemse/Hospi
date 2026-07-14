@@ -27,6 +27,11 @@ public class StayingGuestService {
         return stayingGuestRepository.findByReservationIdOrderByCreatedAtAsc(reservationId);
     }
 
+    /** Return the number of registered guests for a reservation. */
+    public int getGuestCount(Long reservationId) {
+        return (int) stayingGuestRepository.countByReservationId(reservationId);
+    }
+
     /** Add a new staying guest to a reservation. */
     public int getAdultGuestCount(Long reservationId, LocalDate checkInAt) {
         return (int) stayingGuestRepository.findByReservationIdOrderByCreatedAtAsc(reservationId)

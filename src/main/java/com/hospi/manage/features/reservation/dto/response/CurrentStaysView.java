@@ -8,5 +8,6 @@ public record CurrentStaysView(
     String checkedInSearch,
     int page,
     int totalPages,
-    long total
+    long total,
+    String checkoutFilter
 ) {}
