@@ -42,11 +42,21 @@ class RoomAssignmentServiceTest {
 
     @Test
     void assignRoom_shouldAssign() {
+        RoomType roomType = new RoomType();
+        roomType.setId(99L);
+        roomType.setName("Deluxe");
+
+        ReservationDetail detail = new ReservationDetail();
+        detail.setRoomType(roomType);
+        detail.setRoomCount(3);
+
         Reservation reservation = new Reservation();
         reservation.setId(1L);
+        reservation.setDetails(List.of(detail));
 
         Room room = new Room();
         room.setId(10L);
+        room.setRoomType(roomType);
         room.setOccupancyStatus(OccupancyStatus.VACANT);
 
         RoomAssignment savedAssignment = new RoomAssignment();
@@ -55,6 +65,7 @@ class RoomAssignmentServiceTest {
         when(roomAssignmentRepository.existsByReservationIdAndRoomId(1L, 10L)).thenReturn(false);
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
         when(roomRepository.findById(10L)).thenReturn(Optional.of(room));
+        when(roomAssignmentRepository.countByReservationIdAndRoom_RoomTypeId(1L, 99L)).thenReturn(0L);
         when(roomAssignmentRepository.save(any())).thenAnswer(i -> {
             RoomAssignment ra = i.getArgument(0);
             ra.setId(100L);
@@ -69,6 +80,37 @@ class RoomAssignmentServiceTest {
         assertEquals(OccupancyStatus.OCCUPIED, room.getOccupancyStatus());
         verify(roomRepository).save(room);
         verify(roomAssignmentRepository).save(any());
+    }
+
+    @Test
+    void assignRoom_shouldThrow_whenRoomTypeLimitExceeded() {
+        RoomType roomType = new RoomType();
+        roomType.setId(99L);
+        roomType.setName("Deluxe");
+
+        ReservationDetail detail = new ReservationDetail();
+        detail.setRoomType(roomType);
+        detail.setRoomCount(1);
+
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setDetails(List.of(detail));
+
+        Room room = new Room();
+        room.setId(10L);
+        room.setRoomType(roomType);
+        room.setOccupancyStatus(OccupancyStatus.VACANT);
+
+        when(roomAssignmentRepository.existsByReservationIdAndRoomId(1L, 10L)).thenReturn(false);
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+        when(roomRepository.findById(10L)).thenReturn(Optional.of(room));
+        when(roomAssignmentRepository.countByReservationIdAndRoom_RoomTypeId(1L, 99L)).thenReturn(1L);
+
+        assertThrows(IllegalStateException.class,
+                () -> roomAssignmentService.assignRoom(1L, 10L));
+
+        verify(roomRepository, never()).save(any());
+        verify(roomAssignmentRepository, never()).save(any());
     }
 
     @Test
