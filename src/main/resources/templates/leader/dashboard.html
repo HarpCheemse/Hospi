@@ -55,10 +55,21 @@
         </header>
 
         <!-- CONTAINER FOR TASK PANEL WITH GRID -->
-        <div class="grid grid-cols-12 gap-6 mt-6" th:x-data="|{ count: ${dirtyRooms.size()}, confirmOpen: false, selectedRoomId: null, selectedRoomNum: null, cleanedRooms: [], total: ${totalRooms}, clean: ${cleanRooms}, percent() { return this.total > 0 ? Math.round((this.clean / this.total) * 100) : 0; } }|">
+        <div class="flex gap-6 mt-6"
+             th:attr="data-count=${dirtyRooms.size()}, data-total=${totalRooms}, data-clean=${cleanRooms}"
+             x-data="{
+                 count: parseInt($el.dataset.count),
+                 confirmOpen: false,
+                 selectedRoomId: null,
+                 selectedRoomNum: null,
+                 cleanedRooms: [],
+                 total: parseInt($el.dataset.total),
+                 clean: parseInt($el.dataset.clean),
+                 percent() { return this.total > 0 ? Math.round((this.clean / this.total) * 100) : 0; }
+             }">
             
             <!-- LEFT COLUMN: ACTIVE TASKS -->
-            <section class="card-panel col-span-12 lg:col-span-8">
+            <section class="card-panel flex-[2] min-w-0">
                 <div class="mb-4 flex items-center justify-between">
                     <div>
                         <h2 class="text-lg font-semibold text-foreground">Active Tasks</h2>
@@ -75,7 +86,8 @@
                 <!-- TASK LIST -->
                 <div class="flex flex-col gap-2" x-show="count > 0">
                     <div th:each="room : ${dirtyRooms}" 
-                         th:x-data="|{ roomId: ${room.id}, roomNum: '${room.roomNumber}' }|"
+                         th:attr="data-room-id=${room.id}, data-room-num=${room.roomNumber}"
+                         x-data="{ roomId: parseInt($el.dataset.roomId), roomNum: $el.dataset.roomNum }"
                          x-show="!cleanedRooms.includes(roomId)" 
                          class="grid grid-cols-12 items-center gap-3 rounded-lg border border-border bg-background p-4 text-sm shadow-sm">
                         
@@ -103,7 +115,7 @@
             </section>
 
             <!-- RIGHT COLUMN: CLEANLINESS OVERVIEW STATS -->
-            <section class="card-panel col-span-12 lg:col-span-4 flex flex-col items-center justify-center p-6 text-center">
+            <section class="card-panel flex-1 flex flex-col items-center justify-center p-6 text-center">
                 <div class="mb-4">
                     <h2 class="text-lg font-semibold text-foreground">Cleanliness Overview</h2>
                     <p class="text-sm text-muted-foreground">Overall room status</p>
