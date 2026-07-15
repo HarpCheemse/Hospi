@@ -12,6 +12,7 @@ import com.hospi.manage.features.payment.service.PaymentService;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.service.ReservationService;
+import com.hospi.manage.features.reservation.service.RoomAvailabilityService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -57,6 +58,9 @@ class BookingFlowControllerTest {
 
     @MockitoBean
     private EmailService emailService;
+
+    @MockitoBean
+    private RoomAvailabilityService roomAvailabilityService;
 
     @Test
     void createPayPalOrder_shouldRedirectToVerify_whenNoDraft() throws Exception {
@@ -124,6 +128,26 @@ class BookingFlowControllerTest {
     }
 
     @Test
+    void createPayPalOrder_shouldRedirectToBook_whenExistingKeyIsExpired() throws Exception {
+        BookingDraft draft = new BookingDraft();
+        draft.setGuest(new BookingDraft.BookingGuest(null, "test@example.com", null, null, null));
+        draft.setDates(new BookingDraft.BookingDates(LocalDate.now().plusDays(5), LocalDate.now().plusDays(10)));
+        draft.setRooms(new BookingDraft.BookingRooms(List.of(), null, java.math.BigDecimal.valueOf(100), 0));
+        when(otpService.isValidToken("some-token")).thenReturn(true);
+        Reservation expired = new Reservation();
+        expired.setStatus(ReservationStatus.CANCELLED);
+        when(reservationService.findByPaymentIdempotencyKey("old-key")).thenReturn(expired);
+
+        mockMvc.perform(post("/book/pay")
+                .sessionAttr(BOOKING_DRAFT, draft)
+                .sessionAttr("otpToken", "some-token")
+                .sessionAttr(PENDING_PAYMENT_KEY, "old-key"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/book"))
+                .andExpect(flash().attributeExists(ERROR));
+    }
+
+    @Test
     void payPalSuccess_shouldRedirectToPay_whenCaptureFails() throws Exception {
         when(paymentService.captureOnlineBookingPayment("ORDER-123")).thenReturn(false);
 
@@ -155,18 +179,58 @@ class BookingFlowControllerTest {
     }
 
     @Test
-    void payPalSuccess_shouldRefund_whenReservationCancelled() throws Exception {
+    void payPalSuccess_shouldRefund_whenCancelledAndRoomsUnavailable() throws Exception {
         when(paymentService.captureOnlineBookingPayment("ORDER-123")).thenReturn(true);
+        var roomType = new com.hospi.manage.features.room.entity.RoomType();
+        roomType.setId(1L);
+        var detail = new com.hospi.manage.features.reservation.entity.ReservationDetail();
+        detail.setRoomType(roomType);
+        detail.setRoomCount(2);
         Reservation reservation = new Reservation();
         reservation.setStatus(ReservationStatus.CANCELLED);
+        reservation.setDetails(List.of(detail));
+        reservation.setCheckInAt(java.time.LocalDate.now());
+        reservation.setCheckOutAt(java.time.LocalDate.now().plusDays(3));
         when(reservationService.findByPaymentIdempotencyKey("some-key")).thenReturn(reservation);
         when(paymentService.refundOnlineBookingPayment("ORDER-123")).thenReturn(true);
+        when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(false);
 
         mockMvc.perform(get("/book/pay/success").param("token",
                 "ORDER-123").param("key",
                 "some-key")).andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/book")).andExpect(flash().attributeExists(ERROR));
 
         verify(paymentService).refundOnlineBookingPayment("ORDER-123");
+    }
+
+    @Test
+    void payPalSuccess_shouldConfirm_whenCancelledButRoomsAvailable() throws Exception {
+        when(paymentService.captureOnlineBookingPayment("ORDER-123")).thenReturn(true);
+        var roomType = new com.hospi.manage.features.room.entity.RoomType();
+        roomType.setId(1L);
+        var detail = new com.hospi.manage.features.reservation.entity.ReservationDetail();
+        detail.setRoomType(roomType);
+        detail.setRoomCount(2);
+        Reservation reservation = new Reservation();
+        reservation.setId(42L);
+        reservation.setStatus(ReservationStatus.CANCELLED);
+        reservation.setDetails(List.of(detail));
+        reservation.setCheckInAt(java.time.LocalDate.now());
+        reservation.setCheckOutAt(java.time.LocalDate.now().plusDays(3));
+        reservation.setConfirmationCode("HSP-ABCDEF");
+        reservation.setTotalPrice(java.math.BigDecimal.valueOf(200));
+        when(reservationService.findByPaymentIdempotencyKey("some-key")).thenReturn(reservation);
+        when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(true);
+
+        BookingDraft draft = new BookingDraft();
+        draft.setRooms(new BookingDraft.BookingRooms(null, null, java.math.BigDecimal.valueOf(200), 0));
+
+        mockMvc.perform(get("/book/pay/success").param("token",
+                "ORDER-123").param("key",
+                "some-key").sessionAttr(BOOKING_DRAFT, draft))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/book/confirmation?code=HSP-ABCDEF"));
+
+        verify(reservationService).confirmExpiredReservation(42L, java.math.BigDecimal.valueOf(200), "ONLINE_BOOKING", "ORDER-123");
     }
 
     @Test
