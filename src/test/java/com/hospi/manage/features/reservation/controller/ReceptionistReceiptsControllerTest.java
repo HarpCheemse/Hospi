@@ -6,6 +6,7 @@ import com.hospi.manage.features.reservation.dto.response.ReceiptDetailView;
 import com.hospi.manage.features.reservation.dto.response.ReceiptItemView;
 import com.hospi.manage.features.reservation.dto.response.TodayReceiptView;
 import com.hospi.manage.features.reservation.service.ReceiptService;
+import com.hospi.manage.features.notification.service.NotificationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -30,6 +31,9 @@ class ReceptionistReceiptsControllerTest {
 
     @MockitoBean
     private ReceiptService receiptService;
+
+    @MockitoBean
+    private NotificationService notificationService;
 
     @Test
     void listToday_shouldRender() throws Exception {
