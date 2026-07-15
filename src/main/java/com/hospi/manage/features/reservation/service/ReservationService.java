@@ -322,6 +322,37 @@ public class ReservationService {
         );
     }
 
+    /** Confirm an expired reservation (cancelled by cleanup) and record the PayPal payment. */
+    @Transactional
+    public void confirmExpiredReservation(Long reservationId, BigDecimal amount, String confirmedBy,
+                                          String paymentIdempotencyKey) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
+
+        reservation.setStatus(ReservationStatus.CONFIRMED);
+        reservation.setPaymentIdempotencyKey(paymentIdempotencyKey);
+
+        Payment payment = new Payment();
+        payment.setReservation(reservation);
+        payment.setAmount(amount);
+        payment.setPaymentMethod(PaymentMethod.PAYPAL);
+        payment.setConfirmedAt(LocalDateTime.now());
+        payment.setConfirmedBy(confirmedBy);
+        payment.setOrderId(paymentIdempotencyKey);
+
+        reservationRepository.save(reservation);
+        paymentRepository.save(payment);
+
+        notificationService.notifyRole(
+                Role.RECEPTIONIST,
+                "New Online Booking (Recovered)",
+                "Expired online booking recovered for " + reservation.getGuestName()
+                        + " (" + reservation.getCheckInAt() + " to " + reservation.getCheckOutAt() + ")",
+                "RESERVATION",
+                String.valueOf(reservation.getId())
+        );
+    }
+
     /** Cancel a pending reservation. */
     @Transactional
     public void cancelPendingReservation(Long id) {

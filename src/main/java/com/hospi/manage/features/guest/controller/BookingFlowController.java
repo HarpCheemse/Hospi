@@ -13,8 +13,10 @@ import com.hospi.manage.features.guest.validation.BookingDateValidator;
 import com.hospi.manage.features.payment.service.PaymentService;
 import com.hospi.manage.features.reservation.dto.request.DateSearchForm;
 import com.hospi.manage.features.reservation.entity.Reservation;
+import com.hospi.manage.features.reservation.entity.ReservationDetail;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.service.ReservationService;
+import com.hospi.manage.features.reservation.service.RoomAvailabilityService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -28,8 +30,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.hospi.manage.common.constant.Attributes.*;
 
@@ -48,6 +52,7 @@ public class BookingFlowController {
     private final OtpService otpService;
     private final BookingDateValidator bookingDateValidator;
     private final PaymentService paymentService;
+    private final RoomAvailabilityService roomAvailabilityService;
     private final EmailService emailService;
 
     /** Step 1 — show date form. Resume check: skip to /book/pay if OTP verified + draft complete.
@@ -298,6 +303,23 @@ public class BookingFlowController {
             return "redirect:/book/verify-otp";
         }
 
+        String existingKey = (String) session.getAttribute(PENDING_PAYMENT_KEY);
+        if (existingKey != null) {
+            try {
+                Reservation r = reservationService.findByPaymentIdempotencyKey(existingKey);
+                if (r.getStatus() != ReservationStatus.PENDING) {
+                    session.removeAttribute(PENDING_PAYMENT_KEY);
+                    session.removeAttribute(BOOKING_DRAFT);
+                    session.removeAttribute(OTP_TOKEN);
+                    redirect.addFlashAttribute(ERROR,
+                            "Your booking session has expired. Please start again.");
+                    return "redirect:/book";
+                }
+            } catch (ResourceNotFoundException e) {
+                session.removeAttribute(PENDING_PAYMENT_KEY);
+            }
+        }
+
         String tempKey = "TEMP-" + UUID.randomUUID();
         Reservation reservation;
         try {
@@ -347,18 +369,50 @@ public class BookingFlowController {
 
         // Reservation was cancelled by cleanup scheduler while user was on PayPal
         if (reservation.getStatus() == ReservationStatus.CANCELLED) {
-            boolean refunded = paymentService.refundOnlineBookingPayment(orderId);
-            session.removeAttribute(BOOKING_DRAFT);
-            session.removeAttribute(OTP_TOKEN);
-            session.removeAttribute(PENDING_PAYMENT_KEY);
-            if (refunded) {
-                redirect.addFlashAttribute(ERROR,
-                        "Your reservation has expired. The payment has been refunded. Please start a new booking.");
+            var required = reservation.getDetails().stream()
+                    .collect(Collectors.toMap(
+                            d -> d.getRoomType().getId(),
+                            ReservationDetail::getRoomCount));
+            boolean roomsAvailable = roomAvailabilityService.canFulfil(
+                    required, reservation.getCheckInAt(), reservation.getCheckOutAt(), reservation.getId());
+
+            if (roomsAvailable && !reservation.getCheckInAt().isBefore(LocalDate.now())) {
+                reservationService.confirmExpiredReservation(reservation.getId(),
+                        BookingSession.getDraft(session).getRooms().depositAmount(),
+                        ONLINE_BOOKING, orderId);
+
+                String confirmationCode = reservation.getConfirmationCode();
+                try {
+                    var template = EmailTemplates.bookingConfirmation(
+                            reservation.getGuestName(),
+                            confirmationCode,
+                            reservation.getCheckInAt().toString(),
+                            reservation.getCheckOutAt().toString());
+                    emailService.send(reservation.getGuestEmail(), template.subject(), template.content());
+                } catch (Exception e) {
+                    log.warn("Failed to send confirmation email to {}: {}", reservation.getGuestEmail(), e.getMessage());
+                }
+
+                session.removeAttribute(BOOKING_DRAFT);
+                session.removeAttribute(OTP_TOKEN);
+                session.removeAttribute(PENDING_PAYMENT_KEY);
+                return "redirect:/book/confirmation?code=" + confirmationCode;
             } else {
-                redirect.addFlashAttribute(ERROR,
-                        "Your reservation has expired and the refund could not be processed. Please contact support.");
+                boolean refunded = paymentService.refundOnlineBookingPayment(orderId);
+                session.removeAttribute(BOOKING_DRAFT);
+                session.removeAttribute(OTP_TOKEN);
+                session.removeAttribute(PENDING_PAYMENT_KEY);
+                if (refunded) {
+                    redirect.addFlashAttribute(ERROR,
+                            "Your reservation has expired and the rooms are no longer available. "
+                            + "The payment has been refunded. Please start a new booking.");
+                } else {
+                    redirect.addFlashAttribute(ERROR,
+                            "Your reservation has expired and the refund could not be processed. "
+                            + "Please contact support.");
+                }
+                return "redirect:/book";
             }
-            return "redirect:/book";
         }
 
         if (reservation.getStatus() != ReservationStatus.PENDING) {
