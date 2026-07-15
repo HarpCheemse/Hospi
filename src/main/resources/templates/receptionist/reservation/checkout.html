@@ -68,6 +68,7 @@
                             <span class="pill-muted" th:text="${d.roomTypeName} + ' x' + ${d.roomCount}">Deluxe x2</span>
                         </th:block>
                     </div>
+                    <p class="mt-1 text-sm text-muted-foreground" th:if="${!#strings.isEmpty(view.roomNumbers)}" th:text="|Assigned: ${view.roomNumbers}|">Assigned: 101, 102</p>
                 </div>
             </div>
         </section>

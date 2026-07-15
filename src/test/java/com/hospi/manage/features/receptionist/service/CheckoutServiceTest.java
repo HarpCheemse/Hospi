@@ -90,6 +90,7 @@ class CheckoutServiceTest {
         when(systemConfigService.getConfig()).thenReturn(config);
         when(hotelRepository.findById(1L)).thenReturn(Optional.of(hotel));
         when(paymentRepository.findAllByReservationId(1L)).thenReturn(List.of());
+        when(roomAssignmentService.getAssignedRoomNumbers(1L)).thenReturn("101, 102");
 
         CheckoutView view = checkoutService.buildCheckoutView(1L);
 
@@ -98,6 +99,7 @@ class CheckoutServiceTest {
         assertEquals(0, BigDecimal.valueOf(1080).compareTo(view.totalCharges()));
         assertEquals(0, BigDecimal.ZERO.compareTo(view.depositPaid()));
         assertEquals(0, BigDecimal.valueOf(1080).compareTo(view.remainingDue()));
+        assertEquals("101, 102", view.roomNumbers());
     }
 
     @Test
@@ -121,6 +123,7 @@ class CheckoutServiceTest {
         when(systemConfigService.getConfig()).thenReturn(config);
         when(hotelRepository.findById(1L)).thenReturn(Optional.of(hotel));
         when(paymentRepository.findAllByReservationId(2L)).thenReturn(List.of());
+        when(roomAssignmentService.getAssignedRoomNumbers(2L)).thenReturn("201");
 
         CheckoutView view = checkoutService.buildCheckoutView(2L);
 

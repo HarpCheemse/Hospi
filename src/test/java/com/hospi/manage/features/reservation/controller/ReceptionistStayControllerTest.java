@@ -97,7 +97,7 @@ class ReceptionistStayControllerTest {
                 BigDecimal.valueOf(500), BigDecimal.valueOf(40),
                 BigDecimal.valueOf(540), BigDecimal.ZERO, BigDecimal.ZERO,
                 BigDecimal.ZERO, false, BigDecimal.valueOf(540),
-                List.of(PaymentMethod.CASH, PaymentMethod.CARD), "12:00");
+                List.of(PaymentMethod.CASH, PaymentMethod.CARD), "12:00", "");
     }
 
     @Test
@@ -134,7 +134,7 @@ class ReceptionistStayControllerTest {
                         .param("paymentMethod", "CASH")
                         .param("applyLateCheckoutFee", "false"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/receptionist/stays"))
+                .andExpect(redirectedUrl("/receptionist/receipts/1"))
                 .andExpect(flash().attributeExists("success"));
     }
 

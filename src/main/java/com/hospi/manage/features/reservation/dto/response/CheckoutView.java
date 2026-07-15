@@ -16,5 +16,6 @@ public record CheckoutView(
         boolean showLateFee,
         BigDecimal remainingDue,
         List<PaymentMethod> availableMethods,
-        String hotelCheckOutTime
+        String hotelCheckOutTime,
+        String roomNumbers
 ) {}

@@ -46,7 +46,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr class="border-b border-border/50 hover:bg-muted/50" th:each="r : ${view}">
+                <tr class="border-b border-border/50 hover:bg-muted/50 cursor-pointer" th:each="r : ${view}" th:onclick="|window.location='/receptionist/receipts/${r.id}'|">
                     <td class="py-3 pr-4 font-medium text-foreground" th:text="|#R-${r.id}|">#R-1234</td>
                     <td class="py-3 pr-4 text-foreground" th:text="${r.guestName}">John Doe</td>
                     <td class="py-3 pr-4 text-muted-foreground" th:text="${r.roomNumbers}">Deluxe x2</td>

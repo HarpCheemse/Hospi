@@ -8,8 +8,6 @@ import com.hospi.manage.features.reservation.dto.request.AssignRoomForm;
 import com.hospi.manage.features.reservation.dto.request.CheckoutForm;
 import com.hospi.manage.features.reservation.dto.request.ExtendStayForm;
 import com.hospi.manage.features.reservation.dto.request.StayingGuestForm;
-import com.hospi.manage.features.reservation.dto.response.CheckoutCalculation;
-import com.hospi.manage.features.reservation.dto.response.CurrentStaysView;
 import com.hospi.manage.features.reservation.dto.response.ManageReservationView;
 import com.hospi.manage.features.reservation.dto.response.ReservationSummaryView;
 import com.hospi.manage.features.reservation.entity.Reservation;
@@ -279,7 +277,7 @@ public class ReceptionistStayController {
             auditService.log(principal.getId(), principal.getUsername(), "CHECKOUT", "RESERVATION", id,
                     "Amount: " + form.paymentMethod());
             redirect.addFlashAttribute(Attributes.SUCCESS, "Checkout completed successfully.");
-            return "redirect:/receptionist/stays";
+            return "redirect:/receptionist/receipts/" + id + "";
         } catch (IllegalStateException e) {
             redirect.addFlashAttribute(Attributes.ERROR, e.getMessage());
             return "redirect:/receptionist/stays/" + id + "/checkout";

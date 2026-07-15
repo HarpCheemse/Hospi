@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /** Controller for receptionist today's receipts list. */
@@ -26,5 +27,11 @@ public class ReceptionistReceiptsController {
     String listToday(Model model) {
         model.addAttribute(Attributes.VIEW, receiptService.getTodayReceipts());
         return "receptionist/reservation/receipt";
+    }
+
+    @GetMapping("/{id}")
+    String detail(@PathVariable Long id, Model model) {
+        model.addAttribute(Attributes.VIEW, receiptService.getReceiptDetail(id));
+        return "receptionist/reservation/receipt-detail";
     }
 }

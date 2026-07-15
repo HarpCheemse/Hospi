@@ -79,6 +79,7 @@ public class CheckoutService {
         }
         boolean showLateFee = lateFeeAmount.compareTo(BigDecimal.ZERO) > 0;
 
+        String roomNumbers = roomAssignmentService.getAssignedRoomNumbers(reservationId);
         BigDecimal remainingDue = totalCharges.subtract(depositPaid);
 
         return new CheckoutView(
@@ -92,7 +93,8 @@ public class CheckoutService {
                 showLateFee,
                 remainingDue,
                 List.of(PaymentMethod.CASH, PaymentMethod.CARD),
-                hotelCheckOutTime.toString()
+                hotelCheckOutTime.toString(),
+                roomNumbers
         );
     }
 

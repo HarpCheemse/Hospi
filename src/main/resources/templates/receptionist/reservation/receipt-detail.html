@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt | Hospi</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="staff-layout">
+
+<div th:replace="~{/fragments/receptionist-sidebar :: sidebar}"></div>
+
+<main class="staff-page">
+
+    <div th:replace="~{fragments/components/toast :: toast}"></div>
+
+    <header class="staff-page-header">
+        <div class="flex items-center gap-4">
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/receipt.svg}" class="h-7 w-7" alt="">
+            </div>
+            <section>
+                <h1 class="staff-page-title" th:text="|Receipt #R-${view.bookingId}|">Receipt #R-1234</h1>
+                <p class="page-description" th:text="|Guest: ${view.guestName}|">Guest: John Doe</p>
+            </section>
+        </div>
+        <div class="flex gap-3">
+            <a th:href="@{/receptionist/receipts}" class="btn btn-secondary btn-lg">&larr; Back to Receipts</a>
+        </div>
+    </header>
+
+    <div class="grid grid-cols-3 gap-6">
+
+        <!-- Receipt Info -->
+        <section class="card-panel">
+            <div class="mb-4 flex items-center gap-2">
+                <img th:src="@{/assets/icons/receipt.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                <div>
+                    <h2 class="text-lg font-semibold text-foreground">Receipt Info</h2>
+                    <p class="text-sm text-muted-foreground">Check-out details</p>
+                </div>
+            </div>
+            <div class="space-y-3 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-muted-foreground">Status</span>
+                    <span class="inline-block rounded-full px-3 py-1 text-xs font-medium bg-success/10 text-success" th:text="${view.status.name()}">PAID</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-muted-foreground">Check-Out Time</span>
+                    <span class="font-medium text-foreground" th:text="${#temporals.format(view.checkedOutAt, 'dd MMM yyyy HH:mm')}">18 Jun 2026 10:30</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-muted-foreground">Checked Out By</span>
+                    <span class="font-medium text-foreground" th:text="${view.checkedOutBy}">receptionist</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-muted-foreground">Payment Method</span>
+                    <span class="font-medium text-foreground" th:text="${view.paymentMethod}">CASH</span>
+                </div>
+                <div class="flex justify-between" th:if="${!#strings.isEmpty(view.roomNumbers)}">
+                    <span class="text-muted-foreground">Rooms</span>
+                    <span class="font-medium text-foreground" th:text="${view.roomNumbers}">101, 102</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Financial Breakdown -->
+        <section class="card-panel col-span-2">
+            <div class="mb-4 flex items-center gap-2">
+                <img th:src="@{/assets/icons/credit-card.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                <div>
+                    <h2 class="text-lg font-semibold text-foreground">Financial Breakdown</h2>
+                    <p class="text-sm text-muted-foreground">Itemized charges and payments</p>
+                </div>
+            </div>
+
+            <div class="space-y-3 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-muted-foreground">Room Charges</span>
+                    <span class="font-medium text-foreground" th:text="|$${#numbers.formatDecimal(view.roomCharges, 1, 2)}|">$1,000.00</span>
+                </div>
+                <div class="flex justify-between" th:if="${view.taxAmount.signum() == 1}">
+                    <span class="text-muted-foreground">Tax</span>
+                    <span class="font-medium text-foreground" th:text="|$${#numbers.formatDecimal(view.taxAmount, 1, 2)}|">$80.00</span>
+                </div>
+                <div class="flex justify-between" th:if="${view.lateCheckoutFee.signum() == 1}">
+                    <span class="text-muted-foreground">Late Checkout Fee</span>
+                    <span class="font-medium text-foreground" th:text="|$${#numbers.formatDecimal(view.lateCheckoutFee, 1, 2)}|">$25.00</span>
+                </div>
+                <div class="flex justify-between" th:if="${view.depositPaid.signum() == 1}">
+                    <span class="text-success">Deposit Paid</span>
+                    <span class="font-medium text-success" th:text="|-${#numbers.formatDecimal(view.depositPaid, 1, 2)}|">-$200.00</span>
+                </div>
+                <hr class="border-border">
+                <div class="flex justify-between text-base font-bold">
+                    <span>Total</span>
+                    <span th:text="|$${#numbers.formatDecimal(view.totalAmount, 1, 2)}|">$905.00</span>
+                </div>
+                <div class="flex justify-between text-base font-bold">
+                    <span>Amount Paid</span>
+                    <span class="text-success" th:text="|$${#numbers.formatDecimal(view.amountPaid, 1, 2)}|">$905.00</span>
+                </div>
+            </div>
+
+            <div class="mt-6" th:if="${not #lists.isEmpty(view.items)}">
+                <h3 class="mb-3 text-sm font-semibold text-foreground">Invoice Items</h3>
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="border-b border-border text-muted-foreground">
+                            <th class="pb-2 font-medium">Item</th>
+                            <th class="pb-2 font-medium">Description</th>
+                            <th class="pb-2 font-medium text-right">Qty</th>
+                            <th class="pb-2 font-medium text-right">Unit Price</th>
+                            <th class="pb-2 font-medium text-right">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="item : ${view.items}" class="border-b border-border/50">
+                            <td class="py-2 font-medium text-foreground" th:text="${item.itemType}">ROOM</td>
+                            <td class="py-2 text-muted-foreground" th:text="${item.description}">Deluxe x2</td>
+                            <td class="py-2 text-right text-muted-foreground" th:text="${item.quantity}">3</td>
+                            <td class="py-2 text-right text-muted-foreground" th:text="|$${#numbers.formatDecimal(item.unitPrice, 1, 2)}|">$200.00</td>
+                            <td class="py-2 text-right font-medium text-foreground" th:text="|$${#numbers.formatDecimal(item.amount, 1, 2)}|">$600.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </div>
+
+</main>
+
+</body>
+</html>

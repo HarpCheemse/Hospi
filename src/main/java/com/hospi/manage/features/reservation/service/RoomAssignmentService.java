@@ -127,6 +127,14 @@ public class RoomAssignmentService {
         return roomAssignmentRepository.findByReservationIdIn(reservationIds);
     }
 
+    /** Return comma-separated room numbers for a reservation. */
+    public String getAssignedRoomNumbers(Long reservationId) {
+        return roomAssignmentRepository.findByReservationIdOrderByAssignedAtAsc(reservationId)
+                .stream()
+                .map(a -> a.getRoom().getRoomNumber())
+                .collect(Collectors.joining(", "));
+    }
+
     /** Set all rooms assigned to this reservation to VACANT during checkout. */
     public void vacateAllReservationRooms(Long reservationId) {
         List<RoomAssignment> assignments = roomAssignmentRepository
