@@ -26,6 +26,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByStatusInOrderByCheckInAtDesc(List<ReservationStatus> statuses);
 
+    List<Reservation> findByStatusAndCheckInAt(ReservationStatus status, LocalDate checkInAt);
+
+    List<Reservation> findByStatusAndCheckOutAt(ReservationStatus status, LocalDate checkOutAt);
+
     /**
      * Find non-cancelled reservations whose stay periods overlap the given date range.
      */
@@ -159,4 +163,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     /** Batch lookup reservations by their IDs. */
     List<Reservation> findByIdIn(List<Long> ids);
+
+    /** Find checked-out reservations for a specific date. */
+    @Query("SELECT r FROM Reservation r WHERE r.status = :status AND CAST(r.checkedOutAt AS LocalDate) = :date")
+    List<Reservation> findByStatusAndCheckedOutAtDate(@Param("status") ReservationStatus status, @Param("date") LocalDate date);
 }

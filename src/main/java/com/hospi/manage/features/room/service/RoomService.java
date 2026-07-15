@@ -138,6 +138,16 @@ public class RoomService {
                     String.valueOf(room.getId())
             );
         }
+
+        if (oldCondition == ConditionStatus.CLEAN && form.conditionStatus() == ConditionStatus.DIRTY) {
+            notificationService.notifyRole(
+                    Role.LEADER,
+                    "Room Dirty",
+                    "Room " + room.getRoomNumber() + " needs cleaning",
+                    "ROOM",
+                    String.valueOf(room.getId())
+            );
+        }
     }
 
     /** Return floor views optionally filtered by a specific floor number. */
@@ -169,6 +179,16 @@ public class RoomService {
                     Role.RECEPTIONIST,
                     "Room Ready",
                     "Room " + room.getRoomNumber() + " is now clean and available",
+                    "ROOM",
+                    String.valueOf(room.getId())
+            );
+        }
+
+        if (oldCondition == ConditionStatus.CLEAN && status == ConditionStatus.DIRTY) {
+            notificationService.notifyRole(
+                    Role.LEADER,
+                    "Room Dirty",
+                    "Room " + room.getRoomNumber() + " needs cleaning",
                     "ROOM",
                     String.valueOf(room.getId())
             );

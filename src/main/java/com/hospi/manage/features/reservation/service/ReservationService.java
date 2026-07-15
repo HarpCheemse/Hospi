@@ -397,4 +397,22 @@ public class ReservationService {
         detail.setTotalPrice(lineTotal);
         return detail;
     }
+
+    /** Find all payments for the given reservation IDs. */
+    public List<Payment> findPaymentsByReservationIds(List<Long> reservationIds) {
+        if (reservationIds == null || reservationIds.isEmpty()) {
+            return List.of();
+        }
+        return paymentRepository.findByReservationIdIn(reservationIds);
+    }
+
+    /** Find reservations by status and check-in date. */
+    public List<Reservation> findByStatusAndCheckInAt(ReservationStatus status, LocalDate date) {
+        return reservationRepository.findByStatusAndCheckInAt(status, date);
+    }
+
+    /** Find reservations by status and check-out date. */
+    public List<Reservation> findByStatusAndCheckOutAt(ReservationStatus status, LocalDate date) {
+        return reservationRepository.findByStatusAndCheckOutAt(status, date);
+    }
 }

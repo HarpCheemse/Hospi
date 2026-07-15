@@ -54,16 +54,35 @@ class LeaderControllerTest {
         room2.setRoomNumber("102");
         room2.setConditionStatus(ConditionStatus.DIRTY);
 
+        Room room3 = new Room();
+        room3.setId(3L);
+        room3.setRoomNumber("103");
+        room3.setConditionStatus(ConditionStatus.CLEAN);
+
+        Room room4 = new Room();
+        room4.setId(4L);
+        room4.setRoomNumber("104");
+        room4.setConditionStatus(ConditionStatus.CLEAN);
+
+        Room room5 = new Room();
+        room5.setId(5L);
+        room5.setRoomNumber("105");
+        room5.setConditionStatus(ConditionStatus.MAINTENANCE);
+
         when(roomService.getActiveDirtyRooms()).thenReturn(List.of(room1, room2));
+        when(roomService.findAll()).thenReturn(List.of(room1, room2, room3, room4, room5));
 
         mockMvc.perform(get("/leader"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("leader/dashboard"))
                 .andExpect(model().attributeExists("dirtyRooms"))
                 .andExpect(model().attribute("dirtyRooms", List.of(room1, room2)))
+                .andExpect(model().attribute("totalRooms", 4L))
+                .andExpect(model().attribute("cleanRooms", 2L))
                 .andExpect(model().attribute(Attributes.ACTIVE_SIDEBAR, "TASKS"));
 
         verify(roomService, times(1)).getActiveDirtyRooms();
+        verify(roomService, times(1)).findAll();
     }
 
     @Test

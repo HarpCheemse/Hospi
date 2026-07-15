@@ -21,14 +21,7 @@
 
 <div th:replace="~{/fragments/receptionist-sidebar :: sidebar}"></div>
 
-<main class="staff-page"
-      x-data="{
-          checkoutOpen: false,
-          checkoutConfirmed: false,
-          paymentMethod: 'CASH',
-          applyLateFee: false,
-          actualCheckoutTime: ''
-      }">
+<main class="staff-page" x-data="{ removeModal: false, removeAction: '' }">
 
     <div th:replace="~{fragments/components/toast :: toast}"></div>
 
@@ -49,12 +42,11 @@
         </div>
 
         <div class="flex items-center gap-3">
-            <button th:if="${view.reservation().status.name() == 'CHECKED_IN'}"
-                    @click="checkoutOpen = true; checkoutConfirmed = false; applyLateFee = false; actualCheckoutTime = ''; paymentMethod = 'CASH'"
-                    class="btn btn-primary btn-lg"
-                    type="button">
+            <a th:if="${view.reservation().status.name() == 'CHECKED_IN'}"
+               th:href="@{/receptionist/stays/{id}/checkout(id=${view.reservation().id})}"
+               class="btn btn-primary btn-lg">
                 Check Out
-            </button>
+            </a>
             <a th:href="@{/receptionist/stays}"
                class="btn btn-secondary">
                 Back
@@ -62,14 +54,6 @@
         </div>
 
     </header>
-
-    <form id="checkoutForm"
-          th:action="@{/receptionist/stays/{id}/checkout(id=${view.reservation().id})}"
-          method="post" class="hidden">
-        <input type="hidden" name="paymentMethod" x-model="paymentMethod">
-        <input type="hidden" name="applyLateFee" x-model="applyLateFee">
-        <input type="hidden" name="actualCheckoutTime" x-model="actualCheckoutTime">
-    </form>
 
     <div class="grid grid-cols-3 gap-6">
 
@@ -515,110 +499,6 @@
 
         </div>
 
-    </div>
-
-    <!-- CHECKOUT MODAL -->
-    <div x-show="checkoutOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="checkoutOpen = false"></div>
-        <div x-show="checkoutOpen"
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 scale-95"
-             x-transition:enter-end="opacity-100 scale-100"
-             x-transition:leave="transition ease-in duration-150"
-             x-transition:leave-start="opacity-100 scale-100"
-             x-transition:leave-end="opacity-0 scale-95"
-             @click.stop
-             class="relative mx-4 w-full max-w-lg rounded-2xl border border-border bg-surface p-6 shadow-2xl">
-
-            <div class="flex items-center gap-3 mb-4">
-                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                    <img th:src="@{/assets/icons/log-out.svg}" class="h-5 w-5 text-primary" alt="">
-                </div>
-                <div>
-                    <h2 class="text-lg font-semibold text-foreground">Confirm Check-Out</h2>
-                    <p class="text-sm text-muted-foreground" th:text="|${view.reservation().guestName}|">John Smith</p>
-                </div>
-            </div>
-
-            <!-- Financial breakdown -->
-            <div class="space-y-3 mb-5 text-sm">
-                <div class="flex justify-between py-1">
-                    <span class="text-muted-foreground">Total Price</span>
-                    <span class="font-medium" th:text="|$${#numbers.formatDecimal(checkoutCalc.totalPrice(), 0, 2)}|">$1,000.00</span>
-                </div>
-                <div class="flex justify-between py-1">
-                    <span class="text-muted-foreground">Deposit Paid</span>
-                    <span class="font-medium text-success" th:text="|$${#numbers.formatDecimal(checkoutCalc.depositPaid(), 0, 2)}|">$200.00</span>
-                </div>
-                <div class="flex justify-between py-2 border-t border-border">
-                    <span class="font-medium">Remaining Balance</span>
-                    <span class="font-medium" th:text="|$${#numbers.formatDecimal(checkoutCalc.remainingBalance(), 0, 2)}|">$800.00</span>
-                </div>
-
-                <!-- Late checkout -->
-                <div class="border-t border-border pt-3">
-                    <div class="flex items-center gap-3 mb-3">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" x-model="applyLateFee" class="rounded border-border">
-                            <span class="text-sm font-medium">Apply Late Checkout Fee</span>
-                        </label>
-                    </div>
-                    <div x-show="applyLateFee" class="mb-3">
-                        <label class="mb-1 block text-sm text-muted-foreground">Actual check-out time</label>
-                        <input type="datetime-local" x-model="actualCheckoutTime"
-                               class="input w-full"
-                               :disabled="!applyLateFee">
-                        <p class="mt-1 text-xs text-muted-foreground">
-                            Fee: <strong th:text="|$${#numbers.formatDecimal(config.lateCheckoutFee, 0, 2)}|">$50.00</strong>
-                        </p>
-                    </div>
-                    <div th:if="${checkoutCalc.extraGuestCount() > 0}" class="text-sm text-muted-foreground">
-                        <span th:text="|Extra guest fee: ${checkoutCalc.extraGuestCount()} guest(s) = $${#numbers.formatDecimal(checkoutCalc.extraGuestFee(), 0, 2)}|">
-                            Extra guest fee: 1 guest(s) = $25.00
-                        </span>
-                    </div>
-                </div>
-
-                <div class="flex justify-between py-3 border-t-2 border-border text-lg font-bold">
-                    <span>Total Due</span>
-                    <span th:text="|$${#numbers.formatDecimal(checkoutCalc.totalDue(), 0, 2)}|">$800.00</span>
-                </div>
-            </div>
-
-            <!-- Payment method -->
-            <div class="mb-4">
-                <label class="mb-2 block text-sm font-medium text-foreground">Payment Method</label>
-                <div class="flex gap-3">
-                    <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-border px-4 py-3 has-[:checked]:border-primary has-[:checked]:bg-primary/5 transition-colors">
-                        <input type="radio" name="pm" value="CASH" x-model="paymentMethod" class="h-4 w-4 accent-primary">
-                        <span class="text-sm font-medium text-foreground">Cash</span>
-                    </label>
-                    <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-border px-4 py-3 has-[:checked]:border-primary has-[:checked]:bg-primary/5 transition-colors">
-                        <input type="radio" name="pm" value="CARD" x-model="paymentMethod" class="h-4 w-4 accent-primary">
-                        <span class="text-sm font-medium text-foreground">Card</span>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Confirm checkbox -->
-            <div class="rounded-xl border border-border bg-background p-4 mb-5">
-                <label class="flex items-start gap-3 cursor-pointer">
-                    <input type="checkbox" x-model="checkoutConfirmed" class="mt-0.5 h-4 w-4 accent-primary rounded">
-                    <span class="text-sm text-foreground">
-                        I confirm that I have settled the bill and checked out the guest.
-                    </span>
-                </label>
-            </div>
-
-            <div class="flex justify-end gap-3">
-                <button type="button" @click="checkoutOpen = false" class="btn btn-secondary">Cancel</button>
-                <button type="submit" form="checkoutForm"
-                        :disabled="!checkoutConfirmed"
-                        :class="checkoutConfirmed ? 'btn btn-primary' : 'btn btn-primary opacity-50 cursor-not-allowed'">
-                    Complete Check-Out
-                </button>
-            </div>
-        </div>
     </div>
 
 </main>

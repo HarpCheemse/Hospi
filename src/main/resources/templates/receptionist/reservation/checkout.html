@@ -1,162 +1,227 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Check-Out | Hospi</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
+    <style>[x-cloak] { display: none !important; }</style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.9/cdn.min.js" defer></script>
 </head>
-
 <body class="staff-layout">
 
 <div th:replace="~{/fragments/receptionist-sidebar :: sidebar}"></div>
 
-<main class="staff-page">
+<main class="staff-page" x-data="checkoutPage()">
 
     <div th:replace="~{fragments/components/toast :: toast}"></div>
 
     <header class="staff-page-header">
-        <section>
-            <h1 class="staff-page-title">Check-Out</h1>
-            <p class="page-description">Complete guest stay and finalize billing.</p>
-        </section>
-        <a th:href="@{/receptionist/bookings}" class="btn btn-secondary btn-lg">&larr; Back</a>
+        <div class="flex items-center gap-4">
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/log-out.svg}" class="h-7 w-7" alt="">
+            </div>
+            <section>
+                <h1 class="staff-page-title">Check-Out</h1>
+                <p class="page-description">Review charges and complete the guest's stay.</p>
+            </section>
+        </div>
+        <div class="flex gap-3">
+            <a th:href="@{/receptionist/stays/{id}(id=${view.reservation.id})}" class="btn btn-secondary btn-lg">&larr; Back to Stay</a>
+        </div>
     </header>
 
-    <!-- BOOKING SUMMARY -->
-    <section class="card">
-        <div class="border-b border-border p-5">
-            <h2 class="text-lg font-semibold text-foreground">Booking Summary</h2>
-        </div>
-        <div class="p-5">
-            <div class="grid grid-cols-2 gap-5">
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-muted-foreground">Guest Name</label>
-                    <p class="text-foreground font-medium" th:text="${view.reservation.guestName}">John Smith</p>
+    <form th:action="@{/receptionist/stays/{id}/checkout(id=${view.reservation.id})}"
+          th:object="${form}"
+          method="post"
+          class="flex flex-col gap-6"
+          novalidate>
+
+        <!-- RESERVATION INFO -->
+        <section class="card">
+            <div class="border-b border-border px-6 py-5">
+                <h2 class="text-xl font-semibold">Check-Out Receipt</h2>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-2 gap-5">
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-muted-foreground">Guest</label>
+                        <p class="text-foreground font-medium" th:text="${view.reservation.guestName}">John Doe</p>
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-muted-foreground">Booking</label>
+                        <p class="text-foreground" th:text="|#R-${view.reservation.id}|">#R-1234</p>
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-muted-foreground">Check-In</label>
+                        <p class="text-foreground" th:text="${#temporals.format(view.reservation.checkInAt, 'dd MMM yyyy')}">15 Jun 2026</p>
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-muted-foreground">Scheduled Check-Out</label>
+                        <p class="text-foreground" th:text="${#temporals.format(view.reservation.checkOutAt, 'dd MMM yyyy')} + ' at ' + ${view.hotelCheckOutTime}">18 Jun 2026 at 12:00</p>
+                    </div>
                 </div>
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-muted-foreground">Source</label>
-                    <span class="pill-muted text-sm" th:text="${view.reservation.source.name()}">ONLINE</span>
-                </div>
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-muted-foreground">Check-In</label>
-                    <p class="text-foreground" th:text="${#temporals.format(view.reservation.checkInAt, 'dd MMM yyyy')}">15 Jun 2026</p>
-                </div>
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-muted-foreground">Scheduled Check-Out</label>
-                    <p class="text-foreground" th:text="${#temporals.format(view.reservation.checkOutAt, 'dd MMM yyyy')}">18 Jun 2026</p>
-                </div>
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-muted-foreground">Rooms</label>
-                    <div class="flex flex-wrap gap-1">
-                        <th:block th:each="detail : ${view.reservation.details}">
-                            <span class="pill-muted text-sm" th:text="${detail.roomTypeName} + ' x' + ${detail.roomCount}">Deluxe x2</span>
+                <div class="mt-4">
+                    <label class="mb-2 block text-sm font-medium text-muted-foreground">Rooms</label>
+                    <div class="flex flex-wrap gap-2">
+                        <th:block th:each="d : ${view.reservation.details}">
+                            <span class="pill-muted" th:text="${d.roomTypeName} + ' x' + ${d.roomCount}">Deluxe x2</span>
                         </th:block>
                     </div>
-                </div>
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-muted-foreground">Adult Guests (14+)</label>
-                    <p class="text-foreground" th:text="${view.adultGuests}">2</p>
+                    <p class="mt-1 text-sm text-muted-foreground" th:if="${!#strings.isEmpty(view.roomNumbers)}" th:text="|Assigned: ${view.roomNumbers}|">Assigned: 101, 102</p>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- FINANCIAL BREAKDOWN -->
-    <section class="card mt-6">
-        <div class="border-b border-border p-5">
-            <h2 class="text-lg font-semibold text-foreground">Financial Breakdown</h2>
-        </div>
-        <div class="p-5" x-data="checkoutCalc()">
-            <div class="space-y-4">
+        <!-- FINANCIAL BREAKDOWN -->
+        <section class="card">
+            <div class="border-b border-border px-6 py-5">
+                <h2 class="text-xl font-semibold">Payment Breakdown</h2>
+            </div>
+            <div class="p-6 space-y-3">
                 <div class="flex justify-between py-2">
-                    <span class="text-muted-foreground">Total Price</span>
-                    <span class="font-medium" th:text="|$${#numbers.formatDecimal(view.calc.totalPrice, 0, 2)}|">$1000.00</span>
+                    <span class="text-muted-foreground">Room Charges</span>
+                    <span class="font-medium" th:text="|$${#numbers.formatDecimal(view.roomCharges, 1, 2)}|">$1,000.00</span>
                 </div>
                 <div class="flex justify-between py-2">
-                    <span class="text-muted-foreground">Deposit Paid</span>
-                    <span class="font-medium text-success" th:text="|$${#numbers.formatDecimal(view.calc.depositPaid, 0, 2)}|">$200.00</span>
+                    <span class="text-muted-foreground">Tax</span>
+                    <span class="font-medium" th:text="|$${#numbers.formatDecimal(view.taxAmount, 1, 2)}|">$80.00</span>
                 </div>
-                <div class="flex justify-between py-2 border-t border-border">
-                    <span class="font-medium">Remaining Balance</span>
-                    <span class="font-medium" th:text="|$${#numbers.formatDecimal(view.calc.remainingBalance, 0, 2)}|">$800.00</span>
+                <div class="flex justify-between py-2 border-t border-border font-semibold">
+                    <span>Total Charges</span>
+                    <span th:text="|$${#numbers.formatDecimal(view.totalCharges, 1, 2)}|">$1,080.00</span>
+                </div>
+                <div class="flex justify-between py-2" th:if="${view.depositPaid.signum() == 1}">
+                    <span class="text-success">Deposit Paid</span>
+                    <span class="font-medium text-success" th:text="|-${#numbers.formatDecimal(view.depositPaid, 1, 2)}|">-$200.00</span>
                 </div>
 
-                <div class="border-t border-border pt-4">
-                    <h3 class="text-sm font-semibold text-foreground mb-3">Optional Fees</h3>
-
-                    <div class="flex items-center gap-4 mb-4">
-                        <label class="flex items-center gap-2">
-                            <input type="checkbox" name="applyLateFee" x-model="applyLateFee" class="rounded border-border">
-                            <span class="text-sm font-medium">Apply Late Checkout Fee</span>
-                        </label>
-                        <div x-show="applyLateFee" class="flex items-center gap-2">
-                            <input type="datetime-local" name="actualCheckoutTime"
-                                   x-model="actualCheckoutTime"
-                                   :disabled="!applyLateFee"
-                                   class="rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary">
-                            <span class="text-sm text-muted-foreground">
-                                Fee: <strong th:text="|$${#numbers.formatDecimal(config.lateCheckoutFee, 0, 2)}|">$50.00</strong>
-                            </span>
+                <div class="border-t border-border pt-4" th:if="${view.showLateFee}">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox"
+                                   id="applyLateCheckoutFee"
+                                   th:field="*{applyLateCheckoutFee}"
+                                   class="h-4 w-4 rounded border-border accent-primary"
+                                   x-model="applyLateFee">
+                            <label for="applyLateCheckoutFee" class="text-sm font-medium text-muted-foreground">Apply Late Checkout Fee</label>
                         </div>
+                        <span class="text-sm text-muted-foreground"
+                              th:text="|${view.lateFeeHours}h &times; $${#numbers.formatDecimal(view.lateCheckoutFee.divide(view.lateFeeHours, 2, 1), 1, 2)}|">
+                            1h &times; $25.00
+                        </span>
                     </div>
-
-                    <div class="flex items-center gap-4 mb-4">
-                        <span class="text-sm font-medium">Extra Guest Fee</span>
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm text-muted-foreground" th:if="${view.calc.extraGuestCount > 0}"
-                                  th:text="${view.calc.extraGuestCount} + ' guest(s) &times; $' + ${#numbers.formatDecimal(config.extraGuestFee, 0, 2)} + ' = $' + ${#numbers.formatDecimal(view.calc.extraGuestFee, 0, 2)}">
-                                1 guest(s) &times; $25.00 = $25.00
-                            </span>
-                            <span class="text-sm text-muted-foreground" th:unless="${view.calc.extraGuestCount > 0}">
-                                No extra guests
-                            </span>
-                        </div>
-                    </div>
+                    <p class="mt-1 text-sm font-medium text-right"
+                       th:text="|Late fee: $${#numbers.formatDecimal(view.lateCheckoutFee, 1, 2)}|">
+                        Late fee: $25.00
+                    </p>
                 </div>
 
                 <div class="flex justify-between py-3 border-t-2 border-border text-lg font-bold">
-                    <span>Total Due</span>
-                    <span th:text="|$${#numbers.formatDecimal(view.calc.totalDue, 0, 2)}|">$800.00</span>
+                    <span>Remaining Due</span>
+                    <span x-text="formatPrice(remainingDue())"
+                          th:text="|$${#numbers.formatDecimal(view.remainingDue, 1, 2)}|">$880.00</span>
                 </div>
             </div>
+        </section>
 
-            <!-- PAYMENT FORM -->
-            <form th:action="@{/receptionist/reservations/{id}/checkout(id=${view.reservation.id})}"
-                  method="post"
-                  class="mt-6 border-t border-border pt-6">
+        <!-- PAYMENT METHOD -->
+        <section class="card">
+            <div class="border-b border-border px-6 py-5">
+                <h2 class="text-xl font-semibold">Payment Method</h2>
+            </div>
+            <div class="p-6">
+                <div class="flex gap-4">
+                    <th:block th:each="method : ${view.availableMethods}">
+                        <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-border px-4 py-3 transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+                            <input type="radio"
+                                   th:field="*{paymentMethod}"
+                                   th:value="${method}"
+                                   class="h-4 w-4 accent-primary">
+                            <span class="text-sm font-medium text-foreground" th:text="${method.name()}">CASH</span>
+                        </label>
+                    </th:block>
+                </div>
+                <div th:if="${#fields.hasErrors('paymentMethod')}" class="mt-2 text-sm text-danger" th:errors="*{paymentMethod}">Error</div>
+            </div>
+        </section>
 
-                <div class="flex items-end gap-4">
-                    <div class="w-48">
-                        <label class="mb-2 block text-sm font-medium text-foreground">Payment Method</label>
-                        <select name="paymentMethod" required
-                                class="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary">
-                            <option value="">Select...</option>
-                            <option value="CASH">Cash</option>
-                            <option value="CARD">Card</option>
-                        </select>
+        <!-- CONFIRM SECTION -->
+        <section class="card">
+            <div class="p-6 flex items-center justify-end gap-3">
+                <button type="button"
+                        @click="if ($el.form.reportValidity()) checkoutModalOpen = true"
+                        class="btn btn-primary btn-lg">
+                    Complete Check-Out &mdash; <span x-text="formatPrice(remainingDue())" th:text="|$${#numbers.formatDecimal(view.remainingDue, 1, 2)}|">$880.00</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- CONFIRM MODAL -->
+        <div x-show="checkoutModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="checkoutModalOpen = false"></div>
+            <div x-show="checkoutModalOpen"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95"
+                 @click.stop
+                 class="relative mx-4 w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-warning/10 text-warning">
+                        <img th:src="@{/assets/icons/log-out.svg}" class="h-5 w-5" alt="">
                     </div>
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        Complete Check-Out &mdash; <span th:text="|$${#numbers.formatDecimal(view.calc.totalDue, 0, 2)}|">$800.00</span>
+                    <h2 class="text-lg font-semibold text-foreground">Confirm Payment</h2>
+                </div>
+                <p class="mt-4 text-sm text-muted-foreground">
+                    Confirm that the guest has paid <strong class="text-foreground" x-text="formatPrice(remainingDue())">$880.00</strong>.
+                    Complete the check-out for <strong class="text-foreground" th:text="${view.reservation.guestName}">John Doe</strong>.
+                </p>
+                <p class="mt-2 text-sm text-muted-foreground">This action cannot be undone.</p>
+                <div class="mt-5 rounded-xl border border-border bg-background p-4">
+                    <label class="flex items-start gap-3 cursor-pointer">
+                        <input type="checkbox" x-model="checkoutConfirmed" class="mt-0.5 h-4 w-4 accent-primary rounded">
+                        <span class="text-sm text-foreground">I confirm that I have collected the full payment from the guest.</span>
+                    </label>
+                </div>
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button" @click="checkoutModalOpen = false" class="btn btn-secondary">Cancel</button>
+                    <button type="submit"
+                            :disabled="!checkoutConfirmed"
+                            :class="checkoutConfirmed ? 'btn btn-primary' : 'btn btn-primary opacity-50 cursor-not-allowed'">
+                        Confirm Check-Out
                     </button>
                 </div>
-            </form>
+            </div>
         </div>
-    </section>
+
+    </form>
 
 </main>
 
-<script>
-    function checkoutCalc() {
+<script th:inline="javascript">
+    function checkoutPage() {
         return {
-            applyLateFee: false,
-            actualCheckoutTime: ''
+            applyLateFee: /*[[${form?.applyLateCheckoutFee()}]]*/ false,
+            checkoutModalOpen: false,
+            checkoutConfirmed: false,
+            paymentMethod: /*[[${form?.paymentMethod()}]]*/ 'CASH',
+            lateFeeAmount: /*[[${view.lateCheckoutFee}]]*/ 0.0,
+            baseRemainingDue: /*[[${view.remainingDue}]]*/ 0.0,
+            showLateFee: /*[[${view.showLateFee}]]*/ false,
+            remainingDue() {
+                return this.showLateFee && this.applyLateFee
+                    ? this.baseRemainingDue + this.lateFeeAmount
+                    : this.baseRemainingDue;
+            },
+            formatPrice(val) {
+                return '$' + Number(val).toFixed(2);
+            }
         }
     }
 </script>
 
 </body>
 </html>
-

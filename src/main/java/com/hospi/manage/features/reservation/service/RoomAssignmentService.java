@@ -118,4 +118,31 @@ public class RoomAssignmentService {
 
         roomAssignmentRepository.delete(assignment);
     }
+
+    /** Find all assignments for the given reservation IDs. */
+    public List<RoomAssignment> findAssignmentsByReservationIds(List<Long> reservationIds) {
+        if (reservationIds == null || reservationIds.isEmpty()) {
+            return List.of();
+        }
+        return roomAssignmentRepository.findByReservationIdIn(reservationIds);
+    }
+
+    /** Return comma-separated room numbers for a reservation. */
+    public String getAssignedRoomNumbers(Long reservationId) {
+        return roomAssignmentRepository.findByReservationIdOrderByAssignedAtAsc(reservationId)
+                .stream()
+                .map(a -> a.getRoom().getRoomNumber())
+                .collect(Collectors.joining(", "));
+    }
+
+    /** Set all rooms assigned to this reservation to VACANT during checkout. */
+    public void vacateAllReservationRooms(Long reservationId) {
+        List<RoomAssignment> assignments = roomAssignmentRepository
+                .findByReservationIdOrderByAssignedAtAsc(reservationId);
+        for (RoomAssignment a : assignments) {
+            Room room = a.getRoom();
+            room.setOccupancyStatus(OccupancyStatus.VACANT);
+            roomRepository.save(room);
+        }
+    }
 }

@@ -149,20 +149,6 @@ class ReceptionistReservationControllerTest {
         when(stayingGuestService.getAdultGuestCount(anyLong(), any())).thenReturn(2);
         when(roomAssignmentService.getAssignedRooms(1L)).thenReturn(List.of());
         when(roomAssignmentService.getAvailableRooms(1L)).thenReturn(List.of());
-        when(checkoutService.calculate(any(), any(), anyInt())).thenReturn(
-                new com.hospi.manage.features.reservation.dto.response.CheckoutCalculation(
-                        java.math.BigDecimal.valueOf(500),
-                        java.math.BigDecimal.valueOf(200),
-                        java.math.BigDecimal.valueOf(300),
-                        java.math.BigDecimal.ZERO,
-                        java.math.BigDecimal.ZERO,
-                        java.math.BigDecimal.valueOf(300),
-                        false,
-                        0));
-        var config = new com.hospi.manage.features.config.entity.SystemConfig();
-        config.setLateCheckoutFee(java.math.BigDecimal.valueOf(50));
-        config.setExtraGuestFee(java.math.BigDecimal.valueOf(25));
-        when(systemConfigService.getConfig()).thenReturn(config);
     }
 
     // ========== GET / ==========

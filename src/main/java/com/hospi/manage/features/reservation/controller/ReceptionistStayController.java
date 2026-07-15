@@ -4,14 +4,10 @@ import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.core.security.session.AccountPrincipal;
 import com.hospi.manage.features.audit.service.AuditService;
-import com.hospi.manage.features.config.service.SystemConfigService;
-import com.hospi.manage.features.payment.enums.PaymentMethod;
 import com.hospi.manage.features.reservation.dto.request.AssignRoomForm;
 import com.hospi.manage.features.reservation.dto.request.CheckoutForm;
 import com.hospi.manage.features.reservation.dto.request.ExtendStayForm;
 import com.hospi.manage.features.reservation.dto.request.StayingGuestForm;
-import com.hospi.manage.features.reservation.dto.response.CheckoutCalculation;
-import com.hospi.manage.features.reservation.dto.response.CurrentStaysView;
 import com.hospi.manage.features.reservation.dto.response.ManageReservationView;
 import com.hospi.manage.features.reservation.dto.response.ReservationSummaryView;
 import com.hospi.manage.features.reservation.entity.Reservation;
@@ -33,7 +29,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,7 +44,6 @@ public class ReceptionistStayController {
     private final RoomAssignmentService roomAssignmentService;
     private final RoomUpgradeService roomUpgradeService;
     private final CheckoutService checkoutService;
-    private final SystemConfigService systemConfigService;
     private final AuditService auditService;
 
     private static final int PAGE_SIZE = 10;
@@ -107,7 +101,6 @@ public class ReceptionistStayController {
             model.addAttribute(Attributes.FORM, new StayingGuestForm(null, null, null));
         }
 
-        addCheckoutAttributes(id, reservation, model);
         model.addAttribute(Attributes.ROOM_FORM, new AssignRoomForm(null));
         model.addAttribute(Attributes.EXTEND_FORM, new ExtendStayForm(null));
         return "receptionist/reservation/manage";
@@ -120,7 +113,6 @@ public class ReceptionistStayController {
         if (binding.hasErrors()) {
             var r = reservationService.findById(id);
             model.addAttribute(Attributes.VIEW, buildManageView(id, r));
-            addCheckoutAttributes(id, r, model);
             model.addAttribute(Attributes.ROOM_FORM, new AssignRoomForm(null));
             model.addAttribute(Attributes.EXTEND_FORM, new ExtendStayForm(null));
             return "receptionist/reservation/manage";
@@ -140,7 +132,6 @@ public class ReceptionistStayController {
         if (binding.hasErrors()) {
             var r = reservationService.findById(id);
             model.addAttribute(Attributes.VIEW, buildManageView(id, r));
-            addCheckoutAttributes(id, r, model);
             model.addAttribute(Attributes.EDIT_GUEST_ID, guestId);
             model.addAttribute(Attributes.ROOM_FORM, new AssignRoomForm(null));
             model.addAttribute(Attributes.EXTEND_FORM, new ExtendStayForm(null));
@@ -170,7 +161,6 @@ public class ReceptionistStayController {
         if (binding.hasErrors()) {
             var r = reservationService.findById(id);
             model.addAttribute(Attributes.VIEW, buildManageView(id, r));
-            addCheckoutAttributes(id, r, model);
             model.addAttribute(Attributes.FORM, new StayingGuestForm(null, null, null));
             model.addAttribute(Attributes.EXTEND_FORM, new ExtendStayForm(null));
             return "receptionist/reservation/manage";
@@ -203,7 +193,6 @@ public class ReceptionistStayController {
         if (binding.hasErrors()) {
             var r = reservationService.findById(id);
             model.addAttribute(Attributes.VIEW, buildManageView(id, r));
-            addCheckoutAttributes(id, r, model);
             model.addAttribute(Attributes.FORM, new StayingGuestForm(null, null, null));
             model.addAttribute(Attributes.ROOM_FORM, new AssignRoomForm(null));
             return "receptionist/reservation/manage";
@@ -258,24 +247,40 @@ public class ReceptionistStayController {
         return "redirect:/receptionist/stays/" + id + "";
     }
 
-    @PostMapping("/{id}/checkout")
-    String checkout(@PathVariable Long id, @ModelAttribute CheckoutForm form,
-                    @AuthenticationPrincipal AccountPrincipal principal, RedirectAttributes redirect) {
-        try {
-            var reservation = reservationService.findById(id);
-            int adultGuests = stayingGuestService.getAdultGuestCount(id, reservation.getCheckInAt());
-            boolean applyLateFee = Boolean.TRUE.equals(form.applyLateFee());
-            LocalDateTime actualTime = applyLateFee ? form.actualCheckoutTime() : null;
-            CheckoutCalculation calc = checkoutService.calculate(reservation, actualTime, adultGuests);
-            PaymentMethod method = PaymentMethod.valueOf(form.paymentMethod());
-            checkoutService.complete(id, calc, method, principal.getUsername(), form.actualCheckoutTime(), applyLateFee);
-            auditService.log(principal.getId(), principal.getUsername(), "CHECKOUT", "RESERVATION", id,
-                    "Amount: $" + calc.totalDue());
-            redirect.addFlashAttribute(Attributes.SUCCESS, "Checkout completed successfully.");
+    @GetMapping("/{id}/checkout")
+    String showCheckout(@PathVariable Long id, Model model) {
+        Reservation reservation = reservationService.findById(id);
+        if (reservation.getStatus() != ReservationStatus.CHECKED_IN) {
             return "redirect:/receptionist/stays";
-        } catch (IllegalStateException | IllegalArgumentException e) {
+        }
+        model.addAttribute(Attributes.VIEW, checkoutService.buildCheckoutView(id));
+        model.addAttribute(Attributes.FORM, new CheckoutForm(null, false));
+        return "receptionist/reservation/checkout";
+    }
+
+    @PostMapping("/{id}/checkout")
+    String completeCheckout(@PathVariable Long id,
+                            @Valid @ModelAttribute(Attributes.FORM) CheckoutForm form,
+                            BindingResult binding,
+                            Model model,
+                            RedirectAttributes redirect,
+                            @AuthenticationPrincipal AccountPrincipal principal) {
+        if (binding.hasErrors()) {
+            model.addAttribute(Attributes.VIEW, checkoutService.buildCheckoutView(id));
+            if (!model.containsAttribute(Attributes.FORM) || model.getAttribute(Attributes.FORM) == null) {
+                model.addAttribute(Attributes.FORM, new CheckoutForm(null, false));
+            }
+            return "receptionist/reservation/checkout";
+        }
+        try {
+            checkoutService.complete(id, form, principal.getUsername());
+            auditService.log(principal.getId(), principal.getUsername(), "CHECKOUT", "RESERVATION", id,
+                    "Amount: " + form.paymentMethod());
+            redirect.addFlashAttribute(Attributes.SUCCESS, "Checkout completed successfully.");
+            return "redirect:/receptionist/receipts/" + id + "";
+        } catch (IllegalStateException e) {
             redirect.addFlashAttribute(Attributes.ERROR, e.getMessage());
-            return "redirect:/receptionist/stays/" + id + "";
+            return "redirect:/receptionist/stays/" + id + "/checkout";
         }
     }
 
@@ -284,11 +289,5 @@ public class ReceptionistStayController {
                 stayingGuestService.getGuests(id),
                 roomAssignmentService.getAssignedRooms(id),
                 roomAssignmentService.getAvailableRooms(id));
-    }
-
-    private void addCheckoutAttributes(Long id, Reservation reservation, Model model) {
-        int adultGuests = stayingGuestService.getAdultGuestCount(id, reservation.getCheckInAt());
-        model.addAttribute("checkoutCalc", checkoutService.calculate(reservation, null, adultGuests));
-        model.addAttribute("config", systemConfigService.getConfig());
     }
 }

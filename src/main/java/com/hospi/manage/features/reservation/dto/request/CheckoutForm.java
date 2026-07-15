@@ -1,12 +1,10 @@
 package com.hospi.manage.features.reservation.dto.request;
 
-import org.springframework.format.annotation.DateTimeFormat;
+import com.hospi.manage.features.payment.enums.PaymentMethod;
+import jakarta.validation.constraints.NotNull;
 
-import java.time.LocalDateTime;
-
-/** Form backing the checkout flow — payment method, late fee toggle, and actual checkout time. */
+/** Form backing the checkout flow — payment method and late fee toggle. */
 public record CheckoutForm(
-        Boolean applyLateFee,
-        @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime actualCheckoutTime,
-        String paymentMethod
+        @NotNull PaymentMethod paymentMethod,
+        boolean applyLateCheckoutFee
 ) {}
