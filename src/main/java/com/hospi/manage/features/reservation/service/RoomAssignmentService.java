@@ -126,4 +126,15 @@ public class RoomAssignmentService {
         }
         return roomAssignmentRepository.findByReservationIdIn(reservationIds);
     }
+
+    /** Set all rooms assigned to this reservation to VACANT during checkout. */
+    public void vacateAllReservationRooms(Long reservationId) {
+        List<RoomAssignment> assignments = roomAssignmentRepository
+                .findByReservationIdOrderByAssignedAtAsc(reservationId);
+        for (RoomAssignment a : assignments) {
+            Room room = a.getRoom();
+            room.setOccupancyStatus(OccupancyStatus.VACANT);
+            roomRepository.save(room);
+        }
+    }
 }

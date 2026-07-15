@@ -63,6 +63,18 @@
 
         </a>
 
+        <!-- RECEIPTS -->
+        <a th:href="@{/receptionist/receipts}"
+           class="flex items-center gap-3 rounded-lg p-2"
+           th:classappend="${activeSidebar == 'RECEIPTS'}
+                 ? ' bg-primary/10 text-primary font-medium'
+                 : ' hover:bg-muted text-foreground'">
+
+            <img th:src="@{/assets/icons/receipt.svg}" alt="Receipts"/>
+            Receipts
+
+        </a>
+
         <!-- NOTIFICATIONS -->
         <a th:href="@{/notifications}"
            class="flex items-center justify-between rounded-lg p-2"

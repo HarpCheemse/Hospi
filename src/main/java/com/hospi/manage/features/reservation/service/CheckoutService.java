@@ -1,6 +1,9 @@
 package com.hospi.manage.features.reservation.service;
 
+import com.hospi.manage.common.constant.HotelConstants;
+import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.config.service.SystemConfigService;
+import com.hospi.manage.features.hotel.repository.HotelRepository;
 import com.hospi.manage.features.invoice.entity.Invoice;
 import com.hospi.manage.features.invoice.entity.InvoiceItem;
 import com.hospi.manage.features.invoice.enums.InvoiceItemType;
@@ -9,24 +12,25 @@ import com.hospi.manage.features.invoice.repository.InvoiceRepository;
 import com.hospi.manage.features.payment.entity.Payment;
 import com.hospi.manage.features.payment.enums.PaymentMethod;
 import com.hospi.manage.features.payment.repository.PaymentRepository;
-import com.hospi.manage.features.reservation.dto.response.CheckoutCalculation;
+import com.hospi.manage.features.reservation.dto.request.CheckoutForm;
+import com.hospi.manage.features.reservation.dto.response.CheckoutView;
+import com.hospi.manage.features.reservation.dto.response.ReservationSummaryView;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-/**
- * Service for handling reservation checkout operations.
- */
+/** Service for handling reservation checkout operations. */
 @Service
 @RequiredArgsConstructor
 public class CheckoutService {
@@ -35,96 +39,127 @@ public class CheckoutService {
     private final PaymentRepository paymentRepository;
     private final SystemConfigService systemConfigService;
     private final InvoiceRepository invoiceRepository;
+    private final RoomAssignmentService roomAssignmentService;
+    private final HotelRepository hotelRepository;
 
-    public CheckoutCalculation calculate(Reservation reservation, boolean applyLateFee, int adultGuestCount) {
+    /** Build the checkout view model with all charges for the receipt page. */
+    public CheckoutView buildCheckoutView(Long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
+
         var config = systemConfigService.getConfig();
-        BigDecimal totalPrice = reservation.getTotalPrice();
+        var hotel = hotelRepository.findById(HotelConstants.HOTEL_ID)
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
+
+        BigDecimal roomCharges = reservation.getTotalPrice();
+        BigDecimal taxAmount = config.getTaxRate() != null
+                ? roomCharges.multiply(config.getTaxRate()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO;
+        BigDecimal totalCharges = roomCharges.add(taxAmount);
 
         BigDecimal depositPaid = BigDecimal.ZERO;
-        List<Payment> existingPayments = paymentRepository.findAllByReservationId(reservation.getId());
+        List<Payment> existingPayments = paymentRepository.findAllByReservationId(reservationId);
         if (existingPayments != null && !existingPayments.isEmpty()) {
             depositPaid = existingPayments.stream()
                     .map(Payment::getAmount)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
         }
 
-        BigDecimal remainingBalance = totalPrice.subtract(depositPaid);
-        if (remainingBalance.compareTo(BigDecimal.ZERO) < 0) {
-            remainingBalance = BigDecimal.ZERO;
+        LocalTime hotelCheckOutTime = hotel.getCheckOutTime() != null ? hotel.getCheckOutTime() : LocalTime.of(12, 0);
+        LocalDateTime scheduledCheckOut = reservation.getCheckOutAt().atTime(hotelCheckOutTime);
+        LocalDateTime now = LocalDateTime.now();
+        long hoursPast = 0;
+        if (now.isAfter(scheduledCheckOut)) {
+            hoursPast = (long) Math.ceil(Duration.between(scheduledCheckOut, now).toMinutes() / 60.0);
         }
-
-        boolean isLate = applyLateFee;
-        BigDecimal lateCheckoutFee = BigDecimal.ZERO;
-        if (applyLateFee) {
-            lateCheckoutFee = config.getLateCheckoutFee();
+        BigDecimal lateFeePerHour = config.getLateCheckoutFee();
+        BigDecimal lateFeeAmount = BigDecimal.ZERO;
+        if (hoursPast > 0 && lateFeePerHour != null && lateFeePerHour.compareTo(BigDecimal.ZERO) > 0) {
+            lateFeeAmount = lateFeePerHour.multiply(BigDecimal.valueOf(hoursPast));
         }
+        boolean showLateFee = lateFeeAmount.compareTo(BigDecimal.ZERO) > 0;
 
-        int totalRoomCapacity = reservation.getDetails().stream()
-                .mapToInt(d -> d.getRoomType().getMaxOccupancy() * d.getRoomCount())
-                .sum();
-        int extraGuestCount = Math.max(0, adultGuestCount - totalRoomCapacity);
-        BigDecimal extraGuestFee = config.getExtraGuestFee().multiply(BigDecimal.valueOf(extraGuestCount));
+        BigDecimal remainingDue = totalCharges.subtract(depositPaid);
 
-        BigDecimal totalDue = remainingBalance.add(lateCheckoutFee).add(extraGuestFee);
-
-        return new CheckoutCalculation(
-                totalPrice, depositPaid, remainingBalance,
-                lateCheckoutFee, extraGuestFee, totalDue,
-                isLate, extraGuestCount
+        return new CheckoutView(
+                ReservationSummaryView.from(reservation),
+                roomCharges,
+                taxAmount,
+                totalCharges,
+                depositPaid,
+                lateFeeAmount,
+                BigDecimal.valueOf(hoursPast),
+                showLateFee,
+                remainingDue,
+                List.of(PaymentMethod.CASH, PaymentMethod.CARD),
+                hotelCheckOutTime.toString()
         );
     }
 
+    /** Complete the checkout — record payment, create invoice, vacate rooms. */
     @Transactional
-    public Reservation complete(Long reservationId, CheckoutCalculation calc,
-                                 PaymentMethod method, String principal) {
+    public void complete(Long reservationId, CheckoutForm form, String username) {
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
 
-        List<Payment> payments = paymentRepository.findAllByReservationId(reservationId);
-
-        if (reservation.getStatus() != ReservationStatus.CHECKED_IN
-                && reservation.getStatus() != ReservationStatus.CONFIRMED) {
-            throw new IllegalStateException("Only CHECKED_IN or CONFIRMED reservations can be checked out");
+        if (reservation.getStatus() != ReservationStatus.CHECKED_IN) {
+            throw new IllegalStateException("Only CHECKED_IN reservations can be checked out");
         }
 
-        if (reservation.getStatus() == ReservationStatus.CONFIRMED) {
-            reservation.setStatus(ReservationStatus.CHECKED_IN);
-            reservation.setCheckedInAt(LocalDateTime.now());
-            reservation.setCheckedInBy(principal);
+        var config = systemConfigService.getConfig();
+        var hotel = hotelRepository.findById(HotelConstants.HOTEL_ID)
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
+
+        LocalTime hotelCheckOutTime = hotel.getCheckOutTime() != null ? hotel.getCheckOutTime() : LocalTime.of(12, 0);
+        LocalDateTime scheduledCheckOut = reservation.getCheckOutAt().atTime(hotelCheckOutTime);
+        LocalDateTime now = LocalDateTime.now();
+        long hoursPast = 0;
+        if (now.isAfter(scheduledCheckOut)) {
+            hoursPast = (long) Math.ceil(Duration.between(scheduledCheckOut, now).toMinutes() / 60.0);
+        }
+        BigDecimal lateFeePerHour = config.getLateCheckoutFee();
+        BigDecimal appliedLateFee = (form.applyLateCheckoutFee() && hoursPast > 0 && lateFeePerHour != null)
+                ? lateFeePerHour.multiply(BigDecimal.valueOf(hoursPast))
+                : BigDecimal.ZERO;
+
+        BigDecimal roomCharges = reservation.getTotalPrice();
+        BigDecimal taxAmount = config.getTaxRate() != null
+                ? roomCharges.multiply(config.getTaxRate()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO;
+        BigDecimal totalCharges = roomCharges.add(taxAmount);
+
+        List<Payment> existingPayments = paymentRepository.findAllByReservationId(reservationId);
+        BigDecimal depositPaid = existingPayments != null
+                ? existingPayments.stream().map(Payment::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add)
+                : BigDecimal.ZERO;
+
+        BigDecimal remainingDue = totalCharges.subtract(depositPaid).add(appliedLateFee);
+        if (remainingDue.compareTo(BigDecimal.ZERO) < 0) {
+            remainingDue = BigDecimal.ZERO;
         }
 
+        // Create Payment
         Payment payment = new Payment();
         payment.setReservation(reservation);
-        payment.setAmount(calc.totalDue());
-        payment.setPaymentMethod(method);
+        payment.setAmount(remainingDue);
+        payment.setPaymentMethod(form.paymentMethod());
         payment.setConfirmedAt(LocalDateTime.now());
-        payment.setConfirmedBy(principal);
+        payment.setConfirmedBy(username);
         paymentRepository.save(payment);
 
-        BigDecimal appliedLateFee = calc.isLate() ? calc.lateCheckoutFee() : BigDecimal.ZERO;
-        BigDecimal appliedExtraGuestFee = calc.extraGuestFee();
-
-        // Create invoice
+        // Create Invoice
         Invoice invoice = new Invoice();
         invoice.setBookingId(reservation.getId());
         invoice.setStatus(InvoiceStatus.PAID);
         invoice.setBalanceDue(BigDecimal.ZERO);
 
-        var config = systemConfigService.getConfig();
         int nights = (int) ChronoUnit.DAYS.between(reservation.getCheckInAt(), reservation.getCheckOutAt());
-        BigDecimal subtotal = reservation.getTotalPrice();
-        BigDecimal taxAmount = BigDecimal.ZERO;
-        if (config.getTaxRate() != null) {
-            taxAmount = subtotal.multiply(config.getTaxRate()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-        }
-        BigDecimal depositUsed = payments.stream()
-                .map(Payment::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        invoice.setSubtotal(subtotal);
+        invoice.setSubtotal(roomCharges);
         invoice.setTaxAmount(taxAmount);
-        invoice.setDepositUsed(depositUsed);
-        invoice.setTotalAmount(calc.totalDue());
+        invoice.setDepositUsed(depositPaid);
+
+        BigDecimal totalWithLateFee = roomCharges.add(taxAmount).add(appliedLateFee);
+        invoice.setTotalAmount(totalWithLateFee);
 
         // ROOM line items
         for (var detail : reservation.getDetails()) {
@@ -139,39 +174,27 @@ public class CheckoutService {
         }
 
         // DISCOUNT for deposit
-        if (depositUsed.compareTo(BigDecimal.ZERO) > 0) {
+        if (depositPaid.compareTo(BigDecimal.ZERO) > 0) {
             InvoiceItem discountItem = new InvoiceItem();
             discountItem.setInvoice(invoice);
             discountItem.setItemType(InvoiceItemType.DISCOUNT);
             discountItem.setDescription("Deposit applied");
             discountItem.setQuantity(1);
-            discountItem.setUnitPrice(depositUsed);
-            discountItem.setAmount(depositUsed);
+            discountItem.setUnitPrice(depositPaid);
+            discountItem.setAmount(depositPaid);
             invoice.getItems().add(discountItem);
         }
 
-        // CHARGE for late checkout fee
+        // CHARGE for late fee
         if (appliedLateFee.compareTo(BigDecimal.ZERO) > 0) {
             InvoiceItem lateFeeItem = new InvoiceItem();
             lateFeeItem.setInvoice(invoice);
             lateFeeItem.setItemType(InvoiceItemType.CHARGE);
-            lateFeeItem.setDescription("Late checkout fee");
+            lateFeeItem.setDescription("Late checkout fee (" + hoursPast + "h x $" + lateFeePerHour + ")");
             lateFeeItem.setQuantity(1);
             lateFeeItem.setUnitPrice(appliedLateFee);
             lateFeeItem.setAmount(appliedLateFee);
             invoice.getItems().add(lateFeeItem);
-        }
-
-        // CHARGE for extra guest fee
-        if (appliedExtraGuestFee.compareTo(BigDecimal.ZERO) > 0) {
-            InvoiceItem extraGuestItem = new InvoiceItem();
-            extraGuestItem.setInvoice(invoice);
-            extraGuestItem.setItemType(InvoiceItemType.CHARGE);
-            extraGuestItem.setDescription("Extra guest fee");
-            extraGuestItem.setQuantity(1);
-            extraGuestItem.setUnitPrice(appliedExtraGuestFee);
-            extraGuestItem.setAmount(appliedExtraGuestFee);
-            invoice.getItems().add(extraGuestItem);
         }
 
         // TAX
@@ -188,13 +211,14 @@ public class CheckoutService {
 
         invoiceRepository.save(invoice);
 
+        // Update reservation
         reservation.setStatus(ReservationStatus.CHECKED_OUT);
         reservation.setCheckedOutAt(LocalDateTime.now());
-        reservation.setCheckedOutBy(principal);
-
+        reservation.setCheckedOutBy(username);
         reservation.setLateCheckoutFeeApplied(appliedLateFee);
-        reservation.setExtraGuestFeeApplied(appliedExtraGuestFee);
+        reservationRepository.save(reservation);
 
-        return reservationRepository.save(reservation);
+        // Vacate all assigned rooms
+        roomAssignmentService.vacateAllReservationRooms(reservationId);
     }
 }

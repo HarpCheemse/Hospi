@@ -163,4 +163,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     /** Batch lookup reservations by their IDs. */
     List<Reservation> findByIdIn(List<Long> ids);
+
+    /** Find checked-out reservations for a specific date. */
+    @Query("SELECT r FROM Reservation r WHERE r.status = :status AND CAST(r.checkedOutAt AS LocalDate) = :date")
+    List<Reservation> findByStatusAndCheckedOutAtDate(@Param("status") ReservationStatus status, @Param("date") LocalDate date);
 }
