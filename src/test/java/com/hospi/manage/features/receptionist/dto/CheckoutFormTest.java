@@ -1,5 +1,6 @@
 package com.hospi.manage.features.receptionist.dto;
 
+import com.hospi.manage.features.payment.enums.PaymentMethod;
 import com.hospi.manage.features.reservation.dto.request.CheckoutForm;
 import org.junit.jupiter.api.Test;
 
@@ -8,21 +9,16 @@ import static org.junit.jupiter.api.Assertions.*;
 class CheckoutFormTest {
 
     @Test
-    void shouldCreateWithApplyLateFee() {
-        CheckoutForm form = new CheckoutForm(true, null);
-        assertTrue(form.applyLateFee());
+    void shouldCreateWithPaymentMethodAndLateFee() {
+        CheckoutForm form = new CheckoutForm(PaymentMethod.CASH, true);
+        assertEquals(PaymentMethod.CASH, form.paymentMethod());
+        assertTrue(form.applyLateCheckoutFee());
     }
 
     @Test
-    void shouldCreateWithPaymentMethod() {
-        CheckoutForm form = new CheckoutForm(null, "CASH");
-        assertEquals("CASH", form.paymentMethod());
-    }
-
-    @Test
-    void shouldDefaultToNulls() {
-        CheckoutForm form = new CheckoutForm(null, null);
-        assertNull(form.applyLateFee());
-        assertNull(form.paymentMethod());
+    void shouldCreateWithCardNoLateFee() {
+        CheckoutForm form = new CheckoutForm(PaymentMethod.CARD, false);
+        assertEquals(PaymentMethod.CARD, form.paymentMethod());
+        assertFalse(form.applyLateCheckoutFee());
     }
 }
