@@ -35,6 +35,19 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CheckoutService {
 
+    record ChargesBreakdown(
+            BigDecimal roomCharges,
+            BigDecimal taxAmount,
+            BigDecimal taxRate,
+            BigDecimal totalCharges,
+            BigDecimal depositPaid,
+            BigDecimal lateFeeAmount,
+            long hoursPast,
+            BigDecimal lateFeePerHour,
+            String hotelCheckOutTime,
+            String roomNumbers
+    ) {}
+
     private final ReservationRepository reservationRepository;
     private final PaymentRepository paymentRepository;
     private final SystemConfigService systemConfigService;
@@ -42,11 +55,7 @@ public class CheckoutService {
     private final RoomAssignmentService roomAssignmentService;
     private final HotelRepository hotelRepository;
 
-    /** Build the checkout view model with all charges for the receipt page. */
-    public CheckoutView buildCheckoutView(Long reservationId) {
-        Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
-
+    private ChargesBreakdown calculateChargesBreakdown(Reservation reservation) {
         var config = systemConfigService.getConfig();
         var hotel = hotelRepository.findById(HotelConstants.HOTEL_ID)
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
@@ -57,13 +66,10 @@ public class CheckoutService {
                 : BigDecimal.ZERO;
         BigDecimal totalCharges = roomCharges.add(taxAmount);
 
-        BigDecimal depositPaid = BigDecimal.ZERO;
-        List<Payment> existingPayments = paymentRepository.findAllByReservationId(reservationId);
-        if (existingPayments != null && !existingPayments.isEmpty()) {
-            depositPaid = existingPayments.stream()
-                    .map(Payment::getAmount)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-        }
+        List<Payment> existingPayments = paymentRepository.findAllByReservationId(reservation.getId());
+        BigDecimal depositPaid = existingPayments != null
+                ? existingPayments.stream().map(Payment::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add)
+                : BigDecimal.ZERO;
 
         LocalTime hotelCheckOutTime = hotel.getCheckOutTime() != null ? hotel.getCheckOutTime() : LocalTime.of(12, 0);
         LocalDateTime scheduledCheckOut = reservation.getCheckOutAt().atTime(hotelCheckOutTime);
@@ -72,29 +78,43 @@ public class CheckoutService {
         if (now.isAfter(scheduledCheckOut)) {
             hoursPast = (long) Math.ceil(Duration.between(scheduledCheckOut, now).toMinutes() / 60.0);
         }
+
         BigDecimal lateFeePerHour = config.getLateCheckoutFee();
         BigDecimal lateFeeAmount = BigDecimal.ZERO;
         if (hoursPast > 0 && lateFeePerHour != null && lateFeePerHour.compareTo(BigDecimal.ZERO) > 0) {
             lateFeeAmount = lateFeePerHour.multiply(BigDecimal.valueOf(hoursPast));
         }
-        boolean showLateFee = lateFeeAmount.compareTo(BigDecimal.ZERO) > 0;
 
-        String roomNumbers = roomAssignmentService.getAssignedRoomNumbers(reservationId);
-        BigDecimal remainingDue = totalCharges.subtract(depositPaid);
+        String roomNumbers = roomAssignmentService.getAssignedRoomNumbers(reservation.getId());
+
+        BigDecimal taxRate = config.getTaxRate();
+        return new ChargesBreakdown(
+                roomCharges, taxAmount, taxRate, totalCharges, depositPaid,
+                lateFeeAmount, hoursPast, lateFeePerHour,
+                hotelCheckOutTime.toString(), roomNumbers);
+    }
+
+    /** Build the checkout view model with all charges for the receipt page. */
+    public CheckoutView buildCheckoutView(Long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
+        ChargesBreakdown b = calculateChargesBreakdown(reservation);
+        boolean showLateFee = b.lateFeeAmount().compareTo(BigDecimal.ZERO) > 0;
+        BigDecimal remainingDue = b.totalCharges().subtract(b.depositPaid());
 
         return new CheckoutView(
                 ReservationSummaryView.from(reservation),
-                roomCharges,
-                taxAmount,
-                totalCharges,
-                depositPaid,
-                lateFeeAmount,
-                BigDecimal.valueOf(hoursPast),
+                b.roomCharges(),
+                b.taxAmount(),
+                b.totalCharges(),
+                b.depositPaid(),
+                b.lateFeeAmount(),
+                BigDecimal.valueOf(b.hoursPast()),
                 showLateFee,
                 remainingDue,
                 List.of(PaymentMethod.CASH, PaymentMethod.CARD),
-                hotelCheckOutTime.toString(),
-                roomNumbers
+                b.hotelCheckOutTime(),
+                b.roomNumbers()
         );
     }
 
@@ -108,34 +128,13 @@ public class CheckoutService {
             throw new IllegalStateException("Only CHECKED_IN reservations can be checked out");
         }
 
-        var config = systemConfigService.getConfig();
-        var hotel = hotelRepository.findById(HotelConstants.HOTEL_ID)
-                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
+        ChargesBreakdown b = calculateChargesBreakdown(reservation);
 
-        LocalTime hotelCheckOutTime = hotel.getCheckOutTime() != null ? hotel.getCheckOutTime() : LocalTime.of(12, 0);
-        LocalDateTime scheduledCheckOut = reservation.getCheckOutAt().atTime(hotelCheckOutTime);
-        LocalDateTime now = LocalDateTime.now();
-        long hoursPast = 0;
-        if (now.isAfter(scheduledCheckOut)) {
-            hoursPast = (long) Math.ceil(Duration.between(scheduledCheckOut, now).toMinutes() / 60.0);
-        }
-        BigDecimal lateFeePerHour = config.getLateCheckoutFee();
-        BigDecimal appliedLateFee = (form.applyLateCheckoutFee() && hoursPast > 0 && lateFeePerHour != null)
-                ? lateFeePerHour.multiply(BigDecimal.valueOf(hoursPast))
+        BigDecimal appliedLateFee = (form.applyLateCheckoutFee() && b.hoursPast() > 0 && b.lateFeePerHour() != null)
+                ? b.lateFeePerHour().multiply(BigDecimal.valueOf(b.hoursPast()))
                 : BigDecimal.ZERO;
 
-        BigDecimal roomCharges = reservation.getTotalPrice();
-        BigDecimal taxAmount = config.getTaxRate() != null
-                ? roomCharges.multiply(config.getTaxRate()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
-                : BigDecimal.ZERO;
-        BigDecimal totalCharges = roomCharges.add(taxAmount);
-
-        List<Payment> existingPayments = paymentRepository.findAllByReservationId(reservationId);
-        BigDecimal depositPaid = existingPayments != null
-                ? existingPayments.stream().map(Payment::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add)
-                : BigDecimal.ZERO;
-
-        BigDecimal remainingDue = totalCharges.subtract(depositPaid).add(appliedLateFee);
+        BigDecimal remainingDue = b.totalCharges().subtract(b.depositPaid()).add(appliedLateFee);
         if (remainingDue.compareTo(BigDecimal.ZERO) < 0) {
             remainingDue = BigDecimal.ZERO;
         }
@@ -156,11 +155,11 @@ public class CheckoutService {
         invoice.setBalanceDue(BigDecimal.ZERO);
 
         int nights = (int) ChronoUnit.DAYS.between(reservation.getCheckInAt(), reservation.getCheckOutAt());
-        invoice.setSubtotal(roomCharges);
-        invoice.setTaxAmount(taxAmount);
-        invoice.setDepositUsed(depositPaid);
+        invoice.setSubtotal(b.roomCharges());
+        invoice.setTaxAmount(b.taxAmount());
+        invoice.setDepositUsed(b.depositPaid());
 
-        BigDecimal totalWithLateFee = roomCharges.add(taxAmount).add(appliedLateFee);
+        BigDecimal totalWithLateFee = b.roomCharges().add(b.taxAmount()).add(appliedLateFee);
         invoice.setTotalAmount(totalWithLateFee);
 
         // ROOM line items
@@ -176,14 +175,14 @@ public class CheckoutService {
         }
 
         // DISCOUNT for deposit
-        if (depositPaid.compareTo(BigDecimal.ZERO) > 0) {
+        if (b.depositPaid().compareTo(BigDecimal.ZERO) > 0) {
             InvoiceItem discountItem = new InvoiceItem();
             discountItem.setInvoice(invoice);
             discountItem.setItemType(InvoiceItemType.DISCOUNT);
             discountItem.setDescription("Deposit applied");
             discountItem.setQuantity(1);
-            discountItem.setUnitPrice(depositPaid);
-            discountItem.setAmount(depositPaid);
+            discountItem.setUnitPrice(b.depositPaid());
+            discountItem.setAmount(b.depositPaid());
             invoice.getItems().add(discountItem);
         }
 
@@ -192,7 +191,7 @@ public class CheckoutService {
             InvoiceItem lateFeeItem = new InvoiceItem();
             lateFeeItem.setInvoice(invoice);
             lateFeeItem.setItemType(InvoiceItemType.CHARGE);
-            lateFeeItem.setDescription("Late checkout fee (" + hoursPast + "h x $" + lateFeePerHour + ")");
+            lateFeeItem.setDescription("Late checkout fee (" + b.hoursPast() + "h x $" + b.lateFeePerHour() + ")");
             lateFeeItem.setQuantity(1);
             lateFeeItem.setUnitPrice(appliedLateFee);
             lateFeeItem.setAmount(appliedLateFee);
@@ -200,14 +199,14 @@ public class CheckoutService {
         }
 
         // TAX
-        if (taxAmount.compareTo(BigDecimal.ZERO) > 0) {
+        if (b.taxAmount().compareTo(BigDecimal.ZERO) > 0) {
             InvoiceItem taxItem = new InvoiceItem();
             taxItem.setInvoice(invoice);
             taxItem.setItemType(InvoiceItemType.TAX);
-            taxItem.setDescription("Tax (" + config.getTaxRate() + "%)");
+            taxItem.setDescription("Tax (" + b.taxRate() + "%)");
             taxItem.setQuantity(1);
-            taxItem.setUnitPrice(taxAmount);
-            taxItem.setAmount(taxAmount);
+            taxItem.setUnitPrice(b.taxAmount());
+            taxItem.setAmount(b.taxAmount());
             invoice.getItems().add(taxItem);
         }
 
