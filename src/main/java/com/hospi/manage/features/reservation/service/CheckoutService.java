@@ -128,6 +128,10 @@ public class CheckoutService {
             throw new IllegalStateException("Only CHECKED_IN reservations can be checked out");
         }
 
+        if (invoiceRepository.findByBookingId(reservationId).isPresent()) {
+            throw new IllegalStateException("Invoice already exists for reservation #" + reservationId);
+        }
+
         ChargesBreakdown b = calculateChargesBreakdown(reservation);
 
         BigDecimal appliedLateFee = (form.applyLateCheckoutFee() && b.hoursPast() > 0 && b.lateFeePerHour() != null)
