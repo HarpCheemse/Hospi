@@ -6,7 +6,7 @@
     <title>Check-Out | Hospi</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <style>[x-cloak] { display: none !important; }</style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.9/cdn.min.js" defer></script>
+    <script src="/js/alpine.min.js" defer></script>
 </head>
 <body class="staff-layout">
 
@@ -96,7 +96,7 @@
                     <span class="font-medium text-success" th:text="|-${#numbers.formatDecimal(view.depositPaid, 1, 2)}|">-$200.00</span>
                 </div>
 
-                <div class="border-t border-border pt-4" th:if="${view.showLateFee}">
+                <div class="border-t border-border pt-4" x-show="showLateFee">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <input type="checkbox"
@@ -106,10 +106,12 @@
                                    x-model="applyLateFee">
                             <label for="applyLateCheckoutFee" class="text-sm font-medium text-muted-foreground">Apply Late Checkout Fee</label>
                         </div>
-                        <span class="text-sm text-muted-foreground"
-                              th:text="|${view.lateFeeHours}h &times; $${#numbers.formatDecimal(view.lateCheckoutFee.divide(view.lateFeeHours, 2, 1), 1, 2)}|">
-                            1h &times; $25.00
-                        </span>
+                        <th:block th:if="${view.lateFeeHours != null && view.lateFeeHours.compareTo(0) > 0}">
+                            <span class="text-sm text-muted-foreground"
+                                  th:text="|${view.lateFeeHours}h &times; $${#numbers.formatDecimal(view.lateCheckoutFee.divide(view.lateFeeHours, 2, 1), 1, 2)}|">
+                                1h &times; $25.00
+                            </span>
+                        </th:block>
                     </div>
                     <p class="mt-1 text-sm font-medium text-right"
                        th:text="|Late fee: $${#numbers.formatDecimal(view.lateCheckoutFee, 1, 2)}|">
@@ -188,8 +190,8 @@
                 </div>
                 <div class="mt-6 flex justify-end gap-3">
                     <button type="button" @click="checkoutModalOpen = false" class="btn btn-secondary">Cancel</button>
-                    <button type="submit"
-                            :disabled="!checkoutConfirmed"
+                    <button type="button"
+                            @click="if (checkoutConfirmed) $el.form.submit()"
                             :class="checkoutConfirmed ? 'btn btn-primary' : 'btn btn-primary opacity-50 cursor-not-allowed'">
                         Confirm Check-Out
                     </button>

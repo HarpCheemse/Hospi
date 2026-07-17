@@ -4,6 +4,7 @@ import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.core.security.session.AccountPrincipal;
 import com.hospi.manage.features.audit.service.AuditService;
+import com.hospi.manage.features.payment.enums.PaymentMethod;
 import com.hospi.manage.features.reservation.dto.request.AssignRoomForm;
 import com.hospi.manage.features.reservation.dto.request.CheckoutForm;
 import com.hospi.manage.features.reservation.dto.request.ExtendStayForm;
@@ -20,6 +21,7 @@ import com.hospi.manage.features.reservation.service.RoomUpgradeService;
 import com.hospi.manage.features.reservation.service.StayingGuestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -34,6 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /** Controller for the receptionist current stays management (manage, guests, rooms, extend, swap). */
+@Slf4j
 @Controller
 @RequestMapping("/receptionist/stays")
 @RequiredArgsConstructor
@@ -254,7 +257,7 @@ public class ReceptionistStayController {
             return "redirect:/receptionist/stays";
         }
         model.addAttribute(Attributes.VIEW, checkoutService.buildCheckoutView(id));
-        model.addAttribute(Attributes.FORM, new CheckoutForm(null, false));
+        model.addAttribute(Attributes.FORM, new CheckoutForm(PaymentMethod.CASH, false));
         return "receptionist/reservation/checkout";
     }
 
@@ -268,7 +271,7 @@ public class ReceptionistStayController {
         if (binding.hasErrors()) {
             model.addAttribute(Attributes.VIEW, checkoutService.buildCheckoutView(id));
             if (!model.containsAttribute(Attributes.FORM) || model.getAttribute(Attributes.FORM) == null) {
-                model.addAttribute(Attributes.FORM, new CheckoutForm(null, false));
+                model.addAttribute(Attributes.FORM, new CheckoutForm(PaymentMethod.CASH, false));
             }
             return "receptionist/reservation/checkout";
         }
@@ -279,6 +282,7 @@ public class ReceptionistStayController {
             redirect.addFlashAttribute(Attributes.SUCCESS, "Checkout completed successfully.");
             return "redirect:/receptionist/receipts/" + id + "";
         } catch (IllegalStateException e) {
+            log.warn("Checkout failed for reservation {}: {}", id, e.getMessage());
             redirect.addFlashAttribute(Attributes.ERROR, e.getMessage());
             return "redirect:/receptionist/stays/" + id + "/checkout";
         }
