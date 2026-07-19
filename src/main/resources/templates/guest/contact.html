@@ -35,7 +35,7 @@
             
             <div class="space-y-6 text-sm text-muted-foreground">
               <div class="flex items-start gap-4">
-                <span class="text-2xl text-accent">📍</span>
+                <svg class="size-6 shrink-0 text-accent mt-0.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
                 <div>
                   <h4 class="font-bold text-text mb-1">Our Address</h4>
                   <p th:text="${hotel != null and hotel.address != null ? hotel.address : '123 Luxury Avenue, District 1, Ho Chi Minh City'}">
@@ -45,7 +45,7 @@
               </div>
 
               <div class="flex items-start gap-4">
-                <span class="text-2xl text-accent">📞</span>
+                <svg class="size-6 shrink-0 text-accent mt-0.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></svg>
                 <div>
                   <h4 class="font-bold text-text mb-1">Phone Number</h4>
                   <p th:text="${hotel != null and hotel.phone != null ? hotel.phone : '+84 123 456 789'}">
@@ -55,7 +55,7 @@
               </div>
 
               <div class="flex items-start gap-4">
-                <span class="text-2xl text-accent">✉️</span>
+                <svg class="size-6 shrink-0 text-accent mt-0.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
                 <div>
                   <h4 class="font-bold text-text mb-1">Email Address</h4>
                   <p class="truncate" th:text="${hotel != null and hotel.email != null ? hotel.email : 'contact@hospihotel.com'}">
@@ -65,7 +65,7 @@
               </div>
 
               <div class="flex items-start gap-4">
-                <span class="text-2xl text-accent">🕰️</span>
+                <svg class="size-6 shrink-0 text-accent mt-0.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
                 <div>
                   <h4 class="font-bold text-text mb-1">Support Hours</h4>
                   <p>Front Desk available 24 hours / 7 days a week.</p>
@@ -89,7 +89,7 @@
         <div class="rounded-xl border border-border bg-surface overflow-hidden shadow-card min-h-[350px] relative">
           <!-- Styled Map Placeholder Container -->
           <div class="absolute inset-0 bg-background flex flex-col items-center justify-center p-6 text-center">
-            <span class="text-5xl mb-4">🗺️</span>
+            <svg class="size-12 mb-4 text-subtle" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg>
             <h4 class="font-bold font-display text-lg mb-2">Hotel Location Map</h4>
             <p class="text-xs text-muted-foreground max-w-xs mb-4" th:text="${hotel != null and hotel.address != null ? hotel.address : 'District 1, Ho Chi Minh City'}">
               123 Luxury Avenue, District 1, Ho Chi Minh City
