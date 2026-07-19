@@ -402,7 +402,9 @@ class BookingFlowControllerTest {
                 MAX_ROOMS,
                 DEPOSIT_PERCENTAGE,
                 DRAFT)).andExpect(model().attribute("nights",
-                5L)).andExpect(content().string(containsString("Choose Your Rooms")));
+                5L)).andExpect(content().string(containsString("Choose Your Rooms")))
+                .andExpect(content().string(containsString("Amenities")))
+                .andExpect(content().string(containsString("Description")));
     }
 
     @Test
