@@ -104,9 +104,12 @@
                         </div>
 
                         <div class="col-span-3 flex justify-end">
-                            <button class="btn btn-success"
+                            <button class="btn btn-success btn-lg font-semibold"
                                     @click="selectedRoomId = roomId; selectedRoomNum = roomNum; confirmOpen = true">
-                                Mark Done
+                                <span class="flex items-center gap-2">
+                                    <img th:src="@{/assets/icons/clipboard-check.svg}" class="h-4 w-4 brightness-0 invert" alt="">
+                                    Mark Done
+                                </span>
                             </button>
                         </div>
                     </div>
@@ -151,7 +154,12 @@
                         }).catch(() => {
                             alert('Error completing task for Room ' + selectedRoomNum);
                         });
-                    " class="btn btn-success">Yes, Mark Clean</button>
+                    " class="btn btn-success btn-lg font-semibold">
+                        <span class="flex items-center gap-2">
+                            <img th:src="@{/assets/icons/clipboard-check.svg}" class="h-4 w-4 brightness-0 invert" alt="">
+                            Yes, Mark Clean
+                        </span>
+                    </button>
                 </div>
             </div>
         </div>
