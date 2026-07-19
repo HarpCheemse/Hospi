@@ -101,6 +101,26 @@
                       if (next >= 0 && next <= room.available && this.totalCount + delta <= this.maxRooms) {
                           this.selections[id] = next;
                       }
+                  },
+                  modalRoom: null,
+                  modalPicIdx: 0,
+                  openModal(room) {
+                      this.modalRoom = room;
+                      this.modalPicIdx = 0;
+                  },
+                  closeModal() {
+                      this.modalRoom = null;
+                  },
+                  nextPic() {
+                      const pics = this.allPictures(this.modalRoom);
+                      this.modalPicIdx = (this.modalPicIdx + 1) % pics.length;
+                  },
+                  prevPic() {
+                      const pics = this.allPictures(this.modalRoom);
+                      this.modalPicIdx = (this.modalPicIdx - 1 + pics.length) % pics.length;
+                  },
+                  allPictures(room) {
+                      return room?.pictures?.length ? room.pictures : [{id: null}];
                   }
               }"
               class="flex gap-8 items-start w-full">
@@ -113,10 +133,11 @@
                                  x-bind:class="selections[room.id] > 0 ? 'ring-2 ring-primary' : ''">
 
                             <!-- Image -->
-                            <div class="relative h-48 w-full overflow-hidden">
-<img class="h-full w-full object-cover"
-     x-bind:src="room.pictures.length ? '/room-type-picture/' + room.pictures[0].id : '/images/hotel2.jpg'"
-     alt="Room"/>
+                            <button type="button" @click="openModal(room)" class="relative h-48 w-full overflow-hidden cursor-pointer group">
+                                <img class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                     x-bind:src="room.pictures.length ? '/room-type-picture/' + room.pictures[0].id : '/images/hotel2.jpg'"
+                                     alt="Room"/>
+                                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
                                 <span class="absolute top-4 right-4 bg-primary text-white font-sans text-xs font-semibold px-3 py-1.5 rounded-full shadow-md"
                                       x-text="'$' + room.price.toFixed(2) + ' / night'"></span>
                                 <span x-show="selections[room.id] > 0"
@@ -124,7 +145,7 @@
                                       x-cloak
                                       class="absolute top-4 left-4 bg-primary text-white font-sans text-xs font-semibold px-3 py-1.5 rounded-full shadow-md">
                                 </span>
-                            </div>
+                            </button>
 
                             <!-- Details -->
                             <div class="p-5 flex flex-col flex-grow">
