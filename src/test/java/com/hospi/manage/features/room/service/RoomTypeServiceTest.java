@@ -210,4 +210,32 @@ class RoomTypeServiceTest {
 
         assertEquals(1L, result.id());
     }
+
+    @Test
+    void findView_shouldReturnViewForActiveRoomType() {
+        RoomType rt = new RoomType();
+        rt.setId(1L);
+        rt.setActive(true);
+        when(roomTypeRepository.findById(1L)).thenReturn(Optional.of(rt));
+
+        var view = service.findView(1L);
+        assertNotNull(view);
+        assertEquals(1L, view.id());
+    }
+
+    @Test
+    void findView_shouldThrowForInactiveRoomType() {
+        RoomType rt = new RoomType();
+        rt.setId(1L);
+        rt.setActive(false);
+        when(roomTypeRepository.findById(1L)).thenReturn(Optional.of(rt));
+
+        assertThrows(ResourceNotFoundException.class, () -> service.findView(1L));
+    }
+
+    @Test
+    void findView_shouldThrowForMissingRoomType() {
+        when(roomTypeRepository.findById(99L)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> service.findView(99L));
+    }
 }
