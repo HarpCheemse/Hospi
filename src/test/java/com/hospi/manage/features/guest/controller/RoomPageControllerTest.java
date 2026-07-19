@@ -1,5 +1,6 @@
 package com.hospi.manage.features.guest.controller;
 
+import com.hospi.manage.features.hotel.service.HotelService;
 import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.room.dto.response.RoomTypeView;
 import com.hospi.manage.features.room.service.RoomTypeService;
@@ -27,6 +28,9 @@ class RoomPageControllerTest {
 
     @MockitoBean
     private RoomTypeService roomTypeService;
+
+    @MockitoBean
+    private HotelService hotelService;
 
     @MockitoBean
     private NotificationService notificationService;

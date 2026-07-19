@@ -7,6 +7,7 @@ import com.hospi.manage.features.guest.dto.BookingDraft;
 import com.hospi.manage.features.guest.service.BookingFlowService;
 import com.hospi.manage.features.guest.service.BookingFlowService.AvailabilityView;
 import com.hospi.manage.features.guest.validation.BookingDateValidator;
+import com.hospi.manage.features.hotel.service.HotelService;
 import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.payment.service.PaymentService;
 import com.hospi.manage.features.reservation.entity.Reservation;
@@ -58,6 +59,9 @@ class BookingFlowControllerTest {
 
     @MockitoBean
     private EmailService emailService;
+
+    @MockitoBean
+    private HotelService hotelService;
 
     @MockitoBean
     private RoomAvailabilityService roomAvailabilityService;
