@@ -15,8 +15,20 @@
     <!-- NAV -->
     <nav class="flex-1 overflow-y-auto space-y-1 text-sm">
 
-        <!-- TASKS -->
+        <!-- DASHBOARD -->
         <a th:href="@{/leader}"
+           class="flex items-center gap-3 rounded-lg p-2"
+           th:classappend="${activeSidebar == 'DASHBOARD'}
+                 ? ' bg-primary/10 text-primary font-medium'
+                 : ' hover:bg-muted text-foreground'">
+
+            <img th:src="@{/assets/icons/layout-grid.svg}" alt="Dashboard"/>
+            Dashboard
+
+        </a>
+
+        <!-- TASKS -->
+        <a th:href="@{/leader/tasks}"
            class="flex items-center gap-3 rounded-lg p-2"
            th:classappend="${activeSidebar == 'TASKS'}
                  ? ' bg-primary/10 text-primary font-medium'
