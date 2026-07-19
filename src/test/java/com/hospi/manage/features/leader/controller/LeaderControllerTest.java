@@ -3,6 +3,7 @@ package com.hospi.manage.features.leader.controller;
 import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.features.room.entity.Room;
 import com.hospi.manage.features.room.enums.ConditionStatus;
+import com.hospi.manage.features.room.enums.OccupancyStatus;
 import com.hospi.manage.features.room.service.RoomService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,6 @@ class LeaderControllerTest {
     @MockitoBean
     private com.hospi.manage.features.notification.service.NotificationService notificationService;
 
-    // Mock security-related beans needed for the application context to load during this @WebMvcTest
     @MockitoBean
     private com.hospi.manage.core.security.session.AccountUserDetailsService accountUserDetailsService;
 
@@ -43,43 +43,111 @@ class LeaderControllerTest {
 
     @Test
     @WithMockUser(roles = "LEADER")
-    void dashboard_shouldRenderLeaderDashboardAndPassDirtyRooms() throws Exception {
-        Room room1 = new Room();
-        room1.setId(1L);
-        room1.setRoomNumber("101");
-        room1.setConditionStatus(ConditionStatus.DIRTY);
+    void showDashboard_shouldRender() throws Exception {
+        Room dirty1 = new Room();
+        dirty1.setId(1L);
+        dirty1.setRoomNumber("101");
+        dirty1.setFloorNumber((short) 1);
+        dirty1.setConditionStatus(ConditionStatus.DIRTY);
+        dirty1.setOccupancyStatus(OccupancyStatus.OCCUPIED);
+        dirty1.setActive(true);
 
-        Room room2 = new Room();
-        room2.setId(2L);
-        room2.setRoomNumber("102");
-        room2.setConditionStatus(ConditionStatus.DIRTY);
+        Room dirty2 = new Room();
+        dirty2.setId(2L);
+        dirty2.setRoomNumber("102");
+        dirty2.setFloorNumber((short) 1);
+        dirty2.setConditionStatus(ConditionStatus.DIRTY);
+        dirty2.setOccupancyStatus(OccupancyStatus.VACANT);
+        dirty2.setActive(true);
 
-        Room room3 = new Room();
-        room3.setId(3L);
-        room3.setRoomNumber("103");
-        room3.setConditionStatus(ConditionStatus.CLEAN);
+        Room clean1 = new Room();
+        clean1.setId(3L);
+        clean1.setRoomNumber("103");
+        clean1.setFloorNumber((short) 1);
+        clean1.setConditionStatus(ConditionStatus.CLEAN);
+        clean1.setOccupancyStatus(OccupancyStatus.VACANT);
+        clean1.setActive(true);
 
-        Room room4 = new Room();
-        room4.setId(4L);
-        room4.setRoomNumber("104");
-        room4.setConditionStatus(ConditionStatus.CLEAN);
+        Room clean2 = new Room();
+        clean2.setId(4L);
+        clean2.setRoomNumber("104");
+        clean2.setFloorNumber((short) 1);
+        clean2.setConditionStatus(ConditionStatus.CLEAN);
+        clean2.setOccupancyStatus(OccupancyStatus.VACANT);
+        clean2.setActive(true);
 
-        Room room5 = new Room();
-        room5.setId(5L);
-        room5.setRoomNumber("105");
-        room5.setConditionStatus(ConditionStatus.MAINTENANCE);
+        Room maintenance = new Room();
+        maintenance.setId(5L);
+        maintenance.setRoomNumber("105");
+        maintenance.setFloorNumber((short) 1);
+        maintenance.setConditionStatus(ConditionStatus.MAINTENANCE);
+        maintenance.setOccupancyStatus(OccupancyStatus.VACANT);
+        maintenance.setActive(true);
 
-        when(roomService.getActiveDirtyRooms()).thenReturn(List.of(room1, room2));
-        when(roomService.findAll()).thenReturn(List.of(room1, room2, room3, room4, room5));
+        when(roomService.findAll()).thenReturn(List.of(dirty1, dirty2, clean1, clean2, maintenance));
 
         mockMvc.perform(get("/leader"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("leader/dashboard"))
-                .andExpect(model().attributeExists("dirtyRooms"))
-                .andExpect(model().attribute("dirtyRooms", List.of(room1, room2)))
-                .andExpect(model().attribute("totalRooms", 4L))
-                .andExpect(model().attribute("cleanRooms", 2L))
-                .andExpect(model().attribute(Attributes.ACTIVE_SIDEBAR, "TASKS"));
+                .andExpect(model().attributeExists(Attributes.VIEW))
+                .andExpect(model().attribute(Attributes.ACTIVE_SIDEBAR, "DASHBOARD"))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Leader Dashboard")));
+
+        verify(roomService, times(1)).findAll();
+    }
+
+    @Test
+    @WithMockUser(roles = "LEADER")
+    void showTasks_shouldRender() throws Exception {
+        Room room1 = new Room();
+        room1.setId(1L);
+        room1.setRoomNumber("101");
+        room1.setFloorNumber((short) 1);
+        room1.setConditionStatus(ConditionStatus.DIRTY);
+        room1.setOccupancyStatus(OccupancyStatus.OCCUPIED);
+        room1.setActive(true);
+
+        Room room2 = new Room();
+        room2.setId(2L);
+        room2.setRoomNumber("201");
+        room2.setFloorNumber((short) 2);
+        room2.setConditionStatus(ConditionStatus.DIRTY);
+        room2.setOccupancyStatus(OccupancyStatus.VACANT);
+        room2.setActive(true);
+
+        Room clean = new Room();
+        clean.setId(3L);
+        clean.setRoomNumber("103");
+        clean.setFloorNumber((short) 1);
+        clean.setConditionStatus(ConditionStatus.CLEAN);
+        clean.setOccupancyStatus(OccupancyStatus.VACANT);
+        clean.setActive(true);
+
+        when(roomService.getActiveDirtyRooms()).thenReturn(List.of(room1, room2));
+        when(roomService.findAll()).thenReturn(List.of(room1, room2, clean));
+
+        mockMvc.perform(get("/leader/tasks"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("leader/tasks"))
+                .andExpect(model().attributeExists("roomsByFloor"))
+                .andExpect(model().attribute(Attributes.ACTIVE_SIDEBAR, "TASKS"))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Cleaning Tasks")));
+
+        verify(roomService, times(1)).getActiveDirtyRooms();
+        verify(roomService, times(1)).findAll();
+    }
+
+    @Test
+    @WithMockUser(roles = "LEADER")
+    void showTasks_shouldRenderEmpty_whenNoDirtyRooms() throws Exception {
+        when(roomService.getActiveDirtyRooms()).thenReturn(List.of());
+        when(roomService.findAll()).thenReturn(List.of());
+
+        mockMvc.perform(get("/leader/tasks"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("leader/tasks"))
+                .andExpect(model().attributeExists("roomsByFloor"))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("All tasks completed")));
 
         verify(roomService, times(1)).getActiveDirtyRooms();
         verify(roomService, times(1)).findAll();
