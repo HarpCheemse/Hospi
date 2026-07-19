@@ -89,6 +89,20 @@
         background: #6b2319;
     }
 
+    .btn-success {
+        background: var(--color-success);
+        color: var(--color-success-foreground);
+        box-shadow: 0 1px 3px rgba(30, 90, 50, 0.35);
+    }
+
+    .btn-success:hover {
+        background: color-mix(in srgb, var(--color-success) 85%, black);
+    }
+
+    .btn-success:active {
+        background: color-mix(in srgb, var(--color-success) 70%, black);
+    }
+
     .btn-sm {
         @apply h-[30px] px-3 text-xs rounded-md gap-[5px];
     }
