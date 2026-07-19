@@ -6,6 +6,7 @@ import com.hospi.manage.features.room.enums.RoomCategory;
 import com.hospi.manage.features.room.enums.RoomTier;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 /** View model for displaying room type details. */
@@ -35,5 +36,12 @@ public record RoomTypeView(Long id, String name, RoomCategory category, RoomTier
                 RoomCategory.values(),
                 RoomTier.values(),
                 BedType.values());
+    }
+
+    public List<Long> allPictureIds() {
+        List<Long> ids = new ArrayList<>();
+        if (coverPictureId != null) ids.add(coverPictureId);
+        ids.addAll(additionalPictureId);
+        return ids;
     }
 }

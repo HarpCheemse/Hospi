@@ -35,14 +35,14 @@
       <div th:if="${not #lists.isEmpty(roomTypes)}" class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         <article th:each="roomType : ${roomTypes}" class="overflow-hidden rounded-2xl bg-surface border border-border/80 shadow-card hover:shadow-soft transition-shadow flex flex-col h-full">
           <!-- Room Type Image -->
-          <div class="relative h-64 w-full bg-surface-muted overflow-hidden">
+          <a th:href="@{'/rooms/' + ${roomType.id}}" class="block relative h-64 w-full bg-surface-muted overflow-hidden">
             <img th:if="${roomType.coverPictureId == null}" class="h-full w-full object-cover hover:scale-105 transition-transform duration-slow"
                  th:src="@{/images/hotel2.jpg}" alt="Room template picture"/>
             <img th:if="${roomType.coverPictureId != null}" class="h-full w-full object-cover hover:scale-105 transition-transform duration-slow"
                  th:src="@{'/room-type-picture/' + ${roomType.coverPictureId}}" alt="Room Type Image"/>
             <span class="absolute top-4 right-4 bg-primary text-white font-sans text-xs font-semibold px-3 py-1.5 rounded-full shadow-md"
                   th:text="'$' + ${roomType.basePrice} + ' / night'">$89 / night</span>
-          </div>
+          </a>
 
           <!-- Room Type Content -->
           <div class="p-6 flex flex-col flex-grow">
@@ -77,6 +77,10 @@
               </span>
             </div>
 
+            <a th:href="@{'/rooms/' + ${roomType.id}}"
+               class="text-xs text-primary hover:underline mt-2 mb-2 inline-block">
+              View Details ↗
+            </a>
             <a th:href="@{/book}" class="mt-auto block text-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-card hover:opacity-90 transition-opacity">
               Reserve Room
             </a>

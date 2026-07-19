@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import static com.hospi.manage.common.constant.Attributes.*;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -32,6 +33,13 @@ public class RoomPageController {
         model.addAttribute(ROOM_TYPES,
                 roomTypeService.findAllViews());
         return "guest/rooms";
+    }
+
+    @GetMapping("/{id}")
+    public String roomDetail(@PathVariable Long id, Model model) {
+        getHotelOrDefault(model);
+        model.addAttribute("roomType", roomTypeService.findView(id));
+        return "guest/rooms-detail";
     }
 
     private void getHotelOrDefault(Model model) {
