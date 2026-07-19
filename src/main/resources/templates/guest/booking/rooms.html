@@ -26,7 +26,12 @@
             available: /*[[${rt.availableRooms}]]*/,
             maxOccupancy: /*[[${rt.maxOccupancy}]]*/,
             area: /*[[${rt.area}]]*/,
-            pictureId: /*[[${#lists.isEmpty(rt.pictures) ? null : rt.pictures[0].id}]]*/
+            description: /*[[${rt.description}]]*/ '',
+            features: /*[[${rt.features}]]*/ '',
+            bedType: /*[[${rt.bedType?.name()}]]*/ 'KING',
+            category: /*[[${rt.category?.name()}]]*/ 'DOUBLE',
+            tier: /*[[${rt.tier?.name()}]]*/ 'DELUXE',
+            pictures: /*[[${rt.pictures}]]*/ []
         },
         /*[/]*/
     ];
@@ -109,9 +114,9 @@
 
                             <!-- Image -->
                             <div class="relative h-48 w-full overflow-hidden">
-                                <img class="h-full w-full object-cover"
-                                     x-bind:src="room.pictureId ? '/room-type-picture/' + room.pictureId : '/images/hotel2.jpg'"
-                                     alt="Room"/>
+<img class="h-full w-full object-cover"
+     x-bind:src="room.pictures.length ? '/room-type-picture/' + room.pictures[0].id : '/images/hotel2.jpg'"
+     alt="Room"/>
                                 <span class="absolute top-4 right-4 bg-primary text-white font-sans text-xs font-semibold px-3 py-1.5 rounded-full shadow-md"
                                       x-text="'$' + room.price.toFixed(2) + ' / night'"></span>
                                 <span x-show="selections[room.id] > 0"
