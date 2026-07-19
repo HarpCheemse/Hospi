@@ -9,6 +9,8 @@ import com.hospi.manage.features.guest.dto.BookingTrackForm;
 import com.hospi.manage.features.guest.dto.OtpForm;
 import com.hospi.manage.features.guest.dto.ReviewForm;
 import com.hospi.manage.features.guest.service.BookingTrackerService;
+import com.hospi.manage.features.hotel.entity.Hotel;
+import com.hospi.manage.features.hotel.service.HotelService;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +18,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -31,19 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.hospi.manage.common.constant.Attributes.CHECKED_OUT;
-import static com.hospi.manage.common.constant.Attributes.ERROR;
-import static com.hospi.manage.common.constant.Attributes.FORM;
-import static com.hospi.manage.common.constant.Attributes.OTP_FORM;
-import static com.hospi.manage.common.constant.Attributes.PENDING_CODE;
-import static com.hospi.manage.common.constant.Attributes.PILL_CLASSES;
-import static com.hospi.manage.common.constant.Attributes.RESERVATIONS;
-import static com.hospi.manage.common.constant.Attributes.REVIEW_FORM;
-import static com.hospi.manage.common.constant.Attributes.REVIEW_MAP;
-import static com.hospi.manage.common.constant.Attributes.SUCCESS;
-import static com.hospi.manage.common.constant.Attributes.TRACKED_BOOKING_CODES;
-import static com.hospi.manage.common.constant.Attributes.TRACKED_EMAIL;
-import static com.hospi.manage.common.constant.Attributes.VERIFY_EMAIL;
+import static com.hospi.manage.common.constant.Attributes.*;
 
 /**
  * Controller for the guest booking tracker flow (lookup by email/code, verify
@@ -60,6 +51,7 @@ public class BookingTrackerController {
     private final BookingTrackerService bookingTrackerService;
     private final OtpService otpService;
     private final EmailService emailService;
+    private final HotelService hotelService;
 
     private Set<String> resetTrackedCodes(HttpSession session) {
         var codes = new LinkedHashSet<String>();
@@ -89,6 +81,7 @@ public class BookingTrackerController {
     @GetMapping
     String myBooking(HttpSession session,
                      Model model) {
+        getHotelOrDefault(model);
         Set<String> codes = getTrackedCodes(session);
         model.addAttribute("activePage", "my-booking");
 
@@ -108,6 +101,7 @@ public class BookingTrackerController {
     @GetMapping("/verify")
     String verifyPage(HttpSession session,
                       Model model) {
+        getHotelOrDefault(model);
         String trackedEmail = (String) session.getAttribute(TRACKED_EMAIL);
         String pendingCode = (String) session.getAttribute(PENDING_CODE);
 
@@ -128,8 +122,10 @@ public class BookingTrackerController {
     String lookup(@Valid @ModelAttribute(FORM) BookingTrackForm form,
                   BindingResult binding,
                   HttpSession session,
+                  Model model,
                   RedirectAttributes redirect) {
         if (binding.hasErrors()) {
+            getHotelOrDefault(model);
             return "guest/my-booking";
         }
 
@@ -175,6 +171,7 @@ public class BookingTrackerController {
         }
 
         if (binding.hasErrors()) {
+            getHotelOrDefault(model);
             model.addAttribute(VERIFY_EMAIL, email);
             return "guest/my-booking-verify";
         }
@@ -228,6 +225,7 @@ public class BookingTrackerController {
         Set<String> codes = getTrackedCodes(session);
 
         if (binding.hasErrors()) {
+            getHotelOrDefault(model);
             if (!codes.isEmpty()) {
                 buildMyBookingModel(codes, model, null);
             } else {
@@ -243,6 +241,7 @@ public class BookingTrackerController {
         try {
             bookingTrackerService.submitReview(form.reservationId(), form.rating(), codes);
         } catch (IllegalStateException e) {
+            getHotelOrDefault(model);
             buildMyBookingModel(codes, model, e.getMessage());
             model.addAttribute(REVIEW_FORM, form);
             return "guest/my-booking";
@@ -269,5 +268,15 @@ public class BookingTrackerController {
                 .collect(Collectors.toMap(Reservation::getId,
                         r -> r.getStatus() == ReservationStatus.CHECKED_OUT));
         model.addAttribute(CHECKED_OUT, checkedOutMap);
+    }
+
+    private void getHotelOrDefault(Model model) {
+        try {
+            Hotel hotel = hotelService.find();
+            model.addAttribute(HOTEL, hotel);
+        } catch (DataAccessException | IllegalArgumentException e) {
+            log.warn("Failed to load hotel details", e);
+            model.addAttribute(HOTEL, null);
+        }
     }
 }
