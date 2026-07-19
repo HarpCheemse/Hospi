@@ -1,7 +1,9 @@
 package com.hospi.manage.features.room.service;
 
 import com.hospi.manage.common.exception.ResourceNotFoundException;
+import com.hospi.manage.common.utils.SecurityUtils;
 import com.hospi.manage.features.account.enums.Role;
+import com.hospi.manage.features.audit.service.AuditService;
 import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.RoomAssignment;
@@ -39,6 +41,7 @@ public class RoomService {
     private final NotificationService notificationService;
     private final RoomAssignmentRepository roomAssignmentRepository;
     private final StayingGuestRepository stayingGuestRepository;
+    private final AuditService auditService;
 
     /** Return all active rooms ordered by floor and room number. */
     public List<Room> findAll() {
@@ -148,6 +151,22 @@ public class RoomService {
                     String.valueOf(room.getId())
             );
         }
+
+        if (oldCondition != form.conditionStatus()) {
+            var action = switch (form.conditionStatus()) {
+                case CLEAN -> "CLEAN_ROOM";
+                case DIRTY -> "DIRTY_ROOM";
+                case MAINTENANCE -> "MAINTENANCE_ROOM";
+            };
+            auditService.log(
+                    SecurityUtils.currentStaffId(),
+                    SecurityUtils.currentStaffName(),
+                    action,
+                    "ROOM",
+                    room.getId(),
+                    "Room " + room.getRoomNumber() + " marked as " + form.conditionStatus().name().toLowerCase()
+            );
+        }
     }
 
     /** Return floor views optionally filtered by a specific floor number. */
@@ -193,6 +212,20 @@ public class RoomService {
                     String.valueOf(room.getId())
             );
         }
+
+        var action = switch (status) {
+            case CLEAN -> "CLEAN_ROOM";
+            case DIRTY -> "DIRTY_ROOM";
+            case MAINTENANCE -> "MAINTENANCE_ROOM";
+        };
+        auditService.log(
+                SecurityUtils.currentStaffId(),
+                SecurityUtils.currentStaffName(),
+                action,
+                "ROOM",
+                room.getId(),
+                "Room " + room.getRoomNumber() + " marked as " + status.name().toLowerCase()
+        );
     }
 
     /** Soft-delete a room by marking it inactive. */
