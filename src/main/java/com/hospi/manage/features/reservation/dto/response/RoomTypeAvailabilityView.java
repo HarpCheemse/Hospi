@@ -3,6 +3,8 @@ package com.hospi.manage.features.reservation.dto.response;
 import com.hospi.manage.features.room.dto.response.RoomTypeAvailability;
 import com.hospi.manage.features.room.entity.RoomTypePicture;
 import com.hospi.manage.features.room.enums.BedType;
+import com.hospi.manage.features.room.enums.RoomCategory;
+import com.hospi.manage.features.room.enums.RoomTier;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -19,7 +21,10 @@ public record RoomTypeAvailabilityView(
         Boolean active,
         List<RoomTypePicture> pictures,
         int totalRooms,
-        int availableRooms
+        int availableRooms,
+        String description,
+        RoomCategory category,
+        RoomTier tier
 ) {
     public RoomTypeAvailabilityView(
             RoomTypeAvailability availability
@@ -35,7 +40,10 @@ public record RoomTypeAvailabilityView(
                 availability.roomType().getActive(),
                 availability.roomType().getPictures(),
                 availability.totalRooms(),
-                availability.availableRooms()
+                availability.availableRooms(),
+                availability.roomType().getDescription(),
+                availability.roomType().getCategory(),
+                availability.roomType().getTier()
         );
     }
 
