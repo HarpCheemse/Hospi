@@ -27,15 +27,15 @@
 
         </a>
 
-        <!-- ACTIVE BOOKINGS -->
+        <!-- RESERVATIONS -->
         <a th:href="@{/receptionist/bookings}"
            class="flex items-center gap-3 rounded-lg p-2"
            th:classappend="${activeSidebar == 'ACTIVE_BOOKINGS'}
                  ? ' bg-primary/10 text-primary font-medium'
                  : ' hover:bg-muted text-foreground'">
 
-            <img th:src="@{/assets/icons/list-todo.svg}" alt="Active Bookings"/>
-            Active Bookings
+            <img th:src="@{/assets/icons/calendar-check.svg}" alt="Reservations"/>
+            Reservations
 
         </a>
 
