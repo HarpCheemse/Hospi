@@ -53,22 +53,22 @@
         <!-- QUICK ACTIONS -->
         <section class="mb-6 grid grid-cols-4 gap-4">
 
-            <a th:href="@{/receptionist/reservations}" class="btn btn-primary flex items-center gap-3 p-4">
+            <a th:href="@{/receptionist/bookings}" class="btn btn-primary flex items-center gap-3 p-4">
                 <img class="h-8 w-8" th:src="@{/assets/icons/door-open.svg}" alt=""/>
                 <span class="font-semibold">New Check-In</span>
             </a>
 
-            <a th:href="@{/receptionist/reservations/stays}" class="btn btn-secondary flex items-center gap-3 p-4">
+            <a th:href="@{/receptionist/stays}" class="btn btn-secondary flex items-center gap-3 p-4">
                 <img class="h-8 w-8" th:src="@{/assets/icons/key-round.svg}" alt=""/>
                 <span class="font-semibold">Check-Out</span>
             </a>
 
-            <a th:href="@{/receptionist/reservations/create}" class="btn btn-secondary flex items-center gap-3 p-4">
+            <a th:href="@{/receptionist/bookings/create}" class="btn btn-secondary flex items-center gap-3 p-4">
                 <img class="h-8 w-8" th:src="@{/assets/icons/user-plus.svg}" alt=""/>
                 <span class="font-semibold">Walk-In Guest</span>
             </a>
 
-            <a th:href="@{/receptionist/reservations}" class="btn btn-secondary flex items-center gap-3 p-4">
+            <a th:href="@{/receptionist/bookings}" class="btn btn-secondary flex items-center gap-3 p-4">
                 <img class="h-8 w-8" th:src="@{/assets/icons/search.svg}" alt=""/>
                 <span class="font-semibold">Find Booking</span>
             </a>
@@ -122,39 +122,99 @@
                             </p>
                         </div>
 
-                        <a th:href="@{/receptionist/reservations}" class="btn btn-secondary btn-sm">
-                            View All
-                        </a>
+                        <div class="flex gap-2">
+                            <a th:href="@{/receptionist/bookings?scope=today}" class="btn btn-accent btn-sm">
+                                View All Today
+                            </a>
+                            <a th:href="@{/receptionist/bookings}" class="btn btn-secondary btn-sm">
+                                View All
+                            </a>
+                        </div>
 
                     </div>
 
-                    <div class="flex flex-col gap-2">
+                    <div class="flex flex-col gap-4">
 
-                        <!-- Empty State -->
                         <div th:if="${#lists.isEmpty(view.todayQueue)}" class="p-6 text-center text-muted-foreground">
                             No tasks in queue for today.
                         </div>
 
-                        <!-- ROW -->
-                        <div th:each="item : ${view.todayQueue}" class="grid grid-cols-12 items-center gap-3 rounded-lg border border-border bg-background p-3 text-sm">
+                        <!-- ARRIVALS -->
+                        <div th:if="${!#lists.isEmpty(view.todayQueue.?[actionType == 'Check-In'])}" class="flex flex-col gap-2">
 
-                            <div class="col-span-4">
-                                <p class="font-semibold text-foreground" th:text="${item.guestName}">Nguyen Minh Anh</p>
-                                <p class="text-xs text-muted-foreground" th:text="|Booking #${item.confirmationCode}|">Booking #BK-1048</p>
+                            <div class="flex items-center gap-2">
+                                <div class="h-2 w-2 rounded-full bg-success"></div>
+                                <h3 class="text-sm font-semibold text-foreground">Arrivals</h3>
                             </div>
 
-                            <p class="col-span-2 text-muted-foreground" th:text="${item.roomNumbers}">Room 204</p>
-                            <p class="col-span-2 text-muted-foreground" th:text="${item.time}">14:00</p>
+                            <!-- Header row -->
+                            <div class="grid grid-cols-12 gap-3 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                                <span class="col-span-2">Guest</span>
+                                <span class="col-span-5">Room Type</span>
+                                <span class="col-span-2">Room</span>
+                                <span class="col-span-1">Payment</span>
+                                <span class="col-span-2"></span>
+                            </div>
 
-                            <span class="col-span-2 font-medium"
-                                  th:classappend="${item.actionType == 'Check-In' ? 'text-success' : 'text-muted-foreground'}"
-                                  th:text="${item.actionType}">Check-In</span>
+                            <div th:each="item : ${view.todayQueue.?[actionType == 'Check-In']}" class="grid grid-cols-12 items-center gap-3 rounded-lg border border-border bg-background p-3 text-sm">
 
-                            <a th:href="@{|/receptionist/reservations/${item.reservationId}/${item.actionType == 'Check-In' ? 'checkin' : 'checkout'}|}"
-                               class="col-span-2 rounded-lg bg-primary px-3 py-1 text-white text-center hover:bg-primary/95 transition">
-                                Open
-                            </a>
+                                <div class="col-span-2">
+                                    <p class="font-semibold text-foreground" th:text="${item.guestName}">Nguyen Minh Anh</p>
+                                    <p class="text-xs text-muted-foreground" th:text="|#${item.confirmationCode} · ${item.guestCount} guests|">#BK-1048 · 2 guests</p>
+                                </div>
 
+                                <p class="col-span-5 truncate text-muted-foreground" th:text="${item.roomTypeNames}">Deluxe</p>
+                                <p class="col-span-2 text-muted-foreground" th:text="${item.roomNumbers}">204</p>
+
+                                <span class="col-span-1 text-xs"
+                                      th:classappend="${item.paymentStatus == 'Paid' ? 'pill-success' : item.paymentStatus == 'Partial' ? 'pill-warning' : 'pill-danger'}"
+                                      th:text="${item.paymentStatus}">Pending</span>
+
+                                <a th:href="@{|/receptionist/reservations/${item.reservationId}/checkin|}"
+                                   class="col-span-2 rounded-lg bg-primary px-3 py-1 text-center text-sm text-white hover:bg-primary/95 transition">
+                                    Check In
+                                </a>
+
+                            </div>
+                        </div>
+
+                        <!-- DEPARTURES -->
+                        <div th:if="${!#lists.isEmpty(view.todayQueue.?[actionType == 'Check-Out'])}" class="flex flex-col gap-2">
+
+                            <div class="flex items-center gap-2">
+                                <div class="h-2 w-2 rounded-full bg-warning"></div>
+                                <h3 class="text-sm font-semibold text-foreground">Departures</h3>
+                            </div>
+
+                            <!-- Header row -->
+                            <div class="grid grid-cols-12 gap-3 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                                <span class="col-span-2">Guest</span>
+                                <span class="col-span-5">Room Type</span>
+                                <span class="col-span-2">Room</span>
+                                <span class="col-span-1">Payment</span>
+                                <span class="col-span-2"></span>
+                            </div>
+
+                            <div th:each="item : ${view.todayQueue.?[actionType == 'Check-Out']}" class="grid grid-cols-12 items-center gap-3 rounded-lg border border-border bg-background p-3 text-sm">
+
+                                <div class="col-span-2">
+                                    <p class="font-semibold text-foreground" th:text="${item.guestName}">Nguyen Minh Anh</p>
+                                    <p class="text-xs text-muted-foreground" th:text="|#${item.confirmationCode} · ${item.guestCount} guests|">#BK-1048 · 2 guests</p>
+                                </div>
+
+                                <p class="col-span-5 truncate text-muted-foreground" th:text="${item.roomTypeNames}">Deluxe</p>
+                                <p class="col-span-2 text-muted-foreground" th:text="${item.roomNumbers}">204</p>
+
+                                <span class="col-span-1 text-xs"
+                                      th:classappend="${item.paymentStatus == 'Paid' ? 'pill-success' : item.paymentStatus == 'Partial' ? 'pill-warning' : 'pill-danger'}"
+                                      th:text="${item.paymentStatus}">Pending</span>
+
+                                <a th:href="@{|/receptionist/stays/${item.reservationId}/checkout|}"
+                                   class="col-span-2 rounded-lg bg-primary px-3 py-1 text-center text-sm text-white hover:bg-primary/95 transition">
+                                    Check Out
+                                </a>
+
+                            </div>
                         </div>
 
                     </div>
