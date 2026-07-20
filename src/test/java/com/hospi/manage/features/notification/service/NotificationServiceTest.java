@@ -73,7 +73,7 @@ class NotificationServiceTest {
         Notification notification = Notification.builder().id(1L).build();
         when(notificationRepository.save(any(Notification.class))).thenReturn(notification);
 
-        notificationService.notifyRole(Role.RECEPTIONIST, "Title", "Body", "module", "id");
+        notificationService.notifyRole(Role.RECEPTIONIST, "Title", "Body");
 
         verify(notificationRepository).save(any(Notification.class));
     }
@@ -83,14 +83,12 @@ class NotificationServiceTest {
         Notification notification = Notification.builder().id(1L).build();
         when(notificationRepository.save(any(Notification.class))).thenReturn(notification);
 
-        notificationService.notifyRole(Role.RECEPTIONIST, "Title", "Body", "module", "id");
+        notificationService.notifyRole(Role.RECEPTIONIST, "Title", "Body");
 
         verify(notificationRepository).save(argThat(n ->
                 n.getRole() == Role.RECEPTIONIST
                         && "Title".equals(n.getTitle())
                         && "Body".equals(n.getBody())
-                        && "module".equals(n.getRelatedModule())
-                        && "id".equals(n.getRelatedId())
                         && n.getCreatedAt() != null
         ));
     }

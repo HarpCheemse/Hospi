@@ -143,12 +143,10 @@ class PaymentServiceTest {
 
         verify(notificationService).notifyRole(
                 Role.RECEPTIONIST, "Payment Received",
-                "Payment confirmed for John Doe (CASH)",
-                "PAYMENT", "1");
+                "Payment confirmed for John Doe (CASH)");
         verify(notificationService).notifyRole(
                 Role.MANAGER, "Payment Received",
-                "Payment confirmed for John Doe (CASH)",
-                "PAYMENT", "1");
+                "Payment confirmed for John Doe (CASH)");
     }
 
     @Test
@@ -210,7 +208,7 @@ class PaymentServiceTest {
 
         verify(paymentRepository, never()).save(any());
         verify(reservationRepository, never()).save(any());
-        verify(notificationService, never()).notifyRole(any(), any(), any(), any(), any());
+        verify(notificationService, never()).notifyRole(any(), any(), any());
     }
 
     // --- refundOnlineBookingPayment ---

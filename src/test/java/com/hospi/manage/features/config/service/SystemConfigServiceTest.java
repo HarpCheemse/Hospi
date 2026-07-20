@@ -123,7 +123,7 @@ class SystemConfigServiceTest {
         systemConfigService.updateSystemConfigs(form);
 
         verify(notificationService).notifyRole(Role.ADMIN, "System Configuration Updated",
-                "Hotel system settings have been modified", "CONFIG", "system");
+                "Hotel system settings have been modified");
     }
 
     @Test

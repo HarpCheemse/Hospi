@@ -354,7 +354,7 @@ class RoomServiceTest {
 
         assertEquals(ConditionStatus.CLEAN, room.getConditionStatus());
         verify(roomRepository).save(room);
-        verify(notificationService).notifyRole(eq(Role.RECEPTIONIST), anyString(), anyString(), anyString(), anyString());
+        verify(notificationService).notifyRole(eq(Role.RECEPTIONIST), anyString(), anyString());
     }
 
     @Test
@@ -382,9 +382,7 @@ class RoomServiceTest {
         verify(notificationService).notifyRole(
                 eq(Role.LEADER),
                 eq("Room Dirty"),
-                eq("Room 101 needs cleaning"),
-                eq("ROOM"),
-                eq("1")
+                eq("Room 101 needs cleaning")
         );
     }
 
@@ -560,9 +558,7 @@ class RoomServiceTest {
         verify(notificationService).notifyRole(
                 Role.RECEPTIONIST,
                 "Room Ready",
-                "Room 101 is now clean and available",
-                "ROOM",
-                "1"
+                "Room 101 is now clean and available"
             );
     }
 
@@ -583,9 +579,7 @@ class RoomServiceTest {
         verify(notificationService).notifyRole(
                 Role.LEADER,
                 "Room Dirty",
-                "Room 101 needs cleaning",
-                "ROOM",
-                "1"
+                "Room 101 needs cleaning"
         );
     }
 
