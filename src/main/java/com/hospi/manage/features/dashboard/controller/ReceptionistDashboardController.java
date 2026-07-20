@@ -9,6 +9,7 @@ import com.hospi.manage.features.reservation.entity.RoomAssignment;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.reservation.service.RoomAssignmentService;
+import com.hospi.manage.features.reservation.service.StayingGuestService;
 import com.hospi.manage.features.room.entity.Room;
 import com.hospi.manage.features.room.service.RoomService;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ public class ReceptionistDashboardController {
     private final ReservationService reservationService;
     private final RoomService roomService;
     private final RoomAssignmentService roomAssignmentService;
+    private final StayingGuestService stayingGuestService;
 
     /** Show the receptionist dashboard page. */
     @GetMapping
@@ -70,6 +72,12 @@ public class ReceptionistDashboardController {
                         Collectors.reducing(BigDecimal.ZERO, Payment::getAmount, BigDecimal::add)
                 ));
 
+        Map<Long, Integer> guestCountsByReservationId = activeReservations.stream()
+                .collect(Collectors.toMap(
+                        Reservation::getId,
+                        r -> stayingGuestService.getGuestCount(r.getId())
+                ));
+
         ReceptionistDashboardView view = ReceptionistDashboardMapper.toView(
                 today,
                 confirmed,
@@ -77,7 +85,8 @@ public class ReceptionistDashboardController {
                 checkedOutToday,
                 allRooms,
                 assignmentsByReservationId,
-                paymentsByReservationId
+                paymentsByReservationId,
+                guestCountsByReservationId
         );
 
         model.addAttribute(Attributes.VIEW, view);
