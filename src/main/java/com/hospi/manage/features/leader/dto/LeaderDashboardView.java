@@ -11,7 +11,10 @@ public record LeaderDashboardView(
         int occupiedDirtyRooms,
         int vacantCleanRooms,
         int cleanPercent,
-        List<StatusBreakdown> statusBreakdown
+        List<StatusBreakdown> statusBreakdown,
+        List<PriorityRoomView> priorityRooms
 ) {
     public record StatusBreakdown(String status, int count, String colorClass, String label) {}
+
+    public record PriorityRoomView(Long id, String roomNumber, String roomTypeName, Short floorNumber) {}
 }

@@ -52,6 +52,16 @@ public final class LeaderDashboardMapper {
         breakdown.add(new StatusBreakdown("DIRTY", (int) dirtyCount, "bg-danger", "Dirty"));
         breakdown.add(new StatusBreakdown("MAINTENANCE", (int) maintenanceCount, "bg-warning", "Maintenance"));
 
+        var priorityRooms = activeRooms.stream()
+                .filter(r -> r.getConditionStatus() == ConditionStatus.DIRTY
+                        && r.getOccupancyStatus() == OccupancyStatus.OCCUPIED)
+                .map(r -> new LeaderDashboardView.PriorityRoomView(
+                        r.getId(),
+                        r.getRoomNumber(),
+                        r.getRoomType() != null ? r.getRoomType().getName() : null,
+                        r.getFloorNumber()))
+                .toList();
+
         return new LeaderDashboardView(
                 totalRooms,
                 (int) dirtyCount,
@@ -60,7 +70,8 @@ public final class LeaderDashboardMapper {
                 (int) occupiedDirty,
                 (int) vacantClean,
                 cleanPercent,
-                breakdown
+                breakdown,
+                priorityRooms
         );
     }
 }
