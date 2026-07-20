@@ -43,9 +43,28 @@
         </div>
     </header>
 
-    <!-- KPI CARDS -->
-    <section class="mb-6 grid grid-cols-3 gap-4">
+    <!-- TOP ROW: Room Status + KPI cards -->
+    <section class="mb-6 grid grid-cols-4 gap-4">
 
+        <!-- Room Status Breakdown (spans 2 rows) -->
+        <section class="card-panel col-span-1 row-span-2">
+            <div class="mb-4 flex items-center gap-2">
+                <img th:src="@{/assets/icons/door-open.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                <div>
+                    <h2 class="text-lg font-semibold text-foreground">Room Status</h2>
+                    <p class="text-sm text-muted-foreground">All rooms</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <div th:each="item : ${view.statusBreakdown}" class="flex items-center justify-between">
+                    <p class="text-sm text-muted-foreground" th:text="${item.label}">Clean</p>
+                    <p class="text-2xl font-bold" th:classappend="${item.colorClass.replace('bg-', 'text-')}" th:text="${item.count}">0</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dirty Rooms -->
         <div class="card-compact">
             <div class="flex items-center gap-2 mb-1">
                 <img th:src="@{/assets/icons/list-todo.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
@@ -55,6 +74,7 @@
             <p class="text-xs text-muted-foreground mt-1">Need cleaning</p>
         </div>
 
+        <!-- Clean Rooms -->
         <div class="card-compact">
             <div class="flex items-center gap-2 mb-1">
                 <img th:src="@{/assets/icons/clipboard-check.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
@@ -64,6 +84,17 @@
             <p class="text-xs text-muted-foreground mt-1" th:text="|${view.cleanPercent}% of total|">0% of total</p>
         </div>
 
+        <!-- Total Rooms -->
+        <div class="card-compact">
+            <div class="flex items-center gap-2 mb-1">
+                <img th:src="@{/assets/icons/building-2.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                <p class="text-sm text-muted-foreground">Total Rooms</p>
+            </div>
+            <p class="text-2xl font-bold text-foreground" th:text="${view.totalRooms}">0</p>
+            <p class="text-xs text-muted-foreground mt-1">Active rooms</p>
+        </div>
+
+        <!-- Priority Cleaning (KPI) -->
         <div class="card-compact">
             <div class="flex items-center gap-2 mb-1">
                 <img th:src="@{/assets/icons/alert-triangle.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
@@ -73,6 +104,7 @@
             <p class="text-xs text-muted-foreground mt-1">Occupied rooms need cleaning</p>
         </div>
 
+        <!-- Vacant Ready -->
         <div class="card-compact">
             <div class="flex items-center gap-2 mb-1">
                 <img th:src="@{/assets/icons/door-open.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
@@ -82,6 +114,7 @@
             <p class="text-xs text-muted-foreground mt-1">Ready for check-in</p>
         </div>
 
+        <!-- Maintenance -->
         <div class="card-compact">
             <div class="flex items-center gap-2 mb-1">
                 <img th:src="@{/assets/icons/memory-stick.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
@@ -89,15 +122,6 @@
             </div>
             <p class="text-2xl font-bold text-foreground" th:text="${view.maintenanceRooms}">0</p>
             <p class="text-xs text-muted-foreground mt-1">Out of service</p>
-        </div>
-
-        <div class="card-compact">
-            <div class="flex items-center gap-2 mb-1">
-                <img th:src="@{/assets/icons/building-2.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
-                <p class="text-sm text-muted-foreground">Total Rooms</p>
-            </div>
-            <p class="text-2xl font-bold text-foreground" th:text="${view.totalRooms}">0</p>
-            <p class="text-xs text-muted-foreground mt-1">Active rooms</p>
         </div>
 
     </section>
@@ -201,70 +225,6 @@
                 </div>
             </div>
         </div>
-    </section>
-
-    <!-- GRID -->
-    <section class="grid grid-cols-12 gap-4">
-
-        <!-- LEFT: Room Status Breakdown -->
-        <section class="col-span-8 flex flex-col gap-4">
-            <section class="card-panel h-full">
-                <div class="mb-4 flex items-center gap-2">
-                    <img th:src="@{/assets/icons/door-open.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
-                    <div>
-                        <h2 class="text-lg font-semibold text-foreground">Room Status Breakdown</h2>
-                        <p class="text-sm text-muted-foreground">Current condition of all rooms</p>
-                    </div>
-                </div>
-
-                <div class="flex flex-col gap-4">
-                    <div th:each="item : ${view.statusBreakdown}" class="flex items-center gap-4">
-                        <div class="flex-1 min-w-0">
-                            <p class="text-base font-semibold text-foreground" th:text="${item.label}">Clean</p>
-                            <p class="text-sm text-muted-foreground" th:text="|${item.count} rooms|">0 rooms</p>
-                        </div>
-                        <div class="w-44">
-                            <div class="h-3 rounded-full bg-muted">
-                                <div class="h-3 rounded-full"
-                                     th:classappend="${item.colorClass}"
-                                     th:with="pct=${view.totalRooms > 0 ? item.count * 100 / view.totalRooms : 0}"
-                                     th:style="'width: ' + ${pct} + '%'"></div>
-                            </div>
-                        </div>
-                        <span class="w-12 text-right text-sm font-semibold text-foreground"
-                              th:text="${view.totalRooms > 0 ? item.count * 100 / view.totalRooms : 0} + '%'">0%</span>
-                    </div>
-                </div>
-            </section>
-        </section>
-
-        <!-- RIGHT: Cleanliness Overview -->
-        <section class="col-span-4 flex flex-col gap-4">
-            <section class="card-panel h-full flex flex-col items-center justify-center p-6 text-center">
-                <div class="mb-4">
-                    <h2 class="text-lg font-semibold text-foreground">Cleanliness Overview</h2>
-                    <p class="text-sm text-muted-foreground">Overall room cleanliness</p>
-                </div>
-
-                <div class="relative flex items-center justify-center my-4">
-                    <svg class="h-36 w-36 -rotate-90 transform" viewBox="0 0 100 100">
-                        <circle cx="50" cy="50" r="40" stroke="currentColor" stroke-width="8" class="text-border" fill="none" />
-                        <circle cx="50" cy="50" r="40" stroke-width="8"
-                                class="stroke-[var(--color-success,#2F7D4F)] transition-all duration-500 ease-out"
-                                fill="none"
-                                stroke-dasharray="251.2"
-                                th:attr="stroke-dashoffset=${251.2 - (251.2 * view.cleanPercent / 100) + 0.0}"
-                                stroke-linecap="round" />
-                    </svg>
-                    <div class="absolute text-3xl font-extrabold text-foreground" th:text="${view.cleanPercent} + '%'">0%</div>
-                </div>
-
-                <div>
-                    <p class="text-base font-semibold text-foreground" th:text="|${view.cleanRooms} of ${view.totalRooms} rooms clean|">0 of 0 rooms clean</p>
-                </div>
-            </section>
-        </section>
-
     </section>
 
 </main>

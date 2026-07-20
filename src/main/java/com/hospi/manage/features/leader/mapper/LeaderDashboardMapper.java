@@ -49,8 +49,8 @@ public final class LeaderDashboardMapper {
 
         var breakdown = new ArrayList<StatusBreakdown>();
         breakdown.add(new StatusBreakdown("CLEAN", (int) cleanCount, "bg-success", "Clean"));
-        breakdown.add(new StatusBreakdown("DIRTY", (int) dirtyCount, "bg-danger", "Dirty"));
-        breakdown.add(new StatusBreakdown("MAINTENANCE", (int) maintenanceCount, "bg-warning", "Maintenance"));
+        breakdown.add(new StatusBreakdown("DIRTY", (int) dirtyCount, "bg-warning", "Dirty"));
+        breakdown.add(new StatusBreakdown("MAINTENANCE", (int) maintenanceCount, "bg-danger", "Maintenance"));
 
         var priorityRooms = activeRooms.stream()
                 .filter(r -> r.getConditionStatus() == ConditionStatus.DIRTY
