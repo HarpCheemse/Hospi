@@ -36,14 +36,11 @@ public class NotificationService {
     }
 
     @Transactional
-    public void notifyRole(Role role, String title, String body,
-                           String relatedModule, String relatedId) {
+    public void notifyRole(Role role, String title, String body) {
         Notification notification = Notification.builder()
                 .role(role)
                 .title(title)
                 .body(body)
-                .relatedModule(relatedModule)
-                .relatedId(relatedId)
                 .createdAt(LocalDateTime.now())
                 .build();
         notificationRepository.save(notification);
@@ -54,8 +51,6 @@ public class NotificationService {
                 .id(n.getId())
                 .title(n.getTitle())
                 .body(n.getBody())
-                .relatedModule(n.getRelatedModule())
-                .relatedId(n.getRelatedId())
                 .createdAt(n.getCreatedAt())
                 .build();
     }

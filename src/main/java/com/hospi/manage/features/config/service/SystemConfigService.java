@@ -64,9 +64,7 @@ public class SystemConfigService {
         notificationService.notifyRole(
                 Role.ADMIN,
                 "System Configuration Updated",
-                "Hotel system settings have been modified",
-                "CONFIG",
-                "system"
+                "Hotel system settings have been modified"
         );
     }
 }

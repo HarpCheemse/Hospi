@@ -136,9 +136,7 @@ public class RoomService {
             notificationService.notifyRole(
                     Role.RECEPTIONIST,
                     "Room Ready",
-                    "Room " + room.getRoomNumber() + " is now clean and available",
-                    "ROOM",
-                    String.valueOf(room.getId())
+                    "Room " + room.getRoomNumber() + " is now clean and available"
             );
         }
 
@@ -146,9 +144,7 @@ public class RoomService {
             notificationService.notifyRole(
                     Role.LEADER,
                     "Room Dirty",
-                    "Room " + room.getRoomNumber() + " needs cleaning",
-                    "ROOM",
-                    String.valueOf(room.getId())
+                    "Room " + room.getRoomNumber() + " needs cleaning"
             );
         }
 
@@ -197,9 +193,7 @@ public class RoomService {
             notificationService.notifyRole(
                     Role.RECEPTIONIST,
                     "Room Ready",
-                    "Room " + room.getRoomNumber() + " is now clean and available",
-                    "ROOM",
-                    String.valueOf(room.getId())
+                    "Room " + room.getRoomNumber() + " is now clean and available"
             );
         }
 
@@ -207,9 +201,7 @@ public class RoomService {
             notificationService.notifyRole(
                     Role.LEADER,
                     "Room Dirty",
-                    "Room " + room.getRoomNumber() + " needs cleaning",
-                    "ROOM",
-                    String.valueOf(room.getId())
+                    "Room " + room.getRoomNumber() + " needs cleaning"
             );
         }
 
