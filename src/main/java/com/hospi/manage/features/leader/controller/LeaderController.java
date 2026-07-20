@@ -43,9 +43,15 @@ public class LeaderController {
                 .filter(r -> r.getConditionStatus() == com.hospi.manage.features.room.enums.ConditionStatus.CLEAN)
                 .count();
 
+        var dashboardView = LeaderDashboardMapper.toDashboardView(allRooms);
+        model.addAttribute("occupiedDirtyRooms", dashboardView.occupiedDirtyRooms());
+        model.addAttribute("priorityRooms", dashboardView.priorityRooms());
+
         var roomsByFloor = new TreeMap<Short, List<Room>>();
         for (var room : dirtyRooms) {
-            roomsByFloor.computeIfAbsent(room.getFloorNumber(), k -> new ArrayList<>()).add(room);
+            if (room.getOccupancyStatus() != com.hospi.manage.features.room.enums.OccupancyStatus.OCCUPIED) {
+                roomsByFloor.computeIfAbsent(room.getFloorNumber(), k -> new ArrayList<>()).add(room);
+            }
         }
 
         model.addAttribute("roomsByFloor", roomsByFloor);
