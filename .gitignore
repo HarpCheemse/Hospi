@@ -38,3 +38,4 @@ node_modules
 src/main/resources/static/css/app.css
 docs/SDS.md
 docs/tables.sql
+docs/srs/
