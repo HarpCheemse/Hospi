@@ -1,7 +1,6 @@
 package com.hospi.manage.features.reservation.dto.response;
 
 import com.hospi.manage.features.room.dto.response.RoomTypeAvailability;
-import com.hospi.manage.features.room.entity.RoomTypePicture;
 import com.hospi.manage.features.room.enums.BedType;
 import com.hospi.manage.features.room.enums.RoomCategory;
 import com.hospi.manage.features.room.enums.RoomTier;
@@ -19,7 +18,7 @@ public record RoomTypeAvailabilityView(
         Integer area,
         String features,
         Boolean active,
-        List<RoomTypePicture> pictures,
+        List<PictureView> pictures,
         int totalRooms,
         int availableRooms,
         String description,
@@ -38,7 +37,9 @@ public record RoomTypeAvailabilityView(
                 availability.roomType().getArea(),
                 availability.roomType().getFeatures(),
                 availability.roomType().getActive(),
-                availability.roomType().getPictures(),
+                availability.roomType().getPictures().stream()
+                        .map(p -> new PictureView(p.getId()))
+                        .toList(),
                 availability.totalRooms(),
                 availability.availableRooms(),
                 availability.roomType().getDescription(),
