@@ -10,10 +10,16 @@ import com.hospi.manage.features.guest.validation.BookingDateValidator;
 import com.hospi.manage.features.hotel.service.HotelService;
 import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.payment.service.PaymentService;
+import com.hospi.manage.features.reservation.dto.response.PictureView;
+import com.hospi.manage.features.reservation.dto.response.RoomTypeAvailabilityView;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.reservation.service.RoomAvailabilityService;
+import com.hospi.manage.features.room.entity.RoomType;
+import com.hospi.manage.features.room.enums.BedType;
+import com.hospi.manage.features.room.enums.RoomCategory;
+import com.hospi.manage.features.room.enums.RoomTier;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -21,6 +27,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -410,6 +417,42 @@ class BookingFlowControllerTest {
     void showRooms_shouldRedirect_whenNoDates() throws Exception {
         mockMvc.perform(get("/book/rooms").sessionAttr(BOOKING_DRAFT,
                 new BookingDraft())).andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/book"));
+    }
+
+    @Test
+    void showRooms_shouldRenderWithAvailabilityData() throws Exception {
+        var draft = new BookingDraft();
+        draft.setDates(new BookingDraft.BookingDates(LocalDate.now().plusDays(5),
+                LocalDate.now().plusDays(10)));
+
+        var roomType = new RoomType();
+        roomType.setId(1L);
+        roomType.setName("Deluxe Suite");
+        roomType.setBasePrice(BigDecimal.valueOf(250));
+        roomType.setMaxOccupancy(2);
+        roomType.setArea(45);
+        roomType.setBedType(BedType.KING);
+        roomType.setDescription("A spacious suite");
+        roomType.setCategory(RoomCategory.DOUBLE);
+        roomType.setTier(RoomTier.DELUXE);
+        roomType.setActive(true);
+
+        var availability = new RoomTypeAvailabilityView(
+                roomType.getId(), roomType.getName(), roomType.getMaxOccupancy(),
+                roomType.getBasePrice(), roomType.getBedType(), roomType.getArea(),
+                null, true, List.of(new PictureView(1L)),
+                5, 3, roomType.getDescription(),
+                roomType.getCategory(), roomType.getTier());
+
+        when(bookingFlowService.buildAvailabilityView(any())).thenReturn(
+                new AvailabilityView(List.of(availability), 5, BigDecimal.valueOf(20), 5));
+
+        mockMvc.perform(get("/book/rooms").sessionAttr(BOOKING_DRAFT, draft))
+                .andExpect(status().isOk())
+                .andExpect(view().name("guest/booking/rooms"))
+                .andExpect(content().string(containsString("Deluxe Suite")))
+                .andExpect(content().string(containsString("price: 250")))
+                .andExpect(content().string(containsString("available: 3")));
     }
 
     @Test
