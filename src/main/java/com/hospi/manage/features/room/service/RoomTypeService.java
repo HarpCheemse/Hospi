@@ -125,11 +125,8 @@ public class RoomTypeService {
 
     /** Return a room type view model by ID, ensuring the room type is active. */
     public RoomTypeView findView(Long id) {
-        RoomType roomType = roomTypeRepository.findById(id)
+        RoomType roomType = roomTypeRepository.findByIdWithRelations(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Room type"));
-        if (!roomType.getActive()) {
-            throw new ResourceNotFoundException("Room type");
-        }
         return RoomTypeView.from(roomType);
     }
 }

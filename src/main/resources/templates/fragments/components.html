@@ -75,7 +75,7 @@
             <th:block th:each="picId, iter : ${pictureIds}">
                 <div class="absolute inset-0 transition-opacity duration-500"
                      x-show="currentSlide === ${iter.index}"
-                     x-cloak>
+                     th:attr="x-cloak=${iter.index > 0} ? '' : null">
                     <img th:src="@{'/room-type-picture/' + ${picId}}"
                          th:alt="${altText}"
                          class="h-full w-full object-cover"/>
@@ -92,13 +92,13 @@
                 <svg class="size-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
             </button>
             <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                <template th:each="picId, iter : ${pictureIds}">
+                <th:block th:each="picId, iter : ${pictureIds}">
                     <button type="button"
                             @click="currentSlide = ${iter.index}"
                             class="h-2.5 w-2.5 rounded-full transition-all duration-300"
                             x-bind:class="currentSlide === ${iter.index} ? 'bg-white w-6' : 'bg-white/50'">
                     </button>
-                </template>
+                </th:block>
             </div>
         </th:block>
     </th:block>
