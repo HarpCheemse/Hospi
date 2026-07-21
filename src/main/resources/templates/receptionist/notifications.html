@@ -17,10 +17,15 @@
 
         <!-- HEADER -->
         <header class="staff-page-header">
-            <section>
-                <h1 class="staff-page-title">Notifications</h1>
-                <p class="page-description">System notifications for receptionists</p>
-            </section>
+            <div class="flex items-center gap-4">
+                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    <img th:src="@{/assets/icons/bell.svg}" alt="">
+                </div>
+                <div>
+                    <h1 class="staff-page-title">Notifications</h1>
+                    <p class="page-description">System notifications for receptionists</p>
+                </div>
+            </div>
         </header>
 
         <section class="card-panel">

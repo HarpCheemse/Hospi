@@ -83,16 +83,12 @@ public class PaymentService {
         notificationService.notifyRole(
                 Role.RECEPTIONIST,
                 "Payment Received",
-                "Payment confirmed for " + reservation.getGuestName() + " (" + method + ")",
-                "PAYMENT",
-                String.valueOf(reservation.getId())
+                "Payment confirmed for " + reservation.getGuestName() + " (" + method + ")"
         );
         notificationService.notifyRole(
                 Role.MANAGER,
                 "Payment Received",
-                "Payment confirmed for " + reservation.getGuestName() + " (" + method + ")",
-                "PAYMENT",
-                String.valueOf(reservation.getId())
+                "Payment confirmed for " + reservation.getGuestName() + " (" + method + ")"
         );
 
         return payment;

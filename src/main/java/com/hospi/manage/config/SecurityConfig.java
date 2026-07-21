@@ -81,6 +81,7 @@ public class SecurityConfig {
 
                         .requestMatchers("/",
                                 "/rooms",
+                                "/rooms/**",
                                 "/policies",
                                 "/contact",
                                 "/my-booking/**",

@@ -17,4 +17,13 @@ public final class SecurityUtils {
         }
         return "System";
     }
+
+    /** Return the ID of the currently authenticated staff member, or null if not authenticated. */
+    public static Long currentStaffId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof AccountPrincipal p) {
+            return p.getAccount().getId();
+        }
+        return null;
+    }
 }

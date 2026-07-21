@@ -3,6 +3,7 @@ package com.hospi.manage.features.dashboard.controller;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.reservation.service.RoomAssignmentService;
+import com.hospi.manage.features.reservation.service.StayingGuestService;
 import com.hospi.manage.features.room.service.RoomService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,9 @@ class ReceptionistDashboardControllerTest {
     @MockitoBean
     private com.hospi.manage.features.notification.service.NotificationService notificationService;
 
+    @MockitoBean
+    private StayingGuestService stayingGuestService;
+
     @Test
     void dashboard_shouldRender() throws Exception {
         when(reservationService.findByStatus(ReservationStatus.CONFIRMED)).thenReturn(List.of());
@@ -48,6 +52,7 @@ class ReceptionistDashboardControllerTest {
         when(roomService.findAll()).thenReturn(List.of());
         when(roomAssignmentService.findAssignmentsByReservationIds(any())).thenReturn(List.of());
         when(reservationService.findPaymentsByReservationIds(any())).thenReturn(List.of());
+        when(stayingGuestService.getGuestCount(any())).thenReturn(0);
 
         mockMvc.perform(get("/receptionist"))
                 .andExpect(status().isOk())

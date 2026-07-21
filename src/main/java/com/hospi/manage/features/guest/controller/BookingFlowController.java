@@ -10,6 +10,8 @@ import com.hospi.manage.features.guest.dto.OtpForm;
 import com.hospi.manage.features.guest.mapper.BookingSession;
 import com.hospi.manage.features.guest.service.BookingFlowService;
 import com.hospi.manage.features.guest.validation.BookingDateValidator;
+import com.hospi.manage.features.hotel.entity.Hotel;
+import com.hospi.manage.features.hotel.service.HotelService;
 import com.hospi.manage.features.payment.service.PaymentService;
 import com.hospi.manage.features.reservation.dto.request.DateSearchForm;
 import com.hospi.manage.features.reservation.entity.Reservation;
@@ -22,6 +24,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -54,6 +57,7 @@ public class BookingFlowController {
     private final PaymentService paymentService;
     private final RoomAvailabilityService roomAvailabilityService;
     private final EmailService emailService;
+    private final HotelService hotelService;
 
     /** Step 1 — show date form. Resume check: skip to /book/pay if OTP verified + draft complete.
      *  Pending cleanup: cancel abandoned PENDING reservation. Otherwise: full reset. */
@@ -89,6 +93,7 @@ public class BookingFlowController {
         session.removeAttribute(BOOKING_DRAFT);
         session.removeAttribute(OTP_TOKEN);
         session.removeAttribute(PENDING_PAYMENT_KEY);
+        getHotelOrDefault(model);
         model.addAttribute(FORM,
                 new DateSearchForm(null,
                         null));
@@ -99,11 +104,13 @@ public class BookingFlowController {
     @PostMapping
     String submitDates(@Valid @ModelAttribute("form") DateSearchForm form,
                        BindingResult binding,
-                       HttpSession session) {
+                       HttpSession session,
+                       Model model) {
         bookingDateValidator.validate(form,
                 binding);
 
         if (binding.hasErrors()) {
+            getHotelOrDefault(model);
             return "guest/booking/book";
         }
 
@@ -122,6 +129,7 @@ public class BookingFlowController {
             return "redirect:/book";
         }
 
+        getHotelOrDefault(model);
         var view = bookingFlowService.buildAvailabilityView(draft);
         model.addAttribute(AVAILABILITY,
                 view.availability());
@@ -168,6 +176,7 @@ public class BookingFlowController {
             return "redirect:/book/rooms";
         }
 
+        getHotelOrDefault(model);
         if (!model.containsAttribute(GUEST_DETAIL_FORM)) {
             var guest = draft.getGuest();
             model.addAttribute(GUEST_DETAIL_FORM,
@@ -190,8 +199,10 @@ public class BookingFlowController {
     String sendOtp(@Valid @ModelAttribute("guestDetailForm") GuestDetailForm form,
                    BindingResult binding,
                    HttpSession session,
+                   Model model,
                    RedirectAttributes redirect) {
         if (binding.hasErrors()) {
+            getHotelOrDefault(model);
             return "guest/booking/verify";
         }
 
@@ -224,6 +235,7 @@ public class BookingFlowController {
             return "redirect:/book/verify";
         }
 
+        getHotelOrDefault(model);
         if (!model.containsAttribute(OTP_FORM)) {
             model.addAttribute(OTP_FORM,
                     new OtpForm(null));
@@ -246,6 +258,7 @@ public class BookingFlowController {
         }
 
         if (binding.hasErrors()) {
+            getHotelOrDefault(model);
             model.addAttribute(OTP_FORM,
                     otpForm);
             model.addAttribute(EMAIL,
@@ -279,6 +292,7 @@ public class BookingFlowController {
         if (otpToken == null || !otpService.isValidToken(otpToken)) {
             return "redirect:/book/verify-otp";
         }
+        getHotelOrDefault(model);
         model.addAttribute(DRAFT,
                 draft);
         model.addAttribute(TOKEN,
@@ -464,8 +478,19 @@ public class BookingFlowController {
     /** Step 7 — show booking confirmation page. */
     @GetMapping("/confirmation")
     String showConfirmation(@RequestParam String code, Model model) {
+        getHotelOrDefault(model);
         model.addAttribute(BOOKING_CODE,
                 code);
         return "guest/booking/confirmation";
+    }
+
+    private void getHotelOrDefault(Model model) {
+        try {
+            Hotel hotel = hotelService.find();
+            model.addAttribute(HOTEL, hotel);
+        } catch (DataAccessException | IllegalArgumentException e) {
+            log.warn("Failed to load hotel details", e);
+            model.addAttribute(HOTEL, null);
+        }
     }
 }

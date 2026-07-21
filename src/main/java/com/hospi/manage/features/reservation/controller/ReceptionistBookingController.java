@@ -168,9 +168,9 @@ public class ReceptionistBookingController {
             return "receptionist/reservation/details";
         }
 
-        reservationService.createReservation(form);
+        var reservation = reservationService.createReservation(form);
         redirect.addFlashAttribute(Attributes.SUCCESS, "Offline booking created successfully.");
-        return "redirect:/receptionist/bookings";
+        return "redirect:/receptionist/bookings/" + reservation.getId();
     }
 
     private List<RoomTypeAvailabilityView> getAvailabilityView(LocalDate checkInAt, LocalDate checkOutAt) {

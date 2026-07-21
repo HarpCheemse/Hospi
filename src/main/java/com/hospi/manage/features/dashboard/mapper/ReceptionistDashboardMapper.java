@@ -3,6 +3,7 @@ package com.hospi.manage.features.dashboard.mapper;
 import com.hospi.manage.features.dashboard.dto.QueueItemView;
 import com.hospi.manage.features.dashboard.dto.ReceptionistDashboardView;
 import com.hospi.manage.features.reservation.entity.Reservation;
+import com.hospi.manage.features.reservation.entity.ReservationDetail;
 import com.hospi.manage.features.reservation.entity.RoomAssignment;
 import com.hospi.manage.features.room.entity.Room;
 import com.hospi.manage.features.room.enums.ConditionStatus;
@@ -39,37 +40,26 @@ public final class ReceptionistDashboardMapper {
             List<Reservation> checkedOutToday,
             List<Room> allRooms,
             Map<Long, List<RoomAssignment>> assignmentsByReservationId,
-            Map<Long, BigDecimal> paymentsByReservationId
+            Map<Long, BigDecimal> paymentsByReservationId,
+            Map<Long, Integer> guestCountsByReservationId
     ) {
         List<QueueItemView> todayQueue = new ArrayList<>();
 
         // 1. Arrivals Today (Check-In)
         for (Reservation res : confirmed) {
             if (today.equals(res.getCheckInAt())) {
-                String rooms = getRoomNumbers(res.getId(), assignmentsByReservationId);
-                todayQueue.add(new QueueItemView(
-                        res.getId(),
-                        res.getGuestName(),
-                        res.getConfirmationCode(),
-                        rooms,
-                        "14:00",
-                        "Check-In"
-                ));
+                todayQueue.add(toQueueItem(res, "Check-In", "14:00",
+                        assignmentsByReservationId, paymentsByReservationId,
+                        guestCountsByReservationId));
             }
         }
 
         // 2. Departures Today (Check-Out)
         for (Reservation res : checkedIn) {
             if (today.equals(res.getCheckOutAt())) {
-                String rooms = getRoomNumbers(res.getId(), assignmentsByReservationId);
-                todayQueue.add(new QueueItemView(
-                        res.getId(),
-                        res.getGuestName(),
-                        res.getConfirmationCode(),
-                        rooms,
-                        "12:00",
-                        "Check-Out"
-                ));
+                todayQueue.add(toQueueItem(res, "Check-Out", "12:00",
+                        assignmentsByReservationId, paymentsByReservationId,
+                        guestCountsByReservationId));
             }
         }
 
@@ -155,6 +145,56 @@ public final class ReceptionistDashboardMapper {
                 pendingPaymentsAmount,
                 invoicesNeedFollowUp
         );
+    }
+
+    private static QueueItemView toQueueItem(
+            Reservation res,
+            String actionType,
+            String time,
+            Map<Long, List<RoomAssignment>> assignmentsByReservationId,
+            Map<Long, BigDecimal> paymentsByReservationId,
+            Map<Long, Integer> guestCountsByReservationId
+    ) {
+        String rooms = getRoomNumbers(res.getId(), assignmentsByReservationId);
+        String roomTypeNames = getRoomTypeNames(res);
+        int guestCount = guestCountsByReservationId.getOrDefault(res.getId(), 0);
+        String paymentStatus = getPaymentStatus(res, paymentsByReservationId);
+        return new QueueItemView(
+                res.getId(),
+                res.getGuestName(),
+                res.getConfirmationCode(),
+                rooms,
+                roomTypeNames,
+                guestCount,
+                time,
+                actionType,
+                paymentStatus
+        );
+    }
+
+    private static String getRoomTypeNames(Reservation res) {
+        List<ReservationDetail> details = res.getDetails();
+        if (details == null || details.isEmpty()) {
+            return "";
+        }
+        return details.stream()
+                .map(d -> d.getRoomType().getName())
+                .collect(Collectors.joining(", "));
+    }
+
+    private static String getPaymentStatus(Reservation res, Map<Long, BigDecimal> paymentsByReservationId) {
+        BigDecimal total = res.getTotalPrice();
+        if (total == null || total.compareTo(BigDecimal.ZERO) <= 0) {
+            return "Pending";
+        }
+        BigDecimal paid = paymentsByReservationId.getOrDefault(res.getId(), BigDecimal.ZERO);
+        if (paid.compareTo(BigDecimal.ZERO) <= 0) {
+            return "Pending";
+        }
+        if (paid.compareTo(total) >= 0) {
+            return "Paid";
+        }
+        return "Partial";
     }
 
     private static String getRoomNumbers(Long reservationId, Map<Long, List<RoomAssignment>> assignmentsByReservationId) {

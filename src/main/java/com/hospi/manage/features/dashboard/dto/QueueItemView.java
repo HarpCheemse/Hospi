@@ -6,6 +6,9 @@ public record QueueItemView(
         String guestName,
         String confirmationCode,
         String roomNumbers,
+        String roomTypeNames,
+        int guestCount,
         String time,
-        String actionType
+        String actionType,
+        String paymentStatus
 ) {}

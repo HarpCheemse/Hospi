@@ -2,6 +2,7 @@ package com.hospi.manage.features.room.service;
 
 import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.account.enums.Role;
+import com.hospi.manage.features.audit.service.AuditService;
 import com.hospi.manage.features.hotel.repository.HotelRepository;
 import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.reservation.entity.Reservation;
@@ -54,6 +55,9 @@ class RoomServiceTest {
 
     @Mock
     private NotificationService notificationService;
+
+    @Mock
+    private AuditService auditService;
 
     @InjectMocks
     private RoomService roomService;
@@ -350,7 +354,7 @@ class RoomServiceTest {
 
         assertEquals(ConditionStatus.CLEAN, room.getConditionStatus());
         verify(roomRepository).save(room);
-        verify(notificationService).notifyRole(eq(Role.RECEPTIONIST), anyString(), anyString(), anyString(), anyString());
+        verify(notificationService).notifyRole(eq(Role.RECEPTIONIST), anyString(), anyString());
     }
 
     @Test
@@ -378,9 +382,7 @@ class RoomServiceTest {
         verify(notificationService).notifyRole(
                 eq(Role.LEADER),
                 eq("Room Dirty"),
-                eq("Room 101 needs cleaning"),
-                eq("ROOM"),
-                eq("1")
+                eq("Room 101 needs cleaning")
         );
     }
 
@@ -556,9 +558,7 @@ class RoomServiceTest {
         verify(notificationService).notifyRole(
                 Role.RECEPTIONIST,
                 "Room Ready",
-                "Room 101 is now clean and available",
-                "ROOM",
-                "1"
+                "Room 101 is now clean and available"
             );
     }
 
@@ -579,9 +579,105 @@ class RoomServiceTest {
         verify(notificationService).notifyRole(
                 Role.LEADER,
                 "Room Dirty",
-                "Room 101 needs cleaning",
+                "Room 101 needs cleaning"
+        );
+    }
+
+    @Test
+    void updateConditionStatus_shouldLogAudit_whenRoomBecomesClean() {
+        Room room = new Room();
+        room.setId(1L);
+        room.setActive(true);
+        room.setRoomNumber("101");
+        room.setConditionStatus(ConditionStatus.DIRTY);
+
+        when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
+
+        roomService.updateConditionStatus(1L, ConditionStatus.CLEAN);
+
+        verify(auditService).log(
+                null,
+                "System",
+                "CLEAN_ROOM",
                 "ROOM",
-                "1"
+                1L,
+                "Room 101 marked as clean"
+        );
+    }
+
+    @Test
+    void updateConditionStatus_shouldLogAudit_whenRoomBecomesDirty() {
+        Room room = new Room();
+        room.setId(1L);
+        room.setActive(true);
+        room.setRoomNumber("101");
+        room.setConditionStatus(ConditionStatus.CLEAN);
+
+        when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
+
+        roomService.updateConditionStatus(1L, ConditionStatus.DIRTY);
+
+        verify(auditService).log(
+                null,
+                "System",
+                "DIRTY_ROOM",
+                "ROOM",
+                1L,
+                "Room 101 marked as dirty"
+        );
+    }
+
+    @Test
+    void updateConditionStatus_shouldLogAudit_whenRoomBecomesMaintenance() {
+        Room room = new Room();
+        room.setId(1L);
+        room.setActive(true);
+        room.setRoomNumber("101");
+        room.setConditionStatus(ConditionStatus.CLEAN);
+
+        when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
+
+        roomService.updateConditionStatus(1L, ConditionStatus.MAINTENANCE);
+
+        verify(auditService).log(
+                null,
+                "System",
+                "MAINTENANCE_ROOM",
+                "ROOM",
+                1L,
+                "Room 101 marked as maintenance"
+        );
+    }
+
+    @Test
+    void updateRoom_shouldLogAudit_whenConditionChanges() {
+        Room room = new Room();
+        room.setId(1L);
+        room.setActive(true);
+        room.setFloorNumber((short) 1);
+        room.setRoomNumber("101");
+        room.setConditionStatus(ConditionStatus.DIRTY);
+
+        RoomType roomType = new RoomType();
+        roomType.setId(2L);
+        roomType.setActive(true);
+
+        RoomEditForm form = new RoomEditForm("101", 2L, ConditionStatus.CLEAN);
+
+        when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
+        when(roomTypeRepository.findById(2L)).thenReturn(Optional.of(roomType));
+
+        roomService.updateRoom(1L, form);
+
+        assertEquals(ConditionStatus.CLEAN, room.getConditionStatus());
+        verify(roomRepository).save(room);
+        verify(auditService).log(
+                null,
+                "System",
+                "CLEAN_ROOM",
+                "ROOM",
+                1L,
+                "Room 101 marked as clean"
         );
     }
 }

@@ -171,9 +171,7 @@ public class ReservationService {
         notificationService.notifyRole(
                 Role.RECEPTIONIST,
                 "New Reservation",
-                "Booking for " + saved.getGuestName() + " (" + saved.getCheckInAt() + " to " + saved.getCheckOutAt() + ")",
-                "RESERVATION",
-                String.valueOf(saved.getId())
+                "Booking for " + saved.getGuestName() + " (" + saved.getCheckInAt() + " to " + saved.getCheckOutAt() + ")"
         );
 
         return saved;
@@ -316,9 +314,7 @@ public class ReservationService {
         notificationService.notifyRole(
                 Role.RECEPTIONIST,
                 "New Online Booking",
-                "Online booking confirmed for " + reservation.getGuestName() + " (" + reservation.getCheckInAt() + " to " + reservation.getCheckOutAt() + ")",
-                "RESERVATION",
-                String.valueOf(reservation.getId())
+                "Online booking confirmed for " + reservation.getGuestName() + " (" + reservation.getCheckInAt() + " to " + reservation.getCheckOutAt() + ")"
         );
     }
 
@@ -347,9 +343,7 @@ public class ReservationService {
                 Role.RECEPTIONIST,
                 "New Online Booking (Recovered)",
                 "Expired online booking recovered for " + reservation.getGuestName()
-                        + " (" + reservation.getCheckInAt() + " to " + reservation.getCheckOutAt() + ")",
-                "RESERVATION",
-                String.valueOf(reservation.getId())
+                        + " (" + reservation.getCheckInAt() + " to " + reservation.getCheckOutAt() + ")"
         );
     }
 

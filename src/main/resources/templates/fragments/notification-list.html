@@ -16,7 +16,6 @@
             <tr class="border-b border-border">
                 <th class="text-left p-3 font-medium">Title</th>
                 <th class="text-left p-3 font-medium">Message</th>
-                <th class="text-left p-3 font-medium">Module</th>
                 <th class="text-left p-3 font-medium">Time</th>
             </tr>
             </thead>
@@ -24,16 +23,12 @@
             <tr th:each="notif : ${notifications.content}" class="border-b border-border/50 hover:bg-muted/50">
                 <td class="p-3 font-medium" th:text="${notif.title}"></td>
                 <td class="p-3 text-foreground/80" th:text="${notif.body}"></td>
-                <td class="p-3 text-foreground/60">
-                    <span th:if="${notif.relatedModule}" class="pill" th:text="${notif.relatedModule} + ': ' + ${notif.relatedId}"></span>
-                    <span th:unless="${notif.relatedModule}" class="text-foreground/40">-</span>
-                </td>
                 <td class="p-3 text-foreground/60" th:text="${#temporals.format(notif.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
             </tr>
             </tbody>
             <tfoot th:if="${notifications.totalPages > 1}">
                 <tr>
-                    <td colspan="4" class="px-5 py-3">
+                    <td colspan="3" class="px-5 py-3">
                         <div class="flex items-center justify-between border-t border-border pt-4">
                             <span class="text-sm text-muted-foreground">
                                 Page <span th:text="${notifications.number + 1}">1</span>

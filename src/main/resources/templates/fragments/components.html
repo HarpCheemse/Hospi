@@ -58,5 +58,51 @@
     </div>
 </div>
 
+<section th:fragment="roomPictureCarousel(pictureIds, fallbackUrl, altText)"
+         x-data="{ currentSlide: 0 }"
+         class="relative w-full h-full overflow-hidden rounded-2xl bg-surface-muted">
+    <img th:if="${#lists.isEmpty(pictureIds)}"
+         th:src="${fallbackUrl}"
+         th:alt="${altText}"
+         class="h-full w-full object-cover"/>
+    <img th:if="${#lists.size(pictureIds) == 1}"
+         th:each="picId : ${pictureIds}"
+         th:src="@{'/room-type-picture/' + ${picId}}"
+         th:alt="${altText}"
+         class="h-full w-full object-cover"/>
+    <th:block th:if="${#lists.size(pictureIds) > 1}">
+        <th:block th:with="lastIndex=${#lists.size(pictureIds)} - 1">
+            <th:block th:each="picId, iter : ${pictureIds}">
+                <div class="absolute inset-0 transition-opacity duration-500"
+                     x-show="currentSlide === ${iter.index}"
+                     x-cloak>
+                    <img th:src="@{'/room-type-picture/' + ${picId}}"
+                         th:alt="${altText}"
+                         class="h-full w-full object-cover"/>
+                </div>
+            </th:block>
+            <button type="button"
+                    @click="currentSlide = currentSlide > 0 ? currentSlide - 1 : ${lastIndex}"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-text shadow-md hover:bg-white transition-colors">
+                <svg class="size-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <button type="button"
+                    @click="currentSlide = currentSlide < ${lastIndex} ? currentSlide + 1 : 0"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-text shadow-md hover:bg-white transition-colors">
+                <svg class="size-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                <template th:each="picId, iter : ${pictureIds}">
+                    <button type="button"
+                            @click="currentSlide = ${iter.index}"
+                            class="h-2.5 w-2.5 rounded-full transition-all duration-300"
+                            x-bind:class="currentSlide === ${iter.index} ? 'bg-white w-6' : 'bg-white/50'">
+                    </button>
+                </template>
+            </div>
+        </th:block>
+    </th:block>
+</section>
+
 </body>
 </html>

@@ -29,12 +29,6 @@ public class Notification {
     @Column(name = "body", length = 1000)
     private String body;
 
-    @Column(name = "related_module", length = 50)
-    private String relatedModule;
-
-    @Column(name = "related_id", length = 50)
-    private String relatedId;
-
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 }

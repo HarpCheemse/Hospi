@@ -73,25 +73,6 @@
 
         </a>
 
-        <a th:href="@{/notifications}"
-           class="flex items-center justify-between rounded-lg p-2"
-           th:classappend="${activeSidebar == 'NOTIFICATIONS'}
-           ? ' bg-primary/10 text-primary font-medium'
-           : ' hover:bg-muted text-foreground'">
-
-            <div class="flex items-center gap-3">
-
-                <img th:src="@{/assets/icons/bell.svg}"
-                     alt="Notifications">
-
-                Notifications
-
-            </div>
-
-            <span class="pill-notification" th:if="${unreadNotificationCount > 0}" th:text="${unreadNotificationCount}">0</span>
-
-        </a>
-
         <a th:href="@{/manager/revenues}"
            class="flex items-center gap-3 rounded-lg p-2"
            th:classappend="${activeSidebar == 'REVENUES'}
@@ -128,6 +109,26 @@
                  alt="Key">
 
             Credentials
+
+        </a>
+
+        <!-- NOTIFICATIONS -->
+        <a th:href="@{/notifications}"
+           class="flex items-center justify-between rounded-lg p-2"
+           th:classappend="${activeSidebar == 'NOTIFICATIONS'}
+           ? ' bg-primary/10 text-primary font-medium'
+           : ' hover:bg-muted text-foreground'">
+
+            <div class="flex items-center gap-3">
+
+                <img th:src="@{/assets/icons/bell.svg}"
+                     alt="Notifications">
+
+                Notifications
+
+            </div>
+
+            <span class="pill-notification" th:if="${unreadNotificationCount > 0}" th:text="${unreadNotificationCount}">0</span>
 
         </a>
 

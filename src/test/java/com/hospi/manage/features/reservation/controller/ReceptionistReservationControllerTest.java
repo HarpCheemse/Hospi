@@ -270,7 +270,9 @@ class ReceptionistReservationControllerTest {
     @Test
     void createBooking_shouldRedirect_whenValid() throws Exception {
         doNothing().when(offlineBookingFormValidator).validate(any(), any());
-        when(reservationService.createReservation(any())).thenReturn(new Reservation());
+        var saved = new Reservation();
+        saved.setId(100L);
+        when(reservationService.createReservation(any())).thenReturn(saved);
 
         mockMvc.perform(post("/receptionist/bookings/create/details")
                         .param("checkInAt", "2026-07-01")
@@ -281,7 +283,7 @@ class ReceptionistReservationControllerTest {
                         .param("guestDateOfBirth", "1990-01-01")
                         .param("guestNationality", "US"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/receptionist/bookings"))
+                .andExpect(redirectedUrl("/receptionist/bookings/100"))
                 .andExpect(flash().attributeExists(SUCCESS));
     }
 

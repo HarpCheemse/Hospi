@@ -13,7 +13,5 @@ public class NotificationDTO {
     private Long id;
     private String title;
     private String body;
-    private String relatedModule;
-    private String relatedId;
     private LocalDateTime createdAt;
 }

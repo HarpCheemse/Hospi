@@ -4,6 +4,7 @@ import com.hospi.manage.features.auth.enums.OtpType;
 import com.hospi.manage.features.auth.service.OtpService;
 import com.hospi.manage.common.interfaces.EmailService;
 import com.hospi.manage.features.guest.service.BookingTrackerService;
+import com.hospi.manage.features.hotel.service.HotelService;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.BookingSource;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
@@ -44,6 +45,9 @@ class BookingTrackerControllerTest {
 
     @MockitoBean
     private EmailService emailService;
+
+    @MockitoBean
+    private HotelService hotelService;
 
     @Test
     void myBooking_shouldShowTrackForm_whenNoTrackedCodes() throws Exception {

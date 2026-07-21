@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="UTF-8">
@@ -10,19 +11,7 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
 
     <style>
-        [x-cloak] {
-            display: none !important;
-        }
-        .btn-success {
-            background-color: var(--color-success, #2F7D4F);
-            color: #FFFFFF;
-        }
-        .btn-success:hover {
-            background-color: #24633e;
-        }
-        .stroke-success {
-            stroke: var(--color-success, #2F7D4F);
-        }
+        [x-cloak] { display: none !important; }
     </style>
 
     <script th:inline="javascript">
@@ -35,160 +24,210 @@
 
 <body class="staff-layout">
 
-    <!-- SIDEBAR -->
-    <div th:replace="~{fragments/leader-sidebar :: sidebar}"></div>
+<div th:replace="~{fragments/leader-sidebar :: sidebar}"></div>
 
-    <!-- MAIN -->
-    <main class="staff-page">
+<main class="staff-page">
 
-        <!-- HEADER -->
-        <header class="staff-page-header">
-            <div class="flex items-center gap-4">
-                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                    <img th:src="@{/assets/icons/list-todo.svg}" class="h-7 w-7" alt="">
-                </div>
-                <section>
-                    <h1 class="staff-page-title">Cleaning Tasks</h1>
-                    <p class="page-description">Manage and complete housekeeping tasks for dirty rooms</p>
-                </section>
+    <div th:replace="~{fragments/components/toast :: toast}"></div>
+
+    <!-- HEADER -->
+    <header class="staff-page-header">
+        <div class="flex items-center gap-4">
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/layout-grid.svg}" alt="">
             </div>
-        </header>
+            <div>
+                <h1 class="staff-page-title">Leader Dashboard</h1>
+                <p class="page-description">Housekeeping overview and room status at a glance</p>
+            </div>
+        </div>
+    </header>
 
-        <!-- CONTAINER FOR TASK PANEL WITH GRID -->
-        <div class="flex gap-6 mt-6"
-             th:attr="data-count=${dirtyRooms.size()}, data-total=${totalRooms}, data-clean=${cleanRooms}"
+    <!-- TOP ROW: Room Status + KPI cards -->
+    <section class="mb-6 grid grid-cols-4 gap-4">
+
+        <!-- Room Status Breakdown (spans 2 rows) -->
+        <section class="card-panel col-span-1 row-span-2">
+            <div class="mb-4 flex items-center gap-2">
+                <img th:src="@{/assets/icons/door-open.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                <div>
+                    <h2 class="text-lg font-semibold text-foreground">Room Status</h2>
+                    <p class="text-sm text-muted-foreground">All rooms</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <div th:each="item : ${view.statusBreakdown}" class="flex items-center justify-between">
+                    <p class="text-sm text-muted-foreground" th:text="${item.label}">Clean</p>
+                    <p class="text-2xl font-bold" th:classappend="${item.colorClass.replace('bg-', 'text-')}" th:text="${item.count}">0</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dirty Rooms -->
+        <div class="card-compact">
+            <div class="flex items-center gap-2 mb-1">
+                <img th:src="@{/assets/icons/list-todo.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                <p class="text-sm text-muted-foreground">Dirty Rooms</p>
+            </div>
+            <p class="text-2xl font-bold text-foreground" th:text="${view.dirtyRooms}">0</p>
+            <p class="text-xs text-muted-foreground mt-1">Need cleaning</p>
+        </div>
+
+        <!-- Clean Rooms -->
+        <div class="card-compact">
+            <div class="flex items-center gap-2 mb-1">
+                <img th:src="@{/assets/icons/clipboard-check.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                <p class="text-sm text-muted-foreground">Clean Rooms</p>
+            </div>
+            <p class="text-2xl font-bold text-foreground" th:text="${view.cleanRooms}">0</p>
+            <p class="text-xs text-muted-foreground mt-1" th:text="|${view.cleanPercent}% of total|">0% of total</p>
+        </div>
+
+        <!-- Total Rooms -->
+        <div class="card-compact">
+            <div class="flex items-center gap-2 mb-1">
+                <img th:src="@{/assets/icons/building-2.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                <p class="text-sm text-muted-foreground">Total Rooms</p>
+            </div>
+            <p class="text-2xl font-bold text-foreground" th:text="${view.totalRooms}">0</p>
+            <p class="text-xs text-muted-foreground mt-1">Active rooms</p>
+        </div>
+
+        <!-- Priority Cleaning (KPI) -->
+        <div class="card-compact">
+            <div class="flex items-center gap-2 mb-1">
+                <img th:src="@{/assets/icons/alert-triangle.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                <p class="text-sm text-muted-foreground">Priority Cleaning</p>
+            </div>
+            <p class="text-2xl font-bold text-foreground" th:text="${view.occupiedDirtyRooms}">0</p>
+            <p class="text-xs text-muted-foreground mt-1">Occupied rooms need cleaning</p>
+        </div>
+
+        <!-- Vacant Ready -->
+        <div class="card-compact">
+            <div class="flex items-center gap-2 mb-1">
+                <img th:src="@{/assets/icons/door-open.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                <p class="text-sm text-muted-foreground">Vacant Ready</p>
+            </div>
+            <p class="text-2xl font-bold text-foreground" th:text="${view.vacantCleanRooms}">0</p>
+            <p class="text-xs text-muted-foreground mt-1">Ready for check-in</p>
+        </div>
+
+        <!-- Maintenance -->
+        <div class="card-compact">
+            <div class="flex items-center gap-2 mb-1">
+                <img th:src="@{/assets/icons/memory-stick.svg}" class="h-4 w-4 text-primary opacity-70" alt="">
+                <p class="text-sm text-muted-foreground">Maintenance</p>
+            </div>
+            <p class="text-2xl font-bold text-foreground" th:text="${view.maintenanceRooms}">0</p>
+            <p class="text-xs text-muted-foreground mt-1">Out of service</p>
+        </div>
+
+    </section>
+
+    <!-- QUICK ACCESS: Priority Cleaning -->
+    <section class="card-panel mb-6"
              x-data="{
-                 count: parseInt($el.dataset.count),
+                 cleanedIds: [],
+                 priorityCount: parseInt('[[${view.occupiedDirtyRooms}]]'),
                  confirmOpen: false,
                  selectedRoomId: null,
                  selectedRoomNum: null,
-                 cleanedRooms: [],
-                 total: parseInt($el.dataset.total),
-                 clean: parseInt($el.dataset.clean),
-                 percent() { return this.total > 0 ? Math.round((this.clean / this.total) * 100) : 0; }
+                 selectRoom(id, num) { this.selectedRoomId = id; this.selectedRoomNum = num; this.confirmOpen = true; }
              }">
-            
-            <!-- LEFT COLUMN: ACTIVE TASKS -->
-            <section class="card-panel flex-[2] min-w-0">
-                <div class="mb-4 flex items-center justify-between">
-                    <div>
-                        <h2 class="text-lg font-semibold text-foreground">Active Tasks</h2>
-                        <p class="text-sm text-muted-foreground">Rooms requiring cleaning</p>
-                    </div>
-                </div>
 
-                <!-- EMPTY STATE -->
-                <div class="p-8 text-center text-muted-foreground" x-show="count === 0" x-cloak>
-                    <p class="text-lg font-medium">All tasks completed!</p>
-                    <p class="text-sm mt-1">No dirty rooms remaining.</p>
-                </div>
-
-                <!-- TASK LIST -->
-                <div class="flex flex-col gap-2" x-show="count > 0">
-                    <div th:each="room : ${dirtyRooms}" 
-                         th:attr="data-room-id=${room.id}, data-room-num=${room.roomNumber}"
-                         x-data="{ roomId: parseInt($el.dataset.roomId), roomNum: $el.dataset.roomNum }"
-                         x-show="!cleanedRooms.includes(roomId)" 
-                         class="grid grid-cols-12 items-center gap-3 rounded-lg border border-border bg-background p-4 text-sm shadow-sm">
-                        
-                        <div class="col-span-3">
-                            <p class="font-bold text-foreground text-base" th:text="'Room ' + ${room.roomNumber}">Room 101</p>
-                            <p class="text-xs text-muted-foreground" th:text="${room.roomType?.name}">Standard Room</p>
-                        </div>
-
-                        <div class="col-span-3 text-muted-foreground">
-                            <span class="font-medium">Floor: </span><span th:text="${room.floorNumber}">1</span>
-                        </div>
-
-                        <div class="col-span-3">
-                            <span class="pill-danger">Dirty</span>
-                        </div>
-
-                        <div class="col-span-3 flex justify-end">
-                            <button class="btn btn-success" 
-                                    @click="selectedRoomId = roomId; selectedRoomNum = roomNum; confirmOpen = true">
-                                Mark Done
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- RIGHT COLUMN: CLEANLINESS OVERVIEW STATS -->
-            <section class="card-panel flex-1 flex flex-col items-center justify-center p-6 text-center">
-                <div class="mb-4">
-                    <h2 class="text-lg font-semibold text-foreground">Cleanliness Overview</h2>
-                    <p class="text-sm text-muted-foreground">Overall room status</p>
-                </div>
-                
-                <div class="relative flex items-center justify-center my-6">
-                    <svg class="h-36 w-36 -rotate-90 transform" viewBox="0 0 100 100">
-                        <circle cx="50" cy="50" r="40" stroke="currentColor" stroke-width="8" class="text-border" fill="none" />
-                        <circle cx="50" cy="50" r="40" stroke-width="8" class="stroke-success transition-all duration-500 ease-out" fill="none"
-                                stroke-dasharray="251.2"
-                                :stroke-dashoffset="251.2 - (251.2 * percent() / 100)"
-                                stroke-linecap="round" />
-                    </svg>
-                    <div class="absolute text-3xl font-extrabold text-foreground" x-text="percent() + '%'"></div>
-                </div>
-
+        <div class="mb-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <img th:src="@{/assets/icons/alert-triangle.svg}" class="h-5 w-5 text-danger opacity-80" alt="">
                 <div>
-                    <p class="text-base font-semibold text-foreground" x-text="clean + ' of ' + total + ' rooms clean'"></p>
-                    <p class="text-xs text-muted-foreground mt-1">Updated in real-time</p>
+                    <h2 class="text-lg font-semibold text-foreground">Priority Cleaning</h2>
+                    <p class="text-sm text-muted-foreground" th:text="|${#lists.size(view.priorityRooms)} room(s) occupied and need cleaning|">0 rooms</p>
                 </div>
-            </section>
+            </div>
+            <a th:href="@{/leader/tasks}" class="btn btn-primary btn-sm">View All Tasks</a>
+        </div>
 
-            <!-- CONFIRMATION MODAL -->
-            <div x-show="confirmOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
-                <!-- BACKDROP -->
-                <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="confirmOpen = false"></div>
-                <!-- MODAL CONTENT -->
-                <div x-show="confirmOpen"
-                     x-transition:enter="transition ease-out duration-200"
-                     x-transition:enter-start="opacity-0 scale-95"
-                     x-transition:enter-end="opacity-100 scale-100"
-                     x-transition:leave="transition ease-in duration-150"
-                     x-transition:leave-start="opacity-100 scale-100"
-                     x-transition:leave-end="opacity-0 scale-95"
-                     class="relative mx-4 w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl">
-                    
-                    <h3 class="text-lg font-semibold text-foreground">Confirm Room Cleaned</h3>
-                    <p class="mt-2 text-sm text-muted-foreground">
-                        Are you sure you want to mark <strong x-text="'Room ' + selectedRoomNum"></strong> as clean?
-                    </p>
+        <div th:if="${#lists.isEmpty(view.priorityRooms)}" class="py-6 text-center text-sm text-muted-foreground">
+            <p>No priority cleaning tasks. All occupied rooms are clean.</p>
+        </div>
 
-                    <div class="mt-6 flex justify-end gap-3">
-                        <button @click="confirmOpen = false" class="btn btn-ghost">
-                            Cancel
-                        </button>
-                        <button @click="
-                            fetch('/leader/rooms/' + selectedRoomId + '/clean', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/x-www-form-urlencoded',
-                                    [window.csrfHeader || 'X-CSRF-TOKEN']: window.csrfToken
-                                }
-                            }).then(response => {
-                                if (response.ok) {
-                                    cleanedRooms.push(selectedRoomId);
-                                    count--;
-                                    clean++;
-                                    confirmOpen = false;
-                                } else {
-                                    alert('Error completing task for Room ' + selectedRoomNum);
-                                }
-                            }).catch(err => {
-                                alert('Error completing task for Room ' + selectedRoomNum);
-                            });
-                        " class="btn btn-success">
-                            Yes, Mark Clean
-                        </button>
+        <div th:if="${!#lists.isEmpty(view.priorityRooms)}" class="flex flex-col gap-2">
+            <div th:each="pr : ${view.priorityRooms}"
+                 th:attr="data-id=${pr.id}, data-num=${pr.roomNumber}"
+                 x-data="{ id: parseInt($el.dataset.id), num: $el.dataset.num }"
+                 x-show="!cleanedIds.includes(id)"
+                 class="flex items-center justify-between rounded-lg border border-border bg-background p-3">
+
+                <div class="flex items-center gap-4">
+                    <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-danger/10">
+                        <img th:src="@{/assets/icons/bed-double.svg}" class="h-4 w-4 text-danger" alt="">
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-foreground" th:text="'Room ' + ${pr.roomNumber}">Room 101</p>
+                        <p class="text-xs text-muted-foreground">
+                            <span th:text="${pr.roomTypeName}">Deluxe</span>
+                            <span th:if="${pr.roomTypeName != null}" class="mx-1">·</span>
+                            <span>Floor <span th:text="${pr.floorNumber}">1</span></span>
+                        </p>
                     </div>
                 </div>
+
+                <button class="btn btn-success btn-sm"
+                        @click="selectRoom(id, num)">
+                    <img th:src="@{/assets/icons/clipboard-check.svg}" class="h-3.5 w-3.5 brightness-0 invert" alt="">
+                    Mark Clean
+                </button>
             </div>
         </div>
 
-    </main>
+        <!-- CONFIRMATION MODAL -->
+        <div x-show="confirmOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="confirmOpen = false"></div>
+            <div x-show="confirmOpen"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95"
+                 class="relative mx-4 w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl">
+
+                <h3 class="text-lg font-semibold text-foreground">Confirm Room Cleaned</h3>
+                <p class="mt-2 text-sm text-muted-foreground">
+                    Are you sure you want to mark <strong x-text="'Room ' + selectedRoomNum"></strong> as clean?
+                </p>
+
+                <div class="mt-6 flex justify-end gap-3">
+                    <button @click="confirmOpen = false" class="btn btn-ghost">Cancel</button>
+                    <button @click="
+                        fetch('/leader/rooms/' + selectedRoomId + '/clean', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                [window.csrfHeader || 'X-CSRF-TOKEN']: window.csrfToken
+                            }
+                        }).then(response => {
+                            if (response.ok) {
+                                cleanedIds.push(selectedRoomId);
+                                priorityCount--;
+                                confirmOpen = false;
+                            } else {
+                                alert('Error completing task for Room ' + selectedRoomNum);
+                            }
+                        }).catch(() => {
+                            alert('Error completing task for Room ' + selectedRoomNum);
+                        });
+                    " class="btn btn-success btn-sm">
+                        <img th:src="@{/assets/icons/clipboard-check.svg}" class="h-3.5 w-3.5 brightness-0 invert" alt="">
+                        Yes, Mark Clean
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
 
 </body>
 </html>
