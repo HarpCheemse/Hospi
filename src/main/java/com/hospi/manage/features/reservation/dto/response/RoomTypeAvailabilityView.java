@@ -25,6 +25,10 @@ public record RoomTypeAvailabilityView(
         RoomCategory category,
         RoomTier tier
 ) {
+
+    /** Lightweight picture reference — only the ID, no binary data. */
+    public record PictureView(Long id) {}
+
     public RoomTypeAvailabilityView(
             RoomTypeAvailability availability
     ) {

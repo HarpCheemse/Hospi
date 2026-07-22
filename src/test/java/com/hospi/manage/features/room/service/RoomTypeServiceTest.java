@@ -204,7 +204,7 @@ class RoomTypeServiceTest {
         rt.setActive(true);
         rt.setName("SUPERIOR FAMILY");
 
-        when(roomTypeRepository.findById(1L)).thenReturn(Optional.of(rt));
+        when(roomTypeRepository.findByIdWithRelations(1L)).thenReturn(rt);
 
         RoomTypeView result = service.findViewById(1L);
 
@@ -216,7 +216,7 @@ class RoomTypeServiceTest {
         RoomType rt = new RoomType();
         rt.setId(1L);
         rt.setActive(true);
-        when(roomTypeRepository.findByIdWithRelations(1L)).thenReturn(Optional.of(rt));
+        when(roomTypeRepository.findByIdWithRelations(1L)).thenReturn(rt);
 
         var view = service.findView(1L);
         assertNotNull(view);
@@ -225,13 +225,17 @@ class RoomTypeServiceTest {
 
     @Test
     void findView_shouldThrowForInactiveRoomType() {
-        when(roomTypeRepository.findByIdWithRelations(1L)).thenReturn(Optional.empty());
+        RoomType rt = new RoomType();
+        rt.setId(1L);
+        rt.setActive(false);
+        when(roomTypeRepository.findByIdWithRelations(1L)).thenReturn(rt);
+
         assertThrows(ResourceNotFoundException.class, () -> service.findView(1L));
     }
 
     @Test
     void findView_shouldThrowForMissingRoomType() {
-        when(roomTypeRepository.findByIdWithRelations(99L)).thenReturn(Optional.empty());
+        when(roomTypeRepository.findByIdWithRelations(99L)).thenReturn(null);
         assertThrows(ResourceNotFoundException.class, () -> service.findView(99L));
     }
 }

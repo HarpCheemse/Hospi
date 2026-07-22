@@ -65,7 +65,7 @@
                     <h2 class="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Amenities</h2>
                     <div class="flex flex-wrap gap-2">
                         <span th:each="feature : ${#strings.arraySplit(roomType.features, ',')}"
-                              class="rounded-md bg-primary-soft/40 px-3 py-1.5 text-xs font-semibold tracking-wider text-primary uppercase"
+                              class="rounded-full bg-accent/20 px-3 py-1.5 text-xs font-semibold tracking-brand uppercase text-ink"
                               th:text="${#strings.trim(feature)}">Free WiFi</span>
                     </div>
                 </div>
