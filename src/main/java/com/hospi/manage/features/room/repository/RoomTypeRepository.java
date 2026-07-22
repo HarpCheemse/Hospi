@@ -23,4 +23,10 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Long> {
      */
     @Query("SELECT DISTINCT rt FROM RoomType rt LEFT JOIN FETCH rt.pictures WHERE rt.active = true")
     List<RoomType> findAllWithRelations();
+
+    /**
+     * Find an active room type by ID with its pictures eagerly loaded.
+     */
+    @Query("SELECT rt FROM RoomType rt LEFT JOIN FETCH rt.pictures WHERE rt.id = :id")
+    RoomType findByIdWithRelations(@org.springframework.data.repository.query.Param("id") Long id);
 }
