@@ -10,7 +10,6 @@ import com.hospi.manage.features.guest.validation.BookingDateValidator;
 import com.hospi.manage.features.hotel.service.HotelService;
 import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.payment.service.PaymentService;
-import com.hospi.manage.features.reservation.dto.response.PictureView;
 import com.hospi.manage.features.reservation.dto.response.RoomTypeAvailabilityView;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
@@ -440,7 +439,7 @@ class BookingFlowControllerTest {
         var availability = new RoomTypeAvailabilityView(
                 roomType.getId(), roomType.getName(), roomType.getMaxOccupancy(),
                 roomType.getBasePrice(), roomType.getBedType(), roomType.getArea(),
-                null, true, List.of(new PictureView(1L)),
+                null, true, List.of(new RoomTypeAvailabilityView.PictureView(1L)),
                 5, 3, roomType.getDescription(),
                 roomType.getCategory(), roomType.getTier());
 
