@@ -35,7 +35,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 
-/** Controller for the receptionist current stays management (manage, guests, rooms, extend, swap). */
+/** Controller for receptionist stays management (listing, manage guests/rooms, checkout). */
 @Slf4j
 @Controller
 @RequestMapping("/receptionist/stays")
@@ -56,6 +56,9 @@ public class ReceptionistStayController {
         model.addAttribute(Attributes.ACTIVE_SIDEBAR, Attributes.CURRENT_STAYS);
     }
 
+    /**
+     * Show paginated list of checked-in guests with optional search and scope filter (all/today).
+     */
     @GetMapping
     String currentStays(@RequestParam(name = "search", required = false) String search,
                         @RequestParam(name = "scope", required = false) String scope,
@@ -64,6 +67,7 @@ public class ReceptionistStayController {
 
         var today = LocalDate.now();
         if ("today".equals(scope)) {
+            // Filter to today's check-outs
             var filtered = paged.getContent().stream()
                     .filter(r -> r.getCheckOutAt() != null && r.getCheckOutAt().equals(today))
                     .toList();
@@ -73,6 +77,7 @@ public class ReceptionistStayController {
 
         var view = ReservationMapper.toCurrentStaysView(paged, search, scope != null ? scope : "all");
 
+        // Per-reservation counts (guests, rooms)
         var guestCounts = new HashMap<Long, Integer>();
         var assignedCounts = new HashMap<Long, Integer>();
         for (var g : paged.getContent()) {
@@ -86,6 +91,9 @@ public class ReceptionistStayController {
         return "receptionist/reservation/stays";
     }
 
+    /**
+     * Show the management page for a single checked-in stay (guests, rooms, extend, swap, checkout).
+     */
     @GetMapping("/{id}")
     String manage(@PathVariable Long id, @RequestParam(required = false) Long edit, Model model) {
         var reservation = reservationService.findById(id);
@@ -250,6 +258,9 @@ public class ReceptionistStayController {
         return "redirect:/receptionist/stays/" + id + "";
     }
 
+    /**
+     * Show the checkout page with charges, deposit, late fee breakdown.
+     */
     @GetMapping("/{id}/checkout")
     String showCheckout(@PathVariable Long id, Model model) {
         Reservation reservation = reservationService.findById(id);
@@ -261,6 +272,10 @@ public class ReceptionistStayController {
         return "receptionist/reservation/checkout";
     }
 
+    /**
+     * Process checkout — record payment, create invoice, vacate rooms.
+     * Redirects to receipt on success, back to checkout on error.
+     */
     @PostMapping("/{id}/checkout")
     String completeCheckout(@PathVariable Long id,
                             @Valid @ModelAttribute(Attributes.FORM) CheckoutForm form,
@@ -288,6 +303,7 @@ public class ReceptionistStayController {
         }
     }
 
+    /** Gather guests, assigned rooms, and available rooms into a manage view. */
     private ManageReservationView buildManageView(Long id, Reservation reservation) {
         return ReservationMapper.toManageView(reservation,
                 stayingGuestService.getGuests(id),
