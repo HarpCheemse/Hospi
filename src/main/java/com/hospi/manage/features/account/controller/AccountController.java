@@ -11,8 +11,10 @@ import com.hospi.manage.features.account.enums.Role;
 import com.hospi.manage.features.account.service.AccountService;
 import com.hospi.manage.features.account.validator.AccountValidator;
 import com.hospi.manage.features.audit.service.AuditService;
+import com.hospi.manage.core.security.session.AccountPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -132,7 +134,12 @@ public class AccountController {
 
     @PostMapping("/delete/{id}")
     public String deleteAccount(@PathVariable Long id,
+                                @AuthenticationPrincipal AccountPrincipal principal,
                                 RedirectAttributes redirectAttributes) {
+        if (principal != null && id.equals(principal.getAccount().getId())) {
+            redirectAttributes.addFlashAttribute(Attributes.ERROR, "You cannot delete your own account.");
+            return "redirect:/admin/accounts";
+        }
         try {
             accountService.softDelete(id);
             auditService.log(null, SecurityUtils.currentStaffName(), "DELETE", "ACCOUNT", id, "Deleted account");

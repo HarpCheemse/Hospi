@@ -69,7 +69,7 @@ class RoomPageControllerTest {
         when(roomTypeService.findView(99L)).thenThrow(new ResourceNotFoundException("Room type"));
 
         mockMvc.perform(get("/rooms/99"))
-                .andExpect(status().isOk())
+                .andExpect(status().is(404))
                 .andExpect(view().name("error/404"));
     }
 }

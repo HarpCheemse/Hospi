@@ -72,7 +72,7 @@ class ReservationServiceTest {
         );
 
         when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(true);
-        when(roomTypeRepository.findById(1L)).thenReturn(Optional.of(roomType));
+        when(roomTypeRepository.findAllById(any())).thenReturn(List.of(roomType));
         when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         Reservation result = reservationService.createReservation(form);
@@ -105,7 +105,7 @@ class ReservationServiceTest {
         );
 
         when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(true);
-        when(roomTypeRepository.findById(1L)).thenReturn(Optional.of(roomType));
+        when(roomTypeRepository.findAllById(any())).thenReturn(List.of(roomType));
         when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         Reservation result = reservationService.createReservation(form);
@@ -128,13 +128,14 @@ class ReservationServiceTest {
         );
 
         when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(true);
+        when(roomTypeRepository.findAllById(any())).thenReturn(List.of());
         when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         Reservation result = reservationService.createReservation(form);
 
         assertTrue(result.getDetails().isEmpty());
         assertEquals(BigDecimal.ZERO, result.getTotalPrice());
-        verify(roomTypeRepository, never()).findById(any());
+        verify(roomTypeRepository).findAllById(any());
     }
 
     @Test
@@ -147,7 +148,7 @@ class ReservationServiceTest {
         );
 
         when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(true);
-        when(roomTypeRepository.findById(999L)).thenReturn(Optional.empty());
+        when(roomTypeRepository.findAllById(any())).thenReturn(List.of());
 
         assertThrows(ResourceNotFoundException.class,
                 () -> reservationService.createReservation(form));
@@ -163,6 +164,7 @@ class ReservationServiceTest {
         );
 
         when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(true);
+        when(roomTypeRepository.findAllById(any())).thenReturn(List.of());
         when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         Reservation result = reservationService.createReservation(form);
@@ -192,8 +194,7 @@ class ReservationServiceTest {
         );
 
         when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(true);
-        when(roomTypeRepository.findById(1L)).thenReturn(Optional.of(rt1));
-        when(roomTypeRepository.findById(2L)).thenReturn(Optional.of(rt2));
+        when(roomTypeRepository.findAllById(any())).thenReturn(List.of(rt1, rt2));
         when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         Reservation result = reservationService.createReservation(form);

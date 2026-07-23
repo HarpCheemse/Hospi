@@ -148,6 +148,12 @@ public class ReservationService {
         reservation.setStatus(ReservationStatus.PENDING);
         reservation.setSource(BookingSource.OFFLINE);
 
+        List<Long> roomTypeIds = form.roomSelections().stream()
+                .map(RoomSelection::roomTypeId)
+                .toList();
+        Map<Long, RoomType> roomTypeMap = roomTypeRepository.findAllById(roomTypeIds).stream()
+                .collect(Collectors.toMap(RoomType::getId, rt -> rt));
+
         BigDecimal totalPrice = BigDecimal.ZERO;
         List<ReservationDetail> details = new ArrayList<>();
 
@@ -157,8 +163,10 @@ public class ReservationService {
 
             if (count == null || count <= 0) continue;
 
-            RoomType roomType = roomTypeRepository.findById(roomTypeId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Room type " + roomTypeId));
+            RoomType roomType = roomTypeMap.get(roomTypeId);
+            if (roomType == null) {
+                throw new ResourceNotFoundException("Room type " + roomTypeId);
+            }
 
             totalPrice = totalPrice.add(roomType.getBasePrice().multiply(BigDecimal.valueOf(count)));
             details.add(buildDetail(reservation, roomType, count, 1));
