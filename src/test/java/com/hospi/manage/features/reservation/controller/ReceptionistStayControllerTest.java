@@ -160,4 +160,20 @@ class ReceptionistStayControllerTest {
                 .andExpect(redirectedUrl("/receptionist/stays/1/checkout"))
                 .andExpect(flash().attributeExists("error"));
     }
+
+    // ========== POST /{id}/swap (swapRoom) ==========
+
+    @Test
+    void swapRoom_shouldRedirectWithSuccess_whenValidUpgrade() throws Exception {
+        doNothing().when(roomUpgradeService).swapOne(1L, 1L, 2L);
+
+        mockMvc.perform(post("/receptionist/stays/1/swap")
+                        .param("roomTypeId", "2")
+                        .param("from", "1"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/receptionist/stays/1"))
+                .andExpect(flash().attribute("success", "Room swapped successfully."));
+
+        verify(roomUpgradeService).swapOne(1L, 1L, 2L);
+    }
 }

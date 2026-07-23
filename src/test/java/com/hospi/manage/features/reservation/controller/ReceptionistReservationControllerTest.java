@@ -9,6 +9,8 @@ import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.payment.service.PaymentService;
 import com.hospi.manage.features.reservation.dto.request.*;
 import com.hospi.manage.features.reservation.entity.Reservation;
+import com.hospi.manage.features.reservation.entity.RoomAssignment;
+import com.hospi.manage.features.reservation.entity.StayingGuest;
 import com.hospi.manage.features.reservation.enums.BookingSource;
 import com.hospi.manage.features.payment.entity.Payment;
 import com.hospi.manage.features.payment.enums.PaymentMethod;
@@ -616,5 +618,37 @@ class ReceptionistReservationControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/receptionist/bookings/1"))
                 .andExpect(flash().attribute(ERROR, "Only confirmed reservations can be refunded offline"));
+    }
+
+    // ========== POST /{id}/guests/add (BookingController) ==========
+
+    @Test
+    void addGuest_shouldRedirectWithSuccess_whenValid() throws Exception {
+        when(stayingGuestService.addGuest(anyLong(), any())).thenReturn(new StayingGuest());
+
+        mockMvc.perform(post("/receptionist/bookings/1/guests/add")
+                        .param("guestName", "Jane Doe")
+                        .param("dateOfBirth", "1990-01-01")
+                        .param("nationality", "US"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/receptionist/bookings/1"))
+                .andExpect(flash().attribute(SUCCESS, "Guest added successfully."));
+
+        verify(stayingGuestService).addGuest(eq(1L), any(StayingGuestForm.class));
+    }
+
+    // ========== POST /{id}/rooms/assign (BookingController) ==========
+
+    @Test
+    void assignRoom_shouldRedirectWithSuccess_whenRoomVacant() throws Exception {
+        when(roomAssignmentService.assignRoom(1L, 5L)).thenReturn(new RoomAssignment());
+
+        mockMvc.perform(post("/receptionist/bookings/1/rooms/assign")
+                        .param("roomId", "5"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/receptionist/bookings/1"))
+                .andExpect(flash().attribute(SUCCESS, "Room assigned successfully."));
+
+        verify(roomAssignmentService).assignRoom(1L, 5L);
     }
 }
