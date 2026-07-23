@@ -132,14 +132,18 @@
                 </div>
                 <div>
                     <p class="text-muted-foreground">Status</p>
-                    <span th:switch="${reservation.status}"
+                    <span th:switch="${reservation.status.name()}"
                           class="inline-block rounded-full px-3 py-1 text-xs font-medium"
                           th:classappend="
                               ${reservation.status.name() == 'PENDING'} ? 'bg-warning/10 text-warning' :
                               (${reservation.status.name() == 'CONFIRMED'} ? 'bg-primary/10 text-primary' :
-                              'bg-muted text-muted-foreground')">
+                              (${reservation.status.name() == 'CANCELLED'} ? 'bg-danger/10 text-danger' :
+                              'bg-muted text-muted-foreground'))">
                         <span th:case="'PENDING'">Pending</span>
                         <span th:case="'CONFIRMED'">Confirmed</span>
+                        <span th:case="'CHECKED_IN'">Checked In</span>
+                        <span th:case="'CHECKED_OUT'">Checked Out</span>
+                        <span th:case="'CANCELLED'">Cancelled</span>
                         <span th:case="*" th:text="${reservation.status.name()}">Unknown</span>
                     </span>
                 </div>
