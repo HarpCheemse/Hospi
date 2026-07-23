@@ -82,13 +82,14 @@ class PasswordResetControllerTest {
     }
 
     @Test
-    void handleForgotPassword_shouldReRender_whenEmailNotFound() throws Exception {
+    void handleForgotPassword_shouldRedirect_whenEmailNotFound() throws Exception {
         when(accountRepository.existsByEmail("test@test.com")).thenReturn(false);
 
         mockMvc.perform(post("/auth/password/forgot")
                         .param("email", "test@test.com"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("auth/forgot-password"));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/auth/password/forgot"))
+                .andExpect(flash().attributeExists(SUCCESS));
     }
 
     @Test
@@ -110,7 +111,7 @@ class PasswordResetControllerTest {
                         .param("email", "test@test.com")
                         .param("otp", "123456"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/auth/password/reset?token=token-123"));
+                .andExpect(redirectedUrl("/auth/password/reset"));
     }
 
     @Test
@@ -138,7 +139,7 @@ class PasswordResetControllerTest {
         when(otpService.isValidToken("valid-token")).thenReturn(true);
 
         mockMvc.perform(get("/auth/password/reset")
-                        .param("token", "valid-token"))
+                        .sessionAttr("resetToken", "valid-token"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("auth/password-reset"))
                 .andExpect(model().attributeExists("form"))
@@ -151,7 +152,14 @@ class PasswordResetControllerTest {
         when(otpService.isValidToken("bad-token")).thenReturn(false);
 
         mockMvc.perform(get("/auth/password/reset")
-                        .param("token", "bad-token"))
+                        .sessionAttr("resetToken", "bad-token"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/auth/password/forgot"));
+    }
+
+    @Test
+    void showResetPassword_shouldRedirect_whenNoTokenInSession() throws Exception {
+        mockMvc.perform(get("/auth/password/reset"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/auth/password/forgot"));
     }
@@ -165,7 +173,7 @@ class PasswordResetControllerTest {
         when(encoder.encode("newPassword123")).thenReturn("encoded-hash");
 
         mockMvc.perform(post("/auth/password/reset")
-                        .param("token", "valid-token")
+                        .sessionAttr("resetToken", "valid-token")
                         .param("newPassword", "newPassword123")
                         .param("confirmPassword", "newPassword123"))
                 .andExpect(status().is3xxRedirection())
@@ -178,9 +186,20 @@ class PasswordResetControllerTest {
         when(otpService.isValidToken("bad-token")).thenReturn(false);
 
         mockMvc.perform(post("/auth/password/reset")
-                        .param("token", "bad-token"))
+                        .sessionAttr("resetToken", "bad-token"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/auth/password/forgot"));
+                .andExpect(redirectedUrl("/auth/password/forgot"))
+                .andExpect(flash().attributeExists("error"));
+    }
+
+    @Test
+    void resetPassword_shouldRedirect_whenNoTokenInSession() throws Exception {
+        mockMvc.perform(post("/auth/password/reset")
+                        .param("newPassword", "newPassword123")
+                        .param("confirmPassword", "newPassword123"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/auth/password/forgot"))
+                .andExpect(flash().attributeExists("error"));
     }
 
     @Test
@@ -193,7 +212,7 @@ class PasswordResetControllerTest {
         }).when(accountValidator).validateResetPassword(any(), any());
 
         mockMvc.perform(post("/auth/password/reset")
-                        .param("token", "valid-token"))
+                        .sessionAttr("resetToken", "valid-token"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("auth/password-reset"));
     }
