@@ -10,6 +10,8 @@ import com.hospi.manage.features.payment.service.PaymentService;
 import com.hospi.manage.features.reservation.dto.request.*;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.BookingSource;
+import com.hospi.manage.features.payment.entity.Payment;
+import com.hospi.manage.features.payment.enums.PaymentMethod;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.service.CheckoutService;
 import com.hospi.manage.features.reservation.service.RoomUpgradeService;
@@ -482,5 +484,137 @@ class ReceptionistReservationControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/receptionist/stays/1"))
                 .andExpect(flash().attributeExists(ERROR));
+    }
+
+    // ========== POST /{id}/cancel ==========
+
+    @Test
+    void cancel_shouldRedirectWithSuccess_whenReservationPending() throws Exception {
+        doNothing().when(reservationService).cancelReservation(1L);
+
+        mockMvc.perform(post("/receptionist/bookings/1/cancel"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/receptionist/bookings/1"))
+                .andExpect(flash().attribute(SUCCESS, "Reservation cancelled."));
+    }
+
+    @Test
+    void cancel_shouldRedirectWithError_whenReservationCheckedIn() throws Exception {
+        doThrow(new IllegalStateException("Only PENDING or CONFIRMED reservations can be cancelled"))
+                .when(reservationService).cancelReservation(1L);
+
+        mockMvc.perform(post("/receptionist/bookings/1/cancel"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/receptionist/bookings/1"))
+                .andExpect(flash().attribute(ERROR, "Only PENDING or CONFIRMED reservations can be cancelled"));
+    }
+
+    // ========== POST /{id}/refund ==========
+
+    private Payment createPayPalPayment(Long id, String orderId, BigDecimal amount) {
+        Payment p = new Payment();
+        p.setId(id);
+        p.setPaymentMethod(PaymentMethod.PAYPAL);
+        p.setOrderId(orderId);
+        p.setAmount(amount);
+        p.setConfirmedAt(java.time.LocalDateTime.now());
+        return p;
+    }
+
+    private Payment createCashPayment(Long id, BigDecimal amount) {
+        Payment p = new Payment();
+        p.setId(id);
+        p.setPaymentMethod(PaymentMethod.CASH);
+        p.setAmount(amount);
+        p.setConfirmedAt(java.time.LocalDateTime.now());
+        return p;
+    }
+
+    @Test
+    void refund_shouldRedirectWithSuccess_whenPayPalRefundSucceeds() throws Exception {
+        var reservation = createReservation(ReservationStatus.CONFIRMED);
+        when(reservationService.findById(1L)).thenReturn(reservation);
+        var payments = List.of(createPayPalPayment(1L, "ORDER123", BigDecimal.valueOf(200)));
+        when(paymentService.getPaymentsByReservationId(1L)).thenReturn(payments);
+        when(paymentService.refundOnlineBookingPayment("ORDER123")).thenReturn(true);
+        when(paymentService.calculateRefund(reservation)).thenReturn(BigDecimal.valueOf(50));
+
+        mockMvc.perform(post("/receptionist/bookings/1/refund"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/receptionist/bookings/1"))
+                .andExpect(flash().attribute(SUCCESS, "Refund processed: $50"));
+
+        verify(paymentService).refundOnlineBookingPayment("ORDER123");
+        verify(paymentService).markRefunded(reservation, payments);
+    }
+
+    @Test
+    void refund_shouldRedirectWithError_whenPayPalRefundFails() throws Exception {
+        var reservation = createReservation(ReservationStatus.CONFIRMED);
+        when(reservationService.findById(1L)).thenReturn(reservation);
+        var payments = List.of(createPayPalPayment(1L, "ORDER123", BigDecimal.valueOf(200)));
+        when(paymentService.getPaymentsByReservationId(1L)).thenReturn(payments);
+        when(paymentService.refundOnlineBookingPayment("ORDER123")).thenReturn(false);
+
+        mockMvc.perform(post("/receptionist/bookings/1/refund"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/receptionist/bookings/1"))
+                .andExpect(flash().attribute(ERROR, "PayPal refund failed for order ORDER123"));
+
+        verify(paymentService, never()).markRefunded(any(), any());
+    }
+
+    @Test
+    void refund_shouldRedirectWithError_whenReservationNotConfirmed() throws Exception {
+        var reservation = createReservation(ReservationStatus.PENDING);
+        when(reservationService.findById(1L)).thenReturn(reservation);
+
+        mockMvc.perform(post("/receptionist/bookings/1/refund"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/receptionist/bookings/1"))
+                .andExpect(flash().attribute(ERROR, "Only confirmed reservations can be refunded"));
+
+        verify(paymentService, never()).getPaymentsByReservationId(anyLong());
+    }
+
+    @Test
+    void refund_shouldRedirectWithError_whenNoPaymentsFound() throws Exception {
+        var reservation = createReservation(ReservationStatus.CONFIRMED);
+        when(reservationService.findById(1L)).thenReturn(reservation);
+        when(paymentService.getPaymentsByReservationId(1L)).thenReturn(List.of());
+
+        mockMvc.perform(post("/receptionist/bookings/1/refund"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/receptionist/bookings/1"))
+                .andExpect(flash().attribute(ERROR, "No payments found for this reservation"));
+    }
+
+    // ========== POST /{id}/refund/offline ==========
+
+    @Test
+    void refundOffline_shouldRedirectWithSuccess_whenConfirmed() throws Exception {
+        var reservation = createReservation(ReservationStatus.CONFIRMED);
+        when(reservationService.findById(1L)).thenReturn(reservation);
+        var payments = List.of(createCashPayment(1L, BigDecimal.valueOf(200)));
+        when(paymentService.getPaymentsByReservationId(1L)).thenReturn(payments);
+        when(paymentService.calculateRefund(reservation)).thenReturn(BigDecimal.valueOf(50));
+
+        mockMvc.perform(post("/receptionist/bookings/1/refund/offline"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/receptionist/bookings/1"))
+                .andExpect(flash().attribute(SUCCESS, "Offline refund processed: $50"));
+
+        verify(paymentService).markRefunded(reservation, payments);
+    }
+
+    @Test
+    void refundOffline_shouldRedirectWithError_whenNotConfirmed() throws Exception {
+        var reservation = createReservation(ReservationStatus.PENDING);
+        when(reservationService.findById(1L)).thenReturn(reservation);
+
+        mockMvc.perform(post("/receptionist/bookings/1/refund/offline"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/receptionist/bookings/1"))
+                .andExpect(flash().attribute(ERROR, "Only confirmed reservations can be refunded offline"));
     }
 }

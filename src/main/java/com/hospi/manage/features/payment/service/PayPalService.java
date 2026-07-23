@@ -128,7 +128,8 @@ public class PayPalService {
         return response.contains("\"status\":\"COMPLETED\"");
     }
 
-    private String readResponse(HttpURLConnection conn)
+    /** Read full response body from connection — package-private for testability. */
+    String readResponse(HttpURLConnection conn)
             throws IOException {
 
         InputStream is = conn.getResponseCode() >= 400
