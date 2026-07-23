@@ -11,7 +11,8 @@ import java.time.LocalDateTime;
  * JPA entity representing the assignment of a specific room to a reservation.
  */
 @Entity
-@Table(name = "room_assignments")
+@Table(name = "room_assignments",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"reservation_id", "room_id"}))
 @Getter
 @Setter
 public class RoomAssignment {
