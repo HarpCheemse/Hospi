@@ -36,7 +36,8 @@ public class AdminAuditLogController {
                 @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
                 @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
                 Model model) {
-        var paged = auditLogRepository.findFiltered(action, staffName, startDate, endDate,
+        var paged = auditLogRepository.findFiltered(action,
+                staffName != null ? staffName.toLowerCase() : null, startDate, endDate,
                 PageRequest.of(page, PAGE_SIZE));
         model.addAttribute("logs", paged);
         model.addAttribute("filterAction", action);

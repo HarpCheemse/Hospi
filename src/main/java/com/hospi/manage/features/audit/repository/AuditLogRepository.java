@@ -22,7 +22,7 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
     /** Return filtered, paginated audit log entries. */
     @Query("SELECT a FROM AuditLog a WHERE " +
            "(:action IS NULL OR a.action = :action) AND " +
-           "(:staffName IS NULL OR LOWER(a.staffName) LIKE LOWER(CONCAT('%', :staffName, '%'))) AND " +
+           "(:staffName IS NULL OR a.staffName LIKE CONCAT('%', :staffName, '%')) AND " +
            "(:startDate IS NULL OR a.createdAt >= :startDate) AND " +
            "(:endDate IS NULL OR a.createdAt <= :endDate) " +
            "ORDER BY a.createdAt DESC")
