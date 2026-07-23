@@ -157,11 +157,11 @@
                     </td>
 
                     <td class="px-4 py-3">
-                        <span th:switch="${b.status}"
+                        <span th:switch="${b.status.name()}"
                               class="text-xs font-medium">
                             <span th:case="'PENDING'" class="pill-warning">Pending</span>
                             <span th:case="'CONFIRMED'" class="pill-muted">Confirmed</span>
-                            <span th:case="*" class="pill-muted" th:text="${b.status}">Unknown</span>
+                            <span th:case="*" class="pill-muted" th:text="${b.status.name()}">Unknown</span>
                         </span>
                     </td>
 

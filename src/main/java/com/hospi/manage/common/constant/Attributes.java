@@ -84,5 +84,6 @@ public class Attributes {
     public static final String CURRENT_TYPE = "currentType";
     public static final String REMAINING_NIGHTS = "remainingNights";
     public static final String TOTAL_NIGHTS = "totalNights";
+    public static final String RECEIPT = "receipt";
 
 }

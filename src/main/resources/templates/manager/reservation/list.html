@@ -165,12 +165,13 @@
                             <span th:text="${#temporals.format(b.checkOutAt, 'dd MMM')}">18 Jun</span>
                         </td>
 
-                        <td class="px-4 py-3 text-sm text-muted-foreground">
-                            <th:block th:if="${not #lists.isEmpty(b.details())}">
-                                <span th:each="d, stat : ${b.details()}"
-                                      th:text="${d.roomTypeName}">Deluxe</span>
-                            </th:block>
-                            <span th:if="${#lists.isEmpty(b.details())}">—</span>
+                        <td class="px-4 py-3">
+                            <div th:if="${not #lists.isEmpty(b.details())}" class="flex flex-wrap gap-1">
+                                <span th:each="d : ${b.details()}"
+                                      class="pill-muted"
+                                      th:text="|${d.roomTypeName} x${d.roomCount}|">Deluxe x2</span>
+                            </div>
+                            <span th:if="${#lists.isEmpty(b.details())}" class="text-sm text-muted-foreground">—</span>
                         </td>
 
                         <td class="px-4 py-3">
