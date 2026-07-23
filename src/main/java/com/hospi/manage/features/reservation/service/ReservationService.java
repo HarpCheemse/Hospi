@@ -176,6 +176,12 @@ public class ReservationService {
                 "Booking for " + saved.getGuestName() + " (" + saved.getCheckInAt() + " to " + saved.getCheckOutAt() + ")"
         );
 
+        notificationService.notifyRole(
+                Role.MANAGER,
+                "New Walk-In Booking",
+                "Walk-in booking created for " + saved.getGuestName() + " (" + saved.getCheckInAt() + " to " + saved.getCheckOutAt() + ")"
+        );
+
         return saved;
     }
 
@@ -332,6 +338,12 @@ public class ReservationService {
                 "New Online Booking",
                 "Online booking confirmed for " + reservation.getGuestName() + " (" + reservation.getCheckInAt() + " to " + reservation.getCheckOutAt() + ")"
         );
+
+        notificationService.notifyRole(
+                Role.MANAGER,
+                "New Online Booking",
+                "Online booking confirmed for " + reservation.getGuestName() + " (" + reservation.getCheckInAt() + " to " + reservation.getCheckOutAt() + ")"
+        );
     }
 
     /** Confirm an expired reservation (cancelled by cleanup) and record the PayPal payment. */
@@ -357,6 +369,13 @@ public class ReservationService {
 
         notificationService.notifyRole(
                 Role.RECEPTIONIST,
+                "New Online Booking (Recovered)",
+                "Expired online booking recovered for " + reservation.getGuestName()
+                        + " (" + reservation.getCheckInAt() + " to " + reservation.getCheckOutAt() + ")"
+        );
+
+        notificationService.notifyRole(
+                Role.MANAGER,
                 "New Online Booking (Recovered)",
                 "Expired online booking recovered for " + reservation.getGuestName()
                         + " (" + reservation.getCheckInAt() + " to " + reservation.getCheckOutAt() + ")"
