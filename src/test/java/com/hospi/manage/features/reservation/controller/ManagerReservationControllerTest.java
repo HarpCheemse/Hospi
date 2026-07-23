@@ -7,6 +7,7 @@ import com.hospi.manage.features.payment.service.PaymentService;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.BookingSource;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
+import com.hospi.manage.features.reservation.service.ReceiptService;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.reservation.service.StayingGuestService;
 import org.junit.jupiter.api.Test;
@@ -48,6 +49,9 @@ class ManagerReservationControllerTest {
 
     @MockitoBean
     private NotificationService notificationService;
+
+    @MockitoBean
+    private ReceiptService receiptService;
 
     private Reservation aReservation(Long id) {
         Reservation r = new Reservation();

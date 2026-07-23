@@ -1,6 +1,7 @@
 package com.hospi.manage.features.reservation.controller;
 
 import com.hospi.manage.common.constant.Attributes;
+import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.payment.service.PaymentService;
 import com.hospi.manage.features.reservation.dto.response.ActiveBookingsView;
 import com.hospi.manage.features.reservation.dto.response.ReservationSummaryView;
@@ -8,6 +9,7 @@ import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.mapper.ManagerReservationMapper;
 import com.hospi.manage.features.reservation.mapper.ReservationMapper;
+import com.hospi.manage.features.reservation.service.ReceiptService;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.reservation.service.StayingGuestService;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +37,7 @@ public class ManagerReservationController {
     private final ReservationService reservationService;
     private final StayingGuestService stayingGuestService;
     private final PaymentService paymentService;
+    private final ReceiptService receiptService;
 
     private static final int PAGE_SIZE = 10;
 
@@ -125,6 +128,11 @@ public class ManagerReservationController {
         model.addAttribute(Attributes.NIGHTS, reservation.getCheckInAt() != null && reservation.getCheckOutAt() != null
                 ? ChronoUnit.DAYS.between(reservation.getCheckInAt(), reservation.getCheckOutAt())
                 : 0);
+        try {
+            model.addAttribute(Attributes.RECEIPT, receiptService.getReceiptDetail(id));
+        } catch (ResourceNotFoundException e) {
+            // No invoice yet — receipt section will not render
+        }
         return "manager/reservation/detail";
     }
 
