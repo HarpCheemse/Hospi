@@ -150,44 +150,6 @@
             </div>
         </section>
 
-        <!-- Booking Details -->
-        <section class="card-panel">
-            <div class="mb-4 flex items-center gap-2">
-                <img th:src="@{/assets/icons/receipt.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
-                <div>
-                    <h2 class="text-lg font-semibold text-foreground">Booking Details</h2>
-                    <p class="text-sm text-muted-foreground">Dates, pricing, and source</p>
-                </div>
-            </div>
-            <div class="mb-3 text-center">
-                <p class="text-sm text-muted-foreground">
-                    <span th:text="${#temporals.format(reservation.checkInAt, 'dd MMM yyyy')}">15 Jun</span>
-                    <span class="mx-2 text-foreground/30">&rarr;</span>
-                    <span th:text="${#temporals.format(reservation.checkOutAt, 'dd MMM yyyy')}">18 Jun</span>
-                </p>
-                <p class="text-xs text-muted-foreground" th:text="|${nights} night${nights != 1 ? 's' : ''}|">3 nights</p>
-            </div>
-            <div class="space-y-3 text-sm">
-                <div class="flex justify-between">
-                    <span class="text-muted-foreground">Check-In</span>
-                    <span class="font-medium text-foreground" th:text="${#temporals.format(reservation.checkInAt, 'dd MMM yyyy')}">15 Jun 2026</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-muted-foreground">Check-Out</span>
-                    <span class="font-medium text-foreground" th:text="${#temporals.format(reservation.checkOutAt, 'dd MMM yyyy')}">18 Jun 2026</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-muted-foreground">Source</span>
-                    <span class="font-medium text-foreground" th:text="${reservation.source}">ONLINE</span>
-                </div>
-                <div class="flex justify-between items-center pt-2 border-t border-border">
-                    <span class="text-muted-foreground">Total Price</span>
-                    <span class="text-lg font-bold text-primary"
-                          th:text="|$${#numbers.formatDecimal(reservation.totalPrice, 1, 2)}|">$960.00</span>
-                </div>
-            </div>
-        </section>
-
         <!-- Rooms (left, wider) -->
         <section class="card-panel col-span-2" th:if="${not #lists.isEmpty(reservation.details)}">
             <div class="mb-4 flex items-center gap-2">
@@ -221,8 +183,149 @@
             </div>
         </section>
 
-        <!-- Payments (right, narrow) -->
-        <section class="card-panel col-span-1" th:if="${not #lists.isEmpty(payments)}">
+        <!-- Registered Guests (left) -->
+        <section class="card-panel col-span-2" th:if="${reservation.status.name() == 'CONFIRMED'}">
+            <div class="mb-4 flex items-center gap-2">
+                <img th:src="@{/assets/icons/users.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                <div>
+                    <h2 class="text-lg font-semibold text-foreground">Registered Guests</h2>
+                    <p class="text-sm text-muted-foreground">Add guests staying under this booking before check-in</p>
+                </div>
+            </div>
+
+            <div th:if="${not #lists.isEmpty(guests)}" class="mb-4 overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="border-b border-border text-muted-foreground">
+                            <th class="pb-2 font-medium">Name</th>
+                            <th class="pb-2 font-medium">Date of Birth</th>
+                            <th class="pb-2 font-medium">Nationality</th>
+                            <th class="pb-2 text-right font-medium">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="g : ${guests}" class="border-b border-border/50">
+                            <td class="py-2 font-medium text-foreground" th:text="${g.guestName}">John Doe</td>
+                            <td class="py-2 text-muted-foreground" th:text="${#temporals.format(g.dateOfBirth, 'dd MMM yyyy')}">15 Jun 1990</td>
+                            <td class="py-2 text-muted-foreground" th:text="${g.nationality}">American</td>
+                            <td class="py-2 text-right">
+                                <form th:action="@{/receptionist/stays/{id}/manage/guests/{gid}/delete(id=${reservation.id}, gid=${g.id})}"
+                                      method="post" class="inline"
+                                      onsubmit="return confirm('Remove this guest?')">
+                                    <button type="submit" class="text-sm text-danger hover:opacity-80">Remove</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <form th:action="@{/receptionist/stays/{id}/manage/guests(id=${reservation.id})}"
+                  th:object="${guestForm}" method="post" class="grid grid-cols-3 gap-4">
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Name <span class="text-danger">*</span></label>
+                    <input type="text" th:field="*{guestName}" placeholder="Full name" class="input">
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Date of Birth <span class="text-danger">*</span></label>
+                    <input type="date" th:field="*{dateOfBirth}" class="input">
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Nationality</label>
+                    <input type="text" th:field="*{nationality}" placeholder="e.g. Vietnamese" class="input">
+                </div>
+                <div class="col-span-3">
+                    <button type="submit" class="btn btn-primary">Add Guest</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- RIGHT COLUMN -->
+        <div class="col-span-1 flex flex-col gap-6">
+
+            <section class="card-panel">
+                <div class="mb-4 flex items-center gap-2">
+                    <img th:src="@{/assets/icons/receipt.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div>
+                        <h2 class="text-lg font-semibold text-foreground">Booking Details</h2>
+                        <p class="text-sm text-muted-foreground">Dates, pricing, and source</p>
+                    </div>
+                </div>
+                <div class="mb-3 text-center">
+                    <p class="text-sm text-muted-foreground">
+                        <span th:text="${#temporals.format(reservation.checkInAt, 'dd MMM yyyy')}">15 Jun</span>
+                        <span class="mx-2 text-foreground/30">&rarr;</span>
+                        <span th:text="${#temporals.format(reservation.checkOutAt, 'dd MMM yyyy')}">18 Jun</span>
+                    </p>
+                    <p class="text-xs text-muted-foreground" th:text="|${nights} night${nights != 1 ? 's' : ''}|">3 nights</p>
+                </div>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-muted-foreground">Check-In</span>
+                        <span class="font-medium text-foreground" th:text="${#temporals.format(reservation.checkInAt, 'dd MMM yyyy')}">15 Jun 2026</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-muted-foreground">Check-Out</span>
+                        <span class="font-medium text-foreground" th:text="${#temporals.format(reservation.checkOutAt, 'dd MMM yyyy')}">18 Jun 2026</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-muted-foreground">Source</span>
+                        <span class="font-medium text-foreground" th:text="${reservation.source}">ONLINE</span>
+                    </div>
+                    <div class="flex justify-between items-center pt-2 border-t border-border">
+                        <span class="text-muted-foreground">Total Price</span>
+                        <span class="text-lg font-bold text-primary"
+                              th:text="|$${#numbers.formatDecimal(reservation.totalPrice, 1, 2)}|">$960.00</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card-panel">
+                <div class="mb-4 flex items-center gap-2">
+                    <img th:src="@{/assets/icons/door-open.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div>
+                        <h2 class="text-lg font-semibold text-foreground">Assigned Rooms</h2>
+                    </div>
+                </div>
+                <div th:if="${not #lists.isEmpty(assignedRooms)}" class="mb-3 space-y-2 text-sm">
+                    <div th:each="a : ${assignedRooms}" class="flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2">
+                        <span class="font-medium text-foreground" th:text="|Room ${a.room.roomNumber} (Floor ${a.room.floorNumber})|">201 (2)</span>
+                        <form th:action="@{/receptionist/stays/{id}/manage/rooms/{aid}/remove(id=${reservation.id}, aid=${a.id})}"
+                              method="post" class="inline"
+                              onsubmit="return confirm('Remove this room assignment?')">
+                            <button type="submit" class="text-xs text-danger hover:opacity-80">Remove</button>
+                        </form>
+                    </div>
+                </div>
+                <p th:if="${#lists.isEmpty(assignedRooms)}" class="mb-3 text-sm text-muted-foreground">No rooms assigned yet.</p>
+
+                <div th:if="${not #lists.isEmpty(availableRooms)}" x-data="{ assignOpen: false }">
+                    <button type="button" @click="assignOpen = true" class="btn btn-primary btn-sm w-full">Assign Room</button>
+                    <div x-show="assignOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
+                        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="assignOpen = false"></div>
+                        <div x-show="assignOpen" x-transition @click.stop
+                             class="relative mx-4 w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl">
+                            <h2 class="text-lg font-semibold text-foreground mb-4">Select a Room</h2>
+                            <div class="max-h-64 overflow-y-auto space-y-2">
+                                <th:block th:each="r : ${availableRooms}">
+                                    <form th:action="@{/receptionist/stays/{id}/manage/rooms(id=${reservation.id})}"
+                                          method="post" class="flex items-center justify-between rounded-xl border border-border px-4 py-3 hover:bg-accent/30 transition-colors">
+                                        <div>
+                                            <p class="font-medium text-foreground text-sm" th:text="|Room ${r.roomNumber} (Floor ${r.floorNumber})|">201 (2)</p>
+                                            <p class="text-xs text-muted-foreground" th:text="${r.roomTypeName}">Deluxe</p>
+                                        </div>
+                                        <input type="hidden" name="roomId" th:value="${r.id}">
+                                        <button type="submit" class="btn btn-primary btn-sm">Assign</button>
+                                    </form>
+                                </th:block>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p th:if="${#lists.isEmpty(availableRooms)}" class="text-sm text-muted-foreground mt-3">No vacant rooms available.</p>
+            </section>
+
+            <section class="card-panel" th:if="${not #lists.isEmpty(payments)}">
             <div class="mb-4 flex items-center gap-2">
                 <img th:src="@{/assets/icons/credit-card.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
                 <div>

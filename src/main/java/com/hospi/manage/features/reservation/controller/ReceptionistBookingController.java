@@ -4,12 +4,14 @@ import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.features.payment.service.PaymentService;
 import com.hospi.manage.features.reservation.dto.request.DateSearchForm;
 import com.hospi.manage.features.reservation.dto.request.OfflineBookingForm;
+import com.hospi.manage.features.reservation.dto.request.StayingGuestForm;
 import com.hospi.manage.features.reservation.dto.response.CreateDetailsView;
 import com.hospi.manage.features.reservation.dto.response.ReservationSummaryView;
 import com.hospi.manage.features.reservation.dto.response.RoomTypeAvailabilityView;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.mapper.ReservationMapper;
 import com.hospi.manage.features.reservation.service.ReservationService;
+import com.hospi.manage.features.reservation.service.RoomAssignmentService;
 import com.hospi.manage.features.reservation.service.RoomAvailabilityService;
 import com.hospi.manage.features.reservation.service.StayingGuestService;
 import com.hospi.manage.features.reservation.validation.DateSearchValidator;
@@ -49,6 +51,7 @@ public class ReceptionistBookingController {
     private final RoomAvailabilityService roomAvailabilityService;
     private final PaymentService paymentService;
     private final StayingGuestService stayingGuestService;
+    private final RoomAssignmentService roomAssignmentService;
 
     private static final int PAGE_SIZE = 10;
 
@@ -119,6 +122,9 @@ public class ReceptionistBookingController {
         model.addAttribute(NIGHTS, reservation.getCheckInAt() != null && reservation.getCheckOutAt() != null
                 ? ChronoUnit.DAYS.between(reservation.getCheckInAt(), reservation.getCheckOutAt())
                 : 0);
+        model.addAttribute("guestForm", new StayingGuestForm(null, null, null));
+        model.addAttribute("assignedRooms", roomAssignmentService.getAssignedRooms(id));
+        model.addAttribute("availableRooms", roomAssignmentService.getAvailableRooms(id));
         return "receptionist/reservation/detail";
     }
 
