@@ -4,12 +4,15 @@ import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.features.audit.repository.AuditLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.time.LocalDateTime;
 
 /** Controller for the admin audit log listing page. */
 @Controller
@@ -27,9 +30,19 @@ public class AdminAuditLogController {
     }
 
     @GetMapping
-    String list(@RequestParam(name = "page", defaultValue = "0") int page, Model model) {
-        var paged = auditLogRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(page, PAGE_SIZE));
+    String list(@RequestParam(name = "page", defaultValue = "0") int page,
+                @RequestParam(required = false) String action,
+                @RequestParam(required = false) String staffName,
+                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+                Model model) {
+        var paged = auditLogRepository.findFiltered(action, staffName, startDate, endDate,
+                PageRequest.of(page, PAGE_SIZE));
         model.addAttribute("logs", paged);
+        model.addAttribute("filterAction", action);
+        model.addAttribute("filterStaff", staffName);
+        model.addAttribute("filterStart", startDate);
+        model.addAttribute("filterEnd", endDate);
         return "admin/audit-log/list";
     }
 }

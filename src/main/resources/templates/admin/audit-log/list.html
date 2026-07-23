@@ -28,6 +28,41 @@
         </div>
     </header>
 
+    <form th:action="@{/admin/audit-logs}" method="get" class="mb-6 card-panel">
+        <div class="flex flex-wrap gap-3 items-end">
+            <div class="flex-1 min-w-0">
+                <label class="block text-xs text-muted-foreground mb-1">Action</label>
+                <select name="action" class="w-full rounded-lg border border-input bg-surface px-3 py-2 text-sm">
+                    <option value="">All Actions</option>
+                    <option value="CREATE" th:selected="${filterAction == 'CREATE'}">Create</option>
+                    <option value="UPDATE" th:selected="${filterAction == 'UPDATE'}">Update</option>
+                    <option value="DELETE" th:selected="${filterAction == 'DELETE'}">Delete</option>
+                    <option value="CHECKIN" th:selected="${filterAction == 'CHECKIN'}">Check-In</option>
+                    <option value="CHECKOUT" th:selected="${filterAction == 'CHECKOUT'}">Check-Out</option>
+                </select>
+            </div>
+            <div class="flex-1 min-w-0">
+                <label class="block text-xs text-muted-foreground mb-1">Staff Name</label>
+                <input type="text" name="staffName" th:value="${filterStaff}" placeholder="Search by name..."
+                       class="w-full rounded-lg border border-input bg-surface px-3 py-2 text-sm" />
+            </div>
+            <div class="flex-1 min-w-0">
+                <label class="block text-xs text-muted-foreground mb-1">From Date</label>
+                <input type="datetime-local" name="startDate" th:value="${filterStart}" 
+                       class="w-full rounded-lg border border-input bg-surface px-3 py-2 text-sm" />
+            </div>
+            <div class="flex-1 min-w-0">
+                <label class="block text-xs text-muted-foreground mb-1">To Date</label>
+                <input type="datetime-local" name="endDate" th:value="${filterEnd}"
+                       class="w-full rounded-lg border border-input bg-surface px-3 py-2 text-sm" />
+            </div>
+            <div class="flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+                <a th:href="@{/admin/audit-logs}" class="btn btn-ghost btn-sm">Reset</a>
+            </div>
+        </div>
+    </form>
+
     <section class="card">
         <div class="overflow-x-auto">
             <table class="w-full">

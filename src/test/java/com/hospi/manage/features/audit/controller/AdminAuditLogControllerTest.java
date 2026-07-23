@@ -30,7 +30,7 @@ class AdminAuditLogControllerTest {
 
     @Test
     void list_shouldRender() throws Exception {
-        when(auditLogRepository.findAllByOrderByCreatedAtDesc(any()))
+        when(auditLogRepository.findFiltered(any(), any(), any(), any(), any()))
                 .thenReturn(org.springframework.data.domain.Page.empty());
 
         mockMvc.perform(get("/admin/audit-logs"))
