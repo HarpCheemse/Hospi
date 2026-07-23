@@ -37,6 +37,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
      */
     @Query("""
                 select r from Reservation r
+                left join fetch r.details d
+                left join fetch d.roomType
                 where r.status <> 'CANCELLED'
                 and r.checkInAt < :checkOut
                 and r.checkOutAt > :checkIn
@@ -48,6 +50,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
      */
     @Query("""
                 SELECT r FROM Reservation r
+                left join fetch r.details d
+                left join fetch d.roomType
                 WHERE r.status IN ('CONFIRMED', 'CHECKED_IN')
                 AND r.id <> :excludedId
                 AND r.checkInAt < :end
