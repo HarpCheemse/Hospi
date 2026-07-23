@@ -131,7 +131,7 @@ public class ManagerReservationController {
     @PostMapping("/{id}/cancel")
     String cancel(@PathVariable Long id, RedirectAttributes redirect) {
         try {
-            reservationService.cancelPendingReservation(id);
+            reservationService.cancelReservation(id);
             redirect.addFlashAttribute(Attributes.SUCCESS, "Reservation cancelled.");
         } catch (IllegalStateException e) {
             redirect.addFlashAttribute(Attributes.ERROR, e.getMessage());

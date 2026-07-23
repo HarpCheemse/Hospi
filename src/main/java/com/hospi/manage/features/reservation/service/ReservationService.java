@@ -347,15 +347,13 @@ public class ReservationService {
         );
     }
 
-    /** Cancel a pending reservation. */
+    /** Cancel a PENDING or CONFIRMED reservation. */
     @Transactional
-    public void cancelPendingReservation(Long id) {
+    public void cancelReservation(Long id) {
         Reservation reservation = findById(id);
-        if (reservation.getStatus() != ReservationStatus.PENDING) {
-            throw new IllegalStateException("Only PENDING reservations can be cancelled");
-        }
-        if (reservation.getSource() == BookingSource.ONLINE) {
-            throw new IllegalStateException("Online pending reservations cannot be cancelled manually");
+        if (reservation.getStatus() != ReservationStatus.PENDING
+                && reservation.getStatus() != ReservationStatus.CONFIRMED) {
+            throw new IllegalStateException("Only PENDING or CONFIRMED reservations can be cancelled");
         }
         reservation.setStatus(ReservationStatus.CANCELLED);
         reservationRepository.save(reservation);

@@ -282,7 +282,7 @@ class BookingFlowControllerTest {
         mockMvc.perform(get("/book/pay/cancel").param("key",
                 "some-key")).andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/book/pay"));
 
-        verify(reservationService).cancelPendingReservation(42L);
+        verify(reservationService).cancelReservation(42L);
     }
 
     @Test
@@ -290,7 +290,7 @@ class BookingFlowControllerTest {
         mockMvc.perform(get("/book/pay/cancel")).andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/book/pay"));
 
         verify(reservationService,
-                never()).cancelPendingReservation(any());
+                never()).cancelReservation(any());
     }
 
     @Test
@@ -390,7 +390,7 @@ class BookingFlowControllerTest {
                 "true").sessionAttr("pendingPaymentKey",
                 "some-key")).andExpect(status().isOk()).andExpect(view().name("guest/booking/book")).andExpect(model().attributeExists(FORM));
 
-        verify(reservationService).cancelPendingReservation(reservation.getId());
+        verify(reservationService).cancelReservation(reservation.getId());
     }
 
     @Test

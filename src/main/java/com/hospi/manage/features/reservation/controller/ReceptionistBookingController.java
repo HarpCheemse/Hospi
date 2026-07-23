@@ -17,6 +17,7 @@ import com.hospi.manage.features.reservation.validation.OfflineBookingFormValida
 import com.hospi.manage.features.room.dto.response.RoomSelection;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
@@ -39,6 +40,7 @@ import static com.hospi.manage.common.constant.Attributes.RESERVATION;
 @Controller
 @RequestMapping("/receptionist/bookings")
 @RequiredArgsConstructor
+@Slf4j
 public class ReceptionistBookingController {
 
     private final ReservationService reservationService;
@@ -171,6 +173,71 @@ public class ReceptionistBookingController {
         var reservation = reservationService.createReservation(form);
         redirect.addFlashAttribute(Attributes.SUCCESS, "Offline booking created successfully.");
         return "redirect:/receptionist/bookings/" + reservation.getId();
+    }
+
+    @PostMapping("/{id}/cancel")
+    String cancel(@PathVariable Long id, RedirectAttributes redirect) {
+        try {
+            reservationService.cancelReservation(id);
+            redirect.addFlashAttribute(Attributes.SUCCESS, "Reservation cancelled.");
+        } catch (IllegalStateException e) {
+            log.warn("Cancel failed for reservation {}: {}", id, e.getMessage());
+            redirect.addFlashAttribute(Attributes.ERROR, e.getMessage());
+        }
+        return "redirect:/receptionist/bookings/" + id;
+    }
+
+    @PostMapping("/{id}/refund")
+    String refund(@PathVariable Long id, RedirectAttributes redirect) {
+        var reservation = reservationService.findById(id);
+        if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
+            redirect.addFlashAttribute(Attributes.ERROR, "Only confirmed reservations can be refunded");
+            return "redirect:/receptionist/bookings/" + id;
+        }
+        var payments = paymentService.getPaymentsByReservationId(id);
+        if (payments.isEmpty()) {
+            redirect.addFlashAttribute(Attributes.ERROR, "No payments found for this reservation");
+            return "redirect:/receptionist/bookings/" + id;
+        }
+
+        for (var p : payments) {
+            if (p.getRefundedAt() != null) continue;
+            if (p.getPaymentMethod() != null && p.getPaymentMethod().name().equals("PAYPAL") && p.getOrderId() != null) {
+                try {
+                    boolean ok = paymentService.refundOnlineBookingPayment(p.getOrderId());
+                    if (!ok) {
+                        log.warn("PayPal refund returned false for order {}", p.getOrderId());
+                        redirect.addFlashAttribute(Attributes.ERROR, "PayPal refund failed for order " + p.getOrderId());
+                        return "redirect:/receptionist/bookings/" + id;
+                    }
+                } catch (Exception e) {
+                    log.warn("PayPal refund failed for order {}: {}", p.getOrderId(), e.getMessage());
+                    redirect.addFlashAttribute(Attributes.ERROR, "PayPal refund error: " + e.getMessage());
+                    return "redirect:/receptionist/bookings/" + id;
+                }
+            }
+        }
+
+        paymentService.markRefunded(reservation, payments);
+        redirect.addFlashAttribute(Attributes.SUCCESS, "Refund processed: $" + paymentService.calculateRefund(reservation));
+        return "redirect:/receptionist/bookings/" + id;
+    }
+
+    @PostMapping("/{id}/refund/offline")
+    String refundOffline(@PathVariable Long id, RedirectAttributes redirect) {
+        var reservation = reservationService.findById(id);
+        if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
+            redirect.addFlashAttribute(Attributes.ERROR, "Only confirmed reservations can be refunded offline");
+            return "redirect:/receptionist/bookings/" + id;
+        }
+        var payments = paymentService.getPaymentsByReservationId(id);
+        if (payments.isEmpty()) {
+            redirect.addFlashAttribute(Attributes.ERROR, "No payments found for this reservation");
+            return "redirect:/receptionist/bookings/" + id;
+        }
+        paymentService.markRefunded(reservation, payments);
+        redirect.addFlashAttribute(Attributes.SUCCESS, "Offline refund processed: $" + paymentService.calculateRefund(reservation));
+        return "redirect:/receptionist/bookings/" + id;
     }
 
     private List<RoomTypeAvailabilityView> getAvailabilityView(LocalDate checkInAt, LocalDate checkOutAt) {
