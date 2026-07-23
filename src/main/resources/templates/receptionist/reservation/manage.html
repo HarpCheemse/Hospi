@@ -479,14 +479,14 @@
                             <tr class="border-b border-border text-muted-foreground text-xs">
                                 <th class="px-4 py-2 font-medium text-left">Room Type</th>
                                 <th class="px-4 py-2 font-medium text-right">Qty</th>
-                                <th class="px-4 py-2 font-medium text-right"></th>
+                                <th class="px-4 py-2 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="d : ${view.reservation().details}"
                                 class="border-b border-border/50">
                                 <td class="px-4 py-2 font-medium text-foreground" th:text="${d.roomTypeName}">Deluxe Double</td>
-                                <td class="px-4 py-2 text-center text-muted-foreground" th:text="${d.roomCount}">2</td>
+                                <td class="px-4 py-2 text-right text-muted-foreground" th:text="${d.roomCount}">2</td>
                                 <td class="px-4 py-2 text-right">
                                     <a th:href="@{/receptionist/stays/{id}/swap(id=${view.reservation().id}, from=${d.roomTypeId})}"
                                        class="text-xs text-primary hover:underline">Swap</a>

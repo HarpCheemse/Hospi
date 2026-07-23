@@ -4,12 +4,16 @@ import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.features.payment.service.PaymentService;
 import com.hospi.manage.features.reservation.dto.request.DateSearchForm;
 import com.hospi.manage.features.reservation.dto.request.OfflineBookingForm;
+import com.hospi.manage.features.reservation.dto.request.StayingGuestForm;
+import com.hospi.manage.features.reservation.dto.response.AvailableRoomView;
 import com.hospi.manage.features.reservation.dto.response.CreateDetailsView;
 import com.hospi.manage.features.reservation.dto.response.ReservationSummaryView;
+import com.hospi.manage.features.reservation.dto.response.RoomAssignmentView;
 import com.hospi.manage.features.reservation.dto.response.RoomTypeAvailabilityView;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.mapper.ReservationMapper;
 import com.hospi.manage.features.reservation.service.ReservationService;
+import com.hospi.manage.features.reservation.service.RoomAssignmentService;
 import com.hospi.manage.features.reservation.service.RoomAvailabilityService;
 import com.hospi.manage.features.reservation.service.StayingGuestService;
 import com.hospi.manage.features.reservation.validation.DateSearchValidator;
@@ -49,6 +53,7 @@ public class ReceptionistBookingController {
     private final RoomAvailabilityService roomAvailabilityService;
     private final PaymentService paymentService;
     private final StayingGuestService stayingGuestService;
+    private final RoomAssignmentService roomAssignmentService;
 
     private static final int PAGE_SIZE = 10;
 
@@ -119,6 +124,16 @@ public class ReceptionistBookingController {
         model.addAttribute(NIGHTS, reservation.getCheckInAt() != null && reservation.getCheckOutAt() != null
                 ? ChronoUnit.DAYS.between(reservation.getCheckInAt(), reservation.getCheckOutAt())
                 : 0);
+        model.addAttribute("guestForm", new StayingGuestForm(null, null, null));
+        var assignedRooms = roomAssignmentService.getAssignedRooms(id).stream()
+                .map(RoomAssignmentView::from).toList();
+        var availableRooms = roomAssignmentService.getAvailableRooms(id).stream()
+                .map(AvailableRoomView::from).toList();
+        model.addAttribute("assignedRooms", assignedRooms);
+        model.addAttribute("availableRooms", availableRooms);
+        model.addAttribute("assignedCounts", assignedRooms.stream()
+                .collect(java.util.stream.Collectors.groupingBy(
+                        RoomAssignmentView::roomTypeId, java.util.stream.Collectors.summingInt(a -> 1))));
         return "receptionist/reservation/detail";
     }
 
@@ -237,6 +252,43 @@ public class ReceptionistBookingController {
         }
         paymentService.markRefunded(reservation, payments);
         redirect.addFlashAttribute(Attributes.SUCCESS, "Offline refund processed: $" + paymentService.calculateRefund(reservation));
+        return "redirect:/receptionist/bookings/" + id;
+    }
+
+    @PostMapping("/{id}/guests/add")
+    String addGuest(@PathVariable Long id, @Valid @ModelAttribute("guestForm") StayingGuestForm form,
+                    BindingResult binding, Model model, RedirectAttributes redirect) {
+        if (binding.hasErrors()) {
+            redirect.addFlashAttribute(Attributes.ERROR, "Please fill in all required fields");
+            return "redirect:/receptionist/bookings/" + id;
+        }
+        stayingGuestService.addGuest(id, form);
+        redirect.addFlashAttribute(Attributes.SUCCESS, "Guest added successfully.");
+        return "redirect:/receptionist/bookings/" + id;
+    }
+
+    @PostMapping("/{id}/guests/{guestId}/delete")
+    String deleteGuest(@PathVariable Long id, @PathVariable Long guestId, RedirectAttributes redirect) {
+        stayingGuestService.deleteGuest(id, guestId);
+        redirect.addFlashAttribute(Attributes.SUCCESS, "Guest removed successfully.");
+        return "redirect:/receptionist/bookings/" + id;
+    }
+
+    @PostMapping("/{id}/rooms/assign")
+    String assignRoom(@PathVariable Long id, @RequestParam Long roomId, RedirectAttributes redirect) {
+        try {
+            roomAssignmentService.assignRoom(id, roomId);
+            redirect.addFlashAttribute(Attributes.SUCCESS, "Room assigned successfully.");
+        } catch (IllegalStateException e) {
+            redirect.addFlashAttribute(Attributes.ERROR, e.getMessage());
+        }
+        return "redirect:/receptionist/bookings/" + id;
+    }
+
+    @PostMapping("/{id}/rooms/{assignmentId}/remove")
+    String removeRoom(@PathVariable Long id, @PathVariable Long assignmentId, RedirectAttributes redirect) {
+        roomAssignmentService.removeAssignment(id, assignmentId);
+        redirect.addFlashAttribute(Attributes.SUCCESS, "Room assignment removed successfully.");
         return "redirect:/receptionist/bookings/" + id;
     }
 
