@@ -33,8 +33,8 @@ public class AdminAuditLogController {
     String list(@RequestParam(name = "page", defaultValue = "0") int page,
                 @RequestParam(required = false) String action,
                 @RequestParam(required = false) String staffName,
-                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+                @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime startDate,
+                @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime endDate,
                 Model model) {
         var paged = auditLogRepository.findFiltered(action,
                 staffName != null ? staffName.toLowerCase() : null, startDate, endDate,
