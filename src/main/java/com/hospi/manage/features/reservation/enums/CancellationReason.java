@@ -9,5 +9,7 @@ public enum CancellationReason {
     /** Guest requested cancellation. */
     GUEST_CANCELLED,
     /** Staff cancelled the reservation. */
-    STAFF_CANCELLED
+    STAFF_CANCELLED,
+    /** Guest did not check in on the arrival date. */
+    NO_SHOW
 }
