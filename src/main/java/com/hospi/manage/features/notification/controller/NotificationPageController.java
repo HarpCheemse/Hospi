@@ -13,12 +13,10 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -58,11 +56,5 @@ public class NotificationPageController {
         notificationService.markAllRead(principal.getAccount().getId());
         redirectAttributes.addFlashAttribute(Attributes.SUCCESS, "All notifications marked as read.");
         return "redirect:/notifications";
-    }
-
-    @GetMapping("/unread-count")
-    @ResponseBody
-    public ResponseEntity<Integer> unreadCount(@AuthenticationPrincipal AccountPrincipal principal) {
-        return ResponseEntity.ok(notificationService.getUnreadCount(principal.getAccount().getId()));
     }
 }

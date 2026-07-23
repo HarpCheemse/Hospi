@@ -87,14 +87,7 @@
 
             </div>
 
-            <span class="pill-notification"
-                  x-data="{ count: [[${unreadNotificationCount}]] }"
-                  x-init="setInterval(async () => {
-                    const r = await fetch('/notifications/unread-count');
-                    count = (await r.json()).body;
-                  }, 30000)"
-                  x-show="count > 0"
-                  x-text="count">0</span>
+            <span class="pill-notification" th:if="${unreadNotificationCount > 0}" th:text="${unreadNotificationCount}">0</span>
 
         </a>
 

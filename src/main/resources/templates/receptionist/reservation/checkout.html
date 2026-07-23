@@ -12,6 +12,7 @@
 
 <div th:replace="~{/fragments/receptionist-sidebar :: sidebar}"></div>
 
+<!-- Alpine.js component scope: checkoutPage() provides all reactive state -->
 <main class="staff-page" x-data="checkoutPage()">
 
     <div th:replace="~{fragments/components/toast :: toast}"></div>
@@ -31,6 +32,7 @@
         </div>
     </header>
 
+    <!-- th:object binds to CheckoutForm -->
     <form th:action="@{/receptionist/stays/{id}/checkout(id=${view.reservation.id})}"
           th:object="${form}"
           method="post"
@@ -96,6 +98,7 @@
                     <span class="font-medium text-success" th:text="|-${#numbers.formatDecimal(view.depositPaid, 1, 2)}|">-$200.00</span>
                 </div>
 
+                <!-- Late fee: x-show + x-model toggle -->
                 <div class="border-t border-border pt-4" x-show="showLateFee">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
@@ -151,6 +154,7 @@
         <!-- CONFIRM SECTION -->
         <section class="card">
             <div class="p-6 flex items-center justify-end gap-3">
+                <!-- Opens confirmation modal on click (validates form first) -->
                 <button type="button"
                         @click="if ($el.form.reportValidity()) checkoutModalOpen = true"
                         class="btn btn-primary btn-lg">
@@ -159,8 +163,9 @@
             </div>
         </section>
 
-        <!-- CONFIRM MODAL -->
+        <!-- Confirm modal — requires "I confirm" checkbox before submit -->
         <div x-show="checkoutModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
+            <!-- Click backdrop to close -->
             <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="checkoutModalOpen = false"></div>
             <div x-show="checkoutModalOpen"
                  x-transition:enter="transition ease-out duration-200"
@@ -182,6 +187,7 @@
                     Complete the check-out for <strong class="text-foreground" th:text="${view.reservation.guestName}">John Doe</strong>.
                 </p>
                 <p class="mt-2 text-sm text-muted-foreground">This action cannot be undone.</p>
+                <!-- Must be checked to enable confirm button -->
                 <div class="mt-5 rounded-xl border border-border bg-background p-4">
                     <label class="flex items-start gap-3 cursor-pointer">
                         <input type="checkbox" x-model="checkoutConfirmed" class="mt-0.5 h-4 w-4 accent-primary rounded">
@@ -190,6 +196,7 @@
                 </div>
                 <div class="mt-6 flex justify-end gap-3">
                     <button type="button" @click="checkoutModalOpen = false" class="btn btn-secondary">Cancel</button>
+                    <!-- Disabled until confirmation checkbox is checked -->
                     <button type="button"
                             @click="if (checkoutConfirmed) $el.form.submit()"
                             :class="checkoutConfirmed ? 'btn btn-primary' : 'btn btn-primary opacity-50 cursor-not-allowed'">
@@ -204,6 +211,9 @@
 </main>
 
 <script th:inline="javascript">
+    /*
+     * Alpine.js component — late fee toggle, remaining due calculation, confirmation modal.
+     */
     function checkoutPage() {
         return {
             applyLateFee: /*[[${form?.applyLateCheckoutFee()}]]*/ false,

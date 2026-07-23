@@ -135,7 +135,7 @@ public class RoomAssignmentService {
                 .collect(Collectors.joining(", "));
     }
 
-    /** Set all rooms assigned to this reservation to VACANT during checkout. */
+    /** Free all rooms assigned to this reservation by setting them to VACANT. */
     public void vacateAllReservationRooms(Long reservationId) {
         List<RoomAssignment> assignments = roomAssignmentRepository
                 .findByReservationIdOrderByAssignedAtAsc(reservationId);
