@@ -41,6 +41,8 @@ public class ReservationService {
     private final PaymentRepository paymentRepository;
     private final RoomAvailabilityService roomAvailabilityService;
     private final NotificationService notificationService;
+    private final StayingGuestService stayingGuestService;
+    private final RoomAssignmentService roomAssignmentService;
 
     /** Find all reservations with the given status, ordered by check-in date descending. */
     public List<Reservation> findByStatus(ReservationStatus status) {
@@ -201,6 +203,20 @@ public class ReservationService {
             if (!bookingCode.equals(reservation.getConfirmationCode())) {
                 throw new IllegalStateException("Invalid booking code");
             }
+        }
+
+        int guestCount = stayingGuestService.getGuestCount(reservationId);
+        if (guestCount < 1) {
+            throw new IllegalStateException("At least one staying guest must be registered before check-in");
+        }
+
+        int assignedRooms = roomAssignmentService.getAssignedRoomCount(reservationId);
+        int requiredRooms = reservation.getDetails().stream()
+                .mapToInt(ReservationDetail::getRoomCount)
+                .sum();
+        if (assignedRooms < requiredRooms) {
+            throw new IllegalStateException(
+                    "All rooms must be assigned before check-in (" + assignedRooms + " of " + requiredRooms + " assigned)");
         }
 
         reservation.setStatus(ReservationStatus.CHECKED_IN);

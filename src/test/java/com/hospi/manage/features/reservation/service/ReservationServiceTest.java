@@ -43,6 +43,12 @@ class ReservationServiceTest {
     @Mock
     private com.hospi.manage.features.notification.service.NotificationService notificationService;
 
+    @Mock
+    private StayingGuestService stayingGuestService;
+
+    @Mock
+    private RoomAssignmentService roomAssignmentService;
+
     @InjectMocks
     private ReservationService reservationService;
 
@@ -198,6 +204,17 @@ class ReservationServiceTest {
 
     // --- checkIn ---
 
+    private void mockCheckInPreconditions() {
+        when(stayingGuestService.getGuestCount(1L)).thenReturn(1);
+        when(roomAssignmentService.getAssignedRoomCount(1L)).thenReturn(2);
+    }
+
+    private ReservationDetail aDetail(int roomCount) {
+        ReservationDetail d = new ReservationDetail();
+        d.setRoomCount(roomCount);
+        return d;
+    }
+
     @Test
     void checkIn_shouldSucceed_whenConfirmedAndOffline() {
         Reservation reservation = new Reservation();
@@ -206,9 +223,11 @@ class ReservationServiceTest {
         reservation.setSource(BookingSource.OFFLINE);
         reservation.setCheckInAt(LocalDate.now());
         reservation.setCheckOutAt(LocalDate.now().plusDays(1));
+        reservation.setDetails(List.of(aDetail(2)));
 
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
         when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        mockCheckInPreconditions();
 
         Reservation result = reservationService.checkIn(1L, LocalDate.now(), null, "receptionist");
 
@@ -241,9 +260,11 @@ class ReservationServiceTest {
         reservation.setConfirmationCode("HSP-ABC123");
         reservation.setCheckInAt(LocalDate.now());
         reservation.setCheckOutAt(LocalDate.now().plusDays(1));
+        reservation.setDetails(List.of(aDetail(2)));
 
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
         when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        mockCheckInPreconditions();
 
         Reservation result = reservationService.checkIn(1L, LocalDate.now(), "HSP-ABC123", "receptionist");
 
@@ -291,6 +312,44 @@ class ReservationServiceTest {
 
         assertThrows(ResourceNotFoundException.class,
                 () -> reservationService.checkIn(999L, LocalDate.now(), null, "receptionist"));
+    }
+
+    @Test
+    void checkIn_shouldThrow_whenNoGuests() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setStatus(ReservationStatus.CONFIRMED);
+        reservation.setSource(BookingSource.OFFLINE);
+        reservation.setCheckInAt(LocalDate.now());
+        reservation.setCheckOutAt(LocalDate.now().plusDays(1));
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+        when(stayingGuestService.getGuestCount(1L)).thenReturn(0);
+
+        assertThrows(IllegalStateException.class,
+                () -> reservationService.checkIn(1L, LocalDate.now(), null, "receptionist"));
+
+        verify(reservationRepository, never()).save(any());
+    }
+
+    @Test
+    void checkIn_shouldThrow_whenRoomsNotAssigned() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setStatus(ReservationStatus.CONFIRMED);
+        reservation.setSource(BookingSource.OFFLINE);
+        reservation.setCheckInAt(LocalDate.now());
+        reservation.setCheckOutAt(LocalDate.now().plusDays(1));
+        reservation.setDetails(List.of(aDetail(2)));
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+        when(stayingGuestService.getGuestCount(1L)).thenReturn(1);
+        when(roomAssignmentService.getAssignedRoomCount(1L)).thenReturn(1);
+
+        assertThrows(IllegalStateException.class,
+                () -> reservationService.checkIn(1L, LocalDate.now(), null, "receptionist"));
+
+        verify(reservationRepository, never()).save(any());
     }
 
     // --- extendStay ---
