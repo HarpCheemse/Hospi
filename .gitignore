@@ -39,3 +39,13 @@ src/main/resources/static/css/app.css
 docs/SDS.md
 docs/tables.sql
 docs/srs/
+docs/sds/
+docs/database/
+docs/test/
+docs/weekly_report/
+docs/ai_usage/
+docs/eval/
+docs/known-gaps.md
+docs/~*
+docs/*.xlsx
+src/main/resources/static/assets/images/

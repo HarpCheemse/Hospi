@@ -82,7 +82,7 @@ public class BookingFlowController {
             try {
                 Reservation r = reservationService.findByPaymentIdempotencyKey(tempKey);
                 if (r.getStatus() == ReservationStatus.PENDING) {
-                    reservationService.cancelPendingReservation(r.getId());
+                    reservationService.cancelReservation(r.getId());
                 }
             } catch (ResourceNotFoundException e) {
                 // key doesn't match any reservation, nothing to cancel
@@ -466,7 +466,7 @@ public class BookingFlowController {
             try {
                 Reservation r = reservationService.findByPaymentIdempotencyKey(tempKey);
                 if (r.getStatus() == ReservationStatus.PENDING) {
-                    reservationService.cancelPendingReservation(r.getId());
+                    reservationService.cancelReservation(r.getId());
                 }
             } catch (ResourceNotFoundException e) {
                 // key doesn't match any reservation, nothing to cancel

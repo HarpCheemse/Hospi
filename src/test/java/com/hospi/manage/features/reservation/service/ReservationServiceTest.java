@@ -469,34 +469,48 @@ class ReservationServiceTest {
                 () -> reservationService.findById(999L));
     }
 
-    // --- cancelPendingReservation ---
+    // --- cancelReservation ---
 
     @Test
-    void cancelPendingReservation_shouldCancel_whenPending() {
+    void cancelReservation_shouldCancel_whenPending() {
         Reservation reservation = new Reservation();
         reservation.setId(1L);
         reservation.setStatus(ReservationStatus.PENDING);
 
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
 
-        reservationService.cancelPendingReservation(1L);
+        reservationService.cancelReservation(1L);
 
         assertEquals(ReservationStatus.CANCELLED, reservation.getStatus());
         verify(reservationRepository).save(reservation);
     }
 
     @Test
-    void cancelPendingReservation_shouldThrow_whenNotPending() {
+    void cancelReservation_shouldThrow_whenCheckedIn() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setStatus(ReservationStatus.CHECKED_IN);
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+
+        assertThrows(IllegalStateException.class,
+                () -> reservationService.cancelReservation(1L));
+
+        verify(reservationRepository, never()).save(any());
+    }
+
+    @Test
+    void cancelReservation_shouldCancel_whenConfirmed() {
         Reservation reservation = new Reservation();
         reservation.setId(1L);
         reservation.setStatus(ReservationStatus.CONFIRMED);
 
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
 
-        assertThrows(IllegalStateException.class,
-                () -> reservationService.cancelPendingReservation(1L));
+        reservationService.cancelReservation(1L);
 
-        verify(reservationRepository, never()).save(any());
+        assertEquals(ReservationStatus.CANCELLED, reservation.getStatus());
+        verify(reservationRepository).save(reservation);
     }
 
     // --- confirmAndAddPayment ---

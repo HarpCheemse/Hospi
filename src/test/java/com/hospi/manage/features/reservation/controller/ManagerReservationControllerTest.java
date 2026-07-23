@@ -5,6 +5,7 @@ import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.payment.entity.Payment;
 import com.hospi.manage.features.payment.service.PaymentService;
 import com.hospi.manage.features.reservation.entity.Reservation;
+import com.hospi.manage.features.reservation.enums.BookingSource;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.reservation.service.StayingGuestService;
@@ -55,6 +56,7 @@ class ManagerReservationControllerTest {
         r.setGuestEmail("john@email.com");
         r.setTotalPrice(BigDecimal.valueOf(500));
         r.setStatus(ReservationStatus.CONFIRMED);
+        r.setSource(BookingSource.OFFLINE);
         return r;
     }
 
@@ -196,7 +198,7 @@ class ManagerReservationControllerTest {
     @Test
     void cancel_shouldRedirectWithError_whenNotPending() throws Exception {
         doThrow(new IllegalStateException("Only PENDING reservations can be cancelled"))
-                .when(reservationService).cancelPendingReservation(1L);
+                .when(reservationService).cancelReservation(1L);
 
         mockMvc.perform(post("/manager/reservations/1/cancel").with(csrf()))
                 .andExpect(status().is3xxRedirection())
