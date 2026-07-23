@@ -27,18 +27,12 @@ public class LoginController {
             @RequestParam(value = "logout", required = false) String logout,
             Model model
     ) {
-        accountService.rehashAllPasswords("123");
-
         if (error != null) {
-            model.addAttribute("error",
-                    "Invalid email or password");
+            model.addAttribute("error", "Invalid email or password");
         }
-
         if (logout != null) {
-            model.addAttribute("message",
-                    "You have been logged out");
+            model.addAttribute("message", "You have been logged out");
         }
-
         return "auth/login";
     }
 }
