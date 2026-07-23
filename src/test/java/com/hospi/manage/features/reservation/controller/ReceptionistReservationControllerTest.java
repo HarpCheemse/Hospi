@@ -22,6 +22,7 @@ import com.hospi.manage.features.room.repository.RoomTypeRepository;
 import com.hospi.manage.features.reservation.validation.DateSearchValidator;
 import com.hospi.manage.features.reservation.validation.OfflineBookingFormValidator;
 import com.hospi.manage.features.room.dto.response.RoomTypeAvailability;
+import com.hospi.manage.features.room.entity.Room;
 import com.hospi.manage.features.room.entity.RoomType;
 import com.hospi.manage.features.room.enums.BedType;
 import org.junit.jupiter.api.AfterEach;
@@ -50,6 +51,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 @WebMvcTest({ReceptionistBookingController.class, ReceptionistStayController.class})
 @AutoConfigureMockMvc(addFilters = false)
@@ -181,6 +183,24 @@ class ReceptionistReservationControllerTest {
                 .andExpect(view().name("receptionist/reservation/stays"))
                 .andExpect(model().attributeExists(VIEW))
                 .andExpect(content().string(containsString("John Doe")));
+    }
+
+    // ========== GET /{id} (detail) ==========
+
+    @Test
+    void detail_shouldRender() throws Exception {
+        var reservation = createReservation(ReservationStatus.CONFIRMED);
+        when(reservationService.findById(1L)).thenReturn(reservation);
+        when(stayingGuestService.getGuests(1L)).thenReturn(List.of());
+        when(paymentService.getPaymentsByReservationId(1L)).thenReturn(List.of());
+        when(roomAssignmentService.getAssignedRooms(1L)).thenReturn(List.of());
+        when(roomAssignmentService.getAvailableRooms(1L)).thenReturn(List.of());
+
+        mockMvc.perform(get("/receptionist/bookings/1"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("receptionist/reservation/detail"))
+                .andExpect(content().string(containsString("John Doe")))
+                .andExpect(content().string(containsString("Confirmed")));
     }
 
     // ========== GET /create ==========
