@@ -182,10 +182,15 @@
 
                 <!-- EMPTY STATE -->
                 <tr th:if="${#lists.isEmpty(view.bookings())}">
-                    <td colspan="5" class="px-5 py-16 text-center">
+                    <td colspan="5" class="px-5 py-16 text-center text-muted-foreground">No bookings found.</td>
+                </tr>
 
-                        <td colspan="5" class="px-5 py-3">
-                            <div class="flex items-center justify-between">
+                </tbody>
+
+                <!-- PAGINATION -->
+                <tfoot th:if="${view.totalPages() > 1}">
+                <tr>
+                    <td colspan="5" class="px-5 py-3">                            <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-2">
                                     <a th:href="@{/receptionist/bookings(scope=${activeScope}, source=${activeSource}, status=${view.filterStatus()}, search=${view.filterSearch()}, page=${view.page() - 1})}"
                                        th:classappend="${view.page() == 0} ? 'pointer-events-none opacity-50' : ''"
@@ -240,8 +245,8 @@
                                     </form>
                                 </div>
                             </div>
-                        </td>
-                    </tr>
+                    </td>
+                </tr>
                 </tfoot>
 
             </table>

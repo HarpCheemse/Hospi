@@ -104,19 +104,17 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                    @Param("guestName") String guestName);
 
     /**
-     * Find reservations matching the given statuses and guest name with pagination, excluding online-pending.
+     * Find reservations matching the given statuses and guest name with pagination.
      */
     @Query(value = """
                 SELECT r FROM Reservation r
                 WHERE r.status IN :statuses
                 AND (LOWER(r.guestName) LIKE :guestName OR r.guestPhone LIKE :guestName OR LOWER(r.confirmationCode) LIKE :guestName)
-                AND NOT (r.status = 'PENDING' AND r.source = 'ONLINE')
             """,
             countQuery = """
                 SELECT COUNT(r) FROM Reservation r
                 WHERE r.status IN :statuses
                 AND (LOWER(r.guestName) LIKE :guestName OR r.guestPhone LIKE :guestName OR LOWER(r.confirmationCode) LIKE :guestName)
-                AND NOT (r.status = 'PENDING' AND r.source = 'ONLINE')
             """)
     Page<Reservation> findFiltered(@Param("statuses") List<ReservationStatus> statuses,
                                    @Param("guestName") String guestName,
@@ -138,7 +136,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                            @Param("date") LocalDate date);
 
     /**
-     * Find reservations matching statuses, guest name, and a date with pagination, excluding online-pending.
+     * Find reservations matching statuses, guest name, and a date with pagination.
      */
     @Query(value = """
                 SELECT r FROM Reservation r
@@ -146,7 +144,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 AND (LOWER(r.guestName) LIKE :guestName OR r.guestPhone LIKE :guestName OR LOWER(r.confirmationCode) LIKE :guestName)
                 AND r.checkInAt <= :date
                 AND r.checkOutAt >= :date
-                AND NOT (r.status = 'PENDING' AND r.source = 'ONLINE')
             """,
             countQuery = """
                 SELECT COUNT(r) FROM Reservation r
@@ -154,7 +151,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 AND (LOWER(r.guestName) LIKE :guestName OR r.guestPhone LIKE :guestName OR LOWER(r.confirmationCode) LIKE :guestName)
                 AND r.checkInAt <= :date
                 AND r.checkOutAt >= :date
-                AND NOT (r.status = 'PENDING' AND r.source = 'ONLINE')
             """)
     Page<Reservation> findFilteredWithDate(@Param("statuses") List<ReservationStatus> statuses,
                                            @Param("guestName") String guestName,

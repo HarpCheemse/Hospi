@@ -11,6 +11,7 @@ import com.hospi.manage.features.room.validation.CreateRoomTypeValidator;
 import com.hospi.manage.features.room.validation.EditRoomTypeValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -25,6 +26,7 @@ import java.io.IOException;
 @Controller
 @RequestMapping("/manager/room-types")
 @RequiredArgsConstructor
+@Slf4j
 public class RoomTypeController {
     private final RoomTypeService roomTypeService;
     private final CreateRoomTypeValidator createRoomTypeValidator;
@@ -72,10 +74,15 @@ public class RoomTypeController {
     public String create(@Valid @ModelAttribute(Attributes.FORM) RoomTypeCreateForm form, BindingResult errors,
                          Model model) throws IOException {
 
+        log.info("Create room type POST received: category={}, tier={}, features='{}', price={}, coverImage={}",
+                form.category(), form.tier(), form.features(), form.basePrice(),
+                form.coverImage() != null ? form.coverImage().getOriginalFilename() : "null");
+
         createRoomTypeValidator.validate(form,
                 errors);
 
         if (errors.hasErrors()) {
+            log.warn("Validation failed: {}", errors.getAllErrors());
             model.addAttribute(Attributes.FORM,
                     form);
             model.addAttribute(Attributes.VIEW,
@@ -84,7 +91,9 @@ public class RoomTypeController {
             return "manager/room-type/create";
         }
 
+        log.info("Validation passed, calling service...");
         roomTypeService.createRoomType(form);
+        log.info("Room type created successfully");
 
         return "redirect:/manager/room-types";
     }
