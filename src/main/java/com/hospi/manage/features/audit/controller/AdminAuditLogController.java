@@ -32,16 +32,13 @@ public class AdminAuditLogController {
     @GetMapping
     String list(@RequestParam(name = "page", defaultValue = "0") int page,
                 @RequestParam(required = false) String action,
-                @RequestParam(required = false) String staffName,
                 @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime startDate,
                 @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime endDate,
                 Model model) {
-        var paged = auditLogRepository.findFiltered(action,
-                staffName != null ? staffName.toLowerCase() : null, startDate, endDate,
+        var paged = auditLogRepository.findFiltered(action, startDate, endDate,
                 PageRequest.of(page, PAGE_SIZE));
         model.addAttribute("logs", paged);
         model.addAttribute("filterAction", action);
-        model.addAttribute("filterStaff", staffName);
         model.addAttribute("filterStart", startDate);
         model.addAttribute("filterEnd", endDate);
         return "admin/audit-log/list";

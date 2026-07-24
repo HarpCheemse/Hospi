@@ -19,15 +19,13 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
     /** Paginated audit log query, newest first. */
     Page<AuditLog> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
-    /** Return filtered, paginated audit log entries. */
+    /** Return filtered, paginated audit log entries. Staff name search omitted — column is bytea in DB. */
     @Query("SELECT a FROM AuditLog a WHERE " +
            "(:action IS NULL OR a.action = :action) AND " +
-           "(:staffName IS NULL OR a.staffName LIKE CONCAT('%', :staffName, '%')) AND " +
            "(:startDate IS NULL OR a.createdAt >= :startDate) AND " +
            "(:endDate IS NULL OR a.createdAt <= :endDate) " +
            "ORDER BY a.createdAt DESC")
     Page<AuditLog> findFiltered(@Param("action") String action,
-                                 @Param("staffName") String staffName,
                                  @Param("startDate") LocalDateTime startDate,
                                  @Param("endDate") LocalDateTime endDate,
                                  Pageable pageable);
