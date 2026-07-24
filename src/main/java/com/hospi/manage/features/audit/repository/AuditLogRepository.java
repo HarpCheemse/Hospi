@@ -19,11 +19,11 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
     /** Paginated audit log query, newest first. */
     Page<AuditLog> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
-    /** Return filtered, paginated audit log entries. Staff name search omitted — column is bytea in DB. */
+    /** Return filtered, paginated audit log entries. Uses COALESCE to avoid PostgreSQL null-type issues. */
     @Query("SELECT a FROM AuditLog a WHERE " +
-           "(:action IS NULL OR a.action = :action) AND " +
-           "(:startDate IS NULL OR a.createdAt >= :startDate) AND " +
-           "(:endDate IS NULL OR a.createdAt <= :endDate) " +
+           "a.action = COALESCE(:action, a.action) AND " +
+           "a.createdAt >= COALESCE(:startDate, a.createdAt) AND " +
+           "a.createdAt <= COALESCE(:endDate, a.createdAt) " +
            "ORDER BY a.createdAt DESC")
     Page<AuditLog> findFiltered(@Param("action") String action,
                                  @Param("startDate") LocalDateTime startDate,
