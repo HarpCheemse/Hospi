@@ -778,4 +778,48 @@ class ReservationServiceTest {
         verify(reservationRepository, never()).save(any());
         verify(paymentRepository, never()).save(any());
     }
+
+    // --- cancelReservation not found ---
+
+    @Test
+    void cancelReservation_shouldThrow_whenReservationNotFound() {
+        when(reservationRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> reservationService.cancelReservation(99L));
+    }
+
+    // --- extendStay not found ---
+
+    @Test
+    void extendStay_shouldThrow_whenReservationNotFound() {
+        when(reservationRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> reservationService.extendStay(99L, 2));
+    }
+
+    // --- createReservation rooms not available ---
+
+    @Test
+    void createReservation_shouldThrow_whenRoomsNotAvailable() {
+        RoomType roomType = new RoomType();
+        roomType.setId(1L);
+        roomType.setBasePrice(new BigDecimal("200.00"));
+
+        OfflineBookingForm form = new OfflineBookingForm(
+                futureCheckIn, futureCheckOut,
+                "John Doe", "john@example.com", "+1234567890",
+                LocalDate.of(1990, 1, 1), "US",
+                List.of(new RoomSelection(1L, 2))
+        );
+
+        when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(false);
+        when(roomTypeRepository.findAllById(any())).thenReturn(List.of(roomType));
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class,
+                () -> reservationService.createReservation(form));
+        assertTrue(ex.getMessage().contains("no longer available"));
+        verify(reservationRepository, never()).save(any());
+    }
 }

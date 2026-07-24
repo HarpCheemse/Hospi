@@ -1,18 +1,23 @@
 package com.hospi.manage.features.account.controller;
 
+import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.account.dto.AccountCreateForm;
 import com.hospi.manage.features.account.dto.AccountEditForm;
 import com.hospi.manage.features.account.dto.AccountView;
+import com.hospi.manage.features.account.entity.Account;
 import com.hospi.manage.features.account.enums.Role;
 import com.hospi.manage.features.account.service.AccountService;
 import com.hospi.manage.features.account.validator.AccountValidator;
 import com.hospi.manage.features.audit.service.AuditService;
 import com.hospi.manage.features.notification.service.NotificationService;
+import com.hospi.manage.core.security.session.AccountPrincipal;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.validation.BindingResult;
@@ -246,5 +251,42 @@ class AccountControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/accounts/1"))
                 .andExpect(flash().attribute(ERROR, "Cannot delete an admin account"));
+    }
+
+    @Test
+    void deleteAccount_shouldRedirectWithError_whenDeletingSelf() throws Exception {
+        Account account = new Account();
+        account.setId(1L);
+        account.setRole(Role.ADMIN);
+        AccountPrincipal principal = new AccountPrincipal(account);
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(principal, principal.getPassword(), principal.getAuthorities()));
+        try {
+            mockMvc.perform(post("/admin/accounts/delete/1"))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/admin/accounts"))
+                    .andExpect(flash().attribute(ERROR, "You cannot delete your own account."));
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
+    }
+
+    @Test
+    void detailAccount_shouldReturn404_whenNotFound() throws Exception {
+        when(accountService.getAccountView(999L)).thenThrow(new ResourceNotFoundException("Account"));
+
+        mockMvc.perform(get("/admin/accounts/999"))
+                .andExpect(status().is(404))
+                .andExpect(view().name("error/404"));
+    }
+
+    @Test
+    void editAccount_shouldReturn404_whenNotFound() throws Exception {
+        when(accountService.getEditForm(999L)).thenThrow(new ResourceNotFoundException("Account"));
+
+        mockMvc.perform(get("/admin/accounts/999/edit"))
+                .andExpect(status().is(404))
+                .andExpect(view().name("error/404"));
     }
 }
