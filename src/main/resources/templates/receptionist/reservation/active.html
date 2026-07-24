@@ -187,10 +187,10 @@
 
                 </tbody>
 
-                <!-- PAGINATION -->
                 <tfoot th:if="${view.totalPages() > 1}">
-                <tr>
-                    <td colspan="5" class="px-5 py-3">                            <div class="flex items-center justify-between">
+                    <tr>
+                        <td colspan="8" class="px-5 py-3">
+                            <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-2">
                                     <a th:href="@{/receptionist/bookings(scope=${activeScope}, source=${activeSource}, status=${view.filterStatus()}, search=${view.filterSearch()}, page=${view.page() - 1})}"
                                        th:classappend="${view.page() == 0} ? 'pointer-events-none opacity-50' : ''"
@@ -236,8 +236,10 @@
                                     <form th:action="@{/receptionist/bookings(scope=${activeScope}, source=${activeSource}, status=${view.filterStatus()}, search=${view.filterSearch()})}"
                                           method="get" class="flex items-center gap-1"
                                           onsubmit="const input = this.querySelector('[name=page]'); input.value = parseInt(input.value) - 1 || 0;">
+                                        <input type="hidden" name="scope" th:value="${activeScope}">
+                                        <input type="hidden" name="source" th:value="${activeSource}">
                                         <input type="hidden" name="status" th:value="${view.filterStatus()}">
-                                        <input type="hidden" name="scope" th:value="${activeScope}"><input type="hidden" name="search" th:value="${view.filterSearch()}">
+                                        <input type="hidden" name="search" th:value="${view.filterSearch()}">
                                         <input type="number" name="page" min="1" th:max="${view.totalPages()}"
                                                class="input input-sm w-16 text-center" placeholder="#"
                                                th:value="${view.page() + 1}">
@@ -245,8 +247,8 @@
                                     </form>
                                 </div>
                             </div>
-                    </td>
-                </tr>
+                        </td>
+                    </tr>
                 </tfoot>
 
             </table>

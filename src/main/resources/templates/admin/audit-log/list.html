@@ -90,16 +90,59 @@
                     <tr>
                         <td colspan="4" class="px-5 py-3">
                             <div class="flex items-center justify-between">
-                                <span class="text-sm text-muted-foreground">
-                                    Page <span th:text="${logs.number + 1}">1</span> of <span th:text="${logs.totalPages}">1</span>
-                                </span>
                                 <div class="flex items-center gap-2">
-                                    <a th:href="@{/admin/audit-logs(page=${logs.number - 1})}"
-                                       th:classappend="${logs.first} ? 'pointer-events-none opacity-50' : ''"
-                                       class="btn btn-ghost btn-sm">Prev</a>
-                                    <a th:href="@{/admin/audit-logs(page=${logs.number + 1})}"
-                                       th:classappend="${logs.last} ? 'pointer-events-none opacity-50' : ''"
-                                       class="btn btn-ghost btn-sm">Next</a>
+                                    <a th:href="@{/admin/audit-logs(action=${filterAction}, startDate=${filterStart}, endDate=${filterEnd}, page=${logs.number - 1})}"
+                                       th:classappend="${logs.number == 0} ? 'pointer-events-none opacity-50' : ''"
+                                       class="btn btn-ghost btn-sm">&larr; Prev</a>
+
+                                    <div class="flex items-center gap-1">
+                                        <a th:href="@{/admin/audit-logs(action=${filterAction}, startDate=${filterStart}, endDate=${filterEnd}, page=0)}"
+                                           th:classappend="${logs.number == 0} ? 'btn-primary' : 'btn-ghost'"
+                                           class="btn btn-sm w-8 justify-center">1</a>
+
+                                        <span th:if="${logs.number > 2}"
+                                              class="px-1 text-xs text-muted-foreground">&hellip;</span>
+
+                                        <div th:if="${logs.totalPages > 2}"
+                                             class="flex items-center gap-1">
+                                            <a th:each="p : ${#numbers.sequence(1, logs.totalPages - 2)}"
+                                               th:if="${p >= logs.number - 1 and p <= logs.number + 1}"
+                                               th:href="@{/admin/audit-logs(action=${filterAction}, startDate=${filterStart}, endDate=${filterEnd}, page=${p})}"
+                                               th:classappend="${p == logs.number} ? 'btn-primary' : 'btn-ghost'"
+                                               class="btn btn-sm w-8 justify-center"
+                                               th:text="${p + 1}">2</a>
+                                        </div>
+
+                                        <span th:if="${logs.number < logs.totalPages - 3}"
+                                              class="px-1 text-xs text-muted-foreground">&hellip;</span>
+
+                                        <a th:href="@{/admin/audit-logs(action=${filterAction}, startDate=${filterStart}, endDate=${filterEnd}, page=${logs.totalPages - 1})}"
+                                           th:classappend="${logs.number == logs.totalPages - 1} ? 'btn-primary' : 'btn-ghost'"
+                                           class="btn btn-sm w-8 justify-center"
+                                           th:text="${logs.totalPages}">10</a>
+                                    </div>
+
+                                    <a th:href="@{/admin/audit-logs(action=${filterAction}, startDate=${filterStart}, endDate=${filterEnd}, page=${logs.number + 1})}"
+                                       th:classappend="${logs.number >= logs.totalPages - 1} ? 'pointer-events-none opacity-50' : ''"
+                                       class="btn btn-ghost btn-sm">Next &rarr;</a>
+                                </div>
+
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm text-muted-foreground">
+                                        Page <span th:text="${logs.number + 1}">1</span>/<span th:text="${logs.totalPages}">1</span>
+                                    </span>
+
+                                    <form th:action="@{/admin/audit-logs(action=${filterAction}, startDate=${filterStart}, endDate=${filterEnd})}"
+                                          method="get" class="flex items-center gap-1"
+                                          onsubmit="const input = this.querySelector('[name=page]'); input.value = parseInt(input.value) - 1 || 0;">
+                                        <input type="hidden" name="action" th:value="${filterAction}">
+                                        <input type="hidden" name="startDate" th:value="${filterStart}">
+                                        <input type="hidden" name="endDate" th:value="${filterEnd}">
+                                        <input type="number" name="page" min="1" th:max="${logs.totalPages}"
+                                               class="input input-sm w-16 text-center" placeholder="#"
+                                               th:value="${logs.number + 1}">
+                                        <button type="submit" class="btn btn-ghost btn-sm px-2">Go</button>
+                                    </form>
                                 </div>
                             </div>
                         </td>
