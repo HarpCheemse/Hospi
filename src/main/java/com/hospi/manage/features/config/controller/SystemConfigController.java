@@ -3,6 +3,7 @@ package com.hospi.manage.features.config.controller;
 import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.common.utils.SecurityUtils;
 import com.hospi.manage.features.audit.service.AuditService;
+import com.hospi.manage.features.audit.enums.AuditAction;
 import com.hospi.manage.features.config.dto.SystemConfigForm;
 import com.hospi.manage.features.config.service.SystemConfigService;
 import jakarta.validation.Valid;
@@ -51,7 +52,7 @@ public class SystemConfigController {
         }
 
         systemConfigService.updateSystemConfigs(form);
-        auditService.log(null, SecurityUtils.currentStaffName(), "UPDATE", "SYSTEM_CONFIG", null,
+        auditService.log(null, SecurityUtils.currentStaffName(), AuditAction.UPDATE, "SYSTEM_CONFIG", null,
                 "System configuration updated");
 
         redirectAttributes.addFlashAttribute(Attributes.SUCCESS, "Configs updated successfully");

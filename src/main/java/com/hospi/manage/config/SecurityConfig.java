@@ -117,6 +117,7 @@ public class SecurityConfig {
                 )
                 .rememberMe(remember -> remember
                         .key(rememberMeKey)
+                        .userDetailsService(userDetailsService)
                         //30 days
                         .tokenValiditySeconds(60 * 60 * 24 * 30)
                 )

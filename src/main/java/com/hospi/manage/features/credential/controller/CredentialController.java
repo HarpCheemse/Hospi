@@ -5,6 +5,7 @@ import com.hospi.manage.core.security.session.AccountPrincipal;
 import com.hospi.manage.features.account.enums.Role;
 import com.hospi.manage.features.account.validator.AccountValidator;
 import com.hospi.manage.features.audit.service.AuditService;
+import com.hospi.manage.features.audit.enums.AuditAction;
 import com.hospi.manage.features.credential.dto.request.ChangePasswordForm;
 import com.hospi.manage.features.credential.dto.response.CredentialView;
 import com.hospi.manage.features.credential.service.CredentialService;
@@ -91,7 +92,7 @@ public class CredentialController {
         credentialService.changePassword(principal.getAccount(),
                 form.newPassword());
         auditService.log(principal.getAccount().getId(), principal.getAccount().getFullName(),
-                "CHANGE_PASSWORD", "CREDENTIAL", principal.getAccount().getId(),
+                AuditAction.CHANGE_PASSWORD, "CREDENTIAL", principal.getAccount().getId(),
                 "Password changed");
 
         return "redirect:/credentials";

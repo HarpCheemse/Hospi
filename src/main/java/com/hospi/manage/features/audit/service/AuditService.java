@@ -1,6 +1,7 @@
 package com.hospi.manage.features.audit.service;
 
 import com.hospi.manage.features.audit.entity.AuditLog;
+import com.hospi.manage.features.audit.enums.AuditAction;
 import com.hospi.manage.features.audit.repository.AuditLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -16,7 +17,7 @@ public class AuditService {
     private final AuditLogRepository auditLogRepository;
 
     /** Record an audit entry. */
-    public void log(Long staffId, String staffName, String action, String entityType, Long entityId, String details) {
+    public void log(Long staffId, String staffName, AuditAction action, String entityType, Long entityId, String details) {
         var log = new AuditLog();
         log.setStaffId(staffId);
         log.setStaffName(staffName);

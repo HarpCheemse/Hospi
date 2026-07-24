@@ -3,6 +3,7 @@ package com.hospi.manage.features.reservation.controller;
 import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.core.security.session.AccountPrincipal;
 import com.hospi.manage.features.audit.service.AuditService;
+import com.hospi.manage.features.audit.enums.AuditAction;
 import com.hospi.manage.features.reservation.dto.request.CheckInForm;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import lombok.RequiredArgsConstructor;
@@ -44,7 +45,7 @@ public class CheckInController {
                     LocalDate.now(),
                     form.bookingCode(),
                     principal.getUsername());
-            auditService.log(principal.getId(), principal.getUsername(), "CHECKIN", "RESERVATION", id,
+            auditService.log(principal.getId(), principal.getUsername(), AuditAction.CHECKIN, "RESERVATION", id,
                     "Guest checked in");
             redirect.addFlashAttribute(Attributes.SUCCESS,
                     "Guest checked in successfully.");

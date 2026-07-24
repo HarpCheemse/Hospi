@@ -4,6 +4,7 @@ import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.core.security.session.AccountPrincipal;
 import com.hospi.manage.features.audit.service.AuditService;
+import com.hospi.manage.features.audit.enums.AuditAction;
 import com.hospi.manage.features.payment.enums.PaymentMethod;
 import com.hospi.manage.features.reservation.dto.request.AssignRoomForm;
 import com.hospi.manage.features.reservation.dto.request.CheckoutForm;
@@ -129,7 +130,7 @@ public class ReceptionistStayController {
             return "receptionist/reservation/manage";
         }
         stayingGuestService.addGuest(id, form);
-        auditService.log(principal.getId(), principal.getUsername(), "CREATE", "STAYING_GUEST", id,
+        auditService.log(principal.getId(), principal.getUsername(), AuditAction.CREATE, "STAYING_GUEST", id,
                 "Guest added: " + form.guestName());
         redirect.addFlashAttribute(Attributes.SUCCESS, "Guest added successfully.");
         return "redirect:/receptionist/stays/" + id + "";
@@ -149,7 +150,7 @@ public class ReceptionistStayController {
             return "receptionist/reservation/manage";
         }
         stayingGuestService.updateGuest(id, guestId, form);
-        auditService.log(principal.getId(), principal.getUsername(), "UPDATE", "STAYING_GUEST", guestId,
+        auditService.log(principal.getId(), principal.getUsername(), AuditAction.UPDATE, "STAYING_GUEST", guestId,
                 "Guest updated: " + form.guestName());
         redirect.addFlashAttribute(Attributes.SUCCESS, "Guest updated successfully.");
         return "redirect:/receptionist/stays/" + id + "";
@@ -159,7 +160,7 @@ public class ReceptionistStayController {
     String deleteGuest(@PathVariable Long id, @PathVariable Long guestId, RedirectAttributes redirect,
                        @AuthenticationPrincipal AccountPrincipal principal) {
         stayingGuestService.deleteGuest(id, guestId);
-        auditService.log(principal.getId(), principal.getUsername(), "DELETE", "STAYING_GUEST", guestId,
+        auditService.log(principal.getId(), principal.getUsername(), AuditAction.DELETE, "STAYING_GUEST", guestId,
                 "Guest removed from reservation " + id);
         redirect.addFlashAttribute(Attributes.SUCCESS, "Guest removed successfully.");
         return "redirect:/receptionist/stays/" + id + "";
@@ -178,7 +179,7 @@ public class ReceptionistStayController {
         }
         try {
             roomAssignmentService.assignRoom(id, form.roomId());
-            auditService.log(principal.getId(), principal.getUsername(), "ASSIGN_ROOM", "RESERVATION", id,
+            auditService.log(principal.getId(), principal.getUsername(), AuditAction.ASSIGN_ROOM, "RESERVATION", id,
                     "Room " + form.roomId() + " assigned");
             redirect.addFlashAttribute(Attributes.SUCCESS, "Room assigned successfully.");
         } catch (IllegalStateException e) {
@@ -191,7 +192,7 @@ public class ReceptionistStayController {
     String removeRoom(@PathVariable Long id, @PathVariable Long assignmentId, RedirectAttributes redirect,
                       @AuthenticationPrincipal AccountPrincipal principal) {
         roomAssignmentService.removeAssignment(id, assignmentId);
-        auditService.log(principal.getId(), principal.getUsername(), "REMOVE_ROOM", "RESERVATION", id,
+        auditService.log(principal.getId(), principal.getUsername(), AuditAction.REMOVE_ROOM, "RESERVATION", id,
                 "Room assignment " + assignmentId + " removed");
         redirect.addFlashAttribute(Attributes.SUCCESS, "Room assignment removed successfully.");
         return "redirect:/receptionist/stays/" + id + "";
@@ -210,7 +211,7 @@ public class ReceptionistStayController {
         }
         try {
             reservationService.extendStay(id, form.extraDays());
-            auditService.log(principal.getId(), principal.getUsername(), "EXTEND_STAY", "RESERVATION", id,
+            auditService.log(principal.getId(), principal.getUsername(), AuditAction.EXTEND_STAY, "RESERVATION", id,
                     "Extended by " + form.extraDays() + " days");
             redirect.addFlashAttribute(Attributes.SUCCESS, "Stay extended successfully.");
         } catch (IllegalStateException | IllegalArgumentException e) {
@@ -249,7 +250,7 @@ public class ReceptionistStayController {
                     @AuthenticationPrincipal AccountPrincipal principal) {
         try {
             roomUpgradeService.swapOne(id, from, roomTypeId);
-            auditService.log(principal.getId(), principal.getUsername(), "SWAP_ROOM", "RESERVATION", id,
+            auditService.log(principal.getId(), principal.getUsername(), AuditAction.SWAP_ROOM, "RESERVATION", id,
                     "Swapped from type " + from + " to " + roomTypeId);
             redirect.addFlashAttribute(Attributes.SUCCESS, "Room swapped successfully.");
         } catch (IllegalStateException | IllegalArgumentException e) {
@@ -292,7 +293,7 @@ public class ReceptionistStayController {
         }
         try {
             checkoutService.complete(id, form, principal.getUsername());
-            auditService.log(principal.getId(), principal.getUsername(), "CHECKOUT", "RESERVATION", id,
+            auditService.log(principal.getId(), principal.getUsername(), AuditAction.CHECKOUT, "RESERVATION", id,
                     "Amount: " + form.paymentMethod());
             redirect.addFlashAttribute(Attributes.SUCCESS, "Checkout completed successfully.");
             return "redirect:/receptionist/receipts/" + id + "";

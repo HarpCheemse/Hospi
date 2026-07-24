@@ -1,6 +1,7 @@
 package com.hospi.manage.features.audit.controller;
 
 import com.hospi.manage.common.constant.Attributes;
+import com.hospi.manage.features.audit.enums.AuditAction;
 import com.hospi.manage.features.audit.repository.AuditLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -22,7 +23,7 @@ public class AdminAuditLogController {
 
     private final AuditLogRepository auditLogRepository;
 
-    private static final int PAGE_SIZE = 25;
+    private static final int PAGE_SIZE = 10;
 
     @ModelAttribute
     void addCommonAttributes(Model model) {
@@ -35,12 +36,21 @@ public class AdminAuditLogController {
                 @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime startDate,
                 @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime endDate,
                 Model model) {
-        var paged = auditLogRepository.findFiltered(action, startDate, endDate,
+        AuditAction actionEnum = null;
+        if (action != null && !action.isBlank()) {
+            try {
+                actionEnum = AuditAction.valueOf(action);
+            } catch (IllegalArgumentException e) {
+                actionEnum = null;
+            }
+        }
+        var paged = auditLogRepository.findFiltered(actionEnum, startDate, endDate,
                 PageRequest.of(page, PAGE_SIZE));
         model.addAttribute("logs", paged);
         model.addAttribute("filterAction", action);
         model.addAttribute("filterStart", startDate);
         model.addAttribute("filterEnd", endDate);
+        model.addAttribute("allActions", AuditAction.values());
         return "admin/audit-log/list";
     }
 }

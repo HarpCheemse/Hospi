@@ -1,6 +1,7 @@
 package com.hospi.manage.features.audit.repository;
 
 import com.hospi.manage.features.audit.entity.AuditLog;
+import com.hospi.manage.features.audit.enums.AuditAction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,7 +26,7 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
            "a.createdAt >= COALESCE(:startDate, a.createdAt) AND " +
            "a.createdAt <= COALESCE(:endDate, a.createdAt) " +
            "ORDER BY a.createdAt DESC")
-    Page<AuditLog> findFiltered(@Param("action") String action,
+    Page<AuditLog> findFiltered(@Param("action") AuditAction action,
                                  @Param("startDate") LocalDateTime startDate,
                                  @Param("endDate") LocalDateTime endDate,
                                  Pageable pageable);
