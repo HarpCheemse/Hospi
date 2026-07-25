@@ -314,6 +314,12 @@
                                 </div>
                             </div>
 
+                            <a x-bind:href="'/receptionist/bookings/' + occupancy.reservationId"
+                               class="btn btn-primary btn-sm w-full mt-3"
+                               target="_blank">
+                                View Booking
+                            </a>
+
                             <!-- STAYING GUESTS -->
                             <template x-if="occupancy.stayingGuests && occupancy.stayingGuests.length > 0">
                                 <div class="mt-3 border-t border-gray-200 pt-3">

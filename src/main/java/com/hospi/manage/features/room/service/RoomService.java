@@ -268,6 +268,7 @@ public class RoomService {
                 room.getRoomType() != null ? room.getRoomType().getName() : null,
                 OccupancyStatus.OCCUPIED,
                 room.getConditionStatus(),
+                reservation.getId(),
                 reservation.getGuestName(),
                 reservation.getCheckInAt(),
                 reservation.getCheckOutAt(),

@@ -14,6 +14,7 @@ public record RoomOccupancyView(
         String roomTypeName,
         OccupancyStatus occupancyStatus,
         ConditionStatus conditionStatus,
+        Long reservationId,
         String guestName,
         LocalDate checkInAt,
         LocalDate checkOutAt,
@@ -27,7 +28,7 @@ public record RoomOccupancyView(
                 room.getRoomType() != null ? room.getRoomType().getName() : null,
                 OccupancyStatus.VACANT,
                 room.getConditionStatus(),
-                null, null, null, List.of()
+                null, null, null, null, List.of()
         );
     }
 }
