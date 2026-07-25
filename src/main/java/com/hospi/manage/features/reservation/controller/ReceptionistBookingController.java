@@ -80,21 +80,16 @@ public class ReceptionistBookingController {
                 ? List.of(ReservationStatus.valueOf(status))
                 : List.of(ReservationStatus.PENDING, ReservationStatus.CONFIRMED);
 
-        var paged = reservationService.findFiltered(statuses, search, date, PageRequest.of(page, PAGE_SIZE));
+        LocalDate effectiveDate = date;
+        if ("today".equals(scope) && date == null) {
+            effectiveDate = LocalDate.now();
+        }
 
-        var today = LocalDate.now();
+        var paged = reservationService.findFiltered(statuses, search, effectiveDate, PageRequest.of(page, PAGE_SIZE));
 
         if (source != null && !source.isBlank()) {
             var filtered = paged.getContent().stream()
                     .filter(r -> r.getSource() != null && r.getSource().name().equals(source))
-                    .toList();
-            paged = new org.springframework.data.domain.PageImpl<>(
-                    filtered, PageRequest.of(page, PAGE_SIZE), filtered.size());
-        }
-
-        if ("today".equals(scope)) {
-            var filtered = paged.getContent().stream()
-                    .filter(r -> r.getCheckInAt() != null && r.getCheckInAt().equals(today))
                     .toList();
             paged = new org.springframework.data.domain.PageImpl<>(
                     filtered, PageRequest.of(page, PAGE_SIZE), filtered.size());
@@ -109,7 +104,7 @@ public class ReceptionistBookingController {
         model.addAttribute(CONFIRMED_COUNT, reservationService.findByStatus(ReservationStatus.CONFIRMED).size());
         model.addAttribute(ARRIVING_TODAY,
                 reservationService.findByStatus(ReservationStatus.CONFIRMED).stream()
-                        .filter(r -> r.getCheckInAt() != null && r.getCheckInAt().equals(today))
+                        .filter(r -> r.getCheckInAt() != null && r.getCheckInAt().equals(LocalDate.now()))
                         .count());
 
         return "receptionist/reservation/active";

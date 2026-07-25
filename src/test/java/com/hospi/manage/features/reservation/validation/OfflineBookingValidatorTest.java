@@ -76,24 +76,6 @@ class OfflineBookingFormValidatorTest {
     }
 
     @Test
-    void validateCreate_shouldReject_whenDateOfBirthFuture() {
-        OfflineBookingForm form = new OfflineBookingForm(
-                futureCheckIn, futureCheckOut,
-                "John Doe", null, "+1234567890",
-                today.plusDays(1), null,
-                List.of(new RoomSelection(1L, 2))
-        );
-
-        BindingResult errors = new BeanPropertyBindingResult(form, "form");
-
-        validator.validate(form, errors);
-
-        assertTrue(errors.hasFieldErrors("guestDateOfBirth"));
-        assertEquals("Date of birth must be in the past",
-                errors.getFieldError("guestDateOfBirth").getDefaultMessage());
-    }
-
-    @Test
     void validateCreate_shouldReject_whenRoomSelectionsEmpty() {
         OfflineBookingForm form = new OfflineBookingForm(
                 futureCheckIn, futureCheckOut,

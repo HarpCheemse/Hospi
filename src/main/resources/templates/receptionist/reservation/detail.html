@@ -257,6 +257,7 @@
                             <td class="py-2 pr-2 text-muted-foreground" th:text="|Floor ${a.floorNumber}|">2</td>
                             <td class="py-2 text-right">
                                 <button type="button"
+                                        th:if="${reservation.status.name() != 'PENDING'}"
                                         th:attr="data-url='/receptionist/bookings/' + ${reservation.id} + '/rooms/' + ${a.id} + '/remove'"
                                         @click="removeUrl = $el.dataset.url; removeModal = true"
                                         class="text-xs text-danger hover:opacity-80">Remove</button>
@@ -267,7 +268,7 @@
             </div>
             <p th:if="${#lists.isEmpty(assignedRooms)}" class="mb-3 text-sm text-muted-foreground">No rooms assigned yet.</p>
 
-            <div th:if="${not #lists.isEmpty(availableRooms)}">
+            <div th:if="${not #lists.isEmpty(availableRooms) and reservation.status.name() != 'PENDING'}">
                 <button type="button" @click="assignOpen = true" class="btn btn-primary btn-sm w-full">Assign Room</button>
                 <div x-show="assignOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
                     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="assignOpen = false"></div>
@@ -308,7 +309,7 @@
                     </div>
                 </div>
             </div>
-            <p th:if="${#lists.isEmpty(availableRooms)}" class="text-sm text-muted-foreground mt-3">No vacant rooms available.</p>
+            <p th:if="${#lists.isEmpty(availableRooms) and reservation.status.name() != 'PENDING'}" class="text-sm text-muted-foreground mt-3">No vacant rooms available.</p>
 
             <!-- REMOVE ROOM MODAL -->
             <div x-show="removeModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">

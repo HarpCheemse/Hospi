@@ -53,6 +53,6 @@ public class PaymentController {
                     e.getMessage());
         }
 
-        return "redirect:/receptionist/bookings";
+        return "redirect:/receptionist/bookings/" + id;
     }
 }

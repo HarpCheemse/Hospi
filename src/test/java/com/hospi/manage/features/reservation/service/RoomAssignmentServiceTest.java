@@ -4,6 +4,7 @@ import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.ReservationDetail;
 import com.hospi.manage.features.reservation.entity.RoomAssignment;
+import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
 import com.hospi.manage.features.reservation.repository.RoomAssignmentRepository;
 import com.hospi.manage.features.room.entity.Room;
@@ -134,6 +135,22 @@ class RoomAssignmentServiceTest {
     }
 
     @Test
+    void assignRoom_shouldThrow_whenReservationIsPending() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setStatus(ReservationStatus.PENDING);
+
+        when(roomAssignmentRepository.existsByReservationIdAndRoomId(1L, 10L)).thenReturn(false);
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+
+        assertThrows(IllegalStateException.class,
+                () -> roomAssignmentService.assignRoom(1L, 10L));
+
+        verify(roomRepository, never()).save(any());
+        verify(roomAssignmentRepository, never()).save(any());
+    }
+
+    @Test
     void assignRoom_shouldThrow_whenRoomNotFound() {
         when(roomAssignmentRepository.existsByReservationIdAndRoomId(1L, 10L)).thenReturn(false);
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(new Reservation()));
@@ -219,6 +236,29 @@ class RoomAssignmentServiceTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> roomAssignmentService.removeAssignment(1L, 100L));
+    }
+
+    @Test
+    void removeAssignment_shouldThrow_whenReservationIsPending() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setStatus(ReservationStatus.PENDING);
+
+        Room room = new Room();
+        room.setId(10L);
+
+        RoomAssignment assignment = new RoomAssignment();
+        assignment.setId(100L);
+        assignment.setReservation(reservation);
+        assignment.setRoom(room);
+
+        when(roomAssignmentRepository.findById(100L)).thenReturn(Optional.of(assignment));
+
+        assertThrows(IllegalStateException.class,
+                () -> roomAssignmentService.removeAssignment(1L, 100L));
+
+        verify(roomRepository, never()).save(any());
+        verify(roomAssignmentRepository, never()).delete(any());
     }
 
     // --- getAssignedRooms ---
