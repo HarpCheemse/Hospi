@@ -221,6 +221,23 @@
             </div>
         </section>
 
+        <!-- Payments — next to Rooms Table for CONFIRMED -->
+        <section class="card-panel" th:if="${reservation.status.name() == 'CONFIRMED' and not #lists.isEmpty(payments)}">
+            <div class="mb-4 flex items-center gap-2">
+                <img th:src="@{/assets/icons/credit-card.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                <div>
+                    <h2 class="text-lg font-semibold text-foreground">Payments</h2>
+                    <p class="text-sm text-muted-foreground">Payment history and confirmation</p>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <div th:each="p : ${payments}" class="flex items-center justify-between text-sm">
+                    <span class="text-muted-foreground" th:text="${p.paymentMethod}">PAYPAL</span>
+                    <span class="font-medium text-foreground" th:text="|$${#numbers.formatDecimal(p.amount, 1, 2)}|">$100.00</span>
+                </div>
+            </div>
+        </section>
+
         <!-- Assigned Rooms — hidden for CONFIRMED (moves next to guests) -->
         <section th:if="${reservation.status.name() != 'CONFIRMED'}" class="card-panel" x-data="{ removeModal: false, removeUrl: '', assignOpen: false }">
             <div class="mb-4 flex items-center gap-2">
@@ -414,8 +431,14 @@
                         <span th:text="${d.roomTypeName}">Deluxe</span>
                     </span>
                 </div>
-                <div th:if="${not #lists.isEmpty(assignedRooms)}" class="mb-2">
-                    <p th:each="a : ${assignedRooms}" class="text-sm text-foreground mb-1" th:text="'Room ' + ${a.roomNumber} + ' (' + ${a.roomTypeName} + ')'">Room 201 (Deluxe)</p>
+                <div th:if="${not #lists.isEmpty(assignedRooms)}" class="mb-2 space-y-1">
+                    <div th:each="a : ${assignedRooms}" class="flex items-center justify-between text-sm">
+                        <span class="text-foreground" th:text="'Room ' + ${a.roomNumber} + ' (' + ${a.roomTypeName} + ')'">Room 201 (Deluxe)</span>
+                        <form th:action="@{/receptionist/bookings/{id}/rooms/{assignmentId}/remove(id=${reservation.id}, assignmentId=${a.id})}"
+                              method="post" class="inline">
+                            <button type="submit" class="text-xs text-danger hover:opacity-80">Remove</button>
+                        </form>
+                    </div>
                 </div>
                 <p th:if="${#lists.isEmpty(assignedRooms)}" class="mb-2 text-sm text-muted-foreground">No rooms assigned yet.</p>
                 <div th:if="${not #lists.isEmpty(availableRooms)}">
@@ -459,19 +482,6 @@
                 <p th:if="${#lists.isEmpty(availableRooms)}" class="text-sm text-muted-foreground mt-1">No vacant rooms available.</p>
             </div>
 
-            <hr class="border-border">
-
-            <div th:if="${not #lists.isEmpty(payments)}">
-                <div class="mb-2">
-                    <h2 class="text-base font-semibold text-foreground">Payments</h2>
-                </div>
-                <div class="space-y-2">
-                    <div th:each="p : ${payments}" class="flex items-center justify-between text-sm">
-                        <span class="text-muted-foreground" th:text="${p.paymentMethod}">PAYPAL</span>
-                        <span class="font-medium text-foreground" th:text="|$${#numbers.formatDecimal(p.amount, 1, 2)}|">$100.00</span>
-                    </div>
-                </div>
-            </div>
         </section>
 
         <section class="card-panel col-span-3" th:if="${not #lists.isEmpty(payments) and reservation.status.name() != 'CONFIRMED'}">
