@@ -269,6 +269,7 @@ public class RoomService {
                 OccupancyStatus.OCCUPIED,
                 room.getConditionStatus(),
                 reservation.getId(),
+                reservation.getStatus(),
                 reservation.getGuestName(),
                 reservation.getCheckInAt(),
                 reservation.getCheckOutAt(),

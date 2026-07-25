@@ -1,5 +1,6 @@
 package com.hospi.manage.features.room.dto.response;
 
+import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.room.entity.Room;
 import com.hospi.manage.features.room.enums.ConditionStatus;
 import com.hospi.manage.features.room.enums.OccupancyStatus;
@@ -15,6 +16,7 @@ public record RoomOccupancyView(
         OccupancyStatus occupancyStatus,
         ConditionStatus conditionStatus,
         Long reservationId,
+        ReservationStatus reservationStatus,
         String guestName,
         LocalDate checkInAt,
         LocalDate checkOutAt,
@@ -28,7 +30,7 @@ public record RoomOccupancyView(
                 room.getRoomType() != null ? room.getRoomType().getName() : null,
                 OccupancyStatus.VACANT,
                 room.getConditionStatus(),
-                null, null, null, null, List.of()
+                null, null, null, null, null, List.of()
         );
     }
 }
