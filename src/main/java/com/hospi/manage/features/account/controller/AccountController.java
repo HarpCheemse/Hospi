@@ -96,9 +96,11 @@ public class AccountController {
 
     @GetMapping("/{id}/edit")
     public String edit(@PathVariable Long id, Model model) {
-        model.addAttribute(Attributes.FORM, accountService.getEditForm(id));
+        var form = accountService.getEditForm(id);
+        model.addAttribute(Attributes.FORM, form);
         model.addAttribute("roles", availableRoles());
         model.addAttribute("accountId", id);
+        model.addAttribute("isAdmin", form.role() == Role.ADMIN);
         return "account/edit";
     }
 
@@ -123,6 +125,7 @@ public class AccountController {
         if (bindingResult.hasErrors()) {
             model.addAttribute("roles", availableRoles());
             model.addAttribute("accountId", id);
+            model.addAttribute("isAdmin", current.role() == Role.ADMIN);
             return "account/edit";
         }
 

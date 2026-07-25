@@ -53,6 +53,7 @@ class RoomAssignmentServiceTest {
 
         Reservation reservation = new Reservation();
         reservation.setId(1L);
+        reservation.setStatus(ReservationStatus.CONFIRMED);
         reservation.setDetails(List.of(detail));
 
         Room room = new Room();
@@ -152,8 +153,10 @@ class RoomAssignmentServiceTest {
 
     @Test
     void assignRoom_shouldThrow_whenRoomNotFound() {
+        Reservation reservation = new Reservation();
+        reservation.setStatus(ReservationStatus.CONFIRMED);
         when(roomAssignmentRepository.existsByReservationIdAndRoomId(1L, 10L)).thenReturn(false);
-        when(reservationRepository.findById(1L)).thenReturn(Optional.of(new Reservation()));
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
         when(roomRepository.findById(10L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
@@ -186,6 +189,7 @@ class RoomAssignmentServiceTest {
     void removeAssignment_shouldRemove() {
         Reservation reservation = new Reservation();
         reservation.setId(1L);
+        reservation.setStatus(ReservationStatus.CONFIRMED);
 
         Room room = new Room();
         room.setId(10L);
@@ -286,6 +290,7 @@ class RoomAssignmentServiceTest {
 
         Reservation reservation = new Reservation();
         reservation.setId(1L);
+        reservation.setStatus(ReservationStatus.CONFIRMED);
         reservation.setDetails(List.of(detail));
 
         Room roomA = new Room();

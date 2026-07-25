@@ -2,6 +2,7 @@ package com.hospi.manage.features.room.service;
 
 import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.account.enums.Role;
+import com.hospi.manage.features.audit.enums.AuditAction;
 import com.hospi.manage.features.audit.service.AuditService;
 import com.hospi.manage.features.hotel.repository.HotelRepository;
 import com.hospi.manage.features.notification.service.NotificationService;
@@ -455,7 +456,7 @@ class RoomServiceTest {
         room.setConditionStatus(ConditionStatus.CLEAN);
 
         when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
-        when(roomAssignmentRepository.findByRoomIdAndReservation_StatusIn(1L, List.of(ReservationStatus.CHECKED_IN)))
+        when(roomAssignmentRepository.findByRoomIdAndReservation_StatusIn(1L, List.of(ReservationStatus.CHECKED_IN, ReservationStatus.CONFIRMED)))
                 .thenReturn(List.of());
 
         RoomOccupancyView result = roomService.getRoomOccupancy(1L);
@@ -491,7 +492,7 @@ class RoomServiceTest {
         guest.setNationality("US");
 
         when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
-        when(roomAssignmentRepository.findByRoomIdAndReservation_StatusIn(1L, List.of(ReservationStatus.CHECKED_IN)))
+        when(roomAssignmentRepository.findByRoomIdAndReservation_StatusIn(1L, List.of(ReservationStatus.CHECKED_IN, ReservationStatus.CONFIRMED)))
                 .thenReturn(List.of(assignment));
         when(stayingGuestRepository.findByReservationIdOrderByCreatedAtAsc(10L))
                 .thenReturn(List.of(guest));
@@ -598,7 +599,7 @@ class RoomServiceTest {
         verify(auditService).log(
                 null,
                 "System",
-                "CLEAN_ROOM",
+                AuditAction.CLEAN_ROOM,
                 "ROOM",
                 1L,
                 "Room 101 marked as clean"
@@ -620,7 +621,7 @@ class RoomServiceTest {
         verify(auditService).log(
                 null,
                 "System",
-                "DIRTY_ROOM",
+                AuditAction.DIRTY_ROOM,
                 "ROOM",
                 1L,
                 "Room 101 marked as dirty"
@@ -642,7 +643,7 @@ class RoomServiceTest {
         verify(auditService).log(
                 null,
                 "System",
-                "MAINTENANCE_ROOM",
+                AuditAction.MAINTENANCE_ROOM,
                 "ROOM",
                 1L,
                 "Room 101 marked as maintenance"
@@ -674,7 +675,7 @@ class RoomServiceTest {
         verify(auditService).log(
                 null,
                 "System",
-                "CLEAN_ROOM",
+                AuditAction.CLEAN_ROOM,
                 "ROOM",
                 1L,
                 "Room 101 marked as clean"

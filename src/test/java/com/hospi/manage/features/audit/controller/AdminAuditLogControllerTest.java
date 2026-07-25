@@ -1,5 +1,6 @@
 package com.hospi.manage.features.audit.controller;
 
+import com.hospi.manage.features.audit.enums.AuditAction;
 import com.hospi.manage.features.audit.repository.AuditLogRepository;
 import com.hospi.manage.features.notification.service.NotificationService;
 import org.junit.jupiter.api.Test;
@@ -56,7 +57,7 @@ class AdminAuditLogControllerTest {
                 .andExpect(view().name("admin/audit-log/list"))
                 .andExpect(model().attribute("filterAction", "CREATE"));
 
-        verify(auditLogRepository).findFiltered(eq("CREATE"), isNull(), isNull(), any(PageRequest.class));
+        verify(auditLogRepository).findFiltered(eq(AuditAction.CREATE), isNull(), isNull(), any(PageRequest.class));
     }
 
     @Test
@@ -80,6 +81,6 @@ class AdminAuditLogControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/audit-log/list"));
 
-        verify(auditLogRepository).findFiltered(isNull(), isNull(), isNull(), eq(PageRequest.of(2, 25)));
+        verify(auditLogRepository).findFiltered(isNull(), isNull(), isNull(), eq(PageRequest.of(2, 10)));
     }
 }

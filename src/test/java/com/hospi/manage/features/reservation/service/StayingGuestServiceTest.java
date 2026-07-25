@@ -4,6 +4,7 @@ import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.reservation.dto.request.StayingGuestForm;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.StayingGuest;
+import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
 import com.hospi.manage.features.reservation.repository.StayingGuestRepository;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,7 @@ class StayingGuestServiceTest {
     void addGuest_shouldCreate() {
         Reservation reservation = new Reservation();
         reservation.setId(1L);
+        reservation.setStatus(ReservationStatus.CONFIRMED);
 
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
         when(stayingGuestRepository.save(any())).thenAnswer(i -> i.getArgument(0));
@@ -111,6 +113,7 @@ class StayingGuestServiceTest {
     void deleteGuest_shouldDelete() {
         Reservation reservation = new Reservation();
         reservation.setId(1L);
+        reservation.setStatus(ReservationStatus.CONFIRMED);
 
         StayingGuest guest = new StayingGuest();
         guest.setId(1L);

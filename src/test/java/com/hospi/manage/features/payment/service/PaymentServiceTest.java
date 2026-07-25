@@ -12,6 +12,7 @@ import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.BookingSource;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
+import com.hospi.manage.features.reservation.service.RoomAssignmentService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -47,6 +48,9 @@ class PaymentServiceTest {
 
     @Mock
     private NotificationService notificationService;
+
+    @Mock
+    private RoomAssignmentService roomAssignmentService;
 
     @InjectMocks
     private PaymentService paymentService;
@@ -331,6 +335,8 @@ class PaymentServiceTest {
 
         List<Payment> payments = List.of(alreadyRefunded, notRefunded);
 
+        doNothing().when(roomAssignmentService).vacateAllReservationRooms(any());
+
         paymentService.markRefunded(reservation, payments);
 
         assertEquals(ReservationStatus.CANCELLED, reservation.getStatus());
@@ -359,6 +365,8 @@ class PaymentServiceTest {
         refunded.setRefundedAmount(BigDecimal.valueOf(100));
 
         List<Payment> payments = List.of(refunded);
+
+        doNothing().when(roomAssignmentService).vacateAllReservationRooms(any());
 
         paymentService.markRefunded(reservation, payments);
 
