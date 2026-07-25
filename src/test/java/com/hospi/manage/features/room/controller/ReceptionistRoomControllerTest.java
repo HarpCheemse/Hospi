@@ -75,7 +75,7 @@ class ReceptionistRoomControllerTest {
     @Test
     void getOccupancy_shouldReturn_whenRoomOccupied() throws Exception {
         var occupancy = new RoomOccupancyView(1L, "101", "Deluxe", OccupancyStatus.OCCUPIED,
-                ConditionStatus.CLEAN, "John", null, null, List.of());
+                ConditionStatus.CLEAN, null, null, "John", null, null, List.of());
         when(roomService.getRoomOccupancy(1L)).thenReturn(occupancy);
 
         mockMvc.perform(get("/receptionist/room-status/1/occupancy").with(csrf()))
@@ -88,7 +88,7 @@ class ReceptionistRoomControllerTest {
     @Test
     void getOccupancy_shouldReturn_whenRoomVacant() throws Exception {
         var occupancy = new RoomOccupancyView(1L, "101", "Deluxe", OccupancyStatus.VACANT,
-                ConditionStatus.CLEAN, null, null, null, List.of());
+                ConditionStatus.CLEAN, null, null, null, null, null, List.of());
         when(roomService.getRoomOccupancy(1L)).thenReturn(occupancy);
 
         mockMvc.perform(get("/receptionist/room-status/1/occupancy").with(csrf()))

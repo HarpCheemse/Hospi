@@ -164,7 +164,7 @@ class ReceptionistReservationControllerTest {
         var reservation = createReservation(ReservationStatus.PENDING);
         Page<Reservation> page = new PageImpl<>(
                 List.of(reservation), PageRequest.of(0, 10), 1);
-        when(reservationService.findFiltered(anyList(), any(), any(), any())).thenReturn(page);
+        when(reservationService.findFiltered(anyList(), any(), any(), any(), any())).thenReturn(page);
 
         mockMvc.perform(get("/receptionist/bookings"))
                 .andExpect(status().isOk())
