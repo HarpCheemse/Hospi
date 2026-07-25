@@ -252,7 +252,7 @@ public class RoomService {
         }
 
         List<RoomAssignment> assignments = roomAssignmentRepository
-                .findByRoomIdAndReservation_StatusIn(id, List.of(ReservationStatus.CHECKED_IN));
+                .findByRoomIdAndReservation_StatusIn(id, List.of(ReservationStatus.CHECKED_IN, ReservationStatus.CONFIRMED));
 
         if (assignments.isEmpty()) {
             return RoomOccupancyView.vacant(room);
