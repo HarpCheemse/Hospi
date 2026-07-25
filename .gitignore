@@ -49,4 +49,5 @@ docs/known-gaps.md
 docs/~*
 docs/*.xlsx
 docs/learning/
+backups/
 src/main/resources/static/assets/images/
