@@ -10,6 +10,8 @@ import com.hospi.manage.features.payment.repository.PaymentRepository;
 import com.hospi.manage.features.reservation.dto.request.OfflineBookingForm;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.ReservationDetail;
+import com.hospi.manage.features.reservation.entity.RoomAssignment;
+import com.hospi.manage.features.reservation.entity.StayingGuest;
 import com.hospi.manage.features.reservation.enums.BookingSource;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
@@ -71,10 +73,11 @@ public class ReservationService {
                 searchPattern);
     }
 
-    /** Find reservations filtered by statuses, guest name, and optional date with pagination. */
+    /** Find reservations filtered by statuses, guest name, optional date, and optional source with pagination. */
     public Page<Reservation> findFiltered(List<ReservationStatus> statuses,
                                           String guestName,
                                           LocalDate date,
+                                          BookingSource source,
                                           Pageable pageable) {
         String searchPattern = "%";
         if (guestName != null && !guestName.isBlank()) {
@@ -84,10 +87,12 @@ public class ReservationService {
             return reservationRepository.findFilteredWithDate(statuses,
                     searchPattern,
                     date,
+                    source,
                     pageable);
         }
         return reservationRepository.findFiltered(statuses,
                 searchPattern,
+                source,
                 pageable);
     }
 
@@ -148,6 +153,12 @@ public class ReservationService {
         reservation.setStatus(ReservationStatus.PENDING);
         reservation.setSource(BookingSource.OFFLINE);
 
+        List<Long> roomTypeIds = form.roomSelections().stream()
+                .map(RoomSelection::roomTypeId)
+                .toList();
+        Map<Long, RoomType> roomTypeMap = roomTypeRepository.findAllById(roomTypeIds).stream()
+                .collect(Collectors.toMap(RoomType::getId, rt -> rt));
+
         BigDecimal totalPrice = BigDecimal.ZERO;
         List<ReservationDetail> details = new ArrayList<>();
 
@@ -157,8 +168,10 @@ public class ReservationService {
 
             if (count == null || count <= 0) continue;
 
-            RoomType roomType = roomTypeRepository.findById(roomTypeId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Room type " + roomTypeId));
+            RoomType roomType = roomTypeMap.get(roomTypeId);
+            if (roomType == null) {
+                throw new ResourceNotFoundException("Room type " + roomTypeId);
+            }
 
             totalPrice = totalPrice.add(roomType.getBasePrice().multiply(BigDecimal.valueOf(count)));
             details.add(buildDetail(reservation, roomType, count, 1));
@@ -174,6 +187,12 @@ public class ReservationService {
                 Role.RECEPTIONIST,
                 "New Reservation",
                 "Booking for " + saved.getGuestName() + " (" + saved.getCheckInAt() + " to " + saved.getCheckOutAt() + ")"
+        );
+
+        notificationService.notifyRole(
+                Role.MANAGER,
+                "New Walk-In Booking",
+                "Walk-in booking created for " + saved.getGuestName() + " (" + saved.getCheckInAt() + " to " + saved.getCheckOutAt() + ")"
         );
 
         return saved;
@@ -332,6 +351,12 @@ public class ReservationService {
                 "New Online Booking",
                 "Online booking confirmed for " + reservation.getGuestName() + " (" + reservation.getCheckInAt() + " to " + reservation.getCheckOutAt() + ")"
         );
+
+        notificationService.notifyRole(
+                Role.MANAGER,
+                "New Online Booking",
+                "Online booking confirmed for " + reservation.getGuestName() + " (" + reservation.getCheckInAt() + " to " + reservation.getCheckOutAt() + ")"
+        );
     }
 
     /** Confirm an expired reservation (cancelled by cleanup) and record the PayPal payment. */
@@ -361,6 +386,13 @@ public class ReservationService {
                 "Expired online booking recovered for " + reservation.getGuestName()
                         + " (" + reservation.getCheckInAt() + " to " + reservation.getCheckOutAt() + ")"
         );
+
+        notificationService.notifyRole(
+                Role.MANAGER,
+                "New Online Booking (Recovered)",
+                "Expired online booking recovered for " + reservation.getGuestName()
+                        + " (" + reservation.getCheckInAt() + " to " + reservation.getCheckOutAt() + ")"
+        );
     }
 
     /** Cancel a PENDING or CONFIRMED reservation. */
@@ -371,6 +403,7 @@ public class ReservationService {
                 && reservation.getStatus() != ReservationStatus.CONFIRMED) {
             throw new IllegalStateException("Only PENDING or CONFIRMED reservations can be cancelled");
         }
+        roomAssignmentService.vacateAllReservationRooms(id);
         reservation.setStatus(ReservationStatus.CANCELLED);
         reservationRepository.save(reservation);
     }

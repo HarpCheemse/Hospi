@@ -6,12 +6,12 @@ import org.springframework.validation.BindingResult;
 
 import java.time.LocalDate;
 
-/** Validator for the offline booking creation form ({@link OfflineBookingForm}). */
+/** Validator for the offline booking creation form ({@link OfflineBookingForm}). Date-of-birth validation is handled by {@code @Past} on the form record. */
 @Component
 public class OfflineBookingFormValidator {
 
     /**
-     * Validate check-in, check-out, date of birth, and room selection.
+     * Validate check-in, check-out, and room selection.
      *
      * @param form          the offline booking form data
      * @param bindingResult binding result to populate with validation failures
@@ -19,7 +19,6 @@ public class OfflineBookingFormValidator {
     public void validate(OfflineBookingForm form, BindingResult bindingResult) {
         validateCheckInAt(form, bindingResult);
         validateCheckOutAt(form, bindingResult);
-        validateDateOfBirth(form, bindingResult);
         validateRoomSelection(form, bindingResult);
     }
 
@@ -37,14 +36,6 @@ public class OfflineBookingFormValidator {
             bindingResult.rejectValue("checkOutAt",
                     "error.checkOutBeforeCheckIn",
                     "Check-out must be after check-in");
-        }
-    }
-
-    private void validateDateOfBirth(OfflineBookingForm form, BindingResult bindingResult) {
-        if (form.guestDateOfBirth() != null && !form.guestDateOfBirth().isBefore(LocalDate.now())) {
-            bindingResult.rejectValue("guestDateOfBirth",
-                    "error.futureDateOfBirth",
-                    "Date of birth must be in the past");
         }
     }
 

@@ -10,6 +10,7 @@ import com.hospi.manage.features.auth.dto.request.ResetPasswordForm;
 import com.hospi.manage.features.auth.dto.request.VerifyOtpForm;
 import com.hospi.manage.features.auth.enums.OtpType;
 import com.hospi.manage.features.auth.service.OtpService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,6 +20,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import static com.hospi.manage.common.constant.Attributes.ERROR;
 import static com.hospi.manage.common.constant.Attributes.FORM;
 import static com.hospi.manage.common.constant.Attributes.SUCCESS;
 
@@ -57,10 +59,9 @@ public class PasswordResetController {
         }
 
         if (!accountRepository.existsByEmail(form.email())) {
-            bindingResult.rejectValue("email",
-                    "notFound",
-                    "No account found with this email");
-            return "auth/forgot-password";
+            redirectAttributes.addFlashAttribute(SUCCESS,
+                    "If an account with this email exists, a password reset link will be sent.");
+            return "redirect:/auth/password/forgot";
         }
 
         String otp = otpService.createOtp(form.email(),
@@ -94,7 +95,7 @@ public class PasswordResetController {
      */
     @PostMapping("/verify-otp")
     public String verifyOtp(@Valid @ModelAttribute(FORM) VerifyOtpForm form, BindingResult bindingResult,
-                            RedirectAttributes redirectAttributes) {
+                            HttpSession session) {
         if (bindingResult.hasErrors()) {
             return "auth/verify-otp";
         }
@@ -112,8 +113,8 @@ public class PasswordResetController {
 
         String token = otpService.issueToken(form.email(),
                 OtpType.PASSWORD_RESET);
-        redirectAttributes.addAttribute("token",
-                token);
+        session.setAttribute("resetToken", token);
+        session.setAttribute("resetEmail", form.email());
         return "redirect:/auth/password/reset";
     }
 
@@ -122,8 +123,9 @@ public class PasswordResetController {
      * invalid or expired.
      */
     @GetMapping("/reset")
-    public String showResetPassword(@RequestParam String token, Model model) {
-        if (!otpService.isValidToken(token)) {
+    public String showResetPassword(HttpSession session, Model model) {
+        String token = (String) session.getAttribute("resetToken");
+        if (token == null || !otpService.isValidToken(token)) {
             return "redirect:/auth/password/forgot";
         }
 
@@ -140,9 +142,12 @@ public class PasswordResetController {
      * invalidate the token, and redirect to login.
      */
     @PostMapping("/reset")
-    public String resetPassword(@RequestParam String token, @Valid @ModelAttribute(FORM) ResetPasswordForm form,
+    public String resetPassword(HttpSession session, @Valid @ModelAttribute(FORM) ResetPasswordForm form,
                                 BindingResult bindingResult, RedirectAttributes redirectAttributes) {
-        if (!otpService.isValidToken(token)) {
+        String token = (String) session.getAttribute("resetToken");
+        if (token == null || !otpService.isValidToken(token)) {
+            redirectAttributes.addFlashAttribute(ERROR,
+                    "Session expired. Please request a new reset.");
             return "redirect:/auth/password/forgot";
         }
 
@@ -159,6 +164,9 @@ public class PasswordResetController {
         accountRepository.save(account);
 
         otpService.invalidateToken(token);
+
+        session.removeAttribute("resetToken");
+        session.removeAttribute("resetEmail");
 
         redirectAttributes.addFlashAttribute(SUCCESS,
                 "Password reset successfully");

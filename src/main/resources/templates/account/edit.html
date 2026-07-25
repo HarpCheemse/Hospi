@@ -62,7 +62,7 @@
                            th:classappend="${#fields.hasErrors('phone')} ? 'input-error' : ''" required>
                 </div>
 
-                <div class="flex flex-col gap-2">
+                <div th:if="${!isAdmin}" class="flex flex-col gap-2">
                     <label class="text-sm font-medium">Role <span class="text-danger">*</span></label>
                     <div th:replace="~{fragments/form-error :: error('role')}"></div>
                     <select th:field="*{role}" class="input"
@@ -71,6 +71,7 @@
                         <option th:each="role : ${roles}" th:value="${role}" th:text="${role}"></option>
                     </select>
                 </div>
+                <input th:if="${isAdmin}" type="hidden" th:field="*{role}">
 
             </div>
         </section>

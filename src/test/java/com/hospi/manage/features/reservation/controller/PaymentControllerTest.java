@@ -107,7 +107,7 @@ class PaymentControllerTest {
         mockMvc.perform(post("/receptionist/reservations/1/payment")
                         .param("paymentMethod", "CASH"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/receptionist/bookings"))
+                .andExpect(redirectedUrl("/receptionist/bookings/1"))
                 .andExpect(flash().attributeExists(SUCCESS));
 
         verify(paymentService).confirmPayment(eq(1L), eq(PaymentMethod.CASH), eq("receptionist@test.com"));
@@ -121,7 +121,7 @@ class PaymentControllerTest {
         mockMvc.perform(post("/receptionist/reservations/1/payment")
                         .param("paymentMethod", "CARD"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/receptionist/bookings"))
+                .andExpect(redirectedUrl("/receptionist/bookings/1"))
                 .andExpect(flash().attributeExists(ERROR));
     }
 }

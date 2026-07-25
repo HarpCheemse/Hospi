@@ -1,5 +1,6 @@
 package com.hospi.manage.features.room.controller;
 
+import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.hotel.entity.Hotel;
 import com.hospi.manage.features.hotel.service.HotelService;
 import com.hospi.manage.features.notification.service.NotificationService;
@@ -171,6 +172,15 @@ class ManagerRoomControllerTest {
         mockMvc.perform(post("/manager/rooms/delete/1").with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/manager/rooms"));
+    }
+
+    @Test
+    void edit_shouldReturn404_whenRoomNotFound() throws Exception {
+        when(roomService.findById(999L)).thenThrow(new ResourceNotFoundException("Room"));
+
+        mockMvc.perform(get("/manager/rooms/999/edit").with(csrf()))
+                .andExpect(status().is(404))
+                .andExpect(view().name("error/404"));
     }
 
     @Test

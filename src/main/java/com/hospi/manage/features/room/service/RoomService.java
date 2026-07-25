@@ -4,6 +4,7 @@ import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.common.utils.SecurityUtils;
 import com.hospi.manage.features.account.enums.Role;
 import com.hospi.manage.features.audit.service.AuditService;
+import com.hospi.manage.features.audit.enums.AuditAction;
 import com.hospi.manage.features.notification.service.NotificationService;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.RoomAssignment;
@@ -150,9 +151,9 @@ public class RoomService {
 
         if (oldCondition != form.conditionStatus()) {
             var action = switch (form.conditionStatus()) {
-                case CLEAN -> "CLEAN_ROOM";
-                case DIRTY -> "DIRTY_ROOM";
-                case MAINTENANCE -> "MAINTENANCE_ROOM";
+                case CLEAN -> AuditAction.CLEAN_ROOM;
+                case DIRTY -> AuditAction.DIRTY_ROOM;
+                case MAINTENANCE -> AuditAction.MAINTENANCE_ROOM;
             };
             auditService.log(
                     SecurityUtils.currentStaffId(),
@@ -206,9 +207,9 @@ public class RoomService {
         }
 
         var action = switch (status) {
-            case CLEAN -> "CLEAN_ROOM";
-            case DIRTY -> "DIRTY_ROOM";
-            case MAINTENANCE -> "MAINTENANCE_ROOM";
+            case CLEAN -> AuditAction.CLEAN_ROOM;
+            case DIRTY -> AuditAction.DIRTY_ROOM;
+            case MAINTENANCE -> AuditAction.MAINTENANCE_ROOM;
         };
         auditService.log(
                 SecurityUtils.currentStaffId(),
@@ -251,7 +252,7 @@ public class RoomService {
         }
 
         List<RoomAssignment> assignments = roomAssignmentRepository
-                .findByRoomIdAndReservation_StatusIn(id, List.of(ReservationStatus.CHECKED_IN));
+                .findByRoomIdAndReservation_StatusIn(id, List.of(ReservationStatus.CHECKED_IN, ReservationStatus.CONFIRMED));
 
         if (assignments.isEmpty()) {
             return RoomOccupancyView.vacant(room);
@@ -267,6 +268,8 @@ public class RoomService {
                 room.getRoomType() != null ? room.getRoomType().getName() : null,
                 OccupancyStatus.OCCUPIED,
                 room.getConditionStatus(),
+                reservation.getId(),
+                reservation.getStatus(),
                 reservation.getGuestName(),
                 reservation.getCheckInAt(),
                 reservation.getCheckOutAt(),

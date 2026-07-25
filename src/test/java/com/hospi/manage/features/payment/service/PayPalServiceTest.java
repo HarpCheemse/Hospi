@@ -9,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.lang.reflect.Method;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PayPalServiceTest {
@@ -109,6 +109,107 @@ class PayPalServiceTest {
 
         RuntimeException ex = assertThrowsRuntimeException(
                 () -> invokeExtractCaptureId(response));
+
+        assertTrue(ex.getMessage().contains("Capture ID not found"));
+    }
+
+    // ========== Public method tests (via spy) ==========
+
+    @Test
+    void createOrder_shouldReturnApprovalUrl_whenPayPalApproves() throws Exception {
+        when(payPalProperties.mode()).thenReturn("sandbox");
+        when(payPalProperties.clientId()).thenReturn("test-client-id");
+        when(payPalProperties.clientSecret()).thenReturn("test-secret");
+
+        var spy = spy(new PayPalService(payPalProperties));
+        String tokenResponse = "{\"access_token\":\"A21.fake_token\"}";
+        String orderResponse = "{\"id\":\"ORDER123\",\"links\":[{\"href\":\"https://paypal.com/checkout/now\",\"rel\":\"approve\"}]}";
+        doReturn(tokenResponse).doReturn(orderResponse).when(spy).readResponse(any());
+
+        String result = spy.createOrder("50.00", "http://return", "http://cancel");
+
+        assertEquals("https://paypal.com/checkout/now", result);
+    }
+
+    @Test
+    void captureOrder_shouldReturnTrue_whenStatusCompleted() throws Exception {
+        when(payPalProperties.mode()).thenReturn("sandbox");
+        when(payPalProperties.clientId()).thenReturn("test-client-id");
+        when(payPalProperties.clientSecret()).thenReturn("test-secret");
+
+        var spy = spy(new PayPalService(payPalProperties));
+        String tokenResponse = "{\"access_token\":\"A21.fake_token\"}";
+        String captureResponse = "{\"status\":\"COMPLETED\"}";
+        doReturn(tokenResponse).doReturn(captureResponse).when(spy).readResponse(any());
+
+        boolean result = spy.captureOrder("ORDER123");
+
+        assertTrue(result);
+    }
+
+    @Test
+    void captureOrder_shouldReturnFalse_whenStatusNotCompleted() throws Exception {
+        when(payPalProperties.mode()).thenReturn("sandbox");
+        when(payPalProperties.clientId()).thenReturn("test-client-id");
+        when(payPalProperties.clientSecret()).thenReturn("test-secret");
+
+        var spy = spy(new PayPalService(payPalProperties));
+        String tokenResponse = "{\"access_token\":\"A21.fake_token\"}";
+        String captureResponse = "{\"status\":\"DECLINED\"}";
+        doReturn(tokenResponse).doReturn(captureResponse).when(spy).readResponse(any());
+
+        boolean result = spy.captureOrder("ORDER123");
+
+        assertFalse(result);
+    }
+
+    @Test
+    void refundOrder_shouldReturnTrue_whenRefundCompleted() throws Exception {
+        when(payPalProperties.mode()).thenReturn("sandbox");
+        when(payPalProperties.clientId()).thenReturn("test-client-id");
+        when(payPalProperties.clientSecret()).thenReturn("test-secret");
+
+        var spy = spy(new PayPalService(payPalProperties));
+        String tokenResponse = "{\"access_token\":\"A21.fake_token\"}";
+        String orderResponse = "{\"purchase_units\":[{\"payments\":{\"captures\":[{\"id\":\"CAPTURE_123\"}]}}]}";
+        String refundResponse = "{\"status\":\"COMPLETED\"}";
+        doReturn(tokenResponse).doReturn(orderResponse).doReturn(refundResponse).when(spy).readResponse(any());
+
+        boolean result = spy.refundOrder("ORDER123");
+
+        assertTrue(result);
+    }
+
+    @Test
+    void refundOrder_shouldReturnFalse_whenRefundFails() throws Exception {
+        when(payPalProperties.mode()).thenReturn("sandbox");
+        when(payPalProperties.clientId()).thenReturn("test-client-id");
+        when(payPalProperties.clientSecret()).thenReturn("test-secret");
+
+        var spy = spy(new PayPalService(payPalProperties));
+        String tokenResponse = "{\"access_token\":\"A21.fake_token\"}";
+        String orderResponse = "{\"purchase_units\":[{\"payments\":{\"captures\":[{\"id\":\"CAPTURE_123\"}]}}]}";
+        String refundResponse = "{\"status\":\"FAILED\"}";
+        doReturn(tokenResponse).doReturn(orderResponse).doReturn(refundResponse).when(spy).readResponse(any());
+
+        boolean result = spy.refundOrder("ORDER123");
+
+        assertFalse(result);
+    }
+
+    @Test
+    void refundOrder_shouldThrowException_whenCaptureIdNotFound() throws Exception {
+        when(payPalProperties.mode()).thenReturn("sandbox");
+        when(payPalProperties.clientId()).thenReturn("test-client-id");
+        when(payPalProperties.clientSecret()).thenReturn("test-secret");
+
+        var spy = spy(new PayPalService(payPalProperties));
+        String tokenResponse = "{\"access_token\":\"A21.fake_token\"}";
+        String orderResponse = "{\"purchase_units\":[{\"payments\":{}}]}";
+        doReturn(tokenResponse).doReturn(orderResponse).when(spy).readResponse(any());
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> spy.refundOrder("ORDER123"));
 
         assertTrue(ex.getMessage().contains("Capture ID not found"));
     }

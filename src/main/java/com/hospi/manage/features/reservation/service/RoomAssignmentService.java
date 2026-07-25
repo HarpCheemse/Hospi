@@ -4,6 +4,7 @@ import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.ReservationDetail;
 import com.hospi.manage.features.reservation.entity.RoomAssignment;
+import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
 import com.hospi.manage.features.reservation.repository.RoomAssignmentRepository;
 import com.hospi.manage.features.room.entity.Room;
@@ -43,6 +44,11 @@ public class RoomAssignmentService {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
 
+        if (reservation.getStatus() != ReservationStatus.CONFIRMED
+                && reservation.getStatus() != ReservationStatus.CHECKED_IN) {
+            return List.of();
+        }
+
         Set<Long> typeIds = reservation.getDetails().stream()
                 .map(d -> d.getRoomType().getId())
                 .collect(Collectors.toSet());
@@ -75,6 +81,11 @@ public class RoomAssignmentService {
 
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
+
+        if (reservation.getStatus() != ReservationStatus.CONFIRMED
+                && reservation.getStatus() != ReservationStatus.CHECKED_IN) {
+            throw new IllegalStateException("Cannot manage room assignments for this reservation status");
+        }
 
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new ResourceNotFoundException("Room"));
@@ -110,6 +121,11 @@ public class RoomAssignmentService {
 
         if (!assignment.getReservation().getId().equals(reservationId)) {
             throw new IllegalArgumentException("Assignment does not belong to this reservation");
+        }
+
+        if (assignment.getReservation().getStatus() != ReservationStatus.CONFIRMED
+                && assignment.getReservation().getStatus() != ReservationStatus.CHECKED_IN) {
+            throw new IllegalStateException("Cannot manage room assignments for this reservation status");
         }
 
         Room room = assignment.getRoom();

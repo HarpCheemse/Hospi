@@ -140,7 +140,7 @@ class ManagerReservationControllerTest {
         when(reservationService.findById(99L)).thenThrow(new ResourceNotFoundException("Reservation"));
 
         mockMvc.perform(get("/manager/reservations/99").with(csrf()))
-                .andExpect(status().isOk())
+                .andExpect(status().is(404))
                 .andExpect(view().name("error/404"));
     }
 

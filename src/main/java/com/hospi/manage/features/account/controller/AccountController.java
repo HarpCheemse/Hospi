@@ -11,8 +11,11 @@ import com.hospi.manage.features.account.enums.Role;
 import com.hospi.manage.features.account.service.AccountService;
 import com.hospi.manage.features.account.validator.AccountValidator;
 import com.hospi.manage.features.audit.service.AuditService;
+import com.hospi.manage.features.audit.enums.AuditAction;
+import com.hospi.manage.core.security.session.AccountPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -79,7 +82,7 @@ public class AccountController {
         }
 
         accountService.createAccount(form);
-        auditService.log(null, SecurityUtils.currentStaffName(), "CREATE", "ACCOUNT", null,
+        auditService.log(null, SecurityUtils.currentStaffName(), AuditAction.CREATE, "ACCOUNT", null,
                 "Created account: " + form.email());
         redirectAttributes.addFlashAttribute(Attributes.SUCCESS, "Account created. Login credentials sent via email.");
         return "redirect:/admin/accounts";
@@ -124,7 +127,7 @@ public class AccountController {
         }
 
         accountService.updateAccount(id, form);
-        auditService.log(null, SecurityUtils.currentStaffName(), "UPDATE", "ACCOUNT", id,
+        auditService.log(null, SecurityUtils.currentStaffName(), AuditAction.UPDATE, "ACCOUNT", id,
                 "Updated account: " + form.email());
         redirectAttributes.addFlashAttribute(Attributes.SUCCESS, "Account updated successfully");
         return "redirect:/admin/accounts";
@@ -132,10 +135,15 @@ public class AccountController {
 
     @PostMapping("/delete/{id}")
     public String deleteAccount(@PathVariable Long id,
+                                @AuthenticationPrincipal AccountPrincipal principal,
                                 RedirectAttributes redirectAttributes) {
+        if (principal != null && id.equals(principal.getAccount().getId())) {
+            redirectAttributes.addFlashAttribute(Attributes.ERROR, "You cannot delete your own account.");
+            return "redirect:/admin/accounts";
+        }
         try {
             accountService.softDelete(id);
-            auditService.log(null, SecurityUtils.currentStaffName(), "DELETE", "ACCOUNT", id, "Deleted account");
+            auditService.log(null, SecurityUtils.currentStaffName(), AuditAction.DELETE, "ACCOUNT", id, "Deleted account");
         } catch (IllegalStateException e) {
             redirectAttributes.addFlashAttribute(Attributes.ERROR, e.getMessage());
             return "redirect:/admin/accounts/" + id;

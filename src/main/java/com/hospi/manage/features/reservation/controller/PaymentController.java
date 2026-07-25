@@ -3,6 +3,7 @@ package com.hospi.manage.features.reservation.controller;
 import com.hospi.manage.common.constant.Attributes;
 import com.hospi.manage.core.security.session.AccountPrincipal;
 import com.hospi.manage.features.audit.service.AuditService;
+import com.hospi.manage.features.audit.enums.AuditAction;
 import com.hospi.manage.features.payment.enums.PaymentMethod;
 import com.hospi.manage.features.payment.service.PaymentService;
 import com.hospi.manage.features.reservation.service.ReservationService;
@@ -43,7 +44,7 @@ public class PaymentController {
             paymentService.confirmPayment(id,
                     paymentMethod,
                     principal.getUsername());
-            auditService.log(principal.getId(), principal.getUsername(), "PAYMENT", "RESERVATION", id,
+            auditService.log(principal.getId(), principal.getUsername(), AuditAction.PAYMENT, "RESERVATION", id,
                     "Payment method: " + paymentMethod);
             redirect.addFlashAttribute(Attributes.SUCCESS,
                     "Payment confirmed successfully. Booking is now confirmed.");
@@ -52,6 +53,6 @@ public class PaymentController {
                     e.getMessage());
         }
 
-        return "redirect:/receptionist/bookings";
+        return "redirect:/receptionist/bookings/" + id;
     }
 }

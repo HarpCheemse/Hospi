@@ -1,6 +1,8 @@
 package com.hospi.manage.features.reservation.controller;
 
 import com.hospi.manage.common.constant.Attributes;
+import com.hospi.manage.features.audit.enums.AuditAction;
+import com.hospi.manage.features.audit.service.AuditService;
 import com.hospi.manage.features.payment.service.PaymentService;
 import com.hospi.manage.features.reservation.dto.request.DateSearchForm;
 import com.hospi.manage.features.reservation.dto.request.OfflineBookingForm;
@@ -11,6 +13,7 @@ import com.hospi.manage.features.reservation.dto.response.ReservationSummaryView
 import com.hospi.manage.features.reservation.dto.response.RoomAssignmentView;
 import com.hospi.manage.features.reservation.dto.response.RoomTypeAvailabilityView;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
+import com.hospi.manage.features.reservation.enums.BookingSource;
 import com.hospi.manage.features.reservation.mapper.ReservationMapper;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.reservation.service.RoomAssignmentService;
@@ -19,11 +22,13 @@ import com.hospi.manage.features.reservation.service.StayingGuestService;
 import com.hospi.manage.features.reservation.validation.DateSearchValidator;
 import com.hospi.manage.features.reservation.validation.OfflineBookingFormValidator;
 import com.hospi.manage.features.room.dto.response.RoomSelection;
+import com.hospi.manage.core.security.session.AccountPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -54,6 +59,7 @@ public class ReceptionistBookingController {
     private final PaymentService paymentService;
     private final StayingGuestService stayingGuestService;
     private final RoomAssignmentService roomAssignmentService;
+    private final AuditService auditService;
 
     private static final int PAGE_SIZE = 10;
 
@@ -80,25 +86,17 @@ public class ReceptionistBookingController {
                 ? List.of(ReservationStatus.valueOf(status))
                 : List.of(ReservationStatus.PENDING, ReservationStatus.CONFIRMED);
 
-        var paged = reservationService.findFiltered(statuses, search, date, PageRequest.of(page, PAGE_SIZE));
+        LocalDate effectiveDate = date;
+        if ("today".equals(scope) && date == null) {
+            effectiveDate = LocalDate.now();
+        }
 
-        var today = LocalDate.now();
-
+        BookingSource sourceEnum = null;
         if (source != null && !source.isBlank()) {
-            var filtered = paged.getContent().stream()
-                    .filter(r -> r.getSource() != null && r.getSource().name().equals(source))
-                    .toList();
-            paged = new org.springframework.data.domain.PageImpl<>(
-                    filtered, PageRequest.of(page, PAGE_SIZE), filtered.size());
+            try { sourceEnum = BookingSource.valueOf(source); } catch (IllegalArgumentException e) { sourceEnum = null; }
         }
 
-        if ("today".equals(scope)) {
-            var filtered = paged.getContent().stream()
-                    .filter(r -> r.getCheckInAt() != null && r.getCheckInAt().equals(today))
-                    .toList();
-            paged = new org.springframework.data.domain.PageImpl<>(
-                    filtered, PageRequest.of(page, PAGE_SIZE), filtered.size());
-        }
+        var paged = reservationService.findFiltered(statuses, search, effectiveDate, sourceEnum, PageRequest.of(page, PAGE_SIZE));
 
         model.addAttribute(Attributes.VIEW,
                 ReservationMapper.toActiveBookingsView(paged, status, date, search));
@@ -109,7 +107,7 @@ public class ReceptionistBookingController {
         model.addAttribute(CONFIRMED_COUNT, reservationService.findByStatus(ReservationStatus.CONFIRMED).size());
         model.addAttribute(ARRIVING_TODAY,
                 reservationService.findByStatus(ReservationStatus.CONFIRMED).stream()
-                        .filter(r -> r.getCheckInAt() != null && r.getCheckInAt().equals(today))
+                        .filter(r -> r.getCheckInAt() != null && r.getCheckInAt().equals(LocalDate.now()))
                         .count());
 
         return "receptionist/reservation/active";
@@ -191,9 +189,12 @@ public class ReceptionistBookingController {
     }
 
     @PostMapping("/{id}/cancel")
-    String cancel(@PathVariable Long id, RedirectAttributes redirect) {
+    String cancel(@PathVariable Long id, RedirectAttributes redirect,
+                  @AuthenticationPrincipal AccountPrincipal principal) {
         try {
             reservationService.cancelReservation(id);
+            auditService.log(principal.getId(), principal.getUsername(), AuditAction.UPDATE,
+                    "RESERVATION", id, "Cancelled reservation");
             redirect.addFlashAttribute(Attributes.SUCCESS, "Reservation cancelled.");
         } catch (IllegalStateException e) {
             log.warn("Cancel failed for reservation {}: {}", id, e.getMessage());
@@ -203,7 +204,8 @@ public class ReceptionistBookingController {
     }
 
     @PostMapping("/{id}/refund")
-    String refund(@PathVariable Long id, RedirectAttributes redirect) {
+    String refund(@PathVariable Long id, RedirectAttributes redirect,
+                  @AuthenticationPrincipal AccountPrincipal principal) {
         var reservation = reservationService.findById(id);
         if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
             redirect.addFlashAttribute(Attributes.ERROR, "Only confirmed reservations can be refunded");
@@ -234,12 +236,15 @@ public class ReceptionistBookingController {
         }
 
         paymentService.markRefunded(reservation, payments);
+        auditService.log(principal.getId(), principal.getUsername(), AuditAction.PAYMENT,
+                "RESERVATION", id, "Refund processed: $" + paymentService.calculateRefund(reservation));
         redirect.addFlashAttribute(Attributes.SUCCESS, "Refund processed: $" + paymentService.calculateRefund(reservation));
         return "redirect:/receptionist/bookings/" + id;
     }
 
     @PostMapping("/{id}/refund/offline")
-    String refundOffline(@PathVariable Long id, RedirectAttributes redirect) {
+    String refundOffline(@PathVariable Long id, RedirectAttributes redirect,
+                         @AuthenticationPrincipal AccountPrincipal principal) {
         var reservation = reservationService.findById(id);
         if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
             redirect.addFlashAttribute(Attributes.ERROR, "Only confirmed reservations can be refunded offline");
@@ -251,33 +256,52 @@ public class ReceptionistBookingController {
             return "redirect:/receptionist/bookings/" + id;
         }
         paymentService.markRefunded(reservation, payments);
+        auditService.log(principal.getId(), principal.getUsername(), AuditAction.PAYMENT,
+                "RESERVATION", id, "Offline refund: $" + paymentService.calculateRefund(reservation));
         redirect.addFlashAttribute(Attributes.SUCCESS, "Offline refund processed: $" + paymentService.calculateRefund(reservation));
         return "redirect:/receptionist/bookings/" + id;
     }
 
     @PostMapping("/{id}/guests/add")
     String addGuest(@PathVariable Long id, @Valid @ModelAttribute("guestForm") StayingGuestForm form,
-                    BindingResult binding, Model model, RedirectAttributes redirect) {
+                    BindingResult binding, Model model, RedirectAttributes redirect,
+                    @AuthenticationPrincipal AccountPrincipal principal) {
         if (binding.hasErrors()) {
             redirect.addFlashAttribute(Attributes.ERROR, "Please fill in all required fields");
             return "redirect:/receptionist/bookings/" + id;
         }
-        stayingGuestService.addGuest(id, form);
-        redirect.addFlashAttribute(Attributes.SUCCESS, "Guest added successfully.");
+        try {
+            stayingGuestService.addGuest(id, form);
+            auditService.log(principal.getId(), principal.getUsername(), AuditAction.CREATE,
+                    "STAYING_GUEST", null, "Added guest to reservation " + id);
+            redirect.addFlashAttribute(Attributes.SUCCESS, "Guest added successfully.");
+        } catch (IllegalStateException e) {
+            redirect.addFlashAttribute(Attributes.ERROR, e.getMessage());
+        }
         return "redirect:/receptionist/bookings/" + id;
     }
 
     @PostMapping("/{id}/guests/{guestId}/delete")
-    String deleteGuest(@PathVariable Long id, @PathVariable Long guestId, RedirectAttributes redirect) {
-        stayingGuestService.deleteGuest(id, guestId);
-        redirect.addFlashAttribute(Attributes.SUCCESS, "Guest removed successfully.");
+    String deleteGuest(@PathVariable Long id, @PathVariable Long guestId, RedirectAttributes redirect,
+                       @AuthenticationPrincipal AccountPrincipal principal) {
+        try {
+            stayingGuestService.deleteGuest(id, guestId);
+            auditService.log(principal.getId(), principal.getUsername(), AuditAction.DELETE,
+                    "STAYING_GUEST", guestId, "Removed guest from reservation " + id);
+            redirect.addFlashAttribute(Attributes.SUCCESS, "Guest removed successfully.");
+        } catch (IllegalStateException e) {
+            redirect.addFlashAttribute(Attributes.ERROR, e.getMessage());
+        }
         return "redirect:/receptionist/bookings/" + id;
     }
 
     @PostMapping("/{id}/rooms/assign")
-    String assignRoom(@PathVariable Long id, @RequestParam Long roomId, RedirectAttributes redirect) {
+    String assignRoom(@PathVariable Long id, @RequestParam Long roomId, RedirectAttributes redirect,
+                      @AuthenticationPrincipal AccountPrincipal principal) {
         try {
             roomAssignmentService.assignRoom(id, roomId);
+            auditService.log(principal.getId(), principal.getUsername(), AuditAction.ASSIGN_ROOM,
+                    "RESERVATION", id, "Assigned room " + roomId);
             redirect.addFlashAttribute(Attributes.SUCCESS, "Room assigned successfully.");
         } catch (IllegalStateException e) {
             redirect.addFlashAttribute(Attributes.ERROR, e.getMessage());
@@ -286,9 +310,16 @@ public class ReceptionistBookingController {
     }
 
     @PostMapping("/{id}/rooms/{assignmentId}/remove")
-    String removeRoom(@PathVariable Long id, @PathVariable Long assignmentId, RedirectAttributes redirect) {
-        roomAssignmentService.removeAssignment(id, assignmentId);
-        redirect.addFlashAttribute(Attributes.SUCCESS, "Room assignment removed successfully.");
+    String removeRoom(@PathVariable Long id, @PathVariable Long assignmentId, RedirectAttributes redirect,
+                      @AuthenticationPrincipal AccountPrincipal principal) {
+        try {
+            roomAssignmentService.removeAssignment(id, assignmentId);
+            auditService.log(principal.getId(), principal.getUsername(), AuditAction.REMOVE_ROOM,
+                    "RESERVATION", id, "Removed room assignment " + assignmentId);
+            redirect.addFlashAttribute(Attributes.SUCCESS, "Room assignment removed successfully.");
+        } catch (IllegalStateException e) {
+            redirect.addFlashAttribute(Attributes.ERROR, e.getMessage());
+        }
         return "redirect:/receptionist/bookings/" + id;
     }
 

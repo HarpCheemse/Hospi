@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import static com.hospi.manage.common.constant.Attributes.ERROR;
+import jakarta.servlet.http.HttpServletResponse;
 
 /** Global exception handler mapping exceptions to error views or redirects with flash messages. */
 @Slf4j
@@ -20,7 +21,8 @@ public class GlobalExceptionHandler {
      * @return the 404 error template view name
      */
     @ExceptionHandler(ResourceNotFoundException.class)
-    public String handleNotFound(ResourceNotFoundException ex, Model model) {
+    public String handleNotFound(ResourceNotFoundException ex, Model model, HttpServletResponse response) {
+        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
         model.addAttribute("resource",
                 ex.getResource());
         return "error/404";

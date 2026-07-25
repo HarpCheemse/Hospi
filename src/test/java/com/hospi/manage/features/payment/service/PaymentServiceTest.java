@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -301,5 +302,67 @@ class PaymentServiceTest {
         BigDecimal refund = paymentService.calculateRefund(reservation);
 
         assertEquals(0, BigDecimal.valueOf(200).compareTo(refund));
+    }
+
+    // --- markRefunded ---
+
+    @Test
+    void markRefunded_shouldSetReservationCancelledAndRecordRefundTimestamps() {
+        SystemConfig config = new SystemConfig();
+        config.setFullRefundWindowHours(24);
+        config.setRefundPercentage(new BigDecimal("50"));
+        when(systemConfigService.getConfig()).thenReturn(config);
+
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setStatus(ReservationStatus.CONFIRMED);
+        reservation.setTotalPrice(BigDecimal.valueOf(300));
+        reservation.setCreatedAt(LocalDateTime.now().minusHours(10));
+
+        Payment alreadyRefunded = new Payment();
+        alreadyRefunded.setId(1L);
+        alreadyRefunded.setRefundedAt(LocalDateTime.now().minusDays(1));
+        alreadyRefunded.setAmount(BigDecimal.valueOf(100));
+
+        Payment notRefunded = new Payment();
+        notRefunded.setId(2L);
+        notRefunded.setRefundedAt(null);
+        notRefunded.setAmount(BigDecimal.valueOf(200));
+
+        List<Payment> payments = List.of(alreadyRefunded, notRefunded);
+
+        paymentService.markRefunded(reservation, payments);
+
+        assertEquals(ReservationStatus.CANCELLED, reservation.getStatus());
+        assertNotNull(notRefunded.getRefundedAt());
+        assertNotNull(notRefunded.getRefundedAmount());
+        verify(paymentRepository, times(1)).save(notRefunded);
+        verify(paymentRepository, never()).save(alreadyRefunded);
+    }
+
+    @Test
+    void markRefunded_shouldSkipAlreadyRefundedPayments() {
+        SystemConfig config = new SystemConfig();
+        config.setFullRefundWindowHours(24);
+        config.setRefundPercentage(new BigDecimal("50"));
+        when(systemConfigService.getConfig()).thenReturn(config);
+
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setStatus(ReservationStatus.CONFIRMED);
+        reservation.setTotalPrice(BigDecimal.valueOf(300));
+        reservation.setCreatedAt(LocalDateTime.now().minusHours(10));
+
+        Payment refunded = new Payment();
+        refunded.setId(1L);
+        refunded.setRefundedAt(LocalDateTime.now().minusDays(1));
+        refunded.setRefundedAmount(BigDecimal.valueOf(100));
+
+        List<Payment> payments = List.of(refunded);
+
+        paymentService.markRefunded(reservation, payments);
+
+        assertEquals(ReservationStatus.CANCELLED, reservation.getStatus());
+        verify(paymentRepository, never()).save(any());
     }
 }

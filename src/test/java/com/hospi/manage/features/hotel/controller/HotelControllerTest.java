@@ -65,6 +65,21 @@ class HotelControllerTest {
     }
 
     @Test
+    void updateDetail_shouldReRender_whenValidationFails() throws Exception {
+        Hotel hotel = new Hotel();
+        hotel.setPictures(new ArrayList<>());
+        when(hotelService.find()).thenReturn(hotel);
+
+        mockMvc.perform(post("/manager/details/edit")
+                        .param("name", "")
+                        .param("address", "")
+                        .param("phone", ""))
+                .andExpect(status().isOk())
+                .andExpect(view().name("hotel/edit"))
+                .andExpect(model().attributeHasFieldErrors("hotelForm", "name"));
+    }
+
+    @Test
     void updateDetail_shouldRedirectWithSuccessFlash() throws Exception {
         Hotel hotel = new Hotel();
         hotel.setPictures(new ArrayList<>());

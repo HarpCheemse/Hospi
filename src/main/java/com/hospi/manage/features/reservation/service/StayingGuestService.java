@@ -3,6 +3,7 @@ package com.hospi.manage.features.reservation.service;
 import com.hospi.manage.common.exception.ResourceNotFoundException;
 import com.hospi.manage.features.reservation.dto.request.StayingGuestForm;
 import com.hospi.manage.features.reservation.entity.StayingGuest;
+import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
 import com.hospi.manage.features.reservation.repository.StayingGuestRepository;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,11 @@ public class StayingGuestService {
     public StayingGuest addGuest(Long reservationId, StayingGuestForm form) {
         var reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
+
+        if (reservation.getStatus() != ReservationStatus.CONFIRMED
+                && reservation.getStatus() != ReservationStatus.CHECKED_IN) {
+            throw new IllegalStateException("Cannot manage guests for this reservation status");
+        }
 
         StayingGuest guest = new StayingGuest();
         guest.setReservation(reservation);
@@ -88,6 +94,11 @@ public class StayingGuestService {
 
         if (!guest.getReservation().getId().equals(reservationId)) {
             throw new IllegalArgumentException("Guest does not belong to this reservation");
+        }
+
+        var status = guest.getReservation().getStatus();
+        if (status != ReservationStatus.CONFIRMED && status != ReservationStatus.CHECKED_IN) {
+            throw new IllegalStateException("Cannot manage guests for this reservation status");
         }
 
         stayingGuestRepository.delete(guest);

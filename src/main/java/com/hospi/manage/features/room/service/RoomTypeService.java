@@ -46,10 +46,11 @@ public class RoomTypeService {
         roomType.setBasePrice(form.basePrice());
         roomType.setActive(true);
 
+        roomType = roomTypeRepository.save(roomType);
         roomTypePictureService.replaceCover(roomType,
                 form.coverImage());
 
-        return roomTypeRepository.save(roomType);
+        return roomType;
     }
 
     private String generateRoomTypeName(RoomCategory category, RoomTier tier) {

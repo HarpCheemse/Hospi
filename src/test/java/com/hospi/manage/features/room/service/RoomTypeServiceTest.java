@@ -71,6 +71,31 @@ class RoomTypeServiceTest {
     }
 
     @Test
+    void createRoomType_shouldCallReplaceCoverAfterSave() throws Exception {
+        RoomTypeCreateForm form = mock(RoomTypeCreateForm.class);
+        when(form.category()).thenReturn(RoomCategory.DOUBLE);
+        when(form.tier()).thenReturn(RoomTier.BASIC);
+        when(form.maxOccupancy()).thenReturn(2);
+        when(form.description()).thenReturn("desc");
+        when(form.features()).thenReturn("wifi");
+        when(form.bedType()).thenReturn(null);
+        when(form.area()).thenReturn(25);
+        when(form.basePrice()).thenReturn(BigDecimal.valueOf(80));
+        when(form.coverImage()).thenReturn(null);
+
+        RoomType saved = new RoomType();
+        saved.setId(1L);
+        when(roomTypeRepository.save(any(RoomType.class))).thenReturn(saved);
+
+        service.createRoomType(form);
+
+        var inOrder = inOrder(roomTypeRepository, roomTypePictureService);
+        inOrder.verify(roomTypeRepository).save(any(RoomType.class));
+        inOrder.verify(roomTypePictureService).replaceCover(any(RoomType.class),
+                eq(null));
+    }
+
+    @Test
     void shouldReturn_whenActiveAndFound() {
         RoomType rt = new RoomType();
         rt.setId(1L);

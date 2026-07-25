@@ -74,14 +74,16 @@ public class ImageCompressionService {
             param.setCompressionQuality(quality);
         }
 
-        writer.write(null,
-                new IIOImage(resized,
-                        null,
-                        null),
-                param);
-
-        ios.close();
-        writer.dispose();
+        try {
+            writer.write(null,
+                    new IIOImage(resized,
+                            null,
+                            null),
+                    param);
+        } finally {
+            ios.close();
+            writer.dispose();
+        }
 
         return baos.toByteArray();
     }

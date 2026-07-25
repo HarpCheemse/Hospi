@@ -1,6 +1,7 @@
 package com.hospi.manage.features.reservation.service;
 
 import com.hospi.manage.common.exception.ResourceNotFoundException;
+import com.hospi.manage.features.guest.dto.BookingDraft;
 import com.hospi.manage.features.reservation.dto.request.OfflineBookingForm;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.ReservationDetail;
@@ -72,7 +73,7 @@ class ReservationServiceTest {
         );
 
         when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(true);
-        when(roomTypeRepository.findById(1L)).thenReturn(Optional.of(roomType));
+        when(roomTypeRepository.findAllById(any())).thenReturn(List.of(roomType));
         when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         Reservation result = reservationService.createReservation(form);
@@ -105,7 +106,7 @@ class ReservationServiceTest {
         );
 
         when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(true);
-        when(roomTypeRepository.findById(1L)).thenReturn(Optional.of(roomType));
+        when(roomTypeRepository.findAllById(any())).thenReturn(List.of(roomType));
         when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         Reservation result = reservationService.createReservation(form);
@@ -128,13 +129,14 @@ class ReservationServiceTest {
         );
 
         when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(true);
+        when(roomTypeRepository.findAllById(any())).thenReturn(List.of());
         when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         Reservation result = reservationService.createReservation(form);
 
         assertTrue(result.getDetails().isEmpty());
         assertEquals(BigDecimal.ZERO, result.getTotalPrice());
-        verify(roomTypeRepository, never()).findById(any());
+        verify(roomTypeRepository).findAllById(any());
     }
 
     @Test
@@ -147,7 +149,7 @@ class ReservationServiceTest {
         );
 
         when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(true);
-        when(roomTypeRepository.findById(999L)).thenReturn(Optional.empty());
+        when(roomTypeRepository.findAllById(any())).thenReturn(List.of());
 
         assertThrows(ResourceNotFoundException.class,
                 () -> reservationService.createReservation(form));
@@ -163,6 +165,7 @@ class ReservationServiceTest {
         );
 
         when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(true);
+        when(roomTypeRepository.findAllById(any())).thenReturn(List.of());
         when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         Reservation result = reservationService.createReservation(form);
@@ -192,8 +195,7 @@ class ReservationServiceTest {
         );
 
         when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(true);
-        when(roomTypeRepository.findById(1L)).thenReturn(Optional.of(rt1));
-        when(roomTypeRepository.findById(2L)).thenReturn(Optional.of(rt2));
+        when(roomTypeRepository.findAllById(any())).thenReturn(List.of(rt1, rt2));
         when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         Reservation result = reservationService.createReservation(form);
@@ -597,5 +599,227 @@ class ReservationServiceTest {
 
         assertThrows(ResourceNotFoundException.class,
                 () -> reservationService.confirmAndAddPayment(999L, BigDecimal.valueOf(100), "ONLINE_BOOKING", "ORDER-123"));
+    }
+
+    // --- createOnlineBookingPending ---
+
+    @Test
+    void createOnlineBookingPending_shouldCreatePendingReservation_whenRoomsAvailable() {
+        BookingDraft draft = new BookingDraft();
+        draft.setDates(new BookingDraft.BookingDates(LocalDate.now().plusDays(1), LocalDate.now().plusDays(4)));
+        draft.setGuest(new BookingDraft.BookingGuest("John", "john@test.com", "1234567890", LocalDate.of(1990, 1, 1), "US"));
+        draft.setRooms(new BookingDraft.BookingRooms(
+                List.of(new BookingDraft.RoomSelection(1L, "Deluxe", 2, BigDecimal.valueOf(100))),
+                BigDecimal.valueOf(600), BigDecimal.valueOf(60), 3));
+
+        RoomType roomType = new RoomType();
+        roomType.setId(1L);
+        roomType.setBasePrice(new BigDecimal("100.00"));
+
+        when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(true);
+        when(roomTypeRepository.findAllById(any())).thenReturn(List.of(roomType));
+        when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        Reservation result = reservationService.createOnlineBookingPending(draft, "KEY123");
+
+        assertEquals(ReservationStatus.PENDING, result.getStatus());
+        assertEquals(BookingSource.ONLINE, result.getSource());
+        assertNotNull(result.getConfirmationCode());
+        assertTrue(result.getConfirmationCode().startsWith("HSP-"));
+        assertEquals("KEY123", result.getPaymentIdempotencyKey());
+        assertEquals("John", result.getGuestName());
+        assertEquals("john@test.com", result.getGuestEmail());
+        assertEquals("1234567890", result.getGuestPhone());
+        assertEquals(LocalDate.of(1990, 1, 1), result.getGuestDateOfBirth());
+        assertEquals("US", result.getGuestNationality());
+        assertEquals(1, result.getDetails().size());
+        assertEquals(2, result.getDetails().get(0).getRoomCount());
+        assertEquals(roomType.getId(), result.getDetails().get(0).getRoomType().getId());
+        verify(reservationRepository).save(result);
+    }
+
+    @Test
+    void createOnlineBookingPending_shouldThrow_whenRoomsNotAvailable() {
+        BookingDraft draft = new BookingDraft();
+        draft.setDates(new BookingDraft.BookingDates(LocalDate.now().plusDays(1), LocalDate.now().plusDays(4)));
+        draft.setGuest(new BookingDraft.BookingGuest("John", "john@test.com", "1234567890", LocalDate.of(1990, 1, 1), "US"));
+        draft.setRooms(new BookingDraft.BookingRooms(
+                List.of(new BookingDraft.RoomSelection(1L, "Deluxe", 2, BigDecimal.valueOf(100))),
+                BigDecimal.valueOf(600), BigDecimal.valueOf(60), 3));
+
+        when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(false);
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class,
+                () -> reservationService.createOnlineBookingPending(draft, "KEY"));
+        assertTrue(ex.getMessage().contains("no longer available"));
+        verify(reservationRepository, never()).save(any());
+    }
+
+    @Test
+    void createOnlineBookingPending_shouldCalculateTotalPriceCorrectly() {
+        BookingDraft draft = new BookingDraft();
+        draft.setDates(new BookingDraft.BookingDates(LocalDate.now().plusDays(1), LocalDate.now().plusDays(4)));
+        draft.setGuest(new BookingDraft.BookingGuest("John", "john@test.com", "1234567890", LocalDate.of(1990, 1, 1), "US"));
+        draft.setRooms(new BookingDraft.BookingRooms(
+                List.of(
+                        new BookingDraft.RoomSelection(1L, "TypeA", 3, BigDecimal.valueOf(100)),
+                        new BookingDraft.RoomSelection(2L, "TypeB", 2, BigDecimal.valueOf(150))
+                ),
+                BigDecimal.valueOf(1800), BigDecimal.valueOf(180), 3));
+
+        RoomType typeA = new RoomType();
+        typeA.setId(1L);
+        typeA.setBasePrice(new BigDecimal("100.00"));
+
+        RoomType typeB = new RoomType();
+        typeB.setId(2L);
+        typeB.setBasePrice(new BigDecimal("150.00"));
+
+        when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(true);
+        when(roomTypeRepository.findAllById(any())).thenReturn(List.of(typeA, typeB));
+        when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        Reservation result = reservationService.createOnlineBookingPending(draft, "KEY");
+
+        assertEquals(0, BigDecimal.valueOf(1800).compareTo(result.getTotalPrice()));
+        assertEquals(2, result.getDetails().size());
+    }
+
+    // --- confirmExpiredReservation ---
+
+    @Test
+    void confirmExpiredReservation_shouldSetConfirmedAndCreatePayment_whenCalled() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setStatus(ReservationStatus.CANCELLED);
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+        when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        reservationService.confirmExpiredReservation(1L, BigDecimal.valueOf(100), "ONLINE_BOOKING", "ORDER123");
+
+        assertEquals(ReservationStatus.CONFIRMED, reservation.getStatus());
+        assertEquals("ORDER123", reservation.getPaymentIdempotencyKey());
+        verify(reservationRepository).save(reservation);
+        verify(paymentRepository).save(any());
+    }
+
+    @Test
+    void confirmExpiredReservation_shouldThrow_whenReservationNotFound() {
+        when(reservationRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> reservationService.confirmExpiredReservation(999L, BigDecimal.valueOf(100), "ONLINE_BOOKING", "ORDER123"));
+    }
+
+    // --- checkIn date guards ---
+
+    @Test
+    void checkIn_shouldThrow_whenBeforeCheckInDate() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setStatus(ReservationStatus.CONFIRMED);
+        reservation.setSource(BookingSource.OFFLINE);
+        reservation.setCheckInAt(LocalDate.now().plusDays(2));
+        reservation.setCheckOutAt(LocalDate.now().plusDays(5));
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+
+        assertThrows(IllegalStateException.class,
+                () -> reservationService.checkIn(1L, LocalDate.now(), null, "receptionist"));
+
+        verify(reservationRepository, never()).save(any());
+    }
+
+    @Test
+    void checkIn_shouldThrow_whenAfterCheckOutDate() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setStatus(ReservationStatus.CONFIRMED);
+        reservation.setSource(BookingSource.OFFLINE);
+        reservation.setCheckInAt(LocalDate.now().minusDays(2));
+        reservation.setCheckOutAt(LocalDate.now().minusDays(1));
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+
+        assertThrows(IllegalStateException.class,
+                () -> reservationService.checkIn(1L, LocalDate.now(), null, "receptionist"));
+
+        verify(reservationRepository, never()).save(any());
+    }
+
+    // --- confirmAndAddPayment branches ---
+
+    @Test
+    void confirmAndAddPayment_shouldReturnSilently_whenAlreadyConfirmed() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setStatus(ReservationStatus.CONFIRMED);
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+
+        reservationService.confirmAndAddPayment(1L, BigDecimal.valueOf(100), "ONLINE_BOOKING", "ORDER-123");
+
+        verify(reservationRepository, never()).save(any());
+        verify(paymentRepository, never()).save(any());
+    }
+
+    @Test
+    void confirmAndAddPayment_shouldThrow_whenStatusNotPendingOrConfirmed() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setStatus(ReservationStatus.CHECKED_IN);
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+
+        assertThrows(IllegalStateException.class,
+                () -> reservationService.confirmAndAddPayment(1L, BigDecimal.valueOf(100), "ONLINE_BOOKING", "ORDER-123"));
+
+        verify(reservationRepository, never()).save(any());
+        verify(paymentRepository, never()).save(any());
+    }
+
+    // --- cancelReservation not found ---
+
+    @Test
+    void cancelReservation_shouldThrow_whenReservationNotFound() {
+        when(reservationRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> reservationService.cancelReservation(99L));
+    }
+
+    // --- extendStay not found ---
+
+    @Test
+    void extendStay_shouldThrow_whenReservationNotFound() {
+        when(reservationRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> reservationService.extendStay(99L, 2));
+    }
+
+    // --- createReservation rooms not available ---
+
+    @Test
+    void createReservation_shouldThrow_whenRoomsNotAvailable() {
+        RoomType roomType = new RoomType();
+        roomType.setId(1L);
+        roomType.setBasePrice(new BigDecimal("200.00"));
+
+        OfflineBookingForm form = new OfflineBookingForm(
+                futureCheckIn, futureCheckOut,
+                "John Doe", "john@example.com", "+1234567890",
+                LocalDate.of(1990, 1, 1), "US",
+                List.of(new RoomSelection(1L, 2))
+        );
+
+        when(roomAvailabilityService.canFulfil(any(), any(), any(), any())).thenReturn(false);
+        when(roomTypeRepository.findAllById(any())).thenReturn(List.of(roomType));
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class,
+                () -> reservationService.createReservation(form));
+        assertTrue(ex.getMessage().contains("no longer available"));
+        verify(reservationRepository, never()).save(any());
     }
 }

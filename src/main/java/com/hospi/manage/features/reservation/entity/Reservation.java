@@ -18,10 +18,11 @@ import java.util.List;
  */
 @Entity
 @Table(
-        name = "reservations",
-        indexes = {
-                @Index(name = "idx_reservation_status_created_at", columnList = "status, created_at")
-        }
+    name = "reservations",
+    indexes = {
+        @Index(name = "idx_reservation_status_created_at", columnList = "status, created_at"),
+        @Index(name = "idx_reservation_status_checkin", columnList = "status, check_in_at")
+    }
 )
 @Getter
 @Setter
