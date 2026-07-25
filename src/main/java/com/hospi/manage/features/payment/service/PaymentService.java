@@ -12,6 +12,7 @@ import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.enums.BookingSource;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
+import com.hospi.manage.features.reservation.service.RoomAssignmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ public class PaymentService {
     private final SystemConfigService systemConfigService;
     private final PayPalService payPalService;
     private final NotificationService notificationService;
+    private final RoomAssignmentService roomAssignmentService;
 
 
     /** Create a PayPal order for the deposit amount. */
@@ -122,7 +124,9 @@ public class PaymentService {
                 paymentRepository.save(p);
             }
         }
+        roomAssignmentService.vacateAllReservationRooms(reservation.getId());
         reservation.setStatus(ReservationStatus.CANCELLED);
+        reservationRepository.save(reservation);
     }
 
     /** Calculate refund amount based on system config (full vs partial refund window). */

@@ -398,6 +398,7 @@ public class ReservationService {
                 && reservation.getStatus() != ReservationStatus.CONFIRMED) {
             throw new IllegalStateException("Only PENDING or CONFIRMED reservations can be cancelled");
         }
+        roomAssignmentService.vacateAllReservationRooms(id);
         reservation.setStatus(ReservationStatus.CANCELLED);
         reservationRepository.save(reservation);
     }
