@@ -44,7 +44,8 @@ public class RoomAssignmentService {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
 
-        if (reservation.getStatus() == ReservationStatus.PENDING) {
+        if (reservation.getStatus() != ReservationStatus.CONFIRMED
+                && reservation.getStatus() != ReservationStatus.CHECKED_IN) {
             return List.of();
         }
 
@@ -81,8 +82,9 @@ public class RoomAssignmentService {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
 
-        if (reservation.getStatus() == ReservationStatus.PENDING) {
-            throw new IllegalStateException("Cannot assign rooms to a pending reservation");
+        if (reservation.getStatus() != ReservationStatus.CONFIRMED
+                && reservation.getStatus() != ReservationStatus.CHECKED_IN) {
+            throw new IllegalStateException("Cannot manage room assignments for this reservation status");
         }
 
         Room room = roomRepository.findById(roomId)
@@ -121,8 +123,9 @@ public class RoomAssignmentService {
             throw new IllegalArgumentException("Assignment does not belong to this reservation");
         }
 
-        if (assignment.getReservation().getStatus() == ReservationStatus.PENDING) {
-            throw new IllegalStateException("Cannot remove rooms from a pending reservation");
+        if (assignment.getReservation().getStatus() != ReservationStatus.CONFIRMED
+                && assignment.getReservation().getStatus() != ReservationStatus.CHECKED_IN) {
+            throw new IllegalStateException("Cannot manage room assignments for this reservation status");
         }
 
         Room room = assignment.getRoom();
