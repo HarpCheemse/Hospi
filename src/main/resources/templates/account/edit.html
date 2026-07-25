@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Account | Hospi</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script src="/js/alpine.min.js" defer></script>
+    <style>[x-cloak] { display: none !important; }</style>
+</head>
+
+<body class="staff-layout">
+
+<div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+
+<main class="staff-page">
+
+    <div th:replace="~{fragments/components/toast :: toast}"></div>
+
+    <header class="staff-page-header">
+        <div class="flex items-center gap-4">
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/user.svg}" alt="">
+            </div>
+            <div>
+                <h1 class="staff-page-title">Edit Account</h1>
+                <p class="page-description">Update account information and role.</p>
+            </div>
+        </div>
+
+        <a th:href="@{'/admin/accounts/' + ${accountId}}" class="btn btn-secondary btn-lg">&larr; Back</a>
+    </header>
+
+    <form th:object="${form}"
+          th:action="@{|/admin/accounts/${accountId}/edit|}"
+          method="post"
+          class="grid grid-cols-2 gap-6"
+          novalidate>
+
+        <section class="card col-span-2">
+            <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
+
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Full Name <span class="text-danger">*</span></label>
+                    <div th:replace="~{fragments/form-error :: error('fullName')}"></div>
+                    <input th:field="*{fullName}" type="text" class="input"
+                           th:classappend="${#fields.hasErrors('fullName')} ? 'input-error' : ''" required>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Email <span class="text-danger">*</span></label>
+                    <div th:replace="~{fragments/form-error :: error('email')}"></div>
+                    <input th:field="*{email}" type="email" class="input"
+                           th:classappend="${#fields.hasErrors('email')} ? 'input-error' : ''" required>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Phone <span class="text-danger">*</span></label>
+                    <div th:replace="~{fragments/form-error :: error('phone')}"></div>
+                    <input th:field="*{phone}" type="text" class="input"
+                           th:classappend="${#fields.hasErrors('phone')} ? 'input-error' : ''" required>
+                </div>
+
+                <div th:if="${!isAdmin}" class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Role <span class="text-danger">*</span></label>
+                    <div th:replace="~{fragments/form-error :: error('role')}"></div>
+                    <select th:field="*{role}" class="input"
+                            th:classappend="${#fields.hasErrors('role')} ? 'input-error' : ''">
+                        <option value="">Select role</option>
+                        <option th:each="role : ${roles}" th:value="${role}" th:text="${role}"></option>
+                    </select>
+                </div>
+                <input th:if="${isAdmin}" type="hidden" th:field="*{role}">
+
+            </div>
+        </section>
+
+        <section class="card col-span-2">
+            <div x-data="{ deleteModalOpen: false }"
+                 class="flex items-center justify-end gap-3 p-5">
+
+                <a th:href="@{'/admin/accounts/' + ${accountId}}" class="btn btn-secondary btn-lg">Cancel</a>
+
+                <button type="button" th:if="${accountId != null}"
+                        @click="deleteModalOpen = true"
+                        class="btn btn-danger btn-lg">Delete</button>
+
+                <button type="submit" class="btn btn-primary btn-lg">Save Changes</button>
+
+                <!-- DELETE MODAL -->
+                <div x-show="deleteModalOpen" x-cloak
+                     class="fixed inset-0 z-50 flex items-center justify-center">
+                    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="deleteModalOpen = false"></div>
+                    <div x-show="deleteModalOpen"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         @click.stop
+                         class="relative mx-4 w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl">
+                        <h2 class="text-lg font-semibold text-foreground">Delete Account</h2>
+                        <p class="mt-2 text-sm text-muted-foreground">
+                            Are you sure you want to delete this account? This action cannot be undone.
+                        </p>
+                        <div class="mt-6 flex justify-end gap-3">
+                            <button type="button" @click="deleteModalOpen = false" class="btn btn-secondary">Cancel</button>
+                            <button type="submit" form="deleteForm" class="btn btn-danger">Delete</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </form>
+
+    <form id="deleteForm"
+          th:action="@{/admin/accounts/delete/{id}(id=${accountId})}"
+          method="post">
+    </form>
+
+</main>
+
+</body>
+</html>

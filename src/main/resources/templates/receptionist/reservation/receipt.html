@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Today's Receipts | Hospi</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="staff-layout">
+
+<div th:replace="~{/fragments/receptionist-sidebar :: sidebar}"></div>
+
+<main class="staff-page">
+
+    <div th:replace="~{fragments/components/toast :: toast}"></div>
+
+    <header class="staff-page-header">
+        <div class="flex items-center gap-4">
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/receipt.svg}" class="h-7 w-7" alt="">
+            </div>
+            <section>
+                <h1 class="staff-page-title">Today's Receipts</h1>
+                <p class="page-description">Check-out receipts for today.</p>
+            </section>
+        </div>
+    </header>
+
+    <section class="card">
+        <div class="p-5">
+            <div th:if="${#lists.isEmpty(view)}" class="py-8 text-center">
+                <img th:src="@{/assets/icons/receipt.svg}" class="mx-auto h-12 w-12 text-muted-foreground opacity-50" alt="">
+                <p class="mt-3 text-sm text-muted-foreground">No check-outs recorded today.</p>
+            </div>
+
+            <table th:if="${!#lists.isEmpty(view)}" class="w-full text-left text-sm">
+                <thead>
+                <tr class="border-b border-border text-muted-foreground">
+                    <th class="pb-3 pr-4 font-medium">Booking</th>
+                    <th class="pb-3 pr-4 font-medium">Guest</th>
+                    <th class="pb-3 pr-4 font-medium">Rooms</th>
+                    <th class="pb-3 pr-4 font-medium">Charges</th>
+                    <th class="pb-3 pr-4 font-medium">Paid</th>
+                    <th class="pb-3 pr-4 font-medium">Time</th>
+                    <th class="pb-3 text-right font-medium">By</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="border-b border-border/50 hover:bg-muted/50 cursor-pointer" th:each="r : ${view}" th:onclick="|window.location='/receptionist/receipts/${r.id}'|">
+                    <td class="py-3 pr-4 font-medium text-foreground" th:text="|#R-${r.id}|">#R-1234</td>
+                    <td class="py-3 pr-4 text-foreground" th:text="${r.guestName}">John Doe</td>
+                    <td class="py-3 pr-4 text-muted-foreground" th:text="${r.roomNumbers}">Deluxe x2</td>
+                    <td class="py-3 pr-4 text-foreground" th:text="|$${#numbers.formatDecimal(r.totalCharges, 1, 2)}|">$1,080.00</td>
+                    <td class="py-3 pr-4 text-success font-medium" th:text="|$${#numbers.formatDecimal(r.amountPaid, 1, 2)}|">$1,080.00</td>
+                    <td class="py-3 pr-4 text-muted-foreground" th:text="${#temporals.format(r.checkedOutAt, 'HH:mm')}">10:30</td>
+                    <td class="py-3 text-right text-muted-foreground" th:text="${r.checkedOutBy}">receptionist</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</main>
+
+</body>
+</html>

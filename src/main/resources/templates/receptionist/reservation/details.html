@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Complete Booking | Hospi</title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+
+</head>
+
+<body class="staff-layout">
+
+<div th:replace="~{/fragments/receptionist-sidebar :: sidebar}"></div>
+
+<main class="staff-page">
+
+    <header class="staff-page-header">
+
+        <div class="flex items-center gap-4">
+
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/calendar-check.svg}" alt="">
+            </div>
+
+            <div>
+                <h1 class="staff-page-title">Complete Booking</h1>
+                <p class="page-description">
+                    Select room types and enter guest details to create the reservation.
+                </p>
+            </div>
+
+        </div>
+
+        <a th:href="@{/receptionist/bookings/create}"
+           class="btn btn-secondary">
+            Change Dates
+        </a>
+
+    </header>
+
+    <form th:action="@{/receptionist/bookings/create/details}"
+          th:object="${form}"
+          method="post"
+          class="flex flex-col gap-6"
+          novalidate>
+
+        <!-- HIDDEN DATE FIELDS -->
+        <input type="hidden" th:field="*{checkInAt}">
+        <input type="hidden" th:field="*{checkOutAt}">
+
+        <!-- DATE BAR -->
+        <section class="card">
+
+            <div class="border-b border-border px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <img th:src="@{/assets/icons/calendar-days.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div>
+                        <h2 class="text-xl font-semibold">Stay Dates</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-5 p-6">
+
+                <div class="flex-1">
+                    <label class="mb-2 block text-sm font-medium text-foreground">
+                        Check-In
+                    </label>
+
+                    <p class="text-foreground"
+                       th:text="${#temporals.format(form.checkInAt, 'dd MMM yyyy')}">
+                        15 Jun 2026
+                    </p>
+                </div>
+
+                <div class="flex-1">
+                    <label class="mb-2 block text-sm font-medium text-foreground">
+                        Check-Out
+                    </label>
+
+                    <p class="text-foreground"
+                       th:text="${#temporals.format(form.checkOutAt, 'dd MMM yyyy')}">
+                        18 Jun 2026
+                    </p>
+                </div>
+
+                <div class="flex-1">
+                    <label class="mb-2 block text-sm font-medium text-foreground">
+                        Duration
+                    </label>
+
+                    <p class="text-foreground"
+                       th:text="${view.nights() + ' nights'}">
+                        3 nights
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ROOM SELECTION -->
+        <section class="card">
+
+            <div class="border-b border-border px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <img th:src="@{/assets/icons/bed-double.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div>
+                        <h2 class="text-xl font-semibold">Select Room Types</h2>
+                        <p class="mt-1 text-sm text-muted-foreground">
+                            Choose how many rooms of each type to book.
+                            <span class="text-muted-foreground">
+                                (<span th:text="${#lists.size(view.roomTypes())}"></span> types available)
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${#fields.hasGlobalErrors()}"
+                 class="mx-6 mt-5 mb-6 rounded-xl border border-danger bg-red-50 px-4 py-3 text-sm text-danger">
+                <p th:each="err : ${#fields.allErrors()}" th:text="${err}"></p>
+            </div>
+
+            <div class="overflow-x-auto">
+
+                <table class="w-full">
+
+                    <thead>
+                    <tr class="border-b border-border text-muted-foreground">
+                        <th class="px-5 py-4 text-left text-sm font-medium">Room Type</th>
+                        <th class="px-5 py-4 text-left text-sm font-medium">Price / Night</th>
+                        <th class="px-5 py-4 text-left text-sm font-medium">Max Guests</th>
+                        <th class="px-5 py-4 text-left text-sm font-medium">Available</th>
+                        <th class="px-5 py-4 text-left text-sm font-medium">Quantity</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+
+                    <tr th:each="rt, stat : ${view.roomTypes()}"
+                        class="border-t border-border">
+
+                        <td class="px-5 py-4">
+                            <p class="font-medium text-foreground"
+                               th:text="${rt.name}">
+                                Deluxe Suite
+                            </p>
+                        </td>
+
+                        <td class="px-5 py-4 text-sm text-foreground"
+                            th:text="'$' + ${rt.basePrice} + '/night'">
+                            $320/night
+                        </td>
+
+                        <td class="px-5 py-4 text-sm text-muted-foreground"
+                            th:text="${rt.maxOccupancy}">
+                            4
+                        </td>
+
+                        <td class="px-5 py-4">
+        <span class="pill-success"
+              th:text="${rt.availableRooms}">
+            8
+        </span>
+                        </td>
+
+                        <td class="px-5 py-4">
+
+                            <input type="hidden"
+                                   th:field="*{roomSelections[__${stat.index}__].roomTypeId}"
+                                   th:value="${rt.roomTypeId}"/>
+
+                            <input type="number"
+                                   th:field="*{roomSelections[__${stat.index}__].roomCount}"
+                                   min="0"
+                                   th:max="${rt.availableRooms}"
+                                   class="input w-24"/>
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr th:if="${#lists.isEmpty(view.roomTypes())}">
+                        <td colspan="5"
+                            class="px-5 py-10 text-center text-muted-foreground">
+                            No rooms available for the selected dates.
+                            <a th:href="@{/receptionist/bookings/create}"
+                               class="block mt-2 text-sm text-primary underline">
+                                Try different dates
+                            </a>
+                        </td>
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+        <!-- GUEST INFORMATION -->
+        <section class="card">
+
+            <div class="border-b border-border px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <img th:src="@{/assets/icons/users.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div>
+                        <h2 class="text-xl font-semibold">Guest Information</h2>
+                        <p class="mt-1 text-sm text-muted-foreground">Enter the guest's details.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-5 p-6">
+
+                <div class="flex flex-col gap-2 col-span-2">
+                    <label class="text-sm font-medium">Full Name <span class="text-danger">*</span></label>
+                    <div th:replace="~{fragments/form-error :: error('guestName')}"></div>
+                    <input type="text"
+                           th:field="*{guestName}"
+                           placeholder="e.g. Nguyen Van A"
+                           class="input">
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Email</label>
+                    <div th:replace="~{fragments/form-error :: error('guestEmail')}"></div>
+                    <input type="email"
+                           th:field="*{guestEmail}"
+                           placeholder="e.g. nguyen@email.com"
+                           class="input">
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Phone <span class="text-danger">*</span></label>
+                    <div th:replace="~{fragments/form-error :: error('guestPhone')}"></div>
+                    <input type="text"
+                           th:field="*{guestPhone}"
+                           placeholder="e.g. +84 912 345 678"
+                           class="input">
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Date of Birth <span class="text-danger">*</span></label>
+                    <div th:replace="~{fragments/form-error :: error('guestDateOfBirth')}"></div>
+                    <input type="date"
+                           th:field="*{guestDateOfBirth}"
+                           class="input">
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Nationality</label>
+                    <div th:replace="~{fragments/form-error :: error('guestNationality')}"></div>
+                    <input type="text"
+                           th:field="*{guestNationality}"
+                           placeholder="e.g. Vietnamese"
+                           class="input">
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ACTIONS -->
+        <section class="card">
+            <div class="flex items-center justify-end gap-3 p-5">
+
+                <a th:href="@{/receptionist/bookings}"
+                   class="btn btn-secondary">
+                    Cancel
+                </a>
+
+                <button type="submit"
+                        class="btn btn-primary">
+                    Create Booking
+                </button>
+
+            </div>
+        </section>
+
+    </form>
+
+</main>
+
+</body>
+</html>

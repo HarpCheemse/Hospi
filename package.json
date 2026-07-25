@@ -1,0 +1,29 @@
+{
+  "name": "hospi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "src/test"
+  },
+  "scripts": {
+    "css:build": "tailwindcss -i ./src/main/frontend/app.css -o ./src/main/resources/static/css/app.css --minify",
+    "css:watch": "tailwindcss -i ./src/main/frontend/app.css -o ./src/main/resources/static/css/app.css --watch",
+    "test": "echo \"No JavaScript tests configured\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HarpCheemse/Hospi.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/HarpCheemse/Hospi/issues"
+  },
+  "homepage": "https://github.com/HarpCheemse/Hospi#readme",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.0"
+  }
+}

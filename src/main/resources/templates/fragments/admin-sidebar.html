@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+<aside th:fragment="sidebar"
+       class="flex h-full w-64 flex-col border-r border-border bg-surface p-5">
+
+    <!-- LOGO -->
+    <div class="mb-8 flex items-center gap-3">
+
+        <div class="h-9 w-9 rounded-lg bg-primary"></div>
+
+        <span class="text-lg font-semibold text-foreground">
+            Hospi
+        </span>
+
+    </div>
+
+    <!-- NAVIGATION -->
+    <nav class="flex-1 overflow-y-auto space-y-1 text-sm">
+
+        <!-- DASHBOARD -->
+        <a th:href="@{/admin}"
+           class="flex items-center gap-3 rounded-lg p-2"
+           th:classappend="${activeSidebar == 'DASHBOARD'}
+           ? ' bg-primary/10 text-primary font-medium'
+           : ' hover:bg-muted text-foreground'">
+
+            <img th:src="@{/assets/icons/layout-grid.svg}" alt="Dashboard">
+
+            Dashboard
+
+        </a>
+
+        <!-- STAFF ACCOUNTS -->
+        <a th:href="@{/admin/accounts}"
+           class="flex items-center gap-3 rounded-lg p-2"
+           th:classappend="${activeSidebar == 'STAFF_ACCOUNTS'}
+           ? ' bg-primary/10 text-primary font-medium'
+           : ' hover:bg-muted text-foreground'">
+
+            <img th:src="@{/assets/icons/user.svg}" alt="Staff Accounts">
+
+            Staff Accounts
+
+        </a>
+
+        <!-- SYSTEM CONFIGS -->
+        <a th:href="@{/admin/configs}"
+           class="flex items-center gap-3 rounded-lg p-2"
+           th:classappend="${activeSidebar == 'SYSTEM_CONFIGS'}
+           ? ' bg-primary/10 text-primary font-medium'
+           : ' hover:bg-muted text-foreground'">
+
+            <img th:src="@{/assets/icons/settings.svg}" alt="System Configs">
+
+            System Configs
+
+        </a>
+
+        <!-- AUDIT LOGS -->
+        <a th:href="@{/admin/audit-logs}"
+           class="flex items-center gap-3 rounded-lg p-2"
+           th:classappend="${activeSidebar == 'AUDIT_LOGS'}
+           ? ' bg-primary/10 text-primary font-medium'
+           : ' hover:bg-muted text-foreground'">
+
+            <img th:src="@{/assets/icons/clipboard-check.svg}" alt="Audit Logs">
+
+            Audit Logs
+
+        </a>
+
+        <!-- NOTIFICATIONS -->
+        <a th:href="@{/notifications}"
+           class="flex items-center justify-between rounded-lg p-2"
+           th:classappend="${activeSidebar == 'NOTIFICATIONS'}
+           ? ' bg-primary/10 text-primary font-medium'
+           : ' hover:bg-muted text-foreground'">
+
+            <div class="flex items-center gap-3">
+
+                <img th:src="@{/assets/icons/bell.svg}" alt="Notifications">
+
+                Notifications
+
+            </div>
+
+            <span class="pill-notification" th:if="${unreadNotificationCount > 0}" th:text="${unreadNotificationCount}">0</span>
+
+        </a>
+
+    </nav>
+
+    <!-- LOGOUT -->
+    <div class="mt-auto pt-4">
+
+        <form th:action="@{/logout}"
+              method="post"
+              novalidate>
+
+            <button type="submit"
+                    class="btn btn-danger w-full justify-start">
+
+                <img th:src="@{/assets/icons/log-out.svg}"
+                     class="h-5 w-5 brightness-0 invert"
+                     alt="Logout">
+
+                Logout
+            </button>
+
+        </form>
+
+    </div>
+
+</aside>
+
+</body>
+</html>

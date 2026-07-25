@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Offline Booking | Hospi</title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<body class="staff-layout">
+
+<div th:replace="~{/fragments/receptionist-sidebar :: sidebar}"></div>
+
+<main class="staff-page">
+
+    <header class="staff-page-header">
+
+        <div class="flex items-center gap-4">
+
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/calendar-check.svg}" alt="">
+            </div>
+
+            <div>
+                <h1 class="staff-page-title">Offline Booking</h1>
+                <p class="page-description">
+                    Choose check-in and check-out dates to see available room types.
+                </p>
+            </div>
+
+        </div>
+
+        <a th:href="@{/receptionist/bookings}"
+           class="btn btn-secondary">
+            Back
+        </a>
+
+    </header>
+
+    <form th:action="@{/receptionist/bookings/create}"
+          th:object="${form}"
+          method="post"
+          class="flex flex-col gap-6"
+          novalidate>
+
+        <section class="card">
+
+            <div class="border-b border-border px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <img th:src="@{/assets/icons/calendar-days.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                    <div>
+                        <h2 class="text-xl font-semibold">Select Stay Dates</h2>
+                        <p class="mt-1 text-sm text-muted-foreground">Choose the check-in and check-out dates to see available room types.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-end gap-5 p-6">
+
+                <div class="flex flex-col gap-2 flex-1">
+                    <label class="text-sm font-medium">Check-In Date <span class="text-danger">*</span></label>
+                    <div th:replace="~{fragments/form-error :: error('checkInAt')}"></div>
+                    <input type="date"
+                           th:field="*{checkInAt}"
+                           class="input">
+                </div>
+
+                <div class="flex flex-col gap-2 flex-1">
+                    <label class="text-sm font-medium">Check-Out Date <span class="text-danger">*</span></label>
+                    <div th:replace="~{fragments/form-error :: error('checkOutAt')}"></div>
+                    <input type="date"
+                           th:field="*{checkOutAt}"
+                           class="input">
+                </div>
+
+                <button type="submit"
+                        class="btn btn-primary btn-lg">
+                    Search
+                </button>
+
+            </div>
+
+        </section>
+
+    </form>
+
+</main>
+
+</body>
+</html>

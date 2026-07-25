@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account | Hospi</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<body class="staff-layout">
+
+<div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+
+<main class="staff-page">
+
+    <div th:replace="~{fragments/components/toast :: toast}"></div>
+
+    <header class="staff-page-header">
+        <div class="flex items-center gap-4">
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/user-plus.svg}" alt="">
+            </div>
+            <div>
+                <h1 class="staff-page-title">Create Account</h1>
+                <p class="page-description">Add a new staff account.</p>
+            </div>
+        </div>
+
+        <a th:href="@{/admin/accounts}" class="btn btn-secondary btn-lg">&larr; Back</a>
+    </header>
+
+    <!-- FORM -->
+    <form th:object="${form}"
+          th:action="@{/admin/accounts/create}"
+          method="post"
+          class="grid grid-cols-2 gap-6"
+          novalidate>
+
+        <!-- ACCOUNT DETAILS -->
+        <section class="card col-span-2">
+            <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
+
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Full Name <span class="text-danger">*</span></label>
+                    <div th:replace="~{fragments/form-error :: error('fullName')}"></div>
+                    <input th:field="*{fullName}"
+                           type="text" class="input"
+                           th:classappend="${#fields.hasErrors('fullName')} ? 'input-error' : ''"
+                           required>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Email <span class="text-danger">*</span></label>
+                    <div th:replace="~{fragments/form-error :: error('email')}"></div>
+                    <input th:field="*{email}"
+                           type="email" class="input"
+                           th:classappend="${#fields.hasErrors('email')} ? 'input-error' : ''"
+                           required>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Phone <span class="text-danger">*</span></label>
+                    <div th:replace="~{fragments/form-error :: error('phone')}"></div>
+                    <input th:field="*{phone}"
+                           type="text" class="input"
+                           th:classappend="${#fields.hasErrors('phone')} ? 'input-error' : ''"
+                           required>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium">Role <span class="text-danger">*</span></label>
+                    <div th:replace="~{fragments/form-error :: error('role')}"></div>
+                    <select th:field="*{role}" class="input"
+                            th:classappend="${#fields.hasErrors('role')} ? 'input-error' : ''">
+                        <option value="">Select role</option>
+                        <option th:each="role : ${view.roles()}"
+                                th:value="${role}" th:text="${role}"></option>
+                    </select>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ACTIONS -->
+        <section class="card col-span-2">
+            <div class="flex items-center justify-end gap-3 p-5">
+                <a th:href="@{/admin/accounts}" class="btn btn-secondary btn-lg">Cancel</a>
+                <button type="submit" class="btn btn-primary btn-lg">Create Account</button>
+            </div>
+        </section>
+
+    </form>
+
+</main>
+
+</body>
+</html>

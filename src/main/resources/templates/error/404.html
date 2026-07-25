@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 Not Found | Hospi</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="flex min-h-screen items-center justify-center bg-background">
+
+<section class="mx-auto w-full max-w-md px-4">
+
+    <div class="card p-10 text-center">
+
+        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-warning/10">
+            <svg class="h-8 w-8 text-warning"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="2"
+                 viewBox="0 0 24 24"
+                 stroke-linecap="round"
+                 stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+        </div>
+
+        <h1 class="text-5xl font-bold text-foreground">404</h1>
+
+        <p class="mt-2 text-lg font-semibold text-foreground">
+            Page Not Found
+        </p>
+
+        <p class="mt-2 text-sm text-muted-foreground">
+            The page you're looking for doesn't exist or has been moved.
+        </p>
+
+        <div th:if="${resource}"
+             class="mt-4 rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground font-mono">
+            Resource you are trying to access: <span class="text-foreground" th:text="${resource}">unknown</span>
+        </div>
+
+        <p class="mt-4 text-xs text-muted-foreground">
+            If you followed a link to reach this page,
+            it may be broken or expired.
+            <br>
+            Please contact
+            <a href="mailto:support@hospi.com"
+               class="text-primary hover:underline">
+                support@hospi.com
+            </a>
+            if you need assistance.
+        </p>
+
+        <div class="mt-8 flex items-center justify-center gap-3">
+
+            <button onclick="history.back()"
+                    class="btn btn-secondary">
+                Go Back
+            </button>
+
+            <a href="/"
+               class="btn btn-primary">
+                Back to Home
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+</body>
+</html>

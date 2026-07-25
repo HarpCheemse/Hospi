@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking Confirmed | Hospi Hotel</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-background text-text flex flex-col min-h-screen pt-24">
+
+  <div th:replace="~{guest/layout :: header('book')}"></div>
+
+  <main class="flex-grow">
+
+    <section class="py-20">
+      <div class="mx-auto max-w-xl px-6 text-center">
+
+        <!-- Success Icon -->
+        <div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
+          <svg class="h-10 w-10 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 6 9 17l-5-5"></path>
+          </svg>
+        </div>
+
+        <h1 class="text-4xl md:text-5xl font-bold font-display text-text mb-4">Booking Confirmed!</h1>
+        <p class="text-sm text-muted-foreground mb-8 max-w-md mx-auto">
+          Your booking has been confirmed. A confirmation email with your booking code has been sent to your email address.
+        </p>
+
+        <!-- Booking Code -->
+        <section class="card-elevated p-8 mb-8">
+          <p class="text-xs font-semibold uppercase tracking-widest text-muted-foreground-foreground mb-2">
+            Your Booking Code
+          </p>
+          <p class="text-3xl md:text-4xl font-bold font-display text-primary tracking-widest"
+             th:text="${bookingCode}">
+            HSP-A1B2C3
+          </p>
+          <p class="mt-3 text-xs text-muted-foreground">
+            Please present this code at check-in. A confirmation email has been sent.
+          </p>
+        </section>
+
+        <a th:href="@{/my-booking}"
+           class="btn btn-primary btn-lg">
+          Track Your Booking
+        </a>
+
+        <a th:href="@{/}"
+           class="btn btn-secondary btn-lg">
+          Back to Home
+        </a>
+
+      </div>
+    </section>
+
+  </main>
+
+  <div th:replace="~{guest/layout :: footer}"></div>
+
+</body>
+</html>

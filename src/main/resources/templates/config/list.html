@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Configuration | Hospi</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script src="/js/alpine.min.js" defer></script>
+    <style>[x-cloak] { display: none !important; }</style>
+</head>
+
+<body class="staff-layout">
+
+<div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+
+<main class="staff-page">
+
+    <div th:replace="~{fragments/components/toast :: toast}"></div>
+
+    <!-- HEADER -->
+    <div class="staff-page-header">
+
+        <div class="flex items-center gap-4">
+
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/settings.svg}" alt="">
+            </div>
+
+            <div>
+                <h1 class="staff-page-title">System Configuration</h1>
+                <p class="page-description">Review hotel financial settings and booking rules.</p>
+            </div>
+
+        </div>
+
+        <a th:href="@{/admin/configs/edit}"
+           class="btn btn-primary btn-lg">Edit Configuration</a>
+
+    </div>
+
+    <!-- FINANCIAL SETTINGS -->
+    <section class="card">
+
+        <div class="border-b border-border px-6 py-5">
+            <div class="flex items-center gap-3">
+                <img th:src="@{/assets/icons/circle-dollar-sign.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                <div>
+                    <h2 class="text-xl font-semibold">Financial Settings</h2>
+                    <p class="mt-1 text-sm text-muted-foreground">Tax, deposits, and fees.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
+
+            <div>
+                <p class="text-sm text-muted-foreground">Tax Rate</p>
+                <p class="mt-1 font-medium" th:text="${configs.taxRate + '%'}">0%</p>
+            </div>
+
+            <div>
+                <p class="text-sm text-muted-foreground">Default Deposit Percentage</p>
+                <p class="mt-1 font-medium" th:text="${configs.defaultDepositPercentage + '%'}">0%</p>
+            </div>
+
+            <div>
+                <p class="text-sm text-muted-foreground">Late Checkout Fee</p>
+                <p class="mt-1 font-medium" th:text="${configs.lateCheckoutFee}">0</p>
+            </div>
+
+            <div>
+                <p class="text-sm text-muted-foreground">Extra Guest Fee</p>
+                <p class="mt-1 font-medium" th:text="${configs.extraGuestFee}">0</p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- BOOKING RULES -->
+    <section class="card mt-6">
+
+        <div class="border-b border-border px-6 py-5">
+            <div class="flex items-center gap-3">
+                <img th:src="@{/assets/icons/calendar-days.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                <div>
+                    <h2 class="text-xl font-semibold">Booking Rules</h2>
+                    <p class="mt-1 text-sm text-muted-foreground">Reservation limits and cancellation policies.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
+
+            <div>
+                <p class="text-sm text-muted-foreground">Pending Booking Expiry</p>
+                <p class="mt-1 font-medium" th:text="${configs.pendingBookingExpiryMinutes + ' minutes'}">30 minutes</p>
+            </div>
+
+            <div>
+                <p class="text-sm text-muted-foreground">Cancellation Before Check-in</p>
+                <p class="mt-1 font-medium" th:text="${configs.cancellationHoursBeforeCheckin + ' hours'}">24 hours</p>
+            </div>
+
+            <div>
+                <p class="text-sm text-muted-foreground">Maximum Booking Days</p>
+                <p class="mt-1 font-medium" th:text="${configs.maximumBookingDays}">30</p>
+            </div>
+
+            <div>
+                <p class="text-sm text-muted-foreground">Maximum Rooms Per Booking</p>
+                <p class="mt-1 font-medium" th:text="${configs.maximumRoomPerBook}">5</p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- CANCELLATION & REFUND -->
+    <section class="card mt-6">
+
+        <div class="border-b border-border px-6 py-5">
+            <div class="flex items-center gap-3">
+                <img th:src="@{/assets/icons/clipboard-check.svg}" class="h-5 w-5 text-primary opacity-80" alt="">
+                <div>
+                    <h2 class="text-xl font-semibold">Cancellation &amp; Refund</h2>
+                    <p class="mt-1 text-sm text-muted-foreground">Refund policy for confirmed bookings.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
+
+            <div>
+                <p class="text-sm text-muted-foreground">Refund Percentage</p>
+                <p class="mt-1 font-medium" th:text="${configs.refundPercentage + '%'}">50%</p>
+            </div>
+
+            <div>
+                <p class="text-sm text-muted-foreground">Full Refund Window</p>
+                <p class="mt-1 font-medium" th:text="${configs.fullRefundWindowHours + ' hours'}">24 hours</p>
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+</body>
+</html>

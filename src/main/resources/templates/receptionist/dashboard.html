@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Receptionist Dashboard | Hospi</title>
+
+    <link rel="stylesheet"
+          th:href="@{/css/app.css}" />
+</head>
+
+<body class="staff-layout">
+
+    <!-- SIDEBAR -->
+    <div th:replace="~{/fragments/receptionist-sidebar :: sidebar}"></div>
+
+    <!-- MAIN -->
+    <main class="staff-page">
+
+        <!-- HEADER -->
+        <header class="staff-page-header">
+
+            <div class="flex items-center gap-4">
+                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    <img th:src="@{/assets/icons/layout-grid.svg}" class="h-7 w-7" alt="">
+                </div>
+                <section>
+                    <h1 class="staff-page-title">
+                        Receptionist Dashboard
+                    </h1>
+                    <p class="page-description">
+                        Handle arrivals, departures, guest requests, and daily front-desk work
+                    </p>
+                </section>
+            </div>
+
+            <section>
+                <div class="user-pill">
+
+                    <div class="avatar">
+                        RC
+                    </div>
+
+                    <div>
+                        <p class="text-sm font-medium text-foreground">Reception Desk</p>
+                        <p class="text-xs text-muted-foreground">Morning Shift</p>
+                    </div>
+
+                </div>
+            </section>
+
+        </header>
+
+        <!-- QUICK ACTIONS -->
+        <section class="mb-6 grid grid-cols-4 gap-4">
+
+            <a th:href="@{/receptionist/bookings}" class="btn btn-primary flex items-center gap-3 p-4">
+                <img class="h-8 w-8" th:src="@{/assets/icons/door-open.svg}" alt=""/>
+                <span class="font-semibold">New Check-In</span>
+            </a>
+
+            <a th:href="@{/receptionist/stays}" class="btn btn-secondary flex items-center gap-3 p-4">
+                <img class="h-8 w-8" th:src="@{/assets/icons/key-round.svg}" alt=""/>
+                <span class="font-semibold">Check-Out</span>
+            </a>
+
+            <a th:href="@{/receptionist/bookings/create}" class="btn btn-secondary flex items-center gap-3 p-4">
+                <img class="h-8 w-8" th:src="@{/assets/icons/user-plus.svg}" alt=""/>
+                <span class="font-semibold">Walk-In Guest</span>
+            </a>
+
+            <a th:href="@{/receptionist/bookings}" class="btn btn-secondary flex items-center gap-3 p-4">
+                <img class="h-8 w-8" th:src="@{/assets/icons/search.svg}" alt=""/>
+                <span class="font-semibold">Find Booking</span>
+            </a>
+
+        </section>
+
+        <!-- STATS -->
+        <section class="mb-6 grid grid-cols-4 gap-4">
+
+            <div class="card-compact">
+                <p class="text-sm text-muted-foreground">Arrivals Today</p>
+                <p class="mt-1 text-2xl font-bold text-foreground" th:text="${view.arrivalsToday}">48</p>
+                <p class="mt-1 pill-success" th:text="|${view.checkedInToday} already checked in|">31 already checked in</p>
+            </div>
+
+            <div class="card-compact">
+                <p class="text-sm text-muted-foreground">Departures Today</p>
+                <p class="mt-1 text-2xl font-bold text-foreground" th:text="${view.departuresToday}">26</p>
+                <p class="mt-1 pill-muted" th:text="|${view.departuresToday - view.waitingCheckoutToday} checked out, ${view.waitingCheckoutToday} waiting|">9 waiting for checkout</p>
+            </div>
+
+            <div class="card-compact">
+                <p class="text-sm text-muted-foreground">Available Rooms</p>
+                <p class="mt-1 text-2xl font-bold text-foreground" th:text="${view.availableRooms}">32</p>
+                <p class="mt-1 pill-success" th:text="|${view.cleanedReadyRooms} cleaned and ready|">12 cleaned and ready</p>
+            </div>
+
+            <div class="card-compact">
+                <p class="text-sm text-muted-foreground">Payments Due Today</p>
+                <p class="mt-1 text-2xl font-bold text-foreground" th:text="'$' + ${#numbers.formatDecimal(view.pendingPaymentsAmount, 1, 'COMMA', 0, 'POINT')}">$4,820</p>
+                <p class="mt-1 pill-danger" th:text="|${view.invoicesNeedFollowUp} bookings pending pay|">6 invoices need follow-up</p>
+            </div>
+
+        </section>
+
+        <!-- CONTENT GRID -->
+        <section class="grid grid-cols-12 gap-4">
+
+            <!-- LEFT -->
+            <section class="col-span-8 flex flex-col gap-4">
+
+                <!-- TODAY QUEUE -->
+                <section class="card-panel">
+
+                    <div class="mb-4 flex items-center justify-between">
+
+                        <div>
+                            <h2 class="text-lg font-semibold text-foreground">Today Queue</h2>
+                            <p class="text-sm text-muted-foreground">
+                                Guests that need front-desk action
+                            </p>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <a th:href="@{/receptionist/bookings?scope=today}" class="btn btn-accent btn-sm">
+                                View All Today
+                            </a>
+                            <a th:href="@{/receptionist/bookings}" class="btn btn-secondary btn-sm">
+                                View All
+                            </a>
+                        </div>
+
+                    </div>
+
+                    <div class="flex flex-col gap-4">
+
+                        <div th:if="${#lists.isEmpty(view.todayQueue)}" class="p-6 text-center text-muted-foreground">
+                            No tasks in queue for today.
+                        </div>
+
+                        <!-- ARRIVALS -->
+                        <div th:if="${!#lists.isEmpty(view.todayQueue.?[actionType == 'Check-In'])}" class="flex flex-col gap-2">
+
+                            <div class="flex items-center gap-2">
+                                <div class="h-2 w-2 rounded-full bg-success"></div>
+                                <h3 class="text-sm font-semibold text-foreground">Arrivals</h3>
+                            </div>
+
+                            <!-- Header row -->
+                            <div class="grid grid-cols-12 gap-3 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                                <span class="col-span-2">Guest</span>
+                                <span class="col-span-5">Room Type</span>
+                                <span class="col-span-2">Room</span>
+                                <span class="col-span-1">Payment</span>
+                                <span class="col-span-2"></span>
+                            </div>
+
+                            <div th:each="item : ${view.todayQueue.?[actionType == 'Check-In']}" class="grid grid-cols-12 items-center gap-3 rounded-lg border border-border bg-background p-3 text-sm">
+
+                                <div class="col-span-2">
+                                    <p class="font-semibold text-foreground" th:text="${item.guestName}">Nguyen Minh Anh</p>
+                                    <p class="text-xs text-muted-foreground" th:text="|#${item.confirmationCode} · ${item.guestCount} guests|">#BK-1048 · 2 guests</p>
+                                </div>
+
+                                <p class="col-span-5 truncate text-muted-foreground" th:text="${item.roomTypeNames}">Deluxe</p>
+                                <p class="col-span-2 text-muted-foreground" th:text="${item.roomNumbers}">204</p>
+
+                                <span class="col-span-1 text-xs"
+                                      th:classappend="${item.paymentStatus == 'Paid' ? 'pill-success' : item.paymentStatus == 'Partial' ? 'pill-warning' : 'pill-danger'}"
+                                      th:text="${item.paymentStatus}">Pending</span>
+
+                                <a th:href="@{|/receptionist/reservations/${item.reservationId}/checkin|}"
+                                   class="col-span-2 rounded-lg bg-primary px-3 py-1 text-center text-sm text-white hover:bg-primary/95 transition">
+                                    Check In
+                                </a>
+
+                            </div>
+                        </div>
+
+                        <!-- DEPARTURES -->
+                        <div th:if="${!#lists.isEmpty(view.todayQueue.?[actionType == 'Check-Out'])}" class="flex flex-col gap-2">
+
+                            <div class="flex items-center gap-2">
+                                <div class="h-2 w-2 rounded-full bg-warning"></div>
+                                <h3 class="text-sm font-semibold text-foreground">Departures</h3>
+                            </div>
+
+                            <!-- Header row -->
+                            <div class="grid grid-cols-12 gap-3 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                                <span class="col-span-2">Guest</span>
+                                <span class="col-span-5">Room Type</span>
+                                <span class="col-span-2">Room</span>
+                                <span class="col-span-1">Payment</span>
+                                <span class="col-span-2"></span>
+                            </div>
+
+                            <div th:each="item : ${view.todayQueue.?[actionType == 'Check-Out']}" class="grid grid-cols-12 items-center gap-3 rounded-lg border border-border bg-background p-3 text-sm">
+
+                                <div class="col-span-2">
+                                    <p class="font-semibold text-foreground" th:text="${item.guestName}">Nguyen Minh Anh</p>
+                                    <p class="text-xs text-muted-foreground" th:text="|#${item.confirmationCode} · ${item.guestCount} guests|">#BK-1048 · 2 guests</p>
+                                </div>
+
+                                <p class="col-span-5 truncate text-muted-foreground" th:text="${item.roomTypeNames}">Deluxe</p>
+                                <p class="col-span-2 text-muted-foreground" th:text="${item.roomNumbers}">204</p>
+
+                                <span class="col-span-1 text-xs"
+                                      th:classappend="${item.paymentStatus == 'Paid' ? 'pill-success' : item.paymentStatus == 'Partial' ? 'pill-warning' : 'pill-danger'}"
+                                      th:text="${item.paymentStatus}">Pending</span>
+
+                                <a th:href="@{|/receptionist/stays/${item.reservationId}/checkout|}"
+                                   class="col-span-2 rounded-lg bg-primary px-3 py-1 text-center text-sm text-white hover:bg-primary/95 transition">
+                                    Check Out
+                                </a>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+            </section>
+
+            <!-- RIGHT -->
+            <section class="col-span-4 flex flex-col gap-4">
+
+                <!-- ROOM READINESS -->
+                <section class="card-panel">
+
+                    <div class="mb-4 flex items-center justify-between">
+
+                        <div>
+                            <h2 class="text-lg font-semibold text-foreground">Room Readiness</h2>
+                            <p class="text-sm text-muted-foreground">Housekeeping handoff</p>
+                        </div>
+
+                        <img class="h-8 w-8" th:src="@{/assets/icons/clipboard-check.svg}" alt=""/>
+
+                    </div>
+
+                    <div class="flex flex-col gap-2 text-sm">
+
+                        <div class="flex items-center justify-between rounded-lg bg-background p-3">
+                            <span class="text-foreground">Cleaned</span>
+                            <span class="font-semibold text-success" th:text="${view.cleanedCount}">12</span>
+                        </div>
+
+                        <div class="flex items-center justify-between rounded-lg bg-background p-3">
+                            <span class="text-foreground">Dirty</span>
+                            <span class="font-semibold text-danger" th:text="${view.dirtyCount}">14</span>
+                        </div>
+
+                        <div class="flex items-center justify-between rounded-lg bg-background p-3">
+                            <span class="text-foreground">Out of Service</span>
+                            <span class="font-semibold text-foreground" th:text="${view.maintenanceCount}">3</span>
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </section>
+
+        </section>
+
+    </main>
+
+</body>
+</html>

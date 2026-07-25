@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>500 Internal Server Error | Hospi</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script defer src="/js/alpine.min.js"></script>
+</head>
+<body class="flex min-h-screen items-center justify-center bg-background">
+
+<section class="mx-auto w-full max-w-md px-4">
+
+    <div class="card p-10 text-center">
+
+        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-danger/10">
+            <svg class="h-8 w-8 text-danger" fill="none" stroke="currentColor" stroke-width="2"
+                 viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+        </div>
+
+        <h1 class="text-5xl font-bold text-foreground">500</h1>
+
+        <p class="mt-2 text-lg font-semibold text-foreground">
+            Internal Server Error
+        </p>
+
+        <p class="mt-2 text-sm text-muted-foreground">
+            Something went wrong on our end.
+            Please try again later.
+        </p>
+
+        <p class="mt-4 text-xs text-muted-foreground">
+            If this persists, please contact the administrator at
+            <a href="mailto:support@hospi.com"
+               class="text-primary hover:underline">
+                support@hospi.com
+            </a>.
+        </p>
+
+        <div th:if="${message} or ${trace}"
+             x-data="{ showLogs: false }"
+             class="mt-6">
+
+            <button type="button"
+                    @click="showLogs = !showLogs"
+                    class="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors">
+                <span x-show="!showLogs">Show error details</span>
+                <span x-show="showLogs">Hide error details</span>
+            </button>
+
+            <div x-show="showLogs"
+                 x-transition:enter="transition ease-out duration-150"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 class="mt-4 rounded-lg bg-gray-900 p-4 text-left">
+
+                <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                    Error Log
+                </p>
+
+                <pre th:if="${message}"
+                      class="mb-2 overflow-auto rounded bg-gray-800 p-2 text-xs text-green-400 font-mono"
+                      th:text="${message}"></pre>
+
+                <pre th:if="${trace}"
+                      class="max-h-64 overflow-auto rounded bg-gray-800 p-2 text-xs text-gray-300 font-mono leading-relaxed"
+                      th:text="${trace}"></pre>
+
+            </div>
+
+        </div>
+
+        <div class="mt-8 flex items-center justify-center gap-3">
+
+            <a href="/" class="btn btn-secondary">
+                Back to Home
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+</body>
+</html>

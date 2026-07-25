@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Room Types | Hospi</title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<body class="staff-layout">
+
+<div th:replace="~{fragments/manager-sidebar :: sidebar}"></div>
+
+<main class="staff-page">
+
+    <div class="staff-page-header">
+
+        <div class="flex items-center gap-4">
+
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/bed-double.svg}" alt="">
+            </div>
+
+            <div>
+                <h1 class="staff-page-title">Room Types</h1>
+                <p class="page-description">
+                    Manage room categories, pricing, occupancy, and operational availability.
+                </p>
+            </div>
+
+        </div>
+
+        <a th:href="@{/manager/room-types/create}"
+           class="btn btn-primary">
+            + Room Type
+        </a>
+
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div th:if="${#lists.isEmpty(view)}" class="card-empty">
+        <p class="text-muted-foreground">No room types found. Create your first one.</p>
+    </div>
+
+    <!-- GRID -->
+    <div th:if="${!#lists.isEmpty(view)}"
+         class="grid grid-cols-3 gap-5">
+
+        <!-- CARD -->
+        <div th:each="rt : ${view}"
+             role="button"
+             tabindex="0"
+             th:attr="data-detail-url=@{'/manager/room-types/' + ${rt.id}}"
+             onclick="window.location.href=this.getAttribute('data-detail-url')"
+             class="overflow-hidden card cursor-pointer transition hover:shadow-md">
+
+            <!-- IMAGE -->
+            <div th:if="${rt.coverPictureId() != null}"
+                 class="flex h-48 items-center justify-center overflow-hidden border-b border-border bg-background">
+                <img th:src="@{/room-type-picture/{id}(id=${rt.coverPictureId()})}"
+                     alt=""
+                     class="h-full w-full object-cover">
+            </div>
+
+            <div th:if="${rt.coverPictureId() == null}"
+                 class="flex h-48 items-center justify-center border-b border-border bg-background text-muted-foreground">
+                No Image
+            </div>
+
+            <div class="p-5">
+                <!-- TOP -->
+                <div class="mb-3 flex items-start justify-between">
+
+                    <div>
+                        <h2 class="text-lg font-semibold"
+                            th:text="${rt.name}">
+                            Room Name
+                        </h2>
+
+                        <p class="text-sm text-muted-foreground"
+                           th:text="${rt.maxOccupancy + ' guests · ' + rt.area + 'm²'}">
+                            Bed · Area
+                        </p>
+                    </div>
+
+                    <a th:href="@{'/manager/room-types/{id}/edit'(id=${rt.id})}"
+                       onclick="event.stopPropagation()"
+                       class="btn btn-ghost btn-xs px-2">
+                        <img th:src="@{/assets/icons/pen.svg}" alt="Edit" class="h-4 w-4">
+                    </a>
+                </div>
+
+                <!-- STATS -->
+                <div class="mb-4 grid grid-cols-2 gap-3">
+
+                    <div class="rounded-lg border border-border bg-background p-3">
+                        <p class="text-xs text-muted-foreground">Rooms</p>
+                        <p class="text-lg font-semibold"
+                           th:text="${rt.roomCount}">
+                            0
+                        </p>
+                    </div>
+
+                    <div class="rounded-lg border border-border bg-background p-3">
+                        <p class="text-xs text-muted-foreground">Base Price</p>
+                        <p class="text-lg font-semibold"
+                           th:text="|$${rt.basePrice}|">
+                            $0
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Accounts | Hospi</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<body class="staff-layout">
+
+<div th:replace="~{/fragments/admin-sidebar :: sidebar}"></div>
+
+<main class="staff-page">
+
+    <div th:replace="~{fragments/components/toast :: toast}"></div>
+
+    <header class="staff-page-header">
+        <div class="flex items-center gap-4">
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/user.svg}" alt="">
+            </div>
+            <div>
+                <h1 class="staff-page-title">Staff Accounts</h1>
+                <p class="page-description">Review and manage user accounts.</p>
+            </div>
+        </div>
+
+        <a th:href="@{/admin/accounts/create}" class="btn btn-primary btn-lg">
+            + Create Account
+        </a>
+    </header>
+
+    <section class="overflow-hidden card">
+
+        <!-- SEARCH BAR -->
+        <form th:action="@{/admin/accounts}" method="get"
+              class="flex items-center gap-4 p-5 border-b border-border">
+            <input type="hidden" name="role" th:value="${view.activeRole()}">
+            <input type="text" name="search" placeholder="Search by name or email..."
+                   class="input flex-1" th:value="${view.filterSearch()}">
+            <a th:href="@{/admin/accounts(role=${view.activeRole()})}"
+               class="btn btn-ghost btn-sm">Clear</a>
+        </form>
+
+        <!-- ROLE TABS -->
+        <div class="flex gap-1 border-b border-border px-5 pt-3 pb-0">
+            <a th:href="@{/admin/accounts(search=${view.filterSearch()})}"
+               th:classappend="${view.activeRole() == null} ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'"
+               class="px-3 py-2 text-sm font-medium border-b-2 transition">All</a>
+            <a th:each="r : ${view.roles()}"
+               th:href="@{/admin/accounts(role=${r}, search=${view.filterSearch()})}"
+               th:classappend="${view.activeRole() == r.name()} ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'"
+               class="px-3 py-2 text-sm font-medium border-b-2 transition"
+               th:text="${r.name()}">ADMIN</a>
+        </div>
+
+        <!-- TABLE -->
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-muted">
+                    <tr>
+                        <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">Account</th>
+                        <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">Phone</th>
+                        <th class="px-5 py-4 text-left text-sm font-medium text-muted-foreground">Role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="account : ${view.accounts()}"
+                        class="border-t border-border hover:bg-muted/50 cursor-pointer"
+                        th:attr="data-id=${account.id()}"
+                        x-data
+                        x-on:click="window.location.href = '/admin/accounts/' + $el.dataset.id">
+
+                        <td class="px-5 py-4">
+                            <p class="font-medium text-foreground" th:text="${account.fullName()}">John Smith</p>
+                            <p class="text-sm text-muted-foreground max-w-[200px] truncate"
+                               th:text="${account.email()}">john@hospi.com</p>
+                        </td>
+
+                        <td class="px-5 py-4 text-sm text-muted-foreground" th:text="${account.phone()}">1234567890</td>
+
+                        <td class="px-5 py-4">
+                            <span class="pill-muted text-xs" th:text="${account.role()}">MANAGER</span>
+                        </td>
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(view.accounts())}">
+                        <td colspan="3" class="px-5 py-10 text-center text-muted-foreground">
+                            No accounts found.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </section>
+
+</main>
+
+<script src="/js/alpine.min.js" defer></script>
+</body>
+</html>

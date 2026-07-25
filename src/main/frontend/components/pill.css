@@ -1,0 +1,30 @@
+@layer components {
+    .pill {
+        @apply inline-block px-2 py-0.5 text-xs rounded-full;
+    }
+
+    .pill-success {
+        @apply inline-block px-2 py-0.5 text-xs rounded-full
+        bg-success/10 text-success;
+    }
+
+    .pill-warning {
+        @apply inline-block px-2 py-0.5 text-xs rounded-full
+        bg-warning/10 text-warning;
+    }
+
+    .pill-danger {
+        @apply inline-block px-2 py-0.5 text-xs rounded-full
+        bg-danger/10 text-danger;
+    }
+
+    .pill-muted {
+        @apply inline-block px-2 py-0.5 text-xs rounded-full
+        bg-muted/40 text-muted-foreground;
+    }
+
+    .pill-notification {
+        @apply inline-block px-2 py-0.5 text-xs rounded-full font-bold
+        bg-danger text-white shadow-md shadow-danger/50;
+    }
+}

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Verify Otp</title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<body class="min-h-screen flex items-center justify-center bg-background">
+
+    <div class="w-full max-w-md bg-surface p-8 rounded-2xl shadow-lg">
+
+    <!-- OTP Form -->
+    <form th:action="@{/auth/password/verify-otp}"
+          th:object="${form}"
+          method="post" class="space-y-4" novalidate>
+
+        <div class="mb-6 text-center">
+            <div class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/shield-check.svg}" alt="" class="h-6 w-6">
+            </div>
+            <h1 class="text-2xl font-bold">Verify OTP</h1>
+            <p class="mt-1 text-sm text-muted-foreground">
+                We sent a 6-digit code to:
+                <span class="font-medium" th:text="*{email}"></span>
+            </p>
+        </div>
+        <div>
+            <label class="mb-2 block text-sm font-medium">
+                OTP Code <span class="text-danger">*</span>
+            </label>
+            <input type="text"
+                   th:field="*{otp}"
+                   maxlength="6"
+                   inputmode="numeric"
+                   class="input text-center tracking-widest text-lg"
+                   placeholder="123456"
+                   required>
+            <input type="hidden" th:field="*{email}">
+            <div th:replace="~{fragments/form-error :: error('otp')}"></div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex gap-3 mt-6">
+
+            <!-- Verify -->
+            <button type="submit"
+                    class="btn btn-primary flex-1">
+                Verify
+            </button>
+
+            <!-- Back -->
+            <a th:href="@{/auth/password/forgot}"
+               class="btn btn-secondary flex-1">
+                Back
+            </a>
+
+        </div>
+    </form>
+
+</div>
+
+</body>
+</html>

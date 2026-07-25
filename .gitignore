@@ -1,0 +1,54 @@
+# Build output
+build/
+dist/
+target/
+
+# NetBeans
+nbproject/private/
+nbbuild/
+nbdist/
+nb-configuration.xml
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# Compiled classes
+*.class
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+src/main/webapp/WEB-INF/lib
+src/main/webapp/assets/icons
+src/main/resources/application.yml
+src/main/resources/application-dev.yml
+src/main/resources/application-prod.yml
+
+node_modules
+
+.vscode
+src/main/resources/static/css/app.css
+docs/SDS.md
+docs/tables.sql
+docs/srs/
+docs/sds/
+docs/database/
+docs/test/
+docs/weekly_report/
+docs/ai_usage/
+docs/eval/
+docs/architecture/
+docs/known-gaps.md
+docs/~*
+docs/*.xlsx
+docs/learning/
+backups/
+src/main/resources/static/assets/images/

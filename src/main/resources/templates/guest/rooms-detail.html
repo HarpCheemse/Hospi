@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${roomType.name} + ' | Hospi Hotel'">Room Detail | Hospi Hotel</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script src="/js/alpine.min.js" defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>[x-cloak] { display: none !important; }</style>
+</head>
+<body class="bg-background text-text flex flex-col min-h-screen pt-24">
+
+<div th:replace="~{guest/layout :: header('rooms')}"></div>
+
+<main class="flex-grow mx-auto max-w-7xl px-6 py-12">
+    <nav class="mb-8 text-sm text-muted-foreground font-sans">
+        <a th:href="@{/rooms}" class="hover:text-primary transition-colors">&larr; Back to Rooms</a>
+    </nav>
+
+    <div class="grid gap-10 lg:grid-cols-5 items-start">
+        <div class="lg:col-span-3 h-[28rem] lg:h-[34rem]">
+            <div th:replace="~{fragments/components :: roomPictureCarousel(
+                ${roomType.allPictureIds()},
+                @{/images/hotel2.jpg},
+                ${roomType.name}
+            )}"></div>
+        </div>
+
+        <div class="lg:col-span-2 lg:sticky lg:top-28">
+            <div class="rounded-2xl border border-border/80 bg-surface p-8 shadow-card">
+                <div class="mb-4">
+                    <span class="inline-block rounded-md bg-primary-soft/40 px-3 py-1 text-[10px] font-semibold tracking-wider text-primary uppercase mb-2"
+                          th:text="${roomType.category}">Standard</span>
+                    <h1 class="text-3xl font-bold font-display text-text" th:text="${roomType.name}">Deluxe Room</h1>
+                </div>
+
+                <div class="mb-6 pb-6 border-b border-border/50">
+                    <span class="text-3xl font-bold text-primary" th:text="'$' + ${roomType.basePrice} + ' / night'">$189 / night</span>
+                </div>
+
+                <div class="mb-6">
+                    <h2 class="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">About This Room</h2>
+                    <p class="text-sm leading-relaxed" th:text="${roomType.description}">Room description goes here.</p>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 mb-6 p-4 rounded-xl bg-background border border-border/50">
+                    <div class="text-center">
+                        <p class="text-xs text-muted-foreground">Bed Type</p>
+                        <p class="text-sm font-semibold mt-1" th:text="${roomType.bedType}">King</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-xs text-muted-foreground">Area</p>
+                        <p class="text-sm font-semibold mt-1" th:text="${roomType.area} + ' m²'">32 m²</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-xs text-muted-foreground">Max Guests</p>
+                        <p class="text-sm font-semibold mt-1" th:text="${roomType.maxOccupancy}">2</p>
+                    </div>
+                </div>
+
+                <div class="mb-6" th:if="${roomType.features != null}">
+                    <h2 class="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Amenities</h2>
+                    <div class="flex flex-wrap gap-2">
+                        <span th:each="feature : ${#strings.arraySplit(roomType.features, ',')}"
+                              class="rounded-full bg-accent/20 px-3 py-1.5 text-xs font-semibold tracking-brand uppercase text-ink"
+                              th:text="${#strings.trim(feature)}">Free WiFi</span>
+                    </div>
+                </div>
+
+                <a th:href="@{/book}"
+                   class="block text-center rounded-xl bg-primary px-10 py-5 text-lg font-bold text-white shadow-lg hover:opacity-90 transition-opacity tracking-wide">
+                    Reserve This Room
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{guest/layout :: footer}"></div>
+
+</body>
+</html>

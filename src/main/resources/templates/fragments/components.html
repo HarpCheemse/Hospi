@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+<div th:fragment="statCard(label, value, change, tone)"
+     class="rounded-xl border border-border bg-surface p-4 shadow-card">
+    <p class="text-sm text-muted-foreground" th:text="${label}">Label</p>
+    <p class="mt-1 text-2xl font-bold" th:text="${value}">0</p>
+    <p class="mt-1 text-xs"
+       th:classappend="${tone == 'positive'} ? ' text-green-600' : (${tone == 'negative'} ? ' text-danger' : ' text-accent')"
+       th:text="${change}">Change</p>
+</div>
+
+<section th:fragment="panel(title, subtitle, action, content)"
+         class="rounded-xl border border-border bg-surface p-5 shadow-card">
+    <div class="mb-4 flex items-center justify-between">
+        <div>
+            <h2 class="text-lg font-semibold" th:text="${title}">Panel Title</h2>
+            <p class="text-sm text-muted-foreground" th:text="${subtitle}">Panel subtitle</p>
+        </div>
+        <div th:replace="${action} ?: ~{}"></div>
+    </div>
+    <div th:replace="${content} ?: ~{}"></div>
+</section>
+
+<button th:fragment="button(label, variant)"
+        type="button"
+        class="rounded-lg px-3 py-1 text-sm transition"
+        th:classappend="${variant == 'primary'} ? ' bg-primary text-white shadow-card hover:opacity-90' : ' border border-border text-text hover:bg-background'"
+        th:text="${label}">
+    Button
+</button>
+
+<div th:fragment="userPill(initials, name, role)"
+     class="flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-2 shadow-card">
+    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-semibold text-white"
+         th:text="${initials}">JD</div>
+    <div>
+        <p class="text-sm font-medium text-text" th:text="${name}">John Doe</p>
+        <p class="text-xs text-muted-foreground" th:text="${role}">Manager</p>
+    </div>
+</div>
+
+<div th:fragment="metricTile(label, value)"
+     class="rounded-lg border border-border bg-background p-3">
+    <p class="text-sm text-muted-foreground" th:text="${label}">Label</p>
+    <p class="text-lg font-semibold" th:text="${value}">0</p>
+</div>
+
+<div th:fragment="activityItem(title, time, tone)"
+     class="flex items-start gap-3">
+    <div class="mt-2 h-2 w-2 rounded-full"
+         th:classappend="${tone == 'success'} ? ' bg-green-500' : (${tone == 'warning'} ? ' bg-yellow-500' : ' bg-primary')"></div>
+    <div>
+        <p class="text-sm font-medium" th:text="${title}">Activity title</p>
+        <p class="text-xs text-muted-foreground" th:text="${time}">Just now</p>
+    </div>
+</div>
+
+<section th:fragment="roomPictureCarousel(pictureIds, fallbackUrl, altText)"
+         class="relative w-full h-full overflow-hidden rounded-2xl bg-surface-muted">
+    <img th:if="${#lists.isEmpty(pictureIds)}"
+         th:src="${fallbackUrl}"
+         th:alt="${altText}"
+         class="h-full w-full object-cover"/>
+    <img th:if="${#lists.size(pictureIds) == 1}"
+         th:each="picId : ${pictureIds}"
+         th:src="@{'/room-type-picture/' + ${picId}}"
+         th:alt="${altText}"
+         class="h-full w-full object-cover"/>
+    <div th:if="${#lists.size(pictureIds) > 1}" class="relative w-full h-full">
+        <script th:inline="javascript">
+            var __carouselIds = /*[[${pictureIds}]]*/ [];
+        </script>
+        <div x-data="{ ids: __carouselIds, currentSlide: 0 }" class="absolute inset-0">
+            <template x-for="(id, idx) in ids" :key="id">
+                <div x-show="currentSlide === idx"
+                     x-cloak
+                     class="absolute inset-0 transition-opacity duration-500">
+                    <img x-bind:src="'/room-type-picture/' + id"
+                         th:alt="${altText}"
+                         class="h-full w-full object-cover"/>
+                </div>
+            </template>
+            <button type="button"
+                    @click="currentSlide = currentSlide > 0 ? currentSlide - 1 : ids.length - 1"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-text shadow-md hover:bg-white transition-colors">
+                <svg class="size-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <button type="button"
+                    @click="currentSlide = currentSlide < ids.length - 1 ? currentSlide + 1 : 0"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-text shadow-md hover:bg-white transition-colors">
+                <svg class="size-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                <template x-for="(id, idx) in ids" :key="idx">
+                    <button type="button"
+                            @click="currentSlide = idx"
+                            class="h-2.5 w-2.5 rounded-full transition-all duration-200"
+                            x-bind:class="idx === currentSlide ? 'bg-white w-6' : 'bg-white/50'">
+                    </button>
+                </template>
+            </div>
+        </div>
+    </div>
+</section>
+
+</body>
+</html>

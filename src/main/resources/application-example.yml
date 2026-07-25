@@ -1,0 +1,30 @@
+spring:
+  mail:
+    host:
+    port:
+    username:
+    password:
+    properties:
+      mail:
+        smtp:
+          auth:
+          starttls:
+            enable:
+  datasource:
+    url:
+    username:
+    password:
+    driver-class-name:
+  jpa:
+    hibernate:
+      ddl-auto:
+    show-sql:
+
+paypal:
+  client-id:
+  client-secret:
+  mode:
+
+app:
+  security:
+    remember-me-key:

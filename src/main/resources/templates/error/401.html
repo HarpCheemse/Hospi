@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>401 Unauthorized | Hospi</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="flex min-h-screen items-center justify-center bg-background">
+
+<section class="mx-auto w-full max-w-md px-4">
+
+    <div class="card p-10 text-center">
+
+        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-danger/10">
+            <svg class="h-8 w-8 text-danger" fill="none" stroke="currentColor" stroke-width="2"
+                 viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+        </div>
+
+        <h1 class="text-5xl font-bold text-foreground">401</h1>
+
+        <p class="mt-2 text-lg font-semibold text-foreground">
+            Unauthorized Access
+        </p>
+
+        <p class="mt-2 text-sm text-muted-foreground">
+            You don't have permission to access this page.
+            Please log in with the correct credentials.
+        </p>
+
+        <p class="mt-4 text-xs text-muted-foreground">
+            If you believe this is a mistake,
+            please contact the administrator at
+            <a href="mailto:support@hospi.com"
+               class="text-primary hover:underline">
+                support@hospi.com
+            </a>.
+        </p>
+
+        <div class="mt-8 flex items-center justify-center gap-3">
+
+            <a href="/login" class="btn btn-primary">
+                Go to Login
+            </a>
+
+            <a href="/" class="btn btn-secondary">
+                Back to Home
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications | Hospi</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script src="/js/alpine.min.js" defer></script>
+</head>
+
+<body class="staff-layout">
+
+<!-- SIDEBAR -->
+<aside th:replace="~{fragments/manager-sidebar :: sidebar}"></aside>
+
+<!-- MAIN -->
+<main class="staff-page">
+
+    <!-- HEADER -->
+    <header class="staff-page-header">
+        <div class="flex items-center gap-4">
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <img th:src="@{/assets/icons/bell.svg}" alt="">
+            </div>
+            <div>
+                <h1 class="staff-page-title">Notifications</h1>
+                <p class="page-description">System notifications for managers</p>
+            </div>
+        </div>
+    </header>
+
+    <section class="card-panel">
+        <div th:replace="~{fragments/notification-list :: list}"></div>
+    </section>
+
+</main>
+
+
+</body>
+</html>

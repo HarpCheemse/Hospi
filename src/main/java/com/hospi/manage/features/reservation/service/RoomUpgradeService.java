@@ -1,0 +1,118 @@
+package com.hospi.manage.features.reservation.service;
+
+import com.hospi.manage.common.exception.ResourceNotFoundException;
+import com.hospi.manage.features.reservation.entity.Reservation;
+import com.hospi.manage.features.reservation.entity.ReservationDetail;
+import com.hospi.manage.features.reservation.enums.ReservationStatus;
+import com.hospi.manage.features.reservation.repository.ReservationRepository;
+import com.hospi.manage.features.room.entity.RoomType;
+import com.hospi.manage.features.room.enums.OccupancyStatus;
+import com.hospi.manage.features.room.repository.RoomRepository;
+import com.hospi.manage.features.room.repository.RoomTypeRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+
+/** Service for room swaps — change one unit of a room type to a higher-tier type. */
+@Service
+@RequiredArgsConstructor
+public class RoomUpgradeService {
+
+    private final ReservationRepository reservationRepository;
+    private final RoomTypeRepository roomTypeRepository;
+    private final RoomRepository roomRepository;
+
+    /** Return room types available for upgrade from the given current type. */
+    public List<RoomType> getUpgradeOptions(Reservation reservation, Long currentRoomTypeId) {
+        var detail = reservation.getDetails().stream()
+                .filter(d -> d.getRoomType().getId().equals(currentRoomTypeId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Room type not found on reservation"));
+
+        return roomTypeRepository.findByActiveTrue().stream()
+                .filter(rt -> rt.getBasePrice().compareTo(detail.getBasePrice()) > 0)
+                .filter(rt -> !rt.getId().equals(currentRoomTypeId))
+                .filter(rt -> !roomRepository
+                        .findByRoomTypeIdAndOccupancyStatusAndActiveTrue(rt.getId(), OccupancyStatus.VACANT)
+                        .isEmpty())
+                .toList();
+    }
+
+    /** Swap one unit from currentRoomType to newRoomType. Splits the detail if roomCount > 1. */
+    @Transactional
+    public void swapOne(Long reservationId, Long currentRoomTypeId, Long newRoomTypeId) {
+        var reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation"));
+
+        if (reservation.getStatus() != ReservationStatus.CONFIRMED
+                && reservation.getStatus() != ReservationStatus.CHECKED_IN) {
+            throw new IllegalStateException("Only confirmed or checked-in reservations can be swapped");
+        }
+
+        var newRoomType = roomTypeRepository.findById(newRoomTypeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Room type"));
+
+        var detail = reservation.getDetails().stream()
+                .filter(d -> d.getRoomType().getId().equals(currentRoomTypeId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Room type not found on reservation"));
+
+        var oldBasePrice = detail.getBasePrice();
+        if (newRoomType.getBasePrice().compareTo(oldBasePrice) <= 0) {
+            throw new IllegalStateException("New room type must have a higher price than the current one");
+        }
+        if (reservation.getCheckInAt() == null || reservation.getCheckOutAt() == null) {
+            throw new IllegalStateException("Reservation has no dates");
+        }
+
+        long remainingNights = reservation.getStatus() == ReservationStatus.CHECKED_IN
+                ? ChronoUnit.DAYS.between(LocalDate.now(), reservation.getCheckOutAt())
+                : ChronoUnit.DAYS.between(reservation.getCheckInAt(), reservation.getCheckOutAt());
+
+        if (remainingNights <= 0) {
+            throw new IllegalStateException("No remaining nights for swap");
+        }
+
+        var delta = newRoomType.getBasePrice().subtract(oldBasePrice)
+                .multiply(BigDecimal.valueOf(remainingNights));
+
+        // Reduce the source detail
+        if (detail.getRoomCount() > 1) {
+            detail.setRoomCount(detail.getRoomCount() - 1);
+            detail.setTotalPrice(detail.getBasePrice()
+                    .multiply(BigDecimal.valueOf(detail.getRoomCount()))
+                    .multiply(BigDecimal.valueOf(remainingNights)));
+        } else {
+            reservation.getDetails().remove(detail);
+        }
+
+        // Check if target room type already exists — merge instead of creating new
+        var existingTarget = reservation.getDetails().stream()
+                .filter(d -> d.getRoomType().getId().equals(newRoomTypeId))
+                .findFirst();
+        if (existingTarget.isPresent()) {
+            var et = existingTarget.get();
+            et.setRoomCount(et.getRoomCount() + 1);
+            et.setTotalPrice(et.getBasePrice()
+                    .multiply(BigDecimal.valueOf(et.getRoomCount()))
+                    .multiply(BigDecimal.valueOf(remainingNights)));
+        } else {
+            var newDetail = new ReservationDetail();
+            newDetail.setReservation(reservation);
+            newDetail.setRoomType(newRoomType);
+            newDetail.setRoomCount(1);
+            newDetail.setBasePrice(newRoomType.getBasePrice());
+            newDetail.setTotalPrice(newRoomType.getBasePrice().multiply(BigDecimal.valueOf(remainingNights)));
+            reservation.getDetails().add(newDetail);
+        }
+
+        reservation.setTotalPrice(reservation.getTotalPrice().add(delta));
+
+        reservationRepository.save(reservation);
+    }
+}

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${hotel != null ? hotel.name : 'Hospi | Hotel Booking'}">Hospi | Hotel Booking</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-background text-text flex flex-col min-h-screen pt-24">
+
+  <!-- HEADER -->
+  <div th:replace="~{guest/layout :: header('home')}"></div>
+
+  <main class="flex-grow">
+
+    <!-- HERO SECTION -->
+    <section class="relative min-h-[85vh] overflow-hidden flex items-center">
+      <!-- Fallback banner image if database gallery is empty -->
+      <img th:if="${#lists.isEmpty(banners)}" class="absolute inset-0 h-full w-full object-cover"
+           th:src="@{/images/hotel1.jpg}" alt="Luxury hotel lobby"/>
+           
+      <!-- Display first database image as banner if present -->
+      <img th:if="${not #lists.isEmpty(banners)}" class="absolute inset-0 h-full w-full object-cover"
+           th:src="@{'/hotel-picture/' + ${banners[0].id}}" alt="Luxury Hotel Gallery"/>
+
+      <div class="absolute inset-0 bg-ink/55">  </div>
+
+      <div class="relative mx-auto max-w-7xl px-6 py-20 w-full z-10 text-white flex flex-col justify-between min-h-[70vh]">
+        <div class="max-w-3xl">
+          <p class="mb-4 text-sm font-semibold uppercase tracking-widest text-accent font-sans">
+            CALM STAYS, LUXURIOUS SPACES
+          </p>
+          <h1 class="text-5xl md:text-7xl font-bold font-display leading-tight" th:text="${hotel != null ? hotel.name : 'Hospi Hotel'}">
+            Find your next comfortable stay with Hospi
+          </h1>
+          <p class="mt-6 max-w-2xl text-lg text-white/90 leading-relaxed font-sans" th:text="${hotel != null ? hotel.description : 'Explore selected rooms, manage reservations, and enjoy a smooth hotel experience from arrival to checkout.'}">
+            Explore selected rooms, manage reservations, and enjoy a smooth hotel experience.
+          </p>
+        </div>
+        <div class="flex justify-end w-full mt-8">
+          <a class="rounded-full bg-primary px-14 py-5 text-lg font-bold tracking-wider text-white shadow-soft hover:opacity-90 transition-opacity"
+             th:href="@{/#booking}">
+            Book Now
+          </a>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- TRUST / RATINGS & ABOUT -->
+    <section class="mx-auto max-w-7xl px-6 py-24">
+      <div class="grid gap-12 lg:grid-cols-2 items-center">
+        <div>
+          <p class="mb-3 text-sm font-semibold uppercase tracking-widest text-accent">TRUSTED HOSPITALITY</p>
+          <h2 class="text-4xl md:text-5xl font-bold font-display leading-tight">
+            Designed for unforgettable stays and relaxing breaks
+          </h2>
+          <p class="mt-6 text-muted-foreground leading-relaxed" th:text="${hotel != null ? hotel.description : 'Welcome to our premium hospitality system where we prioritize clean rooms, fast checkout, and stellar service.'}">
+            Welcome to our premium hospitality system.
+          </p>
+
+          <!-- Star Rating & Review Statistics -->
+          <div class="mt-8 flex items-center gap-6 p-6 rounded-xl bg-surface border border-border/60 shadow-card max-w-sm">
+            <div class="flex h-14 w-14 items-center justify-center rounded-full bg-accent-soft text-accent text-2xl font-bold">
+              ★
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-text font-display" th:text="${hotel != null ? hotel.averageRating + ' / 5.0' : '4.8 / 5.0'}">4.8 / 5.0</p>
+              <p class="text-sm text-muted-foreground" th:text="'Based on ' + ${hotel != null ? hotel.reviewCount : '120'} + ' guest reviews'">Based on 120 guest reviews</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- AMENITIES / FEATURES GRID -->
+        <div class="grid gap-6 sm:grid-cols-2">
+          <div class="rounded-xl border border-border bg-surface p-6 shadow-card hover:-translate-y-1 transition-transform duration-slow">
+            <div class="h-10 w-10 rounded-lg bg-primary-soft flex items-center justify-center text-primary mb-4">
+              <svg class="size-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h.01"/><path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M5 12.859a10 10 0 0 1 14 0"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/></svg>
+            </div>
+            <h3 class="font-bold text-lg mb-2">High-Speed WiFi</h3>
+            <p class="text-sm text-muted-foreground">Stay connected anywhere inside the hotel premises.</p>
+          </div>
+
+          <div class="rounded-xl border border-border bg-surface p-6 shadow-card hover:-translate-y-1 transition-transform duration-slow">
+            <div class="h-10 w-10 rounded-lg bg-primary-soft flex items-center justify-center text-primary mb-4">
+              <svg class="size-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/><path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"/></svg>
+            </div>
+            <h3 class="font-bold text-lg mb-2">Swimming Pool</h3>
+            <p class="text-sm text-muted-foreground">Take a refreshing dip in our outdoor heated pool.</p>
+          </div>
+
+          <div class="rounded-xl border border-border bg-surface p-6 shadow-card hover:-translate-y-1 transition-transform duration-slow">
+            <div class="h-10 w-10 rounded-lg bg-primary-soft flex items-center justify-center text-primary mb-4">
+              <svg class="size-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v2"/><path d="M14 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"/><path d="M6 2v2"/></svg>
+            </div>
+            <h3 class="font-bold text-lg mb-2">Free Breakfast</h3>
+            <p class="text-sm text-muted-foreground">Start your morning with chef-curated breakfast selections.</p>
+          </div>
+
+          <div class="rounded-xl border border-border bg-surface p-6 shadow-card hover:-translate-y-1 transition-transform duration-slow">
+            <div class="h-10 w-10 rounded-lg bg-primary-soft flex items-center justify-center text-primary mb-4">
+              <svg class="size-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
+            </div>
+            <h3 class="font-bold text-lg mb-2">24/7 Concierge</h3>
+            <p class="text-sm text-muted-foreground">Helpful support at any hour for all reservation requests.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROMOTIONAL PICTURES SLIDER / GRID -->
+    <section class="bg-surface-muted py-24" th:if="${not #lists.isEmpty(banners)}">
+      <div class="mx-auto max-w-7xl px-6">
+        <div class="mb-10 text-center">
+          <p class="mb-3 text-sm font-semibold uppercase tracking-widest text-accent">PROMOTIONS & SPACES</p>
+          <h2 class="text-4xl font-bold font-display">Take a look inside our spaces</h2>
+        </div>
+
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div th:each="banner, iter : ${banners}" class="overflow-hidden rounded-2xl bg-surface border border-border shadow-card hover:shadow-soft transition-shadow">
+            <img class="h-72 w-full object-cover" th:src="@{'/hotel-picture/' + ${banner.id}}" alt="Hotel Space"/>
+            <div class="p-5">
+              <p class="text-sm font-semibold text-accent font-display" th:text="'SPACE ' + ${iter.count}"></p>
+              <h3 class="text-lg font-bold text-text mt-1">Stunning Guest Area</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <div th:replace="~{guest/layout :: footer}"></div>
+
+</body>
+</html>
