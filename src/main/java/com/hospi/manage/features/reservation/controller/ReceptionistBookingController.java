@@ -272,20 +272,28 @@ public class ReceptionistBookingController {
             redirect.addFlashAttribute(Attributes.ERROR, "Please fill in all required fields");
             return "redirect:/receptionist/bookings/" + id;
         }
-        stayingGuestService.addGuest(id, form);
-        auditService.log(principal.getId(), principal.getUsername(), AuditAction.CREATE,
-                "STAYING_GUEST", null, "Added guest to reservation " + id);
-        redirect.addFlashAttribute(Attributes.SUCCESS, "Guest added successfully.");
+        try {
+            stayingGuestService.addGuest(id, form);
+            auditService.log(principal.getId(), principal.getUsername(), AuditAction.CREATE,
+                    "STAYING_GUEST", null, "Added guest to reservation " + id);
+            redirect.addFlashAttribute(Attributes.SUCCESS, "Guest added successfully.");
+        } catch (IllegalStateException e) {
+            redirect.addFlashAttribute(Attributes.ERROR, e.getMessage());
+        }
         return "redirect:/receptionist/bookings/" + id;
     }
 
     @PostMapping("/{id}/guests/{guestId}/delete")
     String deleteGuest(@PathVariable Long id, @PathVariable Long guestId, RedirectAttributes redirect,
                        @AuthenticationPrincipal AccountPrincipal principal) {
-        stayingGuestService.deleteGuest(id, guestId);
-        auditService.log(principal.getId(), principal.getUsername(), AuditAction.DELETE,
-                "STAYING_GUEST", guestId, "Removed guest from reservation " + id);
-        redirect.addFlashAttribute(Attributes.SUCCESS, "Guest removed successfully.");
+        try {
+            stayingGuestService.deleteGuest(id, guestId);
+            auditService.log(principal.getId(), principal.getUsername(), AuditAction.DELETE,
+                    "STAYING_GUEST", guestId, "Removed guest from reservation " + id);
+            redirect.addFlashAttribute(Attributes.SUCCESS, "Guest removed successfully.");
+        } catch (IllegalStateException e) {
+            redirect.addFlashAttribute(Attributes.ERROR, e.getMessage());
+        }
         return "redirect:/receptionist/bookings/" + id;
     }
 
@@ -306,10 +314,14 @@ public class ReceptionistBookingController {
     @PostMapping("/{id}/rooms/{assignmentId}/remove")
     String removeRoom(@PathVariable Long id, @PathVariable Long assignmentId, RedirectAttributes redirect,
                       @AuthenticationPrincipal AccountPrincipal principal) {
-        roomAssignmentService.removeAssignment(id, assignmentId);
-        auditService.log(principal.getId(), principal.getUsername(), AuditAction.REMOVE_ROOM,
-                "RESERVATION", id, "Removed room assignment " + assignmentId);
-        redirect.addFlashAttribute(Attributes.SUCCESS, "Room assignment removed successfully.");
+        try {
+            roomAssignmentService.removeAssignment(id, assignmentId);
+            auditService.log(principal.getId(), principal.getUsername(), AuditAction.REMOVE_ROOM,
+                    "RESERVATION", id, "Removed room assignment " + assignmentId);
+            redirect.addFlashAttribute(Attributes.SUCCESS, "Room assignment removed successfully.");
+        } catch (IllegalStateException e) {
+            redirect.addFlashAttribute(Attributes.ERROR, e.getMessage());
+        }
         return "redirect:/receptionist/bookings/" + id;
     }
 
