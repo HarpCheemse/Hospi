@@ -1,6 +1,7 @@
 package com.hospi.manage.features.reservation.repository;
 
 import com.hospi.manage.features.reservation.entity.Reservation;
+import com.hospi.manage.features.reservation.enums.BookingSource;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -110,14 +111,17 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 SELECT r FROM Reservation r
                 WHERE r.status IN :statuses
                 AND (LOWER(r.guestName) LIKE :guestName OR r.guestPhone LIKE :guestName OR LOWER(r.confirmationCode) LIKE :guestName)
+                AND (:source IS NULL OR r.source = :source)
             """,
             countQuery = """
                 SELECT COUNT(r) FROM Reservation r
                 WHERE r.status IN :statuses
                 AND (LOWER(r.guestName) LIKE :guestName OR r.guestPhone LIKE :guestName OR LOWER(r.confirmationCode) LIKE :guestName)
+                AND (:source IS NULL OR r.source = :source)
             """)
     Page<Reservation> findFiltered(@Param("statuses") List<ReservationStatus> statuses,
                                    @Param("guestName") String guestName,
+                                   @Param("source") BookingSource source,
                                    Pageable pageable);
 
     /**
@@ -144,6 +148,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 AND (LOWER(r.guestName) LIKE :guestName OR r.guestPhone LIKE :guestName OR LOWER(r.confirmationCode) LIKE :guestName)
                 AND r.checkInAt <= :date
                 AND r.checkOutAt >= :date
+                AND (:source IS NULL OR r.source = :source)
             """,
             countQuery = """
                 SELECT COUNT(r) FROM Reservation r
@@ -151,10 +156,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 AND (LOWER(r.guestName) LIKE :guestName OR r.guestPhone LIKE :guestName OR LOWER(r.confirmationCode) LIKE :guestName)
                 AND r.checkInAt <= :date
                 AND r.checkOutAt >= :date
+                AND (:source IS NULL OR r.source = :source)
             """)
     Page<Reservation> findFilteredWithDate(@Param("statuses") List<ReservationStatus> statuses,
                                            @Param("guestName") String guestName,
                                            @Param("date") LocalDate date,
+                                           @Param("source") BookingSource source,
                                            Pageable pageable);
 
     Optional<Reservation> findByGuestEmailAndConfirmationCode(String guestEmail, String confirmationCode);

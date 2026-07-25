@@ -13,6 +13,7 @@ import com.hospi.manage.features.reservation.dto.response.ReservationSummaryView
 import com.hospi.manage.features.reservation.dto.response.RoomAssignmentView;
 import com.hospi.manage.features.reservation.dto.response.RoomTypeAvailabilityView;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
+import com.hospi.manage.features.reservation.enums.BookingSource;
 import com.hospi.manage.features.reservation.mapper.ReservationMapper;
 import com.hospi.manage.features.reservation.service.ReservationService;
 import com.hospi.manage.features.reservation.service.RoomAssignmentService;
@@ -90,15 +91,12 @@ public class ReceptionistBookingController {
             effectiveDate = LocalDate.now();
         }
 
-        var paged = reservationService.findFiltered(statuses, search, effectiveDate, PageRequest.of(page, PAGE_SIZE));
-
+        BookingSource sourceEnum = null;
         if (source != null && !source.isBlank()) {
-            var filtered = paged.getContent().stream()
-                    .filter(r -> r.getSource() != null && r.getSource().name().equals(source))
-                    .toList();
-            paged = new org.springframework.data.domain.PageImpl<>(
-                    filtered, PageRequest.of(page, PAGE_SIZE), filtered.size());
+            try { sourceEnum = BookingSource.valueOf(source); } catch (IllegalArgumentException e) { sourceEnum = null; }
         }
+
+        var paged = reservationService.findFiltered(statuses, search, effectiveDate, sourceEnum, PageRequest.of(page, PAGE_SIZE));
 
         model.addAttribute(Attributes.VIEW,
                 ReservationMapper.toActiveBookingsView(paged, status, date, search));

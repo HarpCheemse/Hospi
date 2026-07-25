@@ -10,6 +10,8 @@ import com.hospi.manage.features.payment.repository.PaymentRepository;
 import com.hospi.manage.features.reservation.dto.request.OfflineBookingForm;
 import com.hospi.manage.features.reservation.entity.Reservation;
 import com.hospi.manage.features.reservation.entity.ReservationDetail;
+import com.hospi.manage.features.reservation.entity.RoomAssignment;
+import com.hospi.manage.features.reservation.entity.StayingGuest;
 import com.hospi.manage.features.reservation.enums.BookingSource;
 import com.hospi.manage.features.reservation.enums.ReservationStatus;
 import com.hospi.manage.features.reservation.repository.ReservationRepository;
@@ -71,10 +73,11 @@ public class ReservationService {
                 searchPattern);
     }
 
-    /** Find reservations filtered by statuses, guest name, and optional date with pagination. */
+    /** Find reservations filtered by statuses, guest name, optional date, and optional source with pagination. */
     public Page<Reservation> findFiltered(List<ReservationStatus> statuses,
                                           String guestName,
                                           LocalDate date,
+                                          BookingSource source,
                                           Pageable pageable) {
         String searchPattern = "%";
         if (guestName != null && !guestName.isBlank()) {
@@ -84,10 +87,12 @@ public class ReservationService {
             return reservationRepository.findFilteredWithDate(statuses,
                     searchPattern,
                     date,
+                    source,
                     pageable);
         }
         return reservationRepository.findFiltered(statuses,
                 searchPattern,
+                source,
                 pageable);
     }
 

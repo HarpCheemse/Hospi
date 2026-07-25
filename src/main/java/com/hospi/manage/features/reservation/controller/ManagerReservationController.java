@@ -61,7 +61,7 @@ public class ManagerReservationController {
                 : Arrays.asList(ReservationStatus.values());
 
         if ((scope == null || scope.equals("all")) && (status != null && !status.isBlank())) {
-            var paged = reservationService.findFiltered(statuses, search, null, PageRequest.of(page, PAGE_SIZE));
+            var paged = reservationService.findFiltered(statuses, search, null, null, PageRequest.of(page, PAGE_SIZE));
             var view = ReservationMapper.toActiveBookingsView(paged, status, null, search);
             var payments = paymentService.getPaymentsByReservationId(
                     paged.getContent().stream().map(Reservation::getId).toList());
