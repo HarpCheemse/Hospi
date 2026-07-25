@@ -82,17 +82,17 @@
                     x-on:click="openModal('Cancel this offline booking?', $el.dataset.url)">
                 Cancel
             </button>
-            <button th:if="${reservation.status.name() == 'CONFIRMED'}"
+            <button th:if="${reservation.status.name() == 'CONFIRMED' and reservation.source.name() == 'ONLINE'}"
                     class="btn btn-accent btn-lg"
                     th:attr="data-url='/receptionist/bookings/' + ${reservation.id} + '/refund'"
                     x-on:click="openModal('Process PayPal refund? If PayPal fails, no changes will be made.', $el.dataset.url)">
-                Refund
+                Refund via PayPal
             </button>
-            <button th:if="${reservation.status.name() == 'CONFIRMED' and reservation.source.name() == 'ONLINE'}"
+            <button th:if="${reservation.status.name() == 'CONFIRMED'}"
                     class="btn btn-secondary btn-lg"
                     th:attr="data-url='/receptionist/bookings/' + ${reservation.id} + '/refund/offline'"
-                    x-on:click="openModal('Process offline refund and cancel? (Skips PayPal)', $el.dataset.url)">
-                Refund Offline
+                    x-on:click="openModal('Mark as refunded without PayPal? This skips PayPal processing.', $el.dataset.url)">
+                Mark Refunded
             </button>
             <a th:href="@{/receptionist/bookings}" class="btn btn-secondary btn-lg">Back</a>
         </div>
