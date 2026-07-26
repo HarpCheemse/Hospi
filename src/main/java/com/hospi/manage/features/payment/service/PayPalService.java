@@ -90,9 +90,6 @@ public class PayPalService {
 
         String response = readResponse(conn);
 
-        System.out.println("[PayPal] Create Order Response:");
-        System.out.println(response);
-
         return extractApprovalUrl(response);
     }
 
@@ -121,9 +118,6 @@ public class PayPalService {
         conn.getOutputStream().close();
 
         String response = readResponse(conn);
-
-        System.out.println("[PayPal] Capture Response:");
-        System.out.println(response);
 
         return response.contains("\"status\":\"COMPLETED\"");
     }

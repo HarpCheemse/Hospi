@@ -6,6 +6,12 @@ package com.hospi.manage.features.room.enums;
 public enum RoomCategory {
     SINGLE,
     DOUBLE,
+    TWIN,
+    TRIPLE,
+    QUAD,
     FAMILY,
-    SUITE
+    SUITE,
+    STUDIO,
+    EXECUTIVE,
+    PRESIDENTIAL
 }

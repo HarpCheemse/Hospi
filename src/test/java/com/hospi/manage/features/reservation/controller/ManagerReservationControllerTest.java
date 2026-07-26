@@ -70,7 +70,7 @@ class ManagerReservationControllerTest {
 
     @Test
     void list_shouldRender_whenDefault() throws Exception {
-        when(reservationService.findFiltered(any(), any(), any(), any()))
+        when(reservationService.findFiltered(any(), any(), any(), any(), any()))
                 .thenReturn(org.springframework.data.domain.Page.empty());
         when(paymentService.getPaymentsByReservationId(anyList())).thenReturn(List.of());
         mockCounts();
@@ -110,7 +110,7 @@ class ManagerReservationControllerTest {
 
     @Test
     void list_shouldRender_withStatusOnly() throws Exception {
-        when(reservationService.findFiltered(any(), any(), any(), any()))
+        when(reservationService.findFiltered(any(), any(), any(), any(), any()))
                 .thenReturn(org.springframework.data.domain.Page.empty());
         mockCounts();
 
